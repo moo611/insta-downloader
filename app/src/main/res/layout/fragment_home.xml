@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -13,6 +14,10 @@
         tools:context=".fragments.HomeFragment">
 
         <com.google.android.material.tabs.TabLayout
+            app:tabRippleColor="@null"
+            app:tabBackground="@null"
+            app:tabSelectedTextColor="@color/app_color"
+            app:tabIndicatorColor="@color/app_color"
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="50dp"/>

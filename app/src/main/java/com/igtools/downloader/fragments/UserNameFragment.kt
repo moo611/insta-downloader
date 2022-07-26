@@ -5,27 +5,65 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import com.igtools.downloader.R
+import com.igtools.downloader.databinding.FragmentUserNameBinding
 
 /**
  * @Author: desong
  * @Date: 2022/7/21
  */
 class UserNameFragment : Fragment() {
-
-    lateinit var mView:View
+    var selectedIndex=0
+    lateinit var binding:FragmentUserNameBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        mView = inflater.inflate(R.layout.fragment_user_name, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_user_name, container, false)
 
 
-
-
-        return mView
+        initViews()
+        setListeners()
+        return binding.root
     }
 
+
+    private fun initViews(){
+
+        setButtonColor()
+
+    }
+
+
+    private fun setListeners(){
+
+        binding.tvDownload.setOnClickListener {
+
+            selectedIndex=1
+            setButtonColor()
+        }
+        binding.tvPaste.setOnClickListener {
+            selectedIndex=0
+            setButtonColor()
+        }
+
+    }
+
+    private fun setButtonColor(){
+
+        if(selectedIndex==0){
+            binding.tvDownload.isSelected=false
+            binding.tvPaste.isSelected=true
+            binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
+            binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.white))
+        }else{
+            binding.tvDownload.isSelected=true
+            binding.tvPaste.isSelected=false
+            binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
+            binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.black))
+        }
+    }
 
 }
