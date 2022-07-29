@@ -7,7 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import com.igtools.downloader.R
+import com.igtools.downloader.adapter.MultiTypeAdapter
 import com.igtools.downloader.databinding.FragmentShortCodeBinding
+import com.igtools.downloader.models.MediaModel
+import com.youth.banner.indicator.CircleIndicator
 
 /**
  * @Author: desong
@@ -18,6 +21,7 @@ class ShortCodeFragment : Fragment() {
 
     lateinit var binding: FragmentShortCodeBinding
     var selectedIndex = 0
+    var medias: ArrayList<MediaModel> = ArrayList()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -36,6 +40,15 @@ class ShortCodeFragment : Fragment() {
         binding.tvPaste.isSelected = true
         binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
         binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.white))
+
+        medias.add(MediaModel())
+        medias.add(MediaModel())
+
+        val adapter = MultiTypeAdapter(context, medias)
+        binding.banner.addBannerLifecycleObserver(this).setIndicator(CircleIndicator(context))
+            .setAdapter(adapter)
+
+
     }
 
 

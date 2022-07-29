@@ -49,10 +49,13 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "com.squareup.okhttp3:okhttp:4.9.3"
-    
+
     //轮播
     implementation 'io.github.youth5201314:banner:2.2.2'
     implementation 'com.github.bumptech.glide:glide:4.13.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
+
+    //完整版引入
+    implementation 'com.shuyu:GSYVideoPlayer:7.1.3'
 
 }

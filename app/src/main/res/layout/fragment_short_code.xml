@@ -57,6 +57,12 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
+        <com.youth.banner.Banner
+            android:layout_marginTop="30dp"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/banner"
+            android:layout_width="320dp"
+            android:layout_height="320dp" />
 
     </LinearLayout>
 </layout>
