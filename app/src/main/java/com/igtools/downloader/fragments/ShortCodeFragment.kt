@@ -40,7 +40,7 @@ class ShortCodeFragment : Fragment() {
     lateinit var adapter: MultiTypeAdapter
     var TAG = "ShortCodeFragment"
     var count = AtomicInteger(0)
-    var latch: CountDownLatch?=null
+    var latch: CountDownLatch? = null
     var medias: ArrayList<MediaModel> = ArrayList()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -141,14 +141,18 @@ class ShortCodeFragment : Fragment() {
     private fun setListeners() {
 
         binding.tvDownload.setOnClickListener {
+            //TODO 不显示
+            binding.progressBar.visibility=View.VISIBLE
             latch = CountDownLatch(medias.size)
             count.set(0)
+
             for (media in medias) {
                 downloadMedia(media)
             }
             latch?.await();
-            Log.v(TAG,count.get().toString());
-            Toast.makeText(context,"download finished",Toast.LENGTH_SHORT).show()
+            binding.progressBar.visibility=View.INVISIBLE
+            Log.v(TAG, count.get().toString());
+            Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show()
         }
         binding.tvPaste.setOnClickListener {
             binding.etShortcode.clearFocus()
@@ -189,7 +193,7 @@ class ShortCodeFragment : Fragment() {
 
         if (media.mediaType == 1) {
             //image
-            val dir = context?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+            val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
             OkhttpHelper.getInstance()
@@ -197,13 +201,8 @@ class ShortCodeFragment : Fragment() {
                     override fun onDownloadSuccess(path: String?) {
 
                         count.getAndIncrement()
-
-                        val btm = BitmapFactory.decodeFile(path)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            FileUtils.saveImage29(context, btm)
-                        } else {
-                            FileUtils.saveImage(context, btm, file.name)
-                        }
+                        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                        FileUtils.saveImageToAlbum(context!!, bitmap, file.name)
                         latch?.countDown();
 
 
@@ -224,13 +223,13 @@ class ShortCodeFragment : Fragment() {
 
         } else {
             //video
-            val dir = context?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+            val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
             OkhttpHelper.getInstance().download(media.videoUrl, file, object : OnDownloadListener {
                 override fun onDownloadSuccess(path: String?) {
                     count.getAndIncrement()
-                    FileUtils.saveVideo(context, file)
+                    FileUtils.saveVideoToAlbum(context!!, file)
                     latch?.countDown();
 
                 }
