@@ -6,6 +6,7 @@
 
     </data>
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,8 +18,8 @@
             android:id="@+id/et_shortcode"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="20dp"
             android:layout_marginLeft="12dp"
+            android:layout_marginTop="20dp"
             android:layout_marginRight="12dp"
             android:background="@drawable/bg_edit"
             android:gravity="center_vertical|start"
@@ -36,33 +37,50 @@
             android:orientation="horizontal">
 
             <TextView
-                android:background="@drawable/bg_button"
                 android:id="@+id/tv_paste"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_marginEnd="16dp"
                 android:layout_weight="1"
+                android:background="@drawable/bg_button"
                 android:gravity="center"
-                android:text="paste"
+                android:text="search"
                 android:textSize="16sp" />
 
             <TextView
-                android:background="@drawable/bg_button"
                 android:id="@+id/tv_download"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight="1"
+                android:background="@drawable/bg_button"
                 android:gravity="center"
                 android:text="download"
                 android:textSize="16sp" />
         </LinearLayout>
 
-        <com.youth.banner.Banner
-            android:layout_marginTop="30dp"
-            android:layout_gravity="center_horizontal"
-            android:id="@+id/banner"
-            android:layout_width="320dp"
-            android:layout_height="320dp" />
+        <FrameLayout
+            android:visibility="gone"
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="320dp"
+            android:layout_marginTop="30dp">
+
+            <com.youth.banner.Banner
+                android:id="@+id/banner"
+                android:layout_width="320dp"
+                android:layout_height="320dp"
+                android:layout_gravity="center_horizontal" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="invisible" />
+        </FrameLayout>
+
 
     </LinearLayout>
+
+
 </layout>
