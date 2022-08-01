@@ -15,6 +15,7 @@ import com.igtools.downloader.R
 import com.igtools.downloader.adapter.BlogAdapter
 import com.igtools.downloader.api.OkhttpHelper
 import com.igtools.downloader.api.OkhttpListener
+import com.igtools.downloader.api.Urls
 import com.igtools.downloader.databinding.FragmentUserNameBinding
 import com.igtools.downloader.models.BlogModel
 import com.igtools.downloader.utils.KeyboardUtils
@@ -103,7 +104,7 @@ class UserNameFragment : Fragment() {
     }
 
     private fun getData(user: String) {
-        val url = "http://192.168.0.101:3000/api/userinfo?user=$user"
+        val url = Urls.USER_NAME + "?user=$user"
         OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 

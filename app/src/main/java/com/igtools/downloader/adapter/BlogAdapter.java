@@ -1,6 +1,7 @@
 package com.igtools.downloader.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.igtools.downloader.R;
+import com.igtools.downloader.activities.BlogDetailsActivity;
 import com.igtools.downloader.models.BlogModel;
 
 import java.util.List;
@@ -44,6 +46,16 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
 
         Glide.with(c).load(blogs.get(position).getDisplayUrl())
                 .placeholder(new ColorDrawable(ContextCompat.getColor(c, R.color.gray_1))).into(holder.imgThumbnail);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                c.startActivity(new Intent(c, BlogDetailsActivity.class).putExtra("shortCode",blogs.get(position).getShortCode()));
+
+            }
+        });
 
 
     }

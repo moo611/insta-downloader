@@ -19,6 +19,7 @@ import com.igtools.downloader.adapter.MultiTypeAdapter
 import com.igtools.downloader.api.OkhttpHelper
 import com.igtools.downloader.api.OkhttpListener
 import com.igtools.downloader.api.OnDownloadListener
+import com.igtools.downloader.api.Urls
 import com.igtools.downloader.databinding.FragmentShortCodeBinding
 import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.utils.FileUtils
@@ -71,8 +72,9 @@ class ShortCodeFragment : Fragment() {
 
 
     private fun getData(url: String) {
-        val url = "http://192.168.0.101:3000/api/mediainfo?url=$url"
-        OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
+        //val url = "http://192.168.0.101:3000/api/mediainfo?url=$url"
+        val api = Urls.SHORT_CODE + "?url=$url"
+        OkhttpHelper.getInstance().getJson(api, object : OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 
                 parseData(jsonObject);
@@ -142,7 +144,7 @@ class ShortCodeFragment : Fragment() {
 
         binding.tvDownload.setOnClickListener {
             //TODO 不显示
-            binding.progressBar.visibility=View.VISIBLE
+            binding.progressBar.visibility = View.VISIBLE
             latch = CountDownLatch(medias.size)
             count.set(0)
 
@@ -150,7 +152,7 @@ class ShortCodeFragment : Fragment() {
                 downloadMedia(media)
             }
             latch?.await();
-            binding.progressBar.visibility=View.INVISIBLE
+            binding.progressBar.visibility = View.INVISIBLE
             Log.v(TAG, count.get().toString());
             Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show()
         }
