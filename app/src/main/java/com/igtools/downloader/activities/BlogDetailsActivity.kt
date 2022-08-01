@@ -3,12 +3,11 @@ package com.igtools.downloader.activities
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.google.gson.JsonObject
 import com.igtools.downloader.R
@@ -22,17 +21,14 @@ import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.utils.FileUtils
 import com.youth.banner.indicator.CircleIndicator
 import java.io.File
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicInteger
 
 class BlogDetailsActivity : AppCompatActivity() {
 
-
+    var errFlag = false
     lateinit var binding: ActivityBlogDetailsBinding
     lateinit var adapter: MultiTypeAdapter
     var TAG = "ShortCodeFragment"
-    var count = AtomicInteger(0)
-    var latch: CountDownLatch? = null
+    var progressList: ArrayList<Int> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,16 +71,45 @@ class BlogDetailsActivity : AppCompatActivity() {
         binding.btnDownload.setOnClickListener {
 
             binding.progressBar.visibility = View.VISIBLE
-            latch = CountDownLatch(medias.size)
-            count.set(0)
+            Thread {
+                for (media in medias) {
+                    downloadMedia(media, medias.indexOf(media))
+                }
 
-            for (media in medias) {
-                downloadMedia(media)
-            }
-            latch?.await();
-            binding.progressBar.visibility = View.INVISIBLE
-            Log.v(TAG, count.get().toString());
-            Toast.makeText(this@BlogDetailsActivity, "download finished", Toast.LENGTH_SHORT).show()
+                while (true) {
+                    if (errFlag) {
+                        break
+                    }
+                    var cnt = 0
+                    for (index in progressList) {
+                        if (index == 100) {
+                            cnt++
+                        }
+                    }
+                    if (cnt == progressList.size) {
+                        break
+                    }
+                }
+                runOnUiThread {
+                    binding.progressBar.visibility = View.INVISIBLE
+                    if (errFlag) {
+                        Toast.makeText(
+                            this@BlogDetailsActivity,
+                            "download failed",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        Toast.makeText(
+                            this@BlogDetailsActivity,
+                            "download finished",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                }
+
+            }.start()
+
         }
         binding.imgBack.setOnClickListener {
             finish()
@@ -94,7 +119,7 @@ class BlogDetailsActivity : AppCompatActivity() {
 
 
     private fun getData(url: String) {
-        binding.progressBar.visibility=View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
         //val url = "http://192.168.0.101:3000/api/mediainfo?url=$url"
         val api = Urls.SHORT_CODE + "?url=$url"
         OkhttpHelper.getInstance().getJson(api, object : OkhttpListener {
@@ -124,6 +149,7 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     private fun parseData(jsonObject: JsonObject) {
         medias.clear()
+        progressList.clear()
         val data = jsonObject["data"].asJsonObject
         val mediaType = data["media_type"].asInt
 
@@ -141,7 +167,7 @@ class BlogDetailsActivity : AppCompatActivity() {
                 if (!data["caption_text"].isJsonNull) {
                     mediaInfo.title = data["caption_text"]?.asString
                 }
-
+                progressList.add(0)
                 medias.add(mediaInfo)
             }
         } else if (mediaType == 1 || mediaType == 2) {
@@ -156,14 +182,14 @@ class BlogDetailsActivity : AppCompatActivity() {
             if (!data["caption_text"].isJsonNull) {
                 mediaInfo.title = data["caption_text"]?.asString
             }
-
+            progressList.add(0)
             medias.add(mediaInfo)
         }
 
 
     }
 
-    private fun downloadMedia(media: MediaModel) {
+    private fun downloadMedia(media: MediaModel, index: Int) {
 
         if (media.mediaType == 1) {
             //image
@@ -174,27 +200,17 @@ class BlogDetailsActivity : AppCompatActivity() {
                 .download(media.thumbnailUrl, file, object : OnDownloadListener {
                     override fun onDownloadSuccess(path: String?) {
 
-                        count.getAndIncrement()
                         val bitmap = BitmapFactory.decodeFile(file.absolutePath)
                         FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap, file.name)
-                        latch?.countDown();
-
 
                     }
 
                     override fun onDownloading(progress: Int) {
-
+                        progressList[index] = progress
                     }
 
                     override fun onDownloadFailed(message: String?) {
-                        latch?.countDown();
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@BlogDetailsActivity,
-                                message + "",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        errFlag = true
                     }
 
                 })
@@ -206,23 +222,18 @@ class BlogDetailsActivity : AppCompatActivity() {
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
             OkhttpHelper.getInstance().download(media.videoUrl, file, object : OnDownloadListener {
                 override fun onDownloadSuccess(path: String?) {
-                    count.getAndIncrement()
+
                     FileUtils.saveVideoToAlbum(this@BlogDetailsActivity, file)
-                    latch?.countDown();
 
                 }
 
                 override fun onDownloading(progress: Int) {
-
+                    progressList[index] = progress
                 }
 
                 override fun onDownloadFailed(message: String?) {
 
-                    latch?.countDown();
-                    runOnUiThread {
-                        Toast.makeText(this@BlogDetailsActivity, message + "", Toast.LENGTH_SHORT)
-                            .show()
-                    }
+                    errFlag = true
                 }
 
             })

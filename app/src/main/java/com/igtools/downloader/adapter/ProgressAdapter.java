@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,7 +33,7 @@ public class ProgressAdapter extends RecyclerView.Adapter<ProgressAdapter.Progre
     @Override
     public ProgressHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View v = LayoutInflater.from(c).inflate(R.layout.item_progress,parent,false);
+        View v = LayoutInflater.from(c).inflate(R.layout.item_progress, parent, false);
 
         return new ProgressHolder(v);
     }
@@ -42,12 +43,12 @@ public class ProgressAdapter extends RecyclerView.Adapter<ProgressAdapter.Progre
 
         int progress = progressList.get(position);
         holder.progressBar.setProgress(progress);
-
+        holder.tvProgress.setText(progress + "%");
 
     }
 
 
-    public void update(List<Integer>progressList){
+    public void update(List<Integer> progressList) {
         this.progressList = progressList;
         notifyDataSetChanged();
     }
@@ -59,11 +60,13 @@ public class ProgressAdapter extends RecyclerView.Adapter<ProgressAdapter.Progre
 
     class ProgressHolder extends RecyclerView.ViewHolder {
         ProgressBar progressBar;
+        TextView tvProgress;
+
         public ProgressHolder(@NonNull View itemView) {
             super(itemView);
 
             progressBar = itemView.findViewById(R.id.progress_bar);
-
+            tvProgress = itemView.findViewById(R.id.tv_progress);
         }
     }
 

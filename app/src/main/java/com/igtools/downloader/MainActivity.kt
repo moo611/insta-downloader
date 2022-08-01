@@ -22,17 +22,7 @@ import com.igtools.downloader.fragments.RecordFragment
  */
 class MainActivity : AppCompatActivity() {
 
-    var unSelectedImgs = intArrayOf(
-        R.mipmap.home_unselect,
-        R.mipmap.task_unselect, R.mipmap.me_unselect,
-    )
-    var selectedImgs = intArrayOf(
-        R.mipmap.home_select, R.mipmap.task_select,
-        R.mipmap.me_select,
-    )
-
-    lateinit var binding:ActivityMainBinding
-    var textViews: MutableList<TextView> = ArrayList()
+    lateinit var binding: ActivityMainBinding
     var imageViews: MutableList<ImageView> = ArrayList()
     var fragments: MutableList<Fragment> = ArrayList()
     var lastPos = 0
@@ -48,7 +38,7 @@ class MainActivity : AppCompatActivity() {
             window.statusBarColor = Color.TRANSPARENT
         }
 
-        binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         initViews()
         setListeners()
@@ -58,10 +48,6 @@ class MainActivity : AppCompatActivity() {
 
     fun initViews() {
         //添加textviews
-        textViews.add(binding.tvHome)
-        textViews.add(binding.tvRecord)
-        textViews.add(binding.tvMine)
-
 
         //添加imageviews
         imageViews.add(binding.imgHome)
@@ -71,7 +57,6 @@ class MainActivity : AppCompatActivity() {
 
         fragments.add(HomeFragment())
         fragments.add(RecordFragment())
-
         fragments.add(MineFragment())
 
         showFragment(lastPos)
@@ -129,36 +114,16 @@ class MainActivity : AppCompatActivity() {
     //点击底部导航栏的图标文字变化
     private fun selectPage(pos: Int) {
 
-
-
         for (i in imageViews.indices) {
             if (i == pos) {
-                imageViews.get(i).setImageResource(selectedImgs[i])
+                imageViews[i].setColorFilter(
+                    ContextCompat.getColor(this, R.color.app_color)
+                );
             } else {
-                imageViews.get(i).setImageResource(unSelectedImgs[i])
+                imageViews[i].colorFilter = null
             }
 
         }
-
-        for (i in textViews.indices) {
-            if (i == pos) {
-                textViews.get(i).setTextColor(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.home_select_color
-                    )
-                )
-            } else {
-                textViews.get(i).setTextColor(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.home_unselect_color
-                    )
-                )
-            }
-
-        }
-
 
 
     }

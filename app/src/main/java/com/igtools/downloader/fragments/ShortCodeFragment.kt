@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.databinding.DataBindingUtil
@@ -31,6 +32,7 @@ import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.utils.FileUtils
 import com.igtools.downloader.utils.KeyboardUtils
 import com.igtools.downloader.widgets.dialog.ProgressDialog
+import com.igtools.downloader.widgets.progress.WaveProgressView
 import com.youth.banner.indicator.CircleIndicator
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -43,16 +45,16 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 
 class ShortCodeFragment : Fragment() {
-    
-    
-    lateinit var progressAdapter: ProgressAdapter
+
+    var errFlag = false
+
     lateinit var binding: FragmentShortCodeBinding
     lateinit var adapter: MultiTypeAdapter
     var TAG = "ShortCodeFragment"
     lateinit var progressDialog: ProgressDialog
     var medias: ArrayList<MediaModel> = ArrayList()
     var progressList: ArrayList<Int> = ArrayList()
-    
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -72,26 +74,16 @@ class ShortCodeFragment : Fragment() {
         binding.tvPaste.isEnabled = false
         binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
         binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.black))
-
+        binding.container.visibility = View.GONE
         adapter = MultiTypeAdapter(context, medias)
         binding.banner.addBannerLifecycleObserver(this).setIndicator(CircleIndicator(context))
             .setAdapter(adapter).isAutoLoop(false)
-
-
-        progressDialog = ProgressDialog(requireContext())
-        val view = LayoutInflater.from(context).inflate(R.layout.view_download, null)
-
-        progressAdapter = ProgressAdapter(context,progressList)
-        val rv = view.findViewById<RecyclerView>(R.id.rv)
-        rv.adapter = progressAdapter
-        rv.layoutManager = LinearLayoutManager(context)
-
-        progressDialog.setView(view)
 
     }
 
 
     private fun getData(url: String) {
+
         //val url = "http://192.168.0.101:3000/api/mediainfo?url=$url"
         val api = Urls.SHORT_CODE + "?url=$url"
         OkhttpHelper.getInstance().getJson(api, object : OkhttpListener {
@@ -100,7 +92,7 @@ class ShortCodeFragment : Fragment() {
                 parseData(jsonObject);
                 if (medias.size > 0) {
                     adapter.setDatas(medias)
-                    progressAdapter.update(progressList)
+                    //progressAdapter.update(progressList)
 
                     //enable download
                     binding.tvDownload.isEnabled = true
@@ -140,7 +132,7 @@ class ShortCodeFragment : Fragment() {
                 if (!data["caption_text"].isJsonNull) {
                     mediaInfo.title = data["caption_text"]?.asString
                 }
-                progressList.add(0)    
+                progressList.add(0)
                 medias.add(mediaInfo)
             }
         } else if (mediaType == 1 || mediaType == 2) {
@@ -166,12 +158,41 @@ class ShortCodeFragment : Fragment() {
 
         binding.tvDownload.setOnClickListener {
             //TODO 不显示
-            progressDialog.show()
-            for (media in medias) {
-                downloadMedia(media,medias.indexOf(media))
-            }
 
-            //Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show()
+            binding.progressBar.visibility = View.VISIBLE
+
+            Thread {
+                for (media in medias) {
+                    downloadMedia(media, medias.indexOf(media))
+                }
+
+                while (true) {
+                    if (errFlag) {
+                        break
+                    }
+                    var cnt = 0
+                    for (index in progressList) {
+                        if (index == 100) {
+                            cnt++
+                        }
+                    }
+                    if (cnt == progressList.size) {
+                        break
+                    }
+                }
+                activity?.runOnUiThread {
+                    binding.progressBar.visibility = View.INVISIBLE
+                    if (errFlag) {
+                        Toast.makeText(context, "download failed", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show()
+                    }
+
+                }
+
+            }.start()
+
+
         }
         binding.tvPaste.setOnClickListener {
             binding.etShortcode.clearFocus()
@@ -179,7 +200,7 @@ class ShortCodeFragment : Fragment() {
             binding.tvDownload.isEnabled = false
             binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
             binding.progressBar.visibility = View.VISIBLE
-            //binding.container.visibility = View.VISIBLE
+            binding.container.visibility = View.VISIBLE
             getData(binding.etShortcode.text.toString())
         }
 
@@ -208,7 +229,7 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun downloadMedia(media: MediaModel,index: Int) {
+    private fun downloadMedia(media: MediaModel, index: Int) {
 
         if (media.mediaType == 1) {
             //image
@@ -228,16 +249,11 @@ class ShortCodeFragment : Fragment() {
                     override fun onDownloading(progress: Int) {
                         progressList[index] = progress
 
-                        activity?.runOnUiThread{
-                            progressAdapter.update(progressList)
-                        }
                     }
 
                     override fun onDownloadFailed(message: String?) {
 
-                        activity?.runOnUiThread {
-                            Toast.makeText(context, message + "", Toast.LENGTH_SHORT).show()
-                        }
+                        errFlag = true
                     }
 
                 })
@@ -257,16 +273,11 @@ class ShortCodeFragment : Fragment() {
                 override fun onDownloading(progress: Int) {
                     progressList[index] = progress
 
-                    activity?.runOnUiThread{
-                        progressAdapter.update(progressList)
-                    }
                 }
 
                 override fun onDownloadFailed(message: String?) {
 
-                    activity?.runOnUiThread {
-                        Toast.makeText(context, message + "", Toast.LENGTH_SHORT).show()
-                    }
+                    errFlag = true
                 }
 
             })
