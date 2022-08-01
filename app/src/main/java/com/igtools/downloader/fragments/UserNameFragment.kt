@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonObject
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.BlogAdapter
@@ -30,6 +31,9 @@ class UserNameFragment : Fragment() {
     var TAG = "UserNameFragment"
     lateinit var binding: FragmentUserNameBinding
     var blogs: ArrayList<BlogModel> = ArrayList()
+    var cursor = ""
+    var isFetching = false
+    var isEnd = false
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -45,9 +49,8 @@ class UserNameFragment : Fragment() {
 
 
     private fun initViews() {
-        binding.tvDownload.isEnabled = false
+
         binding.tvPaste.isEnabled = false
-        binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
         binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.black))
 
 
@@ -65,17 +68,13 @@ class UserNameFragment : Fragment() {
 
     private fun setListeners() {
 
-        binding.tvDownload.setOnClickListener {
 
-
-        }
         binding.tvPaste.setOnClickListener {
             binding.etUsername.clearFocus()
             KeyboardUtils.closeKeybord(binding.etUsername, context)
-            binding.tvDownload.isEnabled = false
-            binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
+
             binding.progressBar.visibility = View.VISIBLE
-            getData(binding.etUsername.text.toString())
+            refresh(binding.etUsername.text.toString())
         }
 
         binding.etUsername.addTextChangedListener(object : TextWatcher {
@@ -101,9 +100,25 @@ class UserNameFragment : Fragment() {
 
         })
 
+        binding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (!binding.rv.canScrollVertically(1)) {
+                    //滑动到底部
+
+                    loadMore(binding.etUsername.text.toString(), cursor)
+
+                }
+
+            }
+        })
+
+
     }
 
-    private fun getData(user: String) {
+
+    private fun refresh(user: String) {
+        blogs.clear()
         val url = Urls.USER_NAME + "?user=$user"
         OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
@@ -112,9 +127,6 @@ class UserNameFragment : Fragment() {
                 if (blogs.size > 0) {
                     adapter.setDatas(blogs)
 
-                    //enable download
-                    binding.tvDownload.isEnabled = true
-                    binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
                 }
 
                 binding.progressBar.visibility = View.INVISIBLE
@@ -127,15 +139,44 @@ class UserNameFragment : Fragment() {
             }
 
         })
-
     }
 
 
+    private fun loadMore(user: String, end_cursor: String) {
+        if (isFetching || isEnd) {
+            return
+        }
+        isFetching = true
+        binding.progressBottom.visibility = View.VISIBLE
+        val url = Urls.USER_NAME + "?user=$user&&end_cursor=$end_cursor"
+        OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
+            override fun onSuccess(jsonObject: JsonObject) {
+
+                parseData(jsonObject);
+                if (blogs.size > 0) {
+                    adapter.setDatas(blogs)
+
+                }
+                isFetching = false
+                binding.progressBottom.visibility = View.INVISIBLE
+
+            }
+
+            override fun onFail(message: String?) {
+                isFetching = false
+                binding.progressBottom.visibility = View.INVISIBLE
+                Toast.makeText(context, message + "", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+
+    }
+
     private fun parseData(jsonObject: JsonObject) {
-        blogs.clear()
+
         val data = jsonObject["data"].asJsonObject
         val items = data["items"].asJsonArray
-
+        cursor = data["end_cursor"].asString
         for (item in items) {
 
             val blogModel = BlogModel()
@@ -149,7 +190,10 @@ class UserNameFragment : Fragment() {
             blogs.add(blogModel)
         }
 
-        adapter.setDatas(blogs)
+        if (cursor == "") {
+            isEnd = true
+        }
+
     }
 
 

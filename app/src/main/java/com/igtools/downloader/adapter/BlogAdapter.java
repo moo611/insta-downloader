@@ -30,7 +30,7 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
     }
 
     public void setDatas(List<BlogModel> blogs) {
-        this.blogs.addAll(blogs);
+        this.blogs=blogs;
         notifyDataSetChanged();
     }
 

@@ -54,6 +54,7 @@ class BlogDetailsActivity : AppCompatActivity() {
 
         val shortCode = intent.extras?.getString("shortCode")
         if (shortCode != null) {
+
             getData(shortCode)
         }
 
@@ -85,11 +86,15 @@ class BlogDetailsActivity : AppCompatActivity() {
             Log.v(TAG, count.get().toString());
             Toast.makeText(this@BlogDetailsActivity, "download finished", Toast.LENGTH_SHORT).show()
         }
+        binding.imgBack.setOnClickListener {
+            finish()
+        }
 
     }
 
 
     private fun getData(url: String) {
+        binding.progressBar.visibility=View.VISIBLE
         //val url = "http://192.168.0.101:3000/api/mediainfo?url=$url"
         val api = Urls.SHORT_CODE + "?url=$url"
         OkhttpHelper.getInstance().getJson(api, object : OkhttpListener {
