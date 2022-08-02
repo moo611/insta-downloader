@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -14,7 +13,7 @@ import androidx.fragment.app.FragmentTransaction
 import com.igtools.downloader.databinding.ActivityMainBinding
 import com.igtools.downloader.fragments.HomeFragment
 import com.igtools.downloader.fragments.MineFragment
-import com.igtools.downloader.fragments.RecordFragment
+import com.igtools.downloader.fragments.TagFragment
 
 /**
  * @Author: desong
@@ -51,12 +50,12 @@ class MainActivity : AppCompatActivity() {
 
         //添加imageviews
         imageViews.add(binding.imgHome)
-        imageViews.add(binding.imgRecord)
+        imageViews.add(binding.imgTag)
         imageViews.add(binding.imgMine)
 
 
         fragments.add(HomeFragment())
-        fragments.add(RecordFragment())
+        fragments.add(TagFragment())
         fragments.add(MineFragment())
 
         showFragment(lastPos)
@@ -71,7 +70,7 @@ class MainActivity : AppCompatActivity() {
             lastPos = 0
 
         }
-        binding.llRecord.setOnClickListener {
+        binding.llTag.setOnClickListener {
             showFragment(1)
             selectPage(1)
             lastPos = 1

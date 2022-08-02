@@ -17,7 +17,7 @@ import com.igtools.downloader.adapter.BlogAdapter
 import com.igtools.downloader.api.OkhttpHelper
 import com.igtools.downloader.api.OkhttpListener
 import com.igtools.downloader.api.Urls
-import com.igtools.downloader.databinding.FragmentUserNameBinding
+import com.igtools.downloader.databinding.FragmentTagBinding
 import com.igtools.downloader.models.BlogModel
 import com.igtools.downloader.utils.KeyboardUtils
 
@@ -25,22 +25,20 @@ import com.igtools.downloader.utils.KeyboardUtils
  * @Author: desong
  * @Date: 2022/7/21
  */
-class UserNameFragment : Fragment() {
+class TagFragment : Fragment() {
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: BlogAdapter
-    var TAG = "UserNameFragment"
-    lateinit var binding: FragmentUserNameBinding
-    var blogs: ArrayList<BlogModel> = ArrayList()
-    var cursor = ""
+    lateinit var binding: FragmentTagBinding
     var isFetching = false
     var isEnd = false
+    var blogs: ArrayList<BlogModel> = ArrayList()
+    var cursor = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_user_name, container, false)
-
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tag, container, false)
 
         initViews()
         setListeners()
@@ -63,28 +61,27 @@ class UserNameFragment : Fragment() {
                 return 1
             }
         }
-    }
 
+    }
 
     private fun setListeners() {
 
-
         binding.tvSearch.setOnClickListener {
-            binding.etUsername.clearFocus()
-            KeyboardUtils.closeKeybord(binding.etUsername, context)
+            binding.etTag.clearFocus()
+            KeyboardUtils.closeKeybord(binding.etTag, context)
 
             binding.progressBar.visibility = View.VISIBLE
-            refresh(binding.etUsername.text.toString())
+            refresh(binding.etTag.text.toString())
         }
 
-        binding.etUsername.addTextChangedListener(object : TextWatcher {
+        binding.etTag.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
-                if (binding.etUsername.text.isNotEmpty()) {
+                if (binding.etTag.text.isNotEmpty()) {
                     binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.white))
                     binding.tvSearch.isEnabled = true
                 } else {
@@ -106,20 +103,18 @@ class UserNameFragment : Fragment() {
                 if (!binding.rv.canScrollVertically(1)) {
                     //滑动到底部
 
-                    loadMore(binding.etUsername.text.toString(), cursor)
+                    loadMore(binding.etTag.text.toString(), cursor)
 
                 }
 
             }
         })
 
-
     }
 
-
-    private fun refresh(user: String) {
+    private fun refresh(tag: String) {
         blogs.clear()
-        val url = Urls.USER_NAME + "?user=$user"
+        val url = Urls.USER_TAG + "?tag=$tag"
         OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 
@@ -142,13 +137,13 @@ class UserNameFragment : Fragment() {
     }
 
 
-    private fun loadMore(user: String, end_cursor: String) {
+    private fun loadMore(tag: String, end_cursor: String) {
         if (isFetching || isEnd) {
             return
         }
         isFetching = true
         binding.progressBottom.visibility = View.VISIBLE
-        val url = Urls.USER_NAME + "?user=$user&&end_cursor=$end_cursor"
+        val url = Urls.USER_TAG + "?user=$tag&&end_cursor=$end_cursor"
         OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 
@@ -173,7 +168,6 @@ class UserNameFragment : Fragment() {
     }
 
     private fun parseData(jsonObject: JsonObject) {
-
         val data = jsonObject["data"].asJsonObject
         val items = data["items"].asJsonArray
         cursor = data["end_cursor"].asString
@@ -186,15 +180,13 @@ class UserNameFragment : Fragment() {
             }
             blogModel.displayUrl = item.asJsonObject["display_url"].asString
             blogModel.shortCode = item.asJsonObject["shortcode"].asString
-            blogModel.typeName = item.asJsonObject["__typename"].asString
+            //blogModel.typeName = item.asJsonObject["__typename"].asString
             blogs.add(blogModel)
         }
 
         if (cursor == "") {
             isEnd = true
         }
-
     }
-
 
 }
