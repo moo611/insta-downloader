@@ -87,14 +87,9 @@ public class OkhttpHelper {
         });
     }
 
-    public void postJson(String url, String method, HashMap<String, Object> params, OkhttpListener okhttpListener) {
+    public void postJson(String url, HashMap<String, Object> params, OkhttpListener okhttpListener) {
 
-        HashMap<String, Object> reqBody = new HashMap<>();
-        reqBody.put("jsonrpc", "2.0");
-        reqBody.put("method", method);
-        reqBody.put("id", UUID.randomUUID().toString());
-        reqBody.put("params", params);
-        String json = gson.toJson(reqBody);
+        String json = gson.toJson(params);
 
         RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
         Request request = new Request.Builder().url(url).post(body).build();
@@ -113,13 +108,8 @@ public class OkhttpHelper {
     }
 
     public void postJsonWithHeader(String url, String method, String token, HashMap<String, Object> params, OkhttpListener okhttpListener) {
-        HashMap<String, Object> reqBody = new HashMap<>();
-        reqBody.put("jsonrpc", "2.0");
-        reqBody.put("method", method);
-        reqBody.put("id", UUID.randomUUID().toString());
-        params.put("_UserToken", token);
-        reqBody.put("params", params);
-        String json = gson.toJson(reqBody);
+
+        String json = gson.toJson(params);
 
         RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
         Request request = new Request.Builder().url(url).post(body).build();
@@ -214,8 +204,6 @@ public class OkhttpHelper {
             }
         });
     }
-
-
 
 
     public void handleResponse(Response response, OkhttpListener okhttpListener) {
