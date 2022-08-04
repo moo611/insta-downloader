@@ -15,23 +15,10 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="25dp"/>
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="登录"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
-
-        </RelativeLayout>
 
         <TextView
             android:textColor="@color/black"
-            android:text="Username"
+            android:text="@string/username"
             android:layout_marginTop="20dp"
             android:layout_marginLeft="20dp"
             android:layout_width="wrap_content"
@@ -41,7 +28,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:hint="username"
+            android:hint="@string/username_hint"
             android:paddingRight="12dp"
             android:paddingLeft="12dp"
             android:gravity="center_vertical"
@@ -50,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"/>
         <TextView
-            android:text="Password"
+            android:text="@string/password"
             android:textColor="@color/black"
             android:layout_marginTop="20dp"
             android:layout_marginLeft="20dp"
@@ -61,7 +48,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:hint="password"
+            android:hint="@string/password_hint"
             android:paddingRight="12dp"
             android:paddingLeft="12dp"
             android:gravity="center_vertical"
@@ -71,7 +58,7 @@
             android:layout_height="50dp"/>
 
         <Button
-            android:text="登录"
+            android:text="@string/login"
             android:id="@+id/btn_login"
             android:layout_marginTop="30dp"
             android:layout_marginRight="20dp"

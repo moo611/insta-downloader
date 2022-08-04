@@ -6,6 +6,9 @@ import android.content.Context
 class BaseApplication : Application() {
     companion object {
         lateinit var mContext: Context
+
+        var isAuto = true
+
     }
 
     override fun onCreate() {
@@ -14,4 +17,6 @@ class BaseApplication : Application() {
         mContext = applicationContext
 
     }
+
+
 }

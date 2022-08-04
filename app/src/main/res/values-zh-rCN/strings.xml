@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">IgDownloader</string>
+
+    <string name="login">登录</string>
+    <string name="username">邮箱</string>
+    <string name="password">密码</string>
+    <string name="username_hint">请输入邮箱</string>
+    <string name="password_hint">请输入密码</string>
+    <string name="search">搜索</string>
+    <string name="download">下载</string>
+    <string name="search_hint">粘贴 instagram 分享链接</string>
+    <string name="quick_download">快速下载模式</string>
+    <string name="language">语言</string>
+    <string name="share">分享</string>
+    <string name="app_version">App 版本</string>
+    <string name="paste_username">粘贴用户名</string>
+    <string name="next_step">下一步</string>
+    <string name="hashtag">粘贴标签</string>
+    <string name="zh">中文</string>
+    <string name="en">英文</string>
+
+</resources>

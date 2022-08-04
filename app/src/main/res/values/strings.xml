@@ -1,5 +1,21 @@
 <resources>
     <string name="app_name">IgDownloader</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="login">Login</string>
+    <string name="username">Email</string>
+    <string name="password">Password</string>
+    <string name="username_hint">Please input your email</string>
+    <string name="password_hint">Please input your password</string>
+    <string name="search">Search</string>
+    <string name="download">Download</string>
+    <string name="search_hint">Paste instagram share link here</string>
+    <string name="quick_download">Quick Download Mode</string>
+    <string name="language">Languages</string>
+    <string name="share">Share</string>
+    <string name="app_version">App Version</string>
+    <string name="paste_username">Paste username here</string>
+    <string name="next_step">Next Step</string>
+    <string name="hashtag">Paste hashtag here</string>
+    <string name="zh">Chinese</string>
+    <string name="en">English</string>
 </resources>

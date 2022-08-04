@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igtools.downloader.R;
-import com.igtools.downloader.widgets.dialog.ProgressDialog;
 
 import java.util.List;
 

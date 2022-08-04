@@ -1,28 +1,22 @@
 package com.igtools.downloader.fragments
 
-import android.content.res.Resources
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.BitmapFactory
-import android.os.Build
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.Toast
-import androidx.core.content.res.ResourcesCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonObject
 import com.igtools.downloader.R
-import com.igtools.downloader.adapter.BlogAdapter
 import com.igtools.downloader.adapter.MultiTypeAdapter
-import com.igtools.downloader.adapter.ProgressAdapter
 import com.igtools.downloader.api.OkhttpHelper
 import com.igtools.downloader.api.OkhttpListener
 import com.igtools.downloader.api.OnDownloadListener
@@ -31,12 +25,9 @@ import com.igtools.downloader.databinding.FragmentShortCodeBinding
 import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.utils.FileUtils
 import com.igtools.downloader.utils.KeyboardUtils
-import com.igtools.downloader.widgets.dialog.ProgressDialog
-import com.igtools.downloader.widgets.progress.WaveProgressView
+import com.igtools.downloader.widgets.dialog.CustomDialog
 import com.youth.banner.indicator.CircleIndicator
 import java.io.File
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicInteger
 
 
 /**
@@ -51,7 +42,6 @@ class ShortCodeFragment : Fragment() {
     lateinit var binding: FragmentShortCodeBinding
     lateinit var adapter: MultiTypeAdapter
     var TAG = "ShortCodeFragment"
-    lateinit var progressDialog: ProgressDialog
     var medias: ArrayList<MediaModel> = ArrayList()
     var progressList: ArrayList<Int> = ArrayList()
 
@@ -66,6 +56,21 @@ class ShortCodeFragment : Fragment() {
         setListeners()
 
         return binding.root;
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        binding.etShortcode.post {
+            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val item = clipboard.primaryClip?.getItemAt(0)
+            val pasteData = item?.text
+
+            if (pasteData!=null){
+                binding.etShortcode.setText(pasteData)
+            }
+        }
+
     }
 
     private fun initViews() {
@@ -157,7 +162,6 @@ class ShortCodeFragment : Fragment() {
     private fun setListeners() {
 
         binding.tvDownload.setOnClickListener {
-            //TODO 不显示
 
             binding.progressBar.visibility = View.VISIBLE
 
@@ -222,7 +226,7 @@ class ShortCodeFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                //TODO("Not yet implemented")
+
             }
 
         })

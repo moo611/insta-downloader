@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.igtools.downloader.databinding.ActivityMainBinding
 import com.igtools.downloader.fragments.HomeFragment
-import com.igtools.downloader.fragments.MineFragment
+import com.igtools.downloader.fragments.SettingFragment
 import com.igtools.downloader.fragments.TagFragment
 
 /**
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
 
         fragments.add(HomeFragment())
         fragments.add(TagFragment())
-        fragments.add(MineFragment())
+        fragments.add(SettingFragment())
 
         showFragment(lastPos)
         selectPage(0)

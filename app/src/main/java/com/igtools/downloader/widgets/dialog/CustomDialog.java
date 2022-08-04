@@ -15,21 +15,21 @@ import androidx.annotation.Nullable;
  * @Author: desong
  * @Date: 2022/8/1
  */
-public class ProgressDialog extends Dialog {
+public class CustomDialog extends Dialog {
 
     Context c;
 
-    public ProgressDialog(@NonNull Context context) {
+    public CustomDialog(@NonNull Context context) {
         super(context);
         this.c = context;
     }
 
-    public ProgressDialog(@NonNull Context context, int themeResId) {
+    public CustomDialog(@NonNull Context context, int themeResId) {
         super(context, themeResId);
         this.c = context;
     }
 
-    protected ProgressDialog(@NonNull Context context, boolean cancelable, @Nullable OnCancelListener cancelListener) {
+    protected CustomDialog(@NonNull Context context, boolean cancelable, @Nullable OnCancelListener cancelListener) {
         super(context, cancelable, cancelListener);
         this.c = context;
     }

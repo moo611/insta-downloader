@@ -27,7 +27,7 @@ class BlogDetailsActivity : AppCompatActivity() {
     var errFlag = false
     lateinit var binding: ActivityBlogDetailsBinding
     lateinit var adapter: MultiTypeAdapter
-    var TAG = "ShortCodeFragment"
+    var TAG = "BlogDetailsActivity"
     var progressList: ArrayList<Int> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
 
