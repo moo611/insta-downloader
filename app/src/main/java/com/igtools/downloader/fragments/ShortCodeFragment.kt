@@ -2,6 +2,7 @@ package com.igtools.downloader.fragments
 
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -25,6 +26,7 @@ import com.igtools.downloader.databinding.FragmentShortCodeBinding
 import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.utils.FileUtils
 import com.igtools.downloader.utils.KeyboardUtils
+import com.igtools.downloader.utils.RegexUtils
 import com.igtools.downloader.widgets.dialog.CustomDialog
 import com.youth.banner.indicator.CircleIndicator
 import java.io.File
@@ -61,17 +63,35 @@ class ShortCodeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        binding.etShortcode.post {
-            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val item = clipboard.primaryClip?.getItemAt(0)
-            val pasteData = item?.text
 
-            if (pasteData!=null){
-                binding.etShortcode.setText(pasteData)
+        binding.etShortcode.post {
+
+            val intent = activity?.intent
+            if (intent?.action == Intent.ACTION_SEND){
+                if ("text/plain" == intent.type) {
+                    intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+                        // Update UI to reflect text being shared
+
+                        val urls = RegexUtils.extractUrls(it)
+                        binding.etShortcode.setText(urls[0])
+
+                    }
+                }
+            }else {
+                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val item = clipboard.primaryClip?.getItemAt(0)
+                val pasteData = item?.text
+
+                if (pasteData!=null){
+                    binding.etShortcode.setText(pasteData)
+                }
             }
+
+
         }
 
     }
+
 
     private fun initViews() {
 
@@ -218,9 +238,11 @@ class ShortCodeFragment : Fragment() {
                 if (binding.etShortcode.text.isNotEmpty()) {
                     binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.white))
                     binding.tvPaste.isEnabled = true
+                    binding.imgClear.visibility = View.VISIBLE
                 } else {
-                    binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.black))
+                    binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.home_unselect_color))
                     binding.tvPaste.isEnabled = false
+                    binding.imgClear.visibility = View.INVISIBLE
                 }
 
             }
@@ -230,6 +252,12 @@ class ShortCodeFragment : Fragment() {
             }
 
         })
+
+        binding.imgClear.setOnClickListener {
+
+            binding.etShortcode.setText("")
+
+        }
 
     }
 

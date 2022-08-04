@@ -84,9 +84,11 @@ class TagFragment : Fragment() {
                 if (binding.etTag.text.isNotEmpty()) {
                     binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.white))
                     binding.tvSearch.isEnabled = true
+                    binding.imgClear.visibility = View.VISIBLE
                 } else {
-                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
+                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.home_unselect_color))
                     binding.tvSearch.isEnabled = false
+                    binding.imgClear.visibility = View.INVISIBLE
                 }
 
             }
@@ -109,6 +111,12 @@ class TagFragment : Fragment() {
 
             }
         })
+
+        binding.imgClear.setOnClickListener {
+
+            binding.etTag.setText("")
+
+        }
 
     }
 
