@@ -1,11 +1,14 @@
 package com.igtools.downloader
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -14,6 +17,7 @@ import com.igtools.downloader.databinding.ActivityMainBinding
 import com.igtools.downloader.fragments.HomeFragment
 import com.igtools.downloader.fragments.SettingFragment
 import com.igtools.downloader.fragments.TagFragment
+
 
 /**
  * @Author: desong
@@ -81,6 +85,12 @@ class MainActivity : AppCompatActivity() {
             selectPage(2)
             lastPos = 2
 
+        }
+
+        binding.imgCamera.setOnClickListener {
+
+            val launchIntent = packageManager.getLaunchIntentForPackage("com.instagram.android")
+            launchIntent?.let { startActivity(it) }
         }
     }
 

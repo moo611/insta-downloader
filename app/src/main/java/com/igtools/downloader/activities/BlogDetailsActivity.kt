@@ -33,8 +33,6 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_blog_details)
-
 
         //沉浸式状态栏
         if (Build.VERSION.SDK_INT >= 23) {

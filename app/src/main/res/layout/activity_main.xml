@@ -23,21 +23,33 @@
             android:layout_width="match_parent"
             android:layout_height="50dp">
 
+            <TextView
+                android:textStyle="italic"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:text="IgDownloader"
+                android:layout_marginStart="20dp"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
             <ImageView
+                android:id="@+id/img_camera"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="80dp"
-                android:src="@drawable/ic_message" />
+                android:src="@mipmap/camera" />
 
             <ImageView
+                android:id="@+id/img_download"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="20dp"
-                android:src="@drawable/ic_settings" />
+                android:src="@mipmap/download" />
 
         </RelativeLayout>
 

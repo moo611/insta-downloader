@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -268,6 +269,8 @@ class ShortCodeFragment : Fragment() {
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
+            val uri = Uri.fromFile(file)
+            Log.v(TAG, uri.toString())
             OkhttpHelper.getInstance()
                 .download(media.thumbnailUrl, file, object : OnDownloadListener {
                     override fun onDownloadSuccess(path: String?) {
