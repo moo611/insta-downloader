@@ -9,7 +9,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.MultiTypeAdapter
 import com.igtools.downloader.api.OkhttpHelper
@@ -18,9 +21,14 @@ import com.igtools.downloader.api.OnDownloadListener
 import com.igtools.downloader.api.Urls
 import com.igtools.downloader.databinding.ActivityBlogDetailsBinding
 import com.igtools.downloader.models.MediaModel
+import com.igtools.downloader.models.Record
+import com.igtools.downloader.room.RecordDB
 import com.igtools.downloader.utils.FileUtils
 import com.youth.banner.indicator.CircleIndicator
+import kotlinx.coroutines.launch
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
 
 class BlogDetailsActivity : AppCompatActivity() {
 
@@ -30,7 +38,7 @@ class BlogDetailsActivity : AppCompatActivity() {
     var TAG = "BlogDetailsActivity"
     var progressList: ArrayList<Int> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
-
+    val gson = Gson()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -50,6 +58,11 @@ class BlogDetailsActivity : AppCompatActivity() {
         if (shortCode != null) {
 
             getData(shortCode)
+
+        } else if (intent.extras?.getString("content") != null) {
+
+            getDataFromLocal(intent.extras!!.getString("content")!!)
+
         }
 
 
@@ -88,6 +101,19 @@ class BlogDetailsActivity : AppCompatActivity() {
                         break
                     }
                 }
+                if (!errFlag) {
+
+                    val record = Record()
+                    record.createTime = Date()
+                    record.content = Gson().toJson(medias)
+                    lifecycleScope.launch {
+                        RecordDB.getInstance().recordDao().insert(record)
+                    }
+
+
+                }
+
+
                 runOnUiThread {
                     binding.progressBar.visibility = View.INVISIBLE
                     if (errFlag) {
@@ -142,6 +168,12 @@ class BlogDetailsActivity : AppCompatActivity() {
             }
 
         })
+
+    }
+
+    private fun getDataFromLocal(content: String) {
+
+        medias = gson.fromJson(content, genericType<ArrayList<MediaModel>>())
 
     }
 
@@ -240,4 +272,5 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     }
 
+    inline fun <reified T> genericType() = object : TypeToken<T>() {}.type
 }

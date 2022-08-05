@@ -16,6 +16,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.MultiTypeAdapter
@@ -25,12 +27,16 @@ import com.igtools.downloader.api.OnDownloadListener
 import com.igtools.downloader.api.Urls
 import com.igtools.downloader.databinding.FragmentShortCodeBinding
 import com.igtools.downloader.models.MediaModel
+import com.igtools.downloader.models.Record
+import com.igtools.downloader.room.RecordDB
 import com.igtools.downloader.utils.FileUtils
 import com.igtools.downloader.utils.KeyboardUtils
 import com.igtools.downloader.utils.RegexUtils
-import com.igtools.downloader.widgets.dialog.CustomDialog
 import com.youth.banner.indicator.CircleIndicator
+import kotlinx.coroutines.launch
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -205,6 +211,15 @@ class ShortCodeFragment : Fragment() {
                         break
                     }
                 }
+                if (!errFlag){
+                    val record = Record()
+                    record.createTime = Date()
+                    record.content = Gson().toJson(medias)
+                    lifecycleScope.launch {
+                        RecordDB.getInstance().recordDao().insert(record)
+                    }
+                }
+
                 activity?.runOnUiThread {
                     binding.progressBar.visibility = View.INVISIBLE
                     if (errFlag) {

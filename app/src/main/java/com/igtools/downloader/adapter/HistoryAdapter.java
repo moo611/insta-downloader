@@ -23,14 +23,14 @@ import java.util.List;
  * @Date: 2022/8/4
  */
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryHolder> {
-    List<MediaModel> datas;
+    List<String> thumbnails;
+    List<String> titles;
     Context c;
+    OnItemClickListener onItemClickListener;
 
-    public HistoryAdapter(Context c, List<MediaModel> datas) {
+    public HistoryAdapter(Context c) {
 
         this.c = c;
-        this.datas = datas;
-
     }
 
     @NonNull
@@ -43,21 +43,24 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryH
     @Override
     public void onBindViewHolder(@NonNull HistoryHolder holder, int position) {
 
-        Glide.with(c).load(datas.get(position).getThumbnailUrl())
+        Glide.with(c).load(thumbnails.get(position))
                 .placeholder(new ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
                 .into(holder.thumbnail);
 
-        holder.caption.setText(datas.get(position).getTitle());
+        holder.caption.setText(titles.get(position));
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onClick(position));
+
 
     }
 
     @Override
     public int getItemCount() {
-        return datas.size();
+        return thumbnails.size();
     }
 
-    public void setDatas(List<MediaModel> datas) {
-        this.datas = datas;
+    public void setDatas(List<String> thumbnails, List<String> titles) {
+        this.thumbnails = thumbnails;
+        this.titles = titles;
         notifyDataSetChanged();
     }
 
@@ -73,5 +76,15 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryH
             caption = itemView.findViewById(R.id.tv_caption);
 
         }
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    interface OnItemClickListener {
+
+        void onClick(int position);
+
     }
 }
