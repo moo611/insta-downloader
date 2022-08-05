@@ -53,7 +53,12 @@ class DownloadActivity : AppCompatActivity() {
         adapter.setOnItemClickListener {
             val content = contents[it]
 
-            startActivity(Intent(this@DownloadActivity, BlogDetailsActivity::class.java).putExtra("content",content))
+            startActivity(
+                Intent(
+                    this@DownloadActivity,
+                    BlogDetailsActivity::class.java
+                ).putExtra("content", content)
+            )
 
         }
 
@@ -64,8 +69,8 @@ class DownloadActivity : AppCompatActivity() {
         titles.clear()
 
         lifecycleScope.launch {
-            records = withContext(Dispatchers.IO){
-                RecordDB.getInstance().recordDao().all
+            records = withContext(Dispatchers.IO) {
+                RecordDB.getInstance().recordDao().all() as ArrayList<Record>
             }
             for (record in records) {
 

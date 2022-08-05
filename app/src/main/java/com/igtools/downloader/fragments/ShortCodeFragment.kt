@@ -29,6 +29,7 @@ import com.igtools.downloader.databinding.FragmentShortCodeBinding
 import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.models.Record
 import com.igtools.downloader.room.RecordDB
+import com.igtools.downloader.utils.DateUtils
 import com.igtools.downloader.utils.FileUtils
 import com.igtools.downloader.utils.KeyboardUtils
 import com.igtools.downloader.utils.RegexUtils
@@ -213,7 +214,7 @@ class ShortCodeFragment : Fragment() {
                 }
                 if (!errFlag){
                     val record = Record()
-                    record.createTime = Date()
+                    record.createTime = DateUtils.getDate(Date())
                     record.content = Gson().toJson(medias)
                     lifecycleScope.launch {
                         RecordDB.getInstance().recordDao().insert(record)
@@ -277,7 +278,7 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun downloadMedia(media: MediaModel, index: Int) {
+    private  fun downloadMedia(media: MediaModel, index: Int) {
 
         if (media.mediaType == 1) {
             //image
