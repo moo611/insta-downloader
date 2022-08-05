@@ -20,5 +20,6 @@
     <string name="hashtag">粘贴标签</string>
     <string name="zh">中文</string>
     <string name="en">英文</string>
-
+    <string name="vp_shortcode">分享链接</string>
+    <string name="vp_username">用户名</string>
 </resources>

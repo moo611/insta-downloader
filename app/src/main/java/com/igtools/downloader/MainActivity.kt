@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import com.igtools.downloader.activities.DownloadActivity
 import com.igtools.downloader.databinding.ActivityMainBinding
 import com.igtools.downloader.fragments.HomeFragment
 import com.igtools.downloader.fragments.SettingFragment
@@ -91,6 +92,9 @@ class MainActivity : AppCompatActivity() {
 
             val launchIntent = packageManager.getLaunchIntentForPackage("com.instagram.android")
             launchIntent?.let { startActivity(it) }
+        }
+        binding.imgDownload.setOnClickListener {
+            startActivity(Intent(this,DownloadActivity::class.java))
         }
     }
 

@@ -26,7 +26,9 @@ import com.igtools.downloader.room.RecordDB
 import com.igtools.downloader.utils.DateUtils
 import com.igtools.downloader.utils.FileUtils
 import com.youth.banner.indicator.CircleIndicator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -105,11 +107,13 @@ class BlogDetailsActivity : AppCompatActivity() {
                 if (!errFlag) {
 
                     val record = Record()
-                    record.createTime = DateUtils.getDate(Date())
+                    record.createdTime = DateUtils.getDate(Date())
                     record.content = Gson().toJson(medias)
                     lifecycleScope.launch {
+                        withContext(Dispatchers.IO) {
+                            RecordDB.getInstance().recordDao().insert(record)
+                        }
 
-                        RecordDB.getInstance().recordDao().insert(record)
                     }
 
 

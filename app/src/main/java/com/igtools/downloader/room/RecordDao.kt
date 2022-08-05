@@ -13,9 +13,6 @@ interface RecordDao {
     suspend fun all(): List<Record>
 
     @Insert
-    suspend fun insertAll(vararg records: Record?)
-
-    @Insert
     suspend fun insert(record: Record?)
 
     @Delete

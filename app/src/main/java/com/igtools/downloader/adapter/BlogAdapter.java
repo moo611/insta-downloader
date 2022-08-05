@@ -17,12 +17,13 @@ import com.igtools.downloader.R;
 import com.igtools.downloader.activities.BlogDetailsActivity;
 import com.igtools.downloader.models.BlogModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder> {
 
     Context c;
-    List<BlogModel> blogs;
+    List<BlogModel> blogs = new ArrayList<>();
 
     public BlogAdapter(Context c, List<BlogModel> blogs) {
         this.c = c;

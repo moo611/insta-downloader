@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.igtools.downloader.R;
 import com.igtools.downloader.models.MediaModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,8 +24,8 @@ import java.util.List;
  * @Date: 2022/8/4
  */
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryHolder> {
-    List<String> thumbnails;
-    List<String> titles;
+    List<String> thumbnails = new ArrayList<>();
+    List<String> titles = new ArrayList<>();
     Context c;
     OnItemClickListener onItemClickListener;
 
@@ -82,7 +83,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryH
         this.onItemClickListener = onItemClickListener;
     }
 
-    interface OnItemClickListener {
+    public interface OnItemClickListener {
 
         void onClick(int position);
 

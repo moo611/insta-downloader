@@ -18,4 +18,6 @@
     <string name="hashtag">Paste hashtag here</string>
     <string name="zh">Chinese</string>
     <string name="en">English</string>
+    <string name="vp_shortcode">shortcode</string>
+    <string name="vp_username">username</string>
 </resources>

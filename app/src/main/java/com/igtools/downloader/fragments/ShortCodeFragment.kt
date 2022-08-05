@@ -34,7 +34,9 @@ import com.igtools.downloader.utils.FileUtils
 import com.igtools.downloader.utils.KeyboardUtils
 import com.igtools.downloader.utils.RegexUtils
 import com.youth.banner.indicator.CircleIndicator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -75,7 +77,7 @@ class ShortCodeFragment : Fragment() {
         binding.etShortcode.post {
 
             val intent = activity?.intent
-            if (intent?.action == Intent.ACTION_SEND){
+            if (intent?.action == Intent.ACTION_SEND) {
                 if ("text/plain" == intent.type) {
                     intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
                         // Update UI to reflect text being shared
@@ -85,12 +87,13 @@ class ShortCodeFragment : Fragment() {
 
                     }
                 }
-            }else {
-                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            } else {
+                val clipboard =
+                    requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val item = clipboard.primaryClip?.getItemAt(0)
                 val pasteData = item?.text
 
-                if (pasteData!=null){
+                if (pasteData != null) {
                     binding.etShortcode.setText(pasteData)
                 }
             }
@@ -212,12 +215,15 @@ class ShortCodeFragment : Fragment() {
                         break
                     }
                 }
-                if (!errFlag){
+                if (!errFlag) {
                     val record = Record()
-                    record.createTime = DateUtils.getDate(Date())
+                    record.createdTime = DateUtils.getDate(Date())
                     record.content = Gson().toJson(medias)
                     lifecycleScope.launch {
-                        RecordDB.getInstance().recordDao().insert(record)
+                        withContext(Dispatchers.IO) {
+                            RecordDB.getInstance().recordDao().insert(record)
+                        }
+
                     }
                 }
 
@@ -278,7 +284,7 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private  fun downloadMedia(media: MediaModel, index: Int) {
+    private fun downloadMedia(media: MediaModel, index: Int) {
 
         if (media.mediaType == 1) {
             //image

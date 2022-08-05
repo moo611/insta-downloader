@@ -42,8 +42,8 @@ class HomeFragment : Fragment() {
         fragments.add(ShortCodeFragment())
         fragments.add(UserNameFragment())
         val titles:ArrayList<String> = ArrayList()
-        titles.add("shortcode")
-        titles.add("username")
+        titles.add(getString(R.string.vp_shortcode))
+        titles.add(getString(R.string.vp_username))
         mAdapter = ViewPagerAdapter(childFragmentManager,titles,fragments)
         binding.viewpager.adapter = mAdapter
 

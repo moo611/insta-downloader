@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -31,6 +32,7 @@ class DownloadActivity : AppCompatActivity() {
     var titles: ArrayList<String> = ArrayList()
     var contents: ArrayList<String> = ArrayList()
     var gson = Gson()
+    val TAG = "DownloadActivity"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //沉浸式状态栏
@@ -72,6 +74,7 @@ class DownloadActivity : AppCompatActivity() {
             records = withContext(Dispatchers.IO) {
                 RecordDB.getInstance().recordDao().all() as ArrayList<Record>
             }
+            Log.v(TAG, records.size.toString())
             for (record in records) {
 
                 val mediaModels: ArrayList<MediaModel> =

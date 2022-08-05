@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igtools.downloader.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class ProgressAdapter extends RecyclerView.Adapter<ProgressAdapter.ProgressHolder> {
 
-    List<Integer> progressList;
+    List<Integer> progressList = new ArrayList<>();
     Context c;
 
     public ProgressAdapter(Context c, List<Integer> progressList) {
