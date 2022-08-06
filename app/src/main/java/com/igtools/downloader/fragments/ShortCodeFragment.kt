@@ -215,6 +215,8 @@ class ShortCodeFragment : Fragment() {
                         break
                     }
                 }
+
+                Log.v(TAG,"download finished")
                 if (!errFlag) {
                     val record = Record()
                     record.createdTime = DateUtils.getDate(Date())
@@ -291,12 +293,13 @@ class ShortCodeFragment : Fragment() {
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-            val uri = Uri.fromFile(file)
-            Log.v(TAG, uri.toString())
+            //val uri = Uri.fromFile(file)
+            //Log.v(TAG, uri.toString())
             OkhttpHelper.getInstance()
                 .download(media.thumbnailUrl, file, object : OnDownloadListener {
                     override fun onDownloadSuccess(path: String?) {
 
+                        Log.v(TAG,path+"")
 
                         val bitmap = BitmapFactory.decodeFile(file.absolutePath)
                         FileUtils.saveImageToAlbum(context!!, bitmap, file.name)
