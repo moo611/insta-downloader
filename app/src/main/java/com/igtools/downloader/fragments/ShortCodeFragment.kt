@@ -22,8 +22,8 @@ import com.igtools.downloader.R
 import com.igtools.downloader.adapter.MultiTypeAdapter
 import com.igtools.downloader.api.okhttp.OkhttpHelper
 import com.igtools.downloader.api.okhttp.OkhttpListener
-import com.igtools.downloader.api.okhttp.OnDownloadListener
 import com.igtools.downloader.api.okhttp.Urls
+import com.igtools.downloader.api.retrofit.ApiClient
 import com.igtools.downloader.databinding.FragmentShortCodeBinding
 import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.models.Record
@@ -33,10 +33,13 @@ import com.igtools.downloader.utils.FileUtils
 import com.igtools.downloader.utils.KeyboardUtils
 import com.igtools.downloader.utils.RegexUtils
 import com.youth.banner.indicator.CircleIndicator
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import okhttp3.ResponseBody
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.lang.Exception
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 /**
@@ -45,8 +48,6 @@ import kotlin.collections.ArrayList
  */
 
 class ShortCodeFragment : Fragment() {
-
-    var errFlag = false
 
     lateinit var binding: FragmentShortCodeBinding
     lateinit var adapter: MultiTypeAdapter
@@ -193,52 +194,28 @@ class ShortCodeFragment : Fragment() {
         binding.tvDownload.setOnClickListener {
 
             binding.progressBar.visibility = View.VISIBLE
+            lifecycleScope.launch {
 
-            Thread {
-                for (media in medias) {
-                    downloadMedia(media, medias.indexOf(media))
-                }
-
-                while (true) {
-                    if (errFlag) {
-                        break
-                    }
-                    var cnt = 0
-                    for (index in progressList) {
-                        if (index == 100) {
-                            cnt++
-                        }
-                    }
-                    if (cnt == progressList.size) {
-                        break
+                val all:List<Deferred<Unit>> = medias.map {
+                    async {
+                        downloadMedia(it)
                     }
                 }
 
-                Log.v(TAG,"download finished")
-                if (!errFlag) {
-                    val record = Record()
-                    record.createdTime = DateUtils.getDate(Date())
-                    record.content = Gson().toJson(medias)
-                    lifecycleScope.launch {
-//                        withContext(Dispatchers.IO) {
-//                            RecordDB.getInstance().recordDao().insert(record)
-//                        }
-                        RecordDB.getInstance().recordDao().insert(record)
-                    }
+                all.awaitAll()
+                Log.v(TAG,"finish")
+                val record = Record()
+                record.createdTime = DateUtils.getDate(Date())
+                record.content = Gson().toJson(medias)
+                lifecycleScope.launch {
+                    RecordDB.getInstance().recordDao().insert(record)
                 }
+                binding.progressBar.visibility = View.INVISIBLE
 
-                activity?.runOnUiThread {
-                    binding.progressBar.visibility = View.INVISIBLE
-                    if (errFlag) {
-                        Toast.makeText(context, "download failed", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show()
-                    }
+                Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show()
 
-                }
 
-            }.start()
-
+            }
 
         }
         binding.tvPaste.setOnClickListener {
@@ -284,64 +261,67 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun downloadMedia(media: MediaModel, index: Int) {
+    private suspend fun downloadMedia(media: MediaModel) {
 
         if (media.mediaType == 1) {
             //image
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-            //val uri = Uri.fromFile(file)
-            //Log.v(TAG, uri.toString())
-            OkhttpHelper.getInstance()
-                .download(media.thumbnailUrl, file, object :
-                    OnDownloadListener {
-                    override fun onDownloadSuccess(path: String?) {
 
-                        Log.v(TAG,path+"")
+            try {
+                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+                responseBody.body()?.let { saveFile(it, file, 1) }
 
-                        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                        FileUtils.saveImageToAlbum(context!!, bitmap, file.name)
+            } catch (e: Error) {
+                //errFlag = true
+            }
 
-                    }
-
-                    override fun onDownloading(progress: Int) {
-                        progressList[index] = progress
-
-                    }
-
-                    override fun onDownloadFailed(message: String?) {
-
-                        errFlag = true
-                    }
-
-                })
 
         } else {
             //video
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-            OkhttpHelper.getInstance().download(media.videoUrl, file, object :
-                OnDownloadListener {
-                override fun onDownloadSuccess(path: String?) {
+            try {
+                val responseBody = media.videoUrl?.let { ApiClient.getClient().downloadUrl(it) }
+                responseBody?.body()?.let { saveFile(it, file, 2) }
 
-                    FileUtils.saveVideoToAlbum(context!!, file)
+            } catch (e: Error) {
+                //errFlag = true
+            }
 
+        }
+
+    }
+
+    private fun saveFile(body: ResponseBody, file: File, type: Int) {
+
+        var input: InputStream? = null
+        try {
+            input = body.byteStream()
+
+            val fos = FileOutputStream(file)
+            fos.use { output ->
+                val buffer = ByteArray(4 * 1024) // or other buffer size
+                var read: Int
+                while (input.read(buffer).also { read = it } != -1) {
+                    output.write(buffer, 0, read)
                 }
+                output.flush()
+            }
+            if (type == 1) {
+                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                FileUtils.saveImageToAlbum(requireContext(), bitmap, file.name)
+            } else {
+                FileUtils.saveVideoToAlbum(requireContext(), file)
+            }
+            Log.v(TAG,file.absolutePath)
 
-                override fun onDownloading(progress: Int) {
-                    progressList[index] = progress
-
-                }
-
-                override fun onDownloadFailed(message: String?) {
-
-                    errFlag = true
-                }
-
-            })
-
+        } catch (e: Exception) {
+            Log.e("saveFile", e.toString())
+        } finally {
+            input?.close()
         }
 
     }
