@@ -1,4 +1,4 @@
-package com.igtools.downloader.api;
+package com.igtools.downloader.api.okhttp;
 
 public class Urls {
 

@@ -15,10 +15,10 @@ import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.MultiTypeAdapter
-import com.igtools.downloader.api.OkhttpHelper
-import com.igtools.downloader.api.OkhttpListener
-import com.igtools.downloader.api.OnDownloadListener
-import com.igtools.downloader.api.Urls
+import com.igtools.downloader.api.okhttp.OkhttpHelper
+import com.igtools.downloader.api.okhttp.OkhttpListener
+import com.igtools.downloader.api.okhttp.OnDownloadListener
+import com.igtools.downloader.api.okhttp.Urls
 import com.igtools.downloader.databinding.ActivityBlogDetailsBinding
 import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.models.Record
@@ -26,9 +26,7 @@ import com.igtools.downloader.room.RecordDB
 import com.igtools.downloader.utils.DateUtils
 import com.igtools.downloader.utils.FileUtils
 import com.youth.banner.indicator.CircleIndicator
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -110,9 +108,10 @@ class BlogDetailsActivity : AppCompatActivity() {
                     record.createdTime = DateUtils.getDate(Date())
                     record.content = Gson().toJson(medias)
                     lifecycleScope.launch {
-                        withContext(Dispatchers.IO) {
-                            RecordDB.getInstance().recordDao().insert(record)
-                        }
+//                        withContext(Dispatchers.IO) {
+//
+//                        }
+                        RecordDB.getInstance().recordDao().insert(record)
 
                     }
 
@@ -152,7 +151,8 @@ class BlogDetailsActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.VISIBLE
         //val url = "http://192.168.0.101:3000/api/mediainfo?url=$url"
         val api = Urls.SHORT_CODE + "?url=$url"
-        OkhttpHelper.getInstance().getJson(api, object : OkhttpListener {
+        OkhttpHelper.getInstance().getJson(api, object :
+            OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 
                 parseData(jsonObject);
@@ -233,7 +233,8 @@ class BlogDetailsActivity : AppCompatActivity() {
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
             OkhttpHelper.getInstance()
-                .download(media.thumbnailUrl, file, object : OnDownloadListener {
+                .download(media.thumbnailUrl, file, object :
+                    OnDownloadListener {
                     override fun onDownloadSuccess(path: String?) {
 
                         val bitmap = BitmapFactory.decodeFile(file.absolutePath)
@@ -256,7 +257,8 @@ class BlogDetailsActivity : AppCompatActivity() {
             val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-            OkhttpHelper.getInstance().download(media.videoUrl, file, object : OnDownloadListener {
+            OkhttpHelper.getInstance().download(media.videoUrl, file, object :
+                OnDownloadListener {
                 override fun onDownloadSuccess(path: String?) {
 
                     FileUtils.saveVideoToAlbum(this@BlogDetailsActivity, file)

@@ -1,4 +1,4 @@
-package com.igtools.downloader.api;
+package com.igtools.downloader.api.okhttp;
 
 import com.google.gson.JsonObject;
 

@@ -4,7 +4,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
@@ -21,10 +20,10 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.MultiTypeAdapter
-import com.igtools.downloader.api.OkhttpHelper
-import com.igtools.downloader.api.OkhttpListener
-import com.igtools.downloader.api.OnDownloadListener
-import com.igtools.downloader.api.Urls
+import com.igtools.downloader.api.okhttp.OkhttpHelper
+import com.igtools.downloader.api.okhttp.OkhttpListener
+import com.igtools.downloader.api.okhttp.OnDownloadListener
+import com.igtools.downloader.api.okhttp.Urls
 import com.igtools.downloader.databinding.FragmentShortCodeBinding
 import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.models.Record
@@ -34,9 +33,7 @@ import com.igtools.downloader.utils.FileUtils
 import com.igtools.downloader.utils.KeyboardUtils
 import com.igtools.downloader.utils.RegexUtils
 import com.youth.banner.indicator.CircleIndicator
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -122,7 +119,8 @@ class ShortCodeFragment : Fragment() {
 
         //val url = "http://192.168.0.101:3000/api/mediainfo?url=$url"
         val api = Urls.SHORT_CODE + "?url=$url"
-        OkhttpHelper.getInstance().getJson(api, object : OkhttpListener {
+        OkhttpHelper.getInstance().getJson(api, object :
+            OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 
                 parseData(jsonObject);
@@ -222,10 +220,10 @@ class ShortCodeFragment : Fragment() {
                     record.createdTime = DateUtils.getDate(Date())
                     record.content = Gson().toJson(medias)
                     lifecycleScope.launch {
-                        withContext(Dispatchers.IO) {
-                            RecordDB.getInstance().recordDao().insert(record)
-                        }
-
+//                        withContext(Dispatchers.IO) {
+//                            RecordDB.getInstance().recordDao().insert(record)
+//                        }
+                        RecordDB.getInstance().recordDao().insert(record)
                     }
                 }
 
@@ -296,7 +294,8 @@ class ShortCodeFragment : Fragment() {
             //val uri = Uri.fromFile(file)
             //Log.v(TAG, uri.toString())
             OkhttpHelper.getInstance()
-                .download(media.thumbnailUrl, file, object : OnDownloadListener {
+                .download(media.thumbnailUrl, file, object :
+                    OnDownloadListener {
                     override fun onDownloadSuccess(path: String?) {
 
                         Log.v(TAG,path+"")
@@ -323,7 +322,8 @@ class ShortCodeFragment : Fragment() {
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-            OkhttpHelper.getInstance().download(media.videoUrl, file, object : OnDownloadListener {
+            OkhttpHelper.getInstance().download(media.videoUrl, file, object :
+                OnDownloadListener {
                 override fun onDownloadSuccess(path: String?) {
 
                     FileUtils.saveVideoToAlbum(context!!, file)

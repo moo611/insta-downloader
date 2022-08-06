@@ -9,9 +9,9 @@ import androidx.databinding.DataBindingUtil
 import com.google.gson.JsonObject
 import com.igtools.downloader.MainActivity
 import com.igtools.downloader.R
-import com.igtools.downloader.api.OkhttpHelper
-import com.igtools.downloader.api.OkhttpListener
-import com.igtools.downloader.api.Urls
+import com.igtools.downloader.api.okhttp.OkhttpHelper
+import com.igtools.downloader.api.okhttp.OkhttpListener
+import com.igtools.downloader.api.okhttp.Urls
 import com.igtools.downloader.databinding.ActivitySignupBinding
 
 class SignupActivity : AppCompatActivity() {
@@ -70,7 +70,9 @@ class SignupActivity : AppCompatActivity() {
     private fun sendCode() {
         val map: HashMap<String,Any> = HashMap()
         map["username"] = binding.etUsername
-        OkhttpHelper.getInstance().postJson(Urls.SEND_CODE,map,object :OkhttpListener{
+        OkhttpHelper.getInstance().postJson(
+            Urls.SEND_CODE,map,object :
+                OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject?) {
 
 
@@ -92,10 +94,14 @@ class SignupActivity : AppCompatActivity() {
         map["username"] = binding.etUsername
         map["password"] = binding.etPassword
 
-        OkhttpHelper.getInstance().postJson(Urls.SIGN_UP, map, object : OkhttpListener {
+        OkhttpHelper.getInstance().postJson(
+            Urls.SIGN_UP, map, object :
+                OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject?) {
 
-                OkhttpHelper.getInstance().postJson(Urls.LOGIN, map, object : OkhttpListener {
+                OkhttpHelper.getInstance().postJson(
+                    Urls.LOGIN, map, object :
+                        OkhttpListener {
                     override fun onSuccess(jsonObject: JsonObject?) {
 
                         startActivity(Intent(this@SignupActivity,MainActivity::class.java))

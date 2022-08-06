@@ -8,9 +8,9 @@ import androidx.databinding.DataBindingUtil
 import com.google.gson.JsonObject
 import com.igtools.downloader.MainActivity
 import com.igtools.downloader.R
-import com.igtools.downloader.api.OkhttpHelper
-import com.igtools.downloader.api.OkhttpListener
-import com.igtools.downloader.api.Urls
+import com.igtools.downloader.api.okhttp.OkhttpHelper
+import com.igtools.downloader.api.okhttp.OkhttpListener
+import com.igtools.downloader.api.okhttp.Urls
 import com.igtools.downloader.databinding.ActivityLoginBinding
 import com.igtools.downloader.utils.ShareUtils
 
@@ -51,7 +51,9 @@ class LoginActivity : AppCompatActivity() {
         val params: HashMap<String, Any> = HashMap()
         params["username"] = binding.etUsername.text.toString()
         params["password"] = binding.etPassword.text.toString()
-        OkhttpHelper.getInstance().postJson(Urls.LOGIN, params, object : OkhttpListener {
+        OkhttpHelper.getInstance().postJson(
+            Urls.LOGIN, params, object :
+                OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
                 val token = jsonObject["data"]?.asString
                 token?.let { ShareUtils.putData("token", it) }

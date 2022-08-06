@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonObject
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.BlogAdapter
-import com.igtools.downloader.api.OkhttpHelper
-import com.igtools.downloader.api.OkhttpListener
-import com.igtools.downloader.api.Urls
+import com.igtools.downloader.api.okhttp.OkhttpHelper
+import com.igtools.downloader.api.okhttp.OkhttpListener
+import com.igtools.downloader.api.okhttp.Urls
 import com.igtools.downloader.databinding.FragmentTagBinding
 import com.igtools.downloader.models.BlogModel
 import com.igtools.downloader.utils.KeyboardUtils
@@ -123,7 +123,8 @@ class TagFragment : Fragment() {
     private fun refresh(tag: String) {
         blogs.clear()
         val url = Urls.USER_TAG + "?tag=$tag"
-        OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
+        OkhttpHelper.getInstance().getJson(url, object :
+            OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 
                 parseData(jsonObject);
@@ -152,7 +153,8 @@ class TagFragment : Fragment() {
         isFetching = true
         binding.progressBottom.visibility = View.VISIBLE
         val url = Urls.USER_TAG + "?user=$tag&&end_cursor=$end_cursor"
-        OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
+        OkhttpHelper.getInstance().getJson(url, object :
+            OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 
                 parseData(jsonObject);

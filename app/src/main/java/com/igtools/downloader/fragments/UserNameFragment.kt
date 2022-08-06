@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonObject
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.BlogAdapter
-import com.igtools.downloader.api.OkhttpHelper
-import com.igtools.downloader.api.OkhttpListener
-import com.igtools.downloader.api.Urls
+import com.igtools.downloader.api.okhttp.OkhttpHelper
+import com.igtools.downloader.api.okhttp.OkhttpListener
+import com.igtools.downloader.api.okhttp.Urls
 import com.igtools.downloader.databinding.FragmentUserNameBinding
 import com.igtools.downloader.models.BlogModel
 import com.igtools.downloader.utils.KeyboardUtils
@@ -126,7 +126,8 @@ class UserNameFragment : Fragment() {
     private fun refresh(user: String) {
         blogs.clear()
         val url = Urls.USER_NAME + "?user=$user"
-        OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
+        OkhttpHelper.getInstance().getJson(url, object :
+            OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 
                 parseData(jsonObject);
@@ -155,7 +156,8 @@ class UserNameFragment : Fragment() {
         isFetching = true
         binding.progressBottom.visibility = View.VISIBLE
         val url = Urls.USER_NAME + "?user=$user&&end_cursor=$end_cursor"
-        OkhttpHelper.getInstance().getJson(url, object : OkhttpListener {
+        OkhttpHelper.getInstance().getJson(url, object :
+            OkhttpListener {
             override fun onSuccess(jsonObject: JsonObject) {
 
                 parseData(jsonObject);

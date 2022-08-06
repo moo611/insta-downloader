@@ -1,11 +1,7 @@
-package com.igtools.downloader.api;
+package com.igtools.downloader.api.okhttp;
 
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -18,7 +14,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;

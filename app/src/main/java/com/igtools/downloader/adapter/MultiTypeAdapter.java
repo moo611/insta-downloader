@@ -8,11 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.VideoView;
 import android.graphics.drawable.ColorDrawable;
 
-import com.igtools.downloader.api.OkhttpHelper;
-import com.igtools.downloader.api.OnDownloadListener;
+import com.igtools.downloader.api.okhttp.OkhttpHelper;
+import com.igtools.downloader.api.okhttp.OnDownloadListener;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 
 import androidx.annotation.NonNull;

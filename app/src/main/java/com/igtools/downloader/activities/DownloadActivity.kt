@@ -71,9 +71,10 @@ class DownloadActivity : AppCompatActivity() {
         titles.clear()
 
         lifecycleScope.launch {
-            records = withContext(Dispatchers.IO) {
-                RecordDB.getInstance().recordDao().all() as ArrayList<Record>
-            }
+//            records = withContext(Dispatchers.IO) {
+//                RecordDB.getInstance().recordDao().all() as ArrayList<Record>
+//            }
+            records = RecordDB.getInstance().recordDao().all() as ArrayList<Record>
             Log.v(TAG, records.size.toString())
             for (record in records) {
 
