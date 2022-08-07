@@ -70,6 +70,7 @@ class MainActivity : AppCompatActivity() {
     private fun setListeners() {
 
         binding.llHome.setOnClickListener {
+            //throw RuntimeException("Test Crash") // Force a crash
             showFragment(0)
             selectPage(0)
             lastPos = 0
