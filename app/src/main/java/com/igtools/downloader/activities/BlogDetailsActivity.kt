@@ -189,6 +189,8 @@ class BlogDetailsActivity : AppCompatActivity() {
                 if (!data["caption_text"].isJsonNull) {
                     mediaInfo.title = data["caption_text"]?.asString
                 }
+                mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
+                mediaInfo.username = data["user"].asJsonObject["username"].asString
 
                 medias.add(mediaInfo)
             }
@@ -204,6 +206,8 @@ class BlogDetailsActivity : AppCompatActivity() {
             if (!data["caption_text"].isJsonNull) {
                 mediaInfo.title = data["caption_text"]?.asString
             }
+            mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
+            mediaInfo.username = data["user"].asJsonObject["username"].asString
 
             medias.add(mediaInfo)
         }
