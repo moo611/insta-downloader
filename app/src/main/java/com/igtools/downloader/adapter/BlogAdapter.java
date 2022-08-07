@@ -38,7 +38,7 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
     @NonNull
     @Override
     public BlogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(c).inflate(R.layout.view_blog, parent, false);
+        View v = LayoutInflater.from(c).inflate(R.layout.item_blog, parent, false);
         return new BlogViewHolder(v);
     }
 

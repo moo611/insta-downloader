@@ -62,7 +62,7 @@ class LoginActivity : AppCompatActivity() {
             }
 
             override fun onFail(message: String?) {
-                Toast.makeText(this@LoginActivity,"Login Failed",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity,getString(R.string.login_failed),Toast.LENGTH_SHORT).show()
             }
 
 

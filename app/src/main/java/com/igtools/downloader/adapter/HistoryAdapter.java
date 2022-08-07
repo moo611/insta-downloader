@@ -2,6 +2,7 @@ package com.igtools.downloader.adapter;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.igtools.downloader.R;
-import com.igtools.downloader.models.MediaModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,8 @@ import java.util.List;
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryHolder> {
     List<String> thumbnails = new ArrayList<>();
     List<String> titles = new ArrayList<>();
+    List<String> usernames = new ArrayList<>();
+    List<String> avatars = new ArrayList<>();
     Context c;
     OnItemClickListener onItemClickListener;
 
@@ -37,7 +39,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryH
     @NonNull
     @Override
     public HistoryHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(c).inflate(R.layout.view_history, parent, false);
+        View v = LayoutInflater.from(c).inflate(R.layout.item_history, parent, false);
         return new HistoryHolder(v);
     }
 
@@ -51,6 +53,12 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryH
         holder.caption.setText(titles.get(position));
         holder.itemView.setOnClickListener(v -> onItemClickListener.onClick(position));
 
+        Glide.with(c)
+                .load(avatars.get(position))
+                .circleCrop()
+                .placeholder(new ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
+                .into(holder.avatar);
+        holder.username.setText(usernames.get(position));
 
     }
 
@@ -59,9 +67,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryH
         return thumbnails.size();
     }
 
-    public void setDatas(List<String> thumbnails, List<String> titles) {
+    public void setDatas(List<String> thumbnails, List<String> titles, List<String> usernames, List<String> avatars) {
         this.thumbnails = thumbnails;
         this.titles = titles;
+        this.usernames = usernames;
+        this.avatars = avatars;
         notifyDataSetChanged();
     }
 
@@ -69,13 +79,16 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryH
 
         ImageView thumbnail;
         TextView caption;
+        ImageView avatar;
+        TextView username;
 
         public HistoryHolder(@NonNull View itemView) {
             super(itemView);
 
             thumbnail = itemView.findViewById(R.id.img_thumbnail);
             caption = itemView.findViewById(R.id.tv_caption);
-
+            avatar = itemView.findViewById(R.id.img_avatar);
+            username = itemView.findViewById(R.id.tv_username);
         }
     }
 

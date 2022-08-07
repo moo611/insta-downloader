@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -83,6 +84,7 @@
             >
 
             <com.youth.banner.Banner
+                app:banner_infinite_loop="false"
                 android:id="@+id/banner"
                 android:layout_width="320dp"
                 android:layout_height="320dp"

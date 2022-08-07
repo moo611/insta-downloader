@@ -108,7 +108,7 @@ class SignupActivity : AppCompatActivity() {
                     }
 
                     override fun onFail(message: String?) {
-                        Toast.makeText(this@SignupActivity,"Login Failed",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SignupActivity,getString(R.string.login_failed),Toast.LENGTH_SHORT).show()
                     }
 
                 })
@@ -116,7 +116,7 @@ class SignupActivity : AppCompatActivity() {
             }
 
             override fun onFail(message: String?) {
-                Toast.makeText(this@SignupActivity,"Sign Up Failed",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SignupActivity,getString(R.string.signup_failed),Toast.LENGTH_SHORT).show()
             }
 
 

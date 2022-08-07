@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class MultiTypeAdapter extends BannerAdapter<MediaModel, RecyclerView.ViewHolder> {
     private Context context;
-    private SparseArray<RecyclerView.ViewHolder> mVHMap = new SparseArray<>();
+
     String TAG = "MultiTypeAdapter";
 
     public MultiTypeAdapter(Context context, List<MediaModel> mDatas) {
@@ -58,17 +58,16 @@ public class MultiTypeAdapter extends BannerAdapter<MediaModel, RecyclerView.Vie
         switch (viewType) {
             case 1:
                 ImageHolder imageHolder = (ImageHolder) holder;
-                mVHMap.append(position, imageHolder);
-                Glide.with(context).load(data.getThumbnailUrl()).placeholder(new ColorDrawable(ContextCompat.getColor(context, R.color.gray_1))).into(imageHolder.imageView);
+
+                Glide.with(context)
+                        .load(data.getThumbnailUrl())
+                        .placeholder(new ColorDrawable(ContextCompat.getColor(context, R.color.gray_1)))
+                        .into(imageHolder.imageView);
 
                 break;
             case 2:
                 VideoHolder videoHolder = (VideoHolder) holder;
-                mVHMap.append(position, videoHolder);
 
-                //videoHolder.player.setVisibility(View.INVISIBLE);
-
-                //videoHolder.startDownload(data.getVideoUrl());
                 videoHolder.player.setUp(data.getVideoUrl(), true, null);
                 videoHolder.player.getBackButton().setVisibility(View.GONE);
                 //增加封面
@@ -76,7 +75,7 @@ public class MultiTypeAdapter extends BannerAdapter<MediaModel, RecyclerView.Vie
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 Glide.with(context).load(data.getThumbnailUrl()).placeholder(new ColorDrawable(ContextCompat.getColor(context, R.color.gray_1))).into(imageView);
                 videoHolder.player.setThumbImageView(imageView);
-//                videoHolder.player.startPlayLogic();
+
                 break;
 
         }
@@ -87,11 +86,6 @@ public class MultiTypeAdapter extends BannerAdapter<MediaModel, RecyclerView.Vie
         //直接获取真实的实体
         return getRealData(position).getMediaType();
 
-    }
-
-
-    public SparseArray<RecyclerView.ViewHolder> getVHMap() {
-        return mVHMap;
     }
 
     class ImageHolder extends RecyclerView.ViewHolder {
@@ -112,58 +106,8 @@ public class MultiTypeAdapter extends BannerAdapter<MediaModel, RecyclerView.Vie
         public VideoHolder(@NonNull View itemView) {
             super(itemView);
             player = itemView.findViewById(R.id.player);
-
             progressBar = itemView.findViewById(R.id.progress_bar);
         }
 
-        public void startDownload(String url) {
-            Log.v(TAG, "start download..,");
-            progressBar.setVisibility(View.VISIBLE);
-            String dir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES).getAbsolutePath();
-            File file = new File(dir, System.currentTimeMillis() + ".mp4");
-
-            OkhttpHelper.getInstance().download(url, file, new OnDownloadListener() {
-                @Override
-                public void onDownloadSuccess(String path) {
-                    Log.v("MultiTypeAdapter", path);
-                    player.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressBar.setVisibility(View.GONE);
-
-                            player.setVisibility(View.VISIBLE);
-                            player.setUp(path, true, null);
-                        }
-                    });
-
-                }
-
-                @Override
-                public void onDownloading(int progress) {
-                    Log.v("MultiTypeAdapter", progress + "");
-                    progressBar.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressBar.setProgress(progress);
-                        }
-                    });
-
-                }
-
-                @Override
-                public void onDownloadFailed(String message) {
-                    progressBar.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressBar.setVisibility(View.GONE);
-                            Log.v("MultiTypeAdapter", message);
-                        }
-                    });
-
-                }
-            });
-
-
-        }
     }
 }

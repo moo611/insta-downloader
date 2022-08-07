@@ -53,7 +53,6 @@ class ShortCodeFragment : Fragment() {
     lateinit var adapter: MultiTypeAdapter
     var TAG = "ShortCodeFragment"
     var medias: ArrayList<MediaModel> = ArrayList()
-    var progressList: ArrayList<Int> = ArrayList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -110,8 +109,12 @@ class ShortCodeFragment : Fragment() {
         binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.black))
         binding.container.visibility = View.GONE
         adapter = MultiTypeAdapter(context, medias)
-        binding.banner.addBannerLifecycleObserver(this).setIndicator(CircleIndicator(context))
-            .setAdapter(adapter).isAutoLoop(false)
+        binding.banner
+            .addBannerLifecycleObserver(this)
+            .setIndicator(CircleIndicator(context))
+            .setAdapter(adapter)
+            .isAutoLoop(false)
+
 
     }
 
@@ -127,6 +130,8 @@ class ShortCodeFragment : Fragment() {
                 parseData(jsonObject);
                 if (medias.size > 0) {
                     adapter.setDatas(medias)
+//                    binding.banner.currentItem=medias.size
+//                    adapter.notifyItemChanged(medias.size)
                     //progressAdapter.update(progressList)
 
                     //enable download
@@ -149,7 +154,7 @@ class ShortCodeFragment : Fragment() {
 
     private fun parseData(jsonObject: JsonObject) {
         medias.clear()
-        progressList.clear()
+
         val data = jsonObject["data"].asJsonObject
         val mediaType = data["media_type"].asInt
 
@@ -167,7 +172,9 @@ class ShortCodeFragment : Fragment() {
                 if (!data["caption_text"].isJsonNull) {
                     mediaInfo.title = data["caption_text"]?.asString
                 }
-                progressList.add(0)
+                mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
+                mediaInfo.username = data["user"].asJsonObject["username"].asString
+
                 medias.add(mediaInfo)
             }
         } else if (mediaType == 1 || mediaType == 2) {
@@ -182,7 +189,9 @@ class ShortCodeFragment : Fragment() {
             if (!data["caption_text"].isJsonNull) {
                 mediaInfo.title = data["caption_text"]?.asString
             }
-            progressList.add(0)
+            mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
+            mediaInfo.username = data["user"].asJsonObject["username"].asString
+
             medias.add(mediaInfo)
         }
 
@@ -207,12 +216,12 @@ class ShortCodeFragment : Fragment() {
                 val record = Record()
                 record.createdTime = DateUtils.getDate(Date())
                 record.content = Gson().toJson(medias)
-                lifecycleScope.launch {
-                    RecordDB.getInstance().recordDao().insert(record)
-                }
+
+                RecordDB.getInstance().recordDao().insert(record)
+
                 binding.progressBar.visibility = View.INVISIBLE
 
-                Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT).show()
 
 
             }

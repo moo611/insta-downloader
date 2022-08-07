@@ -14,23 +14,23 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.HistoryAdapter
-import com.igtools.downloader.databinding.ActivityDownloadBinding
+import com.igtools.downloader.databinding.ActivityHistoryBinding
 import com.igtools.downloader.models.MediaModel
 import com.igtools.downloader.models.Record
 import com.igtools.downloader.room.RecordDB
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
-class DownloadActivity : AppCompatActivity() {
+class HistoryActivity : AppCompatActivity() {
 
     lateinit var adapter: HistoryAdapter
-    lateinit var binding: ActivityDownloadBinding
+    lateinit var binding: ActivityHistoryBinding
     var records: ArrayList<Record> = ArrayList()
     var thumbnails: ArrayList<String> = ArrayList()
     var titles: ArrayList<String> = ArrayList()
     var contents: ArrayList<String> = ArrayList()
+    var avatars: ArrayList<String> = ArrayList()
+    var usernames: ArrayList<String> = ArrayList()
     var gson = Gson()
     val TAG = "DownloadActivity"
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +41,7 @@ class DownloadActivity : AppCompatActivity() {
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             window.statusBarColor = Color.TRANSPARENT
         }
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_download)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_history)
         initViews()
         getData()
     }
@@ -57,11 +57,15 @@ class DownloadActivity : AppCompatActivity() {
 
             startActivity(
                 Intent(
-                    this@DownloadActivity,
+                    this@HistoryActivity,
                     BlogDetailsActivity::class.java
                 ).putExtra("content", content)
             )
 
+        }
+
+        binding.imgBack.setOnClickListener {
+            finish()
         }
 
     }
@@ -80,11 +84,15 @@ class DownloadActivity : AppCompatActivity() {
 
                 val mediaModels: ArrayList<MediaModel> =
                     gson.fromJson(record.content, genericType<ArrayList<MediaModel>>())
+
                 titles.add(mediaModels[0].title ?: "")
                 thumbnails.add(mediaModels[0].thumbnailUrl)
+                usernames.add(mediaModels[0].username)
+                avatars.add(mediaModels[0].avatar)
                 contents.add(record.content)
+
             }
-            adapter.setDatas(thumbnails, titles)
+            adapter.setDatas(thumbnails, titles, usernames, avatars)
 
         }
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">IgDownloader</string>
+
+    <string name="login">ログイン</string>
+    <string name="username">メール</string>
+    <string name="password">パスワード</string>
+    <string name="username_hint">メールを入力してください</string>
+    <string name="password_hint">パスワードを入力してください</string>
+    <string name="search">検索</string>
+    <string name="download">ダウンロード</string>
+    <string name="search_hint">探しているインスタグラムのリンクを入力してください</string>
+    <string name="quick_download">クイック ダウンロード モード</string>
+    <string name="language">言語</string>
+    <string name="share">共有</string>
+    <string name="app_version">アプリのバージョン</string>
+    <string name="paste_username">お探しの Instagram ユーザー名を入力してください</string>
+    <string name="next_step">次のステップ</string>
+    <string name="hashtag">探しているインスタグラムのハッシュタグを入力してください</string>
+    <string name="zh">中国語</string>
+    <string name="en">英語</string>
+    <string name="vp_shortcode">リンク</string>
+    <string name="vp_username">ユーザー名</string>
+    <string name="history">ダウンロード履歴</string>
+    <string name="details">詳細</string>
+    <string name="login_failed">ログインに失敗しました</string>
+    <string name="signup_failed">サインアップに失敗しました</string>
+    <string name="download_finish">ダウンロード完了</string>
+
+</resources>

@@ -45,7 +45,7 @@ class BlogDetailsActivity : AppCompatActivity() {
     lateinit var binding: ActivityBlogDetailsBinding
     lateinit var adapter: MultiTypeAdapter
     var TAG = "BlogDetailsActivity"
-    var progressList: ArrayList<Int> = ArrayList()
+
     var medias: ArrayList<MediaModel> = ArrayList()
     val gson = Gson()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,11 +65,11 @@ class BlogDetailsActivity : AppCompatActivity() {
 
         val shortCode = intent.extras?.getString("shortCode")
         if (shortCode != null) {
-
+            binding.btnDownload.visibility=View.VISIBLE
             getData(shortCode)
 
         } else if (intent.extras?.getString("content") != null) {
-
+            binding.btnDownload.visibility=View.INVISIBLE
             getDataFromLocal(intent.extras!!.getString("content")!!)
 
         }
@@ -80,8 +80,12 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     private fun initViews() {
         adapter = MultiTypeAdapter(this, medias)
-        binding.banner.addBannerLifecycleObserver(this).setIndicator(CircleIndicator(this))
-            .setAdapter(adapter).isAutoLoop(false)
+        binding.banner
+            .addBannerLifecycleObserver(this)
+            .setIndicator(CircleIndicator(this))
+            .setAdapter(adapter)
+            .isAutoLoop(false)
+
 
     }
 
@@ -104,12 +108,12 @@ class BlogDetailsActivity : AppCompatActivity() {
                 val record = Record()
                 record.createdTime = DateUtils.getDate(Date())
                 record.content = Gson().toJson(medias)
-                lifecycleScope.launch {
-                    RecordDB.getInstance().recordDao().insert(record)
-                }
+
+                RecordDB.getInstance().recordDao().insert(record)
+
                 binding.progressBar.visibility = View.INVISIBLE
 
-                Toast.makeText(this@BlogDetailsActivity, "download finished", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@BlogDetailsActivity, getString(R.string.download_finish), Toast.LENGTH_SHORT).show()
 
 
             }
@@ -155,12 +159,19 @@ class BlogDetailsActivity : AppCompatActivity() {
     private fun getDataFromLocal(content: String) {
 
         medias = gson.fromJson(content, genericType<ArrayList<MediaModel>>())
+        if (medias.size > 0) {
+            adapter.setDatas(medias)
+
+            //enable download
+            binding.btnDownload.isEnabled = true
+            binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+        }
 
     }
 
     private fun parseData(jsonObject: JsonObject) {
         medias.clear()
-        progressList.clear()
+
         val data = jsonObject["data"].asJsonObject
         val mediaType = data["media_type"].asInt
 
@@ -178,7 +189,7 @@ class BlogDetailsActivity : AppCompatActivity() {
                 if (!data["caption_text"].isJsonNull) {
                     mediaInfo.title = data["caption_text"]?.asString
                 }
-                progressList.add(0)
+
                 medias.add(mediaInfo)
             }
         } else if (mediaType == 1 || mediaType == 2) {
@@ -193,7 +204,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             if (!data["caption_text"].isJsonNull) {
                 mediaInfo.title = data["caption_text"]?.asString
             }
-            progressList.add(0)
+
             medias.add(mediaInfo)
         }
 

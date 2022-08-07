@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IgDownloader">
         <activity
-            android:name=".activities.DownloadActivity"
+            android:name=".activities.HistoryActivity"
             android:exported="false" />
         <activity
             android:name=".activities.SignupActivity"

@@ -9,7 +9,7 @@ import com.igtools.downloader.models.Record
 @Dao
 interface RecordDao {
 
-    @Query("SELECT * FROM Record")
+    @Query("SELECT * FROM Record ORDER BY id DESC")
     suspend fun all(): List<Record>
 
     @Insert

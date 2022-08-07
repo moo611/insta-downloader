@@ -1,9 +1,8 @@
 package com.igtools.downloader
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -13,7 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import com.igtools.downloader.activities.DownloadActivity
+import com.igtools.downloader.activities.HistoryActivity
 import com.igtools.downloader.databinding.ActivityMainBinding
 import com.igtools.downloader.fragments.HomeFragment
 import com.igtools.downloader.fragments.SettingFragment
@@ -51,7 +50,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun initViews() {
-        //添加textviews
+        val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
+        binding.appTitle.typeface = typeface
 
         //添加imageviews
         imageViews.add(binding.imgHome)
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             launchIntent?.let { startActivity(it) }
         }
         binding.imgDownload.setOnClickListener {
-            startActivity(Intent(this,DownloadActivity::class.java))
+            startActivity(Intent(this, HistoryActivity::class.java))
         }
     }
 
