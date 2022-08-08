@@ -120,40 +120,35 @@ class ShortCodeFragment : Fragment() {
 
 
     private fun getData(url: String) {
+        binding.progressBar.visibility = View.VISIBLE
+        medias.clear()
+        lifecycleScope.launch {
 
-        //val url = "http://192.168.0.101:3000/api/mediainfo?url=$url"
-        val api = Urls.SHORT_CODE + "?url=$url"
-        OkhttpHelper.getInstance().getJson(api, object :
-            OkhttpListener {
-            override fun onSuccess(jsonObject: JsonObject) {
+            try {
+                val res = ApiClient.getClient().getShortCode(url)
+                val jsonObject = res.body()
+                if (jsonObject!=null){
+                    parseData(jsonObject);
+                    if (medias.size > 0) {
+                        adapter.setDatas(medias)
 
-                parseData(jsonObject);
-                if (medias.size > 0) {
-                    adapter.setDatas(medias)
-//                    binding.banner.currentItem=medias.size
-//                    adapter.notifyItemChanged(medias.size)
-                    //progressAdapter.update(progressList)
+                        binding.tvDownload.isEnabled = true
+                        binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
+                    }
 
-                    //enable download
-                    binding.tvDownload.isEnabled = true
-                    binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
+                    binding.progressBar.visibility = View.INVISIBLE
                 }
 
+            }catch (e:Exception){
                 binding.progressBar.visibility = View.INVISIBLE
-
+                Toast.makeText(context,  "resource not found", Toast.LENGTH_SHORT).show()
             }
 
-            override fun onFail(message: String?) {
-                binding.progressBar.visibility = View.INVISIBLE
-                Toast.makeText(context, message + "", Toast.LENGTH_SHORT).show()
-            }
-
-        })
+        }
 
     }
 
     private fun parseData(jsonObject: JsonObject) {
-        medias.clear()
 
         val data = jsonObject["data"].asJsonObject
         val mediaType = data["media_type"].asInt
@@ -232,7 +227,6 @@ class ShortCodeFragment : Fragment() {
             KeyboardUtils.closeKeybord(binding.etShortcode, context)
             binding.tvDownload.isEnabled = false
             binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
-            binding.progressBar.visibility = View.VISIBLE
             binding.container.visibility = View.VISIBLE
             getData(binding.etShortcode.text.toString())
         }

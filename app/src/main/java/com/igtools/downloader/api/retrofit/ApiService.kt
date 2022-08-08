@@ -19,4 +19,13 @@ interface ApiService {
         @Query("end_cursor") end_cursor: String
     ): Response<JsonObject>
 
+
+    @GET("api/mediainfo")
+    suspend fun getShortCode(@Query("url") url: String): Response<JsonObject>
+
+    @GET("api/taginfo")
+    suspend fun getTags(
+        @Query("tag") tag: String,
+        @Query("end_cursor") end_cursor: String
+    ): Response<JsonObject>
 }

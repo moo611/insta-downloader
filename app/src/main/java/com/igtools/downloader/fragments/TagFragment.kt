@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonObject
@@ -17,9 +18,12 @@ import com.igtools.downloader.adapter.BlogAdapter
 import com.igtools.downloader.api.okhttp.OkhttpHelper
 import com.igtools.downloader.api.okhttp.OkhttpListener
 import com.igtools.downloader.api.okhttp.Urls
+import com.igtools.downloader.api.retrofit.ApiClient
 import com.igtools.downloader.databinding.FragmentTagBinding
 import com.igtools.downloader.models.BlogModel
 import com.igtools.downloader.utils.KeyboardUtils
+import kotlinx.coroutines.launch
+import java.lang.Exception
 
 /**
  * @Author: desong
@@ -69,8 +73,6 @@ class TagFragment : Fragment() {
         binding.tvSearch.setOnClickListener {
             binding.etTag.clearFocus()
             KeyboardUtils.closeKeybord(binding.etTag, context)
-
-            binding.progressBar.visibility = View.VISIBLE
             refresh(binding.etTag.text.toString())
         }
 
@@ -121,28 +123,30 @@ class TagFragment : Fragment() {
     }
 
     private fun refresh(tag: String) {
+        binding.progressBar.visibility = View.VISIBLE
         blogs.clear()
-        val url = Urls.USER_TAG + "?tag=$tag"
-        OkhttpHelper.getInstance().getJson(url, object :
-            OkhttpListener {
-            override fun onSuccess(jsonObject: JsonObject) {
+        lifecycleScope.launch {
 
-                parseData(jsonObject);
-                if (blogs.size > 0) {
-                    adapter.setDatas(blogs)
+            try {
+                val res = ApiClient.getClient().getTags(tag,"")
+                val jsonObject = res.body()
+                if (jsonObject!=null){
+                    parseData(jsonObject);
+                    if (blogs.size > 0) {
+                        adapter.setDatas(blogs)
 
+                    }
+
+                    binding.progressBar.visibility = View.INVISIBLE
                 }
-
+            }catch (e:Exception){
                 binding.progressBar.visibility = View.INVISIBLE
+                Toast.makeText(context, "media not found", Toast.LENGTH_SHORT).show()
 
             }
 
-            override fun onFail(message: String?) {
-                binding.progressBar.visibility = View.INVISIBLE
-                Toast.makeText(context, message + "", Toast.LENGTH_SHORT).show()
-            }
 
-        })
+        }
     }
 
 
@@ -152,28 +156,29 @@ class TagFragment : Fragment() {
         }
         isFetching = true
         binding.progressBottom.visibility = View.VISIBLE
-        val url = Urls.USER_TAG + "?user=$tag&&end_cursor=$end_cursor"
-        OkhttpHelper.getInstance().getJson(url, object :
-            OkhttpListener {
-            override fun onSuccess(jsonObject: JsonObject) {
 
-                parseData(jsonObject);
-                if (blogs.size > 0) {
-                    adapter.setDatas(blogs)
+        lifecycleScope.launch {
 
+            try {
+                val res = ApiClient.getClient().getTags(tag,end_cursor)
+                val jsonObject = res.body()
+                if (jsonObject!=null){
+                    parseData(jsonObject);
+                    if (blogs.size > 0) {
+                        adapter.setDatas(blogs)
+
+                    }
+                    isFetching = false
+                    binding.progressBottom.visibility = View.INVISIBLE
                 }
+            }catch (e:Exception){
+
                 isFetching = false
                 binding.progressBottom.visibility = View.INVISIBLE
-
+                Toast.makeText(context, "media not found", Toast.LENGTH_SHORT).show()
             }
 
-            override fun onFail(message: String?) {
-                isFetching = false
-                binding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(context, message + "", Toast.LENGTH_SHORT).show()
-            }
-
-        })
+        }
 
     }
 
