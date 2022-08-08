@@ -78,8 +78,6 @@ class UserNameFragment : Fragment() {
         binding.tvSearch.setOnClickListener {
             binding.etUsername.clearFocus()
             KeyboardUtils.closeKeybord(binding.etUsername, context)
-
-            binding.progressBar.visibility = View.VISIBLE
             refresh(binding.etUsername.text.toString())
         }
 
@@ -111,7 +109,7 @@ class UserNameFragment : Fragment() {
         binding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!binding.rv.canScrollVertically(1)) {
+                if (!binding.rv.canScrollVertically(1) && dy>0) {
                     //滑动到底部
 
                     loadMore(binding.etUsername.text.toString(), cursor)
@@ -130,8 +128,9 @@ class UserNameFragment : Fragment() {
 
 
     private fun refresh(user: String) {
+        Log.v(TAG,"refresh")
         blogs.clear()
-
+        binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
                 val res = ApiClient.getClient().getUserInfo(user, "")
@@ -158,6 +157,7 @@ class UserNameFragment : Fragment() {
 
 
     private fun loadMore(user: String, end_cursor: String) {
+        Log.v(TAG,"loadmore")
         if (isFetching || isEnd) {
             return
         }

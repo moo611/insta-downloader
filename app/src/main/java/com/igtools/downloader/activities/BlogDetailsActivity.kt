@@ -79,6 +79,7 @@ class BlogDetailsActivity : AppCompatActivity() {
 
 
     private fun initViews() {
+        binding.btnDownload.isEnabled = false
         adapter = MultiTypeAdapter(this, medias)
         binding.banner
             .addBannerLifecycleObserver(this)
@@ -128,32 +129,31 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     private fun getData(url: String) {
         binding.progressBar.visibility = View.VISIBLE
-        //val url = "http://192.168.0.101:3000/api/mediainfo?url=$url"
-        val api = Urls.SHORT_CODE + "?url=$url"
-        OkhttpHelper.getInstance().getJson(api, object :
-            OkhttpListener {
-            override fun onSuccess(jsonObject: JsonObject) {
 
-                parseData(jsonObject);
-                if (medias.size > 0) {
-                    adapter.setDatas(medias)
+        lifecycleScope.launch {
+            try {
+                val res = ApiClient.getClient().getShortCode(url)
+                val jsonObject = res.body()
+                if (jsonObject!=null){
+                    parseData(jsonObject);
+                    if (medias.size > 0) {
+                        adapter.setDatas(medias)
 
-                    //enable download
-                    binding.btnDownload.isEnabled = true
-                    binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+                        //enable download
+                        binding.btnDownload.isEnabled = true
+                        binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+                        binding.tvTitle.text = medias[0].title
+                    }
+
+                    binding.progressBar.visibility = View.INVISIBLE
                 }
-
+            }catch (e:Exception){
                 binding.progressBar.visibility = View.INVISIBLE
-
+                Toast.makeText(this@BlogDetailsActivity, "post not found", Toast.LENGTH_SHORT).show()
             }
 
-            override fun onFail(message: String?) {
-                binding.progressBar.visibility = View.INVISIBLE
-                Toast.makeText(this@BlogDetailsActivity, message + "", Toast.LENGTH_SHORT).show()
-            }
 
-        })
-
+        }
     }
 
     private fun getDataFromLocal(content: String) {

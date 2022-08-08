@@ -58,7 +58,12 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
             }
         });
 
-
+        String typename = blogs.get(position).getTypeName();
+        if (typename.equals("GraphSidecar")){
+            holder.imgCollections.setVisibility(View.VISIBLE);
+        }else{
+            holder.imgCollections.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -68,10 +73,11 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
 
     class BlogViewHolder extends RecyclerView.ViewHolder {
         ImageView imgThumbnail;
-
+        ImageView imgCollections;
         public BlogViewHolder(@NonNull View itemView) {
             super(itemView);
             imgThumbnail = itemView.findViewById(R.id.img_thumbnail);
+            imgCollections = itemView.findViewById(R.id.img_collections);
         }
     }
 
