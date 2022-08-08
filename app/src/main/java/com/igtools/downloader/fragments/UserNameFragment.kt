@@ -3,23 +3,29 @@ package com.igtools.downloader.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.exoplayer2.metadata.id3.ApicFrame
 import com.google.gson.JsonObject
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.BlogAdapter
 import com.igtools.downloader.api.okhttp.OkhttpHelper
 import com.igtools.downloader.api.okhttp.OkhttpListener
 import com.igtools.downloader.api.okhttp.Urls
+import com.igtools.downloader.api.retrofit.ApiClient
+import com.igtools.downloader.api.retrofit.ApiService
 import com.igtools.downloader.databinding.FragmentUserNameBinding
 import com.igtools.downloader.models.BlogModel
 import com.igtools.downloader.utils.KeyboardUtils
+import kotlinx.coroutines.launch
 
 /**
  * @Author: desong
@@ -125,27 +131,29 @@ class UserNameFragment : Fragment() {
 
     private fun refresh(user: String) {
         blogs.clear()
-        val url = Urls.USER_NAME + "?user=$user"
-        OkhttpHelper.getInstance().getJson(url, object :
-            OkhttpListener {
-            override fun onSuccess(jsonObject: JsonObject) {
 
-                parseData(jsonObject);
-                if (blogs.size > 0) {
-                    adapter.setDatas(blogs)
+        lifecycleScope.launch {
+            try {
+                val res = ApiClient.getClient().getUserInfo(user, "")
+                val jsonObject = res.body()
+                if (jsonObject != null) {
+                    parseData(jsonObject);
+                    if (blogs.size > 0) {
+                        adapter.setDatas(blogs)
 
+                    }
+
+                    binding.progressBar.visibility = View.INVISIBLE
                 }
 
+            } catch (e: Exception) {
+                Log.e(TAG,e.message+"")
                 binding.progressBar.visibility = View.INVISIBLE
-
+                Toast.makeText(context, "user not found", Toast.LENGTH_SHORT).show()
             }
+        }
 
-            override fun onFail(message: String?) {
-                binding.progressBar.visibility = View.INVISIBLE
-                Toast.makeText(context, message + "", Toast.LENGTH_SHORT).show()
-            }
 
-        })
     }
 
 
@@ -155,28 +163,29 @@ class UserNameFragment : Fragment() {
         }
         isFetching = true
         binding.progressBottom.visibility = View.VISIBLE
-        val url = Urls.USER_NAME + "?user=$user&&end_cursor=$end_cursor"
-        OkhttpHelper.getInstance().getJson(url, object :
-            OkhttpListener {
-            override fun onSuccess(jsonObject: JsonObject) {
 
-                parseData(jsonObject);
-                if (blogs.size > 0) {
-                    adapter.setDatas(blogs)
+        lifecycleScope.launch {
+            try {
+                val res = ApiClient.getClient().getUserInfo(user, end_cursor)
+                val jsonObject = res.body()
 
+                if (jsonObject != null) {
+                    parseData(jsonObject);
+                    if (blogs.size > 0) {
+                        adapter.setDatas(blogs)
+
+                    }
+                    isFetching = false
+                    binding.progressBottom.visibility = View.INVISIBLE
                 }
+            } catch (e: Exception) {
                 isFetching = false
                 binding.progressBottom.visibility = View.INVISIBLE
-
+                Toast.makeText(context, "user not found", Toast.LENGTH_SHORT).show()
             }
 
-            override fun onFail(message: String?) {
-                isFetching = false
-                binding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(context, message + "", Toast.LENGTH_SHORT).show()
-            }
+        }
 
-        })
 
     }
 
