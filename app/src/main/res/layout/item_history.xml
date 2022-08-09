@@ -6,6 +6,7 @@
     android:layout_height="130dp">
 
     <ImageView
+        android:scaleType="centerCrop"
         android:id="@+id/img_thumbnail"
         android:layout_width="100dp"
         android:layout_height="100dp"/>

@@ -56,7 +56,7 @@ class TagFragment : Fragment() {
         binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
 
 
-        adapter = BlogAdapter(context, blogs)
+        adapter = BlogAdapter(requireContext(), blogs)
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter
         binding.rv.layoutManager = layoutManager

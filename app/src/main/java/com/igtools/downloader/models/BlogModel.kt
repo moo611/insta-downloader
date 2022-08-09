@@ -6,5 +6,5 @@ class BlogModel {
     var displayUrl=""
     var caption=""
     var shortCode=""
-
+    var thumbnailUrl=""
 }

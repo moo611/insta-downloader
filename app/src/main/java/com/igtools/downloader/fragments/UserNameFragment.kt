@@ -60,7 +60,7 @@ class UserNameFragment : Fragment() {
         binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
 
 
-        adapter = BlogAdapter(context, blogs)
+        adapter = BlogAdapter(requireContext(), blogs)
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter
         binding.rv.layoutManager = layoutManager
@@ -204,6 +204,7 @@ class UserNameFragment : Fragment() {
             blogModel.displayUrl = item.asJsonObject["display_url"].asString
             blogModel.shortCode = item.asJsonObject["shortcode"].asString
             blogModel.typeName = item.asJsonObject["__typename"].asString
+            blogModel.thumbnailUrl = item.asJsonObject["thumbnail_resources"].asJsonArray[0].asJsonObject["src"].asString
             blogs.add(blogModel)
         }
 
