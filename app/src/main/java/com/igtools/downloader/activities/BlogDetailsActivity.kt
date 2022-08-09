@@ -137,7 +137,7 @@ class BlogDetailsActivity : AppCompatActivity() {
                 if (jsonObject!=null){
                     parseData(jsonObject);
                     if (medias.size > 0) {
-                        adapter.setDatas(medias)
+                        adapter.setDatas(medias as List<MediaModel?>?)
 
                         //enable download
                         binding.btnDownload.isEnabled = true
@@ -160,7 +160,7 @@ class BlogDetailsActivity : AppCompatActivity() {
 
         medias = gson.fromJson(content, genericType<ArrayList<MediaModel>>())
         if (medias.size > 0) {
-            adapter.setDatas(medias)
+            adapter.setDatas(medias as List<MediaModel?>?)
 
             //enable download
             binding.btnDownload.isEnabled = true

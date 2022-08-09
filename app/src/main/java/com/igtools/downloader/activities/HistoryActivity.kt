@@ -52,15 +52,17 @@ class HistoryActivity : AppCompatActivity() {
         adapter = HistoryAdapter(this)
         binding.rv.adapter = adapter
         binding.rv.layoutManager = LinearLayoutManager(this)
-        adapter.setOnItemClickListener {
-            val content = contents[it]
+        adapter.onItemClickListener = object :HistoryAdapter.OnItemClickListener{
+            override fun onClick(position: Int) {
+                val content = contents[position]
 
-            startActivity(
-                Intent(
-                    this@HistoryActivity,
-                    BlogDetailsActivity::class.java
-                ).putExtra("content", content)
-            )
+                startActivity(
+                    Intent(
+                        this@HistoryActivity,
+                        BlogDetailsActivity::class.java
+                    ).putExtra("content", content)
+                )
+            }
 
         }
 
@@ -75,9 +77,7 @@ class HistoryActivity : AppCompatActivity() {
         titles.clear()
 
         lifecycleScope.launch {
-//            records = withContext(Dispatchers.IO) {
-//                RecordDB.getInstance().recordDao().all() as ArrayList<Record>
-//            }
+
             records = RecordDB.getInstance().recordDao().all() as ArrayList<Record>
             Log.v(TAG, records.size.toString())
             for (record in records) {

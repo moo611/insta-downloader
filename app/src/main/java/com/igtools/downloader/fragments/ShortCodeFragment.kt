@@ -20,9 +20,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.downloader.R
 import com.igtools.downloader.adapter.MultiTypeAdapter
-import com.igtools.downloader.api.okhttp.OkhttpHelper
-import com.igtools.downloader.api.okhttp.OkhttpListener
-import com.igtools.downloader.api.okhttp.Urls
 import com.igtools.downloader.api.retrofit.ApiClient
 import com.igtools.downloader.databinding.FragmentShortCodeBinding
 import com.igtools.downloader.models.MediaModel
@@ -33,12 +30,14 @@ import com.igtools.downloader.utils.FileUtils
 import com.igtools.downloader.utils.KeyboardUtils
 import com.igtools.downloader.utils.RegexUtils
 import com.youth.banner.indicator.CircleIndicator
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.lang.Exception
 import java.util.*
 
 
@@ -85,14 +84,14 @@ class ShortCodeFragment : Fragment() {
                     }
                 }
             } else {
-                val clipboard =
-                    requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val item = clipboard.primaryClip?.getItemAt(0)
-                val pasteData = item?.text
-
-                if (pasteData != null) {
-                    binding.etShortcode.setText(pasteData)
-                }
+//                val clipboard =
+//                    requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+//                val item = clipboard.primaryClip?.getItemAt(0)
+//                val pasteData = item?.text
+//
+//                if (pasteData != null) {
+//                    binding.etShortcode.setText(pasteData)
+//                }
             }
 
 
@@ -108,7 +107,7 @@ class ShortCodeFragment : Fragment() {
         binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
         binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.black))
         binding.container.visibility = View.GONE
-        adapter = MultiTypeAdapter(context, medias)
+        adapter = MultiTypeAdapter(requireContext(), medias)
         binding.banner
             .addBannerLifecycleObserver(this)
             .setIndicator(CircleIndicator(context))
@@ -130,7 +129,7 @@ class ShortCodeFragment : Fragment() {
                 if (jsonObject!=null){
                     parseData(jsonObject);
                     if (medias.size > 0) {
-                        adapter.setDatas(medias)
+                        adapter.setDatas(medias as List<MediaModel?>?)
 
                         binding.tvDownload.isEnabled = true
                         binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
