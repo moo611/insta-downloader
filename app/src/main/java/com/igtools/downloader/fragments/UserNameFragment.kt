@@ -142,8 +142,8 @@ class UserNameFragment : Fragment() {
 
                     }
 
-                    binding.progressBar.visibility = View.INVISIBLE
                 }
+                binding.progressBar.visibility = View.INVISIBLE
 
             } catch (e: Exception) {
                 Log.e(TAG,e.message+"")
@@ -176,8 +176,8 @@ class UserNameFragment : Fragment() {
 
                     }
                     isFetching = false
-                    binding.progressBottom.visibility = View.INVISIBLE
                 }
+                binding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
                 isFetching = false
                 binding.progressBottom.visibility = View.INVISIBLE

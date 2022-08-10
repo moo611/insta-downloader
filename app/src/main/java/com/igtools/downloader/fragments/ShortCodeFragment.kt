@@ -135,8 +135,8 @@ class ShortCodeFragment : Fragment() {
                         binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
                     }
 
-                    binding.progressBar.visibility = View.INVISIBLE
                 }
+                binding.progressBar.visibility = View.INVISIBLE
 
             }catch (e:Exception){
                 binding.progressBar.visibility = View.INVISIBLE

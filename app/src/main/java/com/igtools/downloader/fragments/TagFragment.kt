@@ -3,6 +3,7 @@ package com.igtools.downloader.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,7 +37,13 @@ class TagFragment : Fragment() {
     var isFetching = false
     var isEnd = false
     var blogs: ArrayList<BlogModel> = ArrayList()
-    var cursor = ""
+
+    //tag 分页信息
+    var next_media_ids = ""
+    var next_max_id = ""
+    var more_available = true
+    var next_page = 1
+    val TAG="TagFragment"
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -107,7 +114,7 @@ class TagFragment : Fragment() {
                 if (!binding.rv.canScrollVertically(1)) {
                     //滑动到底部
 
-                    loadMore(binding.etTag.text.toString(), cursor)
+                    loadMore()
 
                 }
 
@@ -128,18 +135,18 @@ class TagFragment : Fragment() {
         lifecycleScope.launch {
 
             try {
-                val res = ApiClient.getClient().getTags(tag,"")
+                val res = ApiClient.getClient().getTags(tag)
                 val jsonObject = res.body()
-                if (jsonObject!=null){
+                if (jsonObject != null) {
                     parseData(jsonObject);
                     if (blogs.size > 0) {
                         adapter.setDatas(blogs)
 
                     }
-
-                    binding.progressBar.visibility = View.INVISIBLE
                 }
-            }catch (e:Exception){
+                binding.progressBar.visibility = View.INVISIBLE
+            } catch (e: Exception) {
+                Log.v(TAG,e.message+"")
                 binding.progressBar.visibility = View.INVISIBLE
                 Toast.makeText(context, "media not found", Toast.LENGTH_SHORT).show()
 
@@ -150,8 +157,8 @@ class TagFragment : Fragment() {
     }
 
 
-    private fun loadMore(tag: String, end_cursor: String) {
-        if (isFetching || isEnd) {
+    private fun loadMore() {
+        if (isFetching || !more_available) {
             return
         }
         isFetching = true
@@ -160,18 +167,23 @@ class TagFragment : Fragment() {
         lifecycleScope.launch {
 
             try {
-                val res = ApiClient.getClient().getTags(tag,end_cursor)
+                val res = ApiClient.getClient().getMoreTags(
+                    max_id = next_max_id,
+                    page = next_page,
+                    next_media_ids = next_media_ids
+                )
                 val jsonObject = res.body()
-                if (jsonObject!=null){
+                if (jsonObject != null) {
                     parseData(jsonObject);
                     if (blogs.size > 0) {
                         adapter.setDatas(blogs)
 
                     }
                     isFetching = false
-                    binding.progressBottom.visibility = View.INVISIBLE
+
                 }
-            }catch (e:Exception){
+                binding.progressBottom.visibility = View.INVISIBLE
+            } catch (e: Exception) {
 
                 isFetching = false
                 binding.progressBottom.visibility = View.INVISIBLE
@@ -184,24 +196,43 @@ class TagFragment : Fragment() {
 
     private fun parseData(jsonObject: JsonObject) {
         val data = jsonObject["data"].asJsonObject
-        val items = data["items"].asJsonArray
-        cursor = data["end_cursor"].asString
+
+        more_available = data["more_available"].asBoolean
+        next_max_id = data["next_max_id"].asString
+        next_page = data["next_page"].asInt
+        val ids = data["next_media_ids"].asJsonArray
+        if (ids.size() > 0) {
+            next_media_ids = ids[0].asString
+        }
+
+        val items = data["sections"].asJsonArray
+
         for (item in items) {
 
             val blogModel = BlogModel()
-            if (item.asJsonObject["edge_media_to_caption"].asJsonObject["edges"].asJsonArray.size() > 0) {
-                blogModel.caption =
-                    item.asJsonObject["edge_media_to_caption"].asJsonObject["edges"].asJsonArray[0].asJsonObject["node"].asJsonObject["text"].asString
-            }
-            blogModel.displayUrl = item.asJsonObject["display_url"].asString
-            blogModel.shortCode = item.asJsonObject["shortcode"].asString
+            blogModel.caption = item.asJsonObject["caption"].asJsonObject["text"].asString ?: ""
+            //blogModel.displayUrl = item.asJsonObject["display_url"].asString
+            blogModel.shortCode = item.asJsonObject["code"].asString
             //blogModel.typeName = item.asJsonObject["__typename"].asString
+            val type = item.asJsonObject["media_type"].asInt
+            if (type == 8) {
+                blogModel.typeName = "GraphSidecar"
+                blogModel.displayUrl = item.asJsonObject["carousel_media"]
+                    .asJsonArray[0]
+                    .asJsonObject["image_versions2"]
+                    .asJsonObject["candidates"]
+                    .asJsonArray[0]
+                    .asJsonObject["url"]
+                    .asString
+            } else {
+                blogModel.typeName = "others"
+                blogModel.displayUrl =
+                    item.asJsonObject["image_versions2"].asJsonObject["candidates"].asJsonArray[0].asJsonObject["url"].asString
+            }
             blogs.add(blogModel)
         }
 
-        if (cursor == "") {
-            isEnd = true
-        }
+
     }
 
 }
