@@ -41,6 +41,7 @@ class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel?>?)
                 val imageHolder = holder as ImageHolder
                 Glide.with(context)
                     .load(data?.thumbnailUrl)
+                    .thumbnail(/*sizeMultiplier=*/ 0.25f)
                     .placeholder(ColorDrawable(ContextCompat.getColor(context, R.color.gray_1)))
                     .into(imageHolder.imageView)
             }
@@ -57,7 +58,7 @@ class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel?>?)
                             context, R.color.gray_1
                         )
                     )
-                ).into(imageView)
+                ).thumbnail(/*sizeMultiplier=*/ 0.25f).into(imageView)
                 videoHolder.player.thumbImageView = imageView
             }
         }

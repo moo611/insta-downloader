@@ -201,7 +201,7 @@ class UserNameFragment : Fragment() {
                 blogModel.caption =
                     item.asJsonObject["edge_media_to_caption"].asJsonObject["edges"].asJsonArray[0].asJsonObject["node"].asJsonObject["text"].asString
             }
-            blogModel.displayUrl = item.asJsonObject["display_url"].asString
+            //blogModel.displayUrl = item.asJsonObject["display_url"].asString
             blogModel.shortCode = item.asJsonObject["shortcode"].asString
             blogModel.typeName = item.asJsonObject["__typename"].asString
             blogModel.thumbnailUrl = item.asJsonObject["thumbnail_resources"].asJsonArray[0].asJsonObject["src"].asString

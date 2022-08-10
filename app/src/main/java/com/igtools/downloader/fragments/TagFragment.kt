@@ -43,7 +43,7 @@ class TagFragment : Fragment() {
     var next_max_id = ""
     var more_available = true
     var next_page = 1
-    val TAG="TagFragment"
+    val TAG = "TagFragment"
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -111,7 +111,7 @@ class TagFragment : Fragment() {
         binding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!binding.rv.canScrollVertically(1)) {
+                if (!binding.rv.canScrollVertically(1) && dy>0) {
                     //滑动到底部
 
                     loadMore()
@@ -132,6 +132,10 @@ class TagFragment : Fragment() {
     private fun refresh(tag: String) {
         binding.progressBar.visibility = View.VISIBLE
         blogs.clear()
+        next_max_id=""
+        next_media_ids=""
+        next_page=1
+        more_available = true
         lifecycleScope.launch {
 
             try {
@@ -146,7 +150,7 @@ class TagFragment : Fragment() {
                 }
                 binding.progressBar.visibility = View.INVISIBLE
             } catch (e: Exception) {
-                Log.v(TAG,e.message+"")
+                Log.v(TAG, e.message + "")
                 binding.progressBar.visibility = View.INVISIBLE
                 Toast.makeText(context, "media not found", Toast.LENGTH_SHORT).show()
 
@@ -208,7 +212,7 @@ class TagFragment : Fragment() {
         val items = data["sections"].asJsonArray
 
         for (item in items) {
-
+            Log.v(TAG,"current:"+items.indexOf(item))
             val blogModel = BlogModel()
             blogModel.caption = item.asJsonObject["caption"].asJsonObject["text"].asString ?: ""
             //blogModel.displayUrl = item.asJsonObject["display_url"].asString
@@ -217,22 +221,28 @@ class TagFragment : Fragment() {
             val type = item.asJsonObject["media_type"].asInt
             if (type == 8) {
                 blogModel.typeName = "GraphSidecar"
-                blogModel.displayUrl = item.asJsonObject["carousel_media"]
+                val candidates = item.asJsonObject["carousel_media"]
                     .asJsonArray[0]
                     .asJsonObject["image_versions2"]
                     .asJsonObject["candidates"]
-                    .asJsonArray[0]
+                    .asJsonArray
+                blogModel.thumbnailUrl = candidates[candidates.size() - 1]
                     .asJsonObject["url"]
                     .asString
+
             } else {
                 blogModel.typeName = "others"
-                blogModel.displayUrl =
-                    item.asJsonObject["image_versions2"].asJsonObject["candidates"].asJsonArray[0].asJsonObject["url"].asString
+                val candidates =
+                    item.asJsonObject["image_versions2"].asJsonObject["candidates"].asJsonArray
+                blogModel.thumbnailUrl =
+                    candidates[candidates.size() - 1].asJsonObject["url"].asString
+
             }
             blogs.add(blogModel)
         }
 
 
     }
+
 
 }
