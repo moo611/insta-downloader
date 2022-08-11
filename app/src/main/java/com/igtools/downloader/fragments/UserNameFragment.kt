@@ -1,5 +1,6 @@
 package com.igtools.downloader.fragments
 
+import android.app.ProgressDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 class UserNameFragment : Fragment() {
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: BlogAdapter
+    lateinit var progressDialog:ProgressDialog
     var TAG = "UserNameFragment"
     lateinit var binding: FragmentUserNameBinding
     var blogs: ArrayList<BlogModel> = ArrayList()
@@ -59,7 +61,8 @@ class UserNameFragment : Fragment() {
         binding.tvSearch.isEnabled = false
         binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
 
-
+        progressDialog = ProgressDialog(requireContext())
+        progressDialog.setMessage(getString(R.string.searching))
         adapter = BlogAdapter(requireContext(), blogs)
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter
@@ -130,7 +133,7 @@ class UserNameFragment : Fragment() {
     private fun refresh(user: String) {
         Log.v(TAG,"refresh")
         blogs.clear()
-        binding.progressBar.visibility = View.VISIBLE
+        progressDialog.show()
         lifecycleScope.launch {
             try {
                 val res = ApiClient.getClient().getUserInfo(user, "")
@@ -143,11 +146,11 @@ class UserNameFragment : Fragment() {
                     }
 
                 }
-                binding.progressBar.visibility = View.INVISIBLE
+                progressDialog.dismiss()
 
             } catch (e: Exception) {
                 Log.e(TAG,e.message+"")
-                binding.progressBar.visibility = View.INVISIBLE
+                progressDialog.dismiss()
                 Toast.makeText(context, "user not found", Toast.LENGTH_SHORT).show()
             }
         }

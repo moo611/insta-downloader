@@ -27,4 +27,8 @@
     <string name="login_failed">登录失败</string>
     <string name="signup_failed">注册失败</string>
     <string name="download_finish">下载完成</string>
+    <string name="searching">正在搜索…</string>
+    <string name="downloading">正在下载…</string>
+    <string name="not_found">post not found</string>
+
 </resources>

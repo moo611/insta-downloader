@@ -25,4 +25,7 @@
     <string name="login_failed">Login Failed</string>
     <string name="signup_failed">Sign Up Failed</string>
     <string name="download_finish">Download Finished</string>
+    <string name="searching">Searching…</string>
+    <string name="downloading">Downloading…</string>
+    <string name="not_found">post not found</string>
 </resources>

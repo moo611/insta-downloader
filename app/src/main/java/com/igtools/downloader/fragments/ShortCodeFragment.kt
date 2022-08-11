@@ -1,5 +1,6 @@
 package com.igtools.downloader.fragments
 
+import android.app.ProgressDialog
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -53,6 +54,7 @@ class ShortCodeFragment : Fragment() {
     var TAG = "ShortCodeFragment"
     var medias: ArrayList<MediaModel> = ArrayList()
 
+    lateinit var progressDialog: ProgressDialog
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -115,18 +117,24 @@ class ShortCodeFragment : Fragment() {
             .isAutoLoop(false)
 
 
+
+        progressDialog = ProgressDialog(requireContext())
+        progressDialog.setMessage(getString(R.string.downloading))
+
+
     }
 
 
     private fun getData(url: String) {
         binding.progressBar.visibility = View.VISIBLE
         medias.clear()
+
         lifecycleScope.launch {
 
             try {
                 val res = ApiClient.getClient().getShortCode(url)
                 val jsonObject = res.body()
-                if (jsonObject!=null){
+                if (jsonObject != null) {
                     parseData(jsonObject);
                     if (medias.size > 0) {
                         adapter.setDatas(medias as List<MediaModel?>?)
@@ -196,26 +204,27 @@ class ShortCodeFragment : Fragment() {
 
         binding.tvDownload.setOnClickListener {
 
-            binding.progressBar.visibility = View.VISIBLE
+            progressDialog.show()
             lifecycleScope.launch {
 
-                val all:List<Deferred<Unit>> = medias.map {
+                val all: List<Deferred<Unit>> = medias.map {
                     async {
                         downloadMedia(it)
                     }
                 }
 
                 all.awaitAll()
-                Log.v(TAG,"finish")
+                Log.v(TAG, "finish")
                 val record = Record()
                 record.createdTime = DateUtils.getDate(Date())
                 record.content = Gson().toJson(medias)
 
                 RecordDB.getInstance().recordDao().insert(record)
 
-                binding.progressBar.visibility = View.INVISIBLE
+                progressDialog.dismiss()
 
-                Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
+                    .show()
 
 
             }
@@ -318,7 +327,7 @@ class ShortCodeFragment : Fragment() {
             } else {
                 FileUtils.saveVideoToAlbum(requireContext(), file)
             }
-            Log.v(TAG,file.absolutePath)
+            Log.v(TAG, file.absolutePath)
 
         } catch (e: Exception) {
             Log.e("saveFile", e.toString())

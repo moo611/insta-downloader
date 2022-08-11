@@ -1,5 +1,6 @@
 package com.igtools.downloader.fragments
 
+import android.app.ProgressDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -34,6 +35,7 @@ class TagFragment : Fragment() {
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: BlogAdapter
     lateinit var binding: FragmentTagBinding
+    lateinit var progressDialog:ProgressDialog
     var isFetching = false
     var isEnd = false
     var blogs: ArrayList<BlogModel> = ArrayList()
@@ -61,7 +63,8 @@ class TagFragment : Fragment() {
 
         binding.tvSearch.isEnabled = false
         binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
-
+        progressDialog = ProgressDialog(requireContext())
+        progressDialog.setMessage(getString(R.string.searching))
 
         adapter = BlogAdapter(requireContext(), blogs)
         layoutManager = GridLayoutManager(context, 3)
@@ -130,7 +133,8 @@ class TagFragment : Fragment() {
     }
 
     private fun refresh(tag: String) {
-        binding.progressBar.visibility = View.VISIBLE
+
+        progressDialog.show()
         blogs.clear()
         next_max_id=""
         next_media_ids=""
@@ -148,10 +152,13 @@ class TagFragment : Fragment() {
 
                     }
                 }
-                binding.progressBar.visibility = View.INVISIBLE
+                progressDialog.dismiss()
+
             } catch (e: Exception) {
+                Log.v(TAG,e.message+"")
+
+                progressDialog.dismiss()
                 Log.v(TAG, e.message + "")
-                binding.progressBar.visibility = View.INVISIBLE
                 Toast.makeText(context, "media not found", Toast.LENGTH_SHORT).show()
 
             }
@@ -243,6 +250,5 @@ class TagFragment : Fragment() {
 
 
     }
-
 
 }

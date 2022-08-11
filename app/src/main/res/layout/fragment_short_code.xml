@@ -1,105 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
     </data>
 
-
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".fragments.ShortCodeFragment">
-
-        <FrameLayout
-            android:layout_marginTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="80dp">
-
-            <EditText
-                android:id="@+id/et_shortcode"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp"
-                android:background="@drawable/bg_edit"
-                android:gravity="top|start"
-                android:hint="@string/search_hint"
-                android:paddingLeft="12dp"
-                android:paddingTop="5dp"
-                android:paddingRight="12dp"
-                android:paddingBottom="5dp"
-                android:textSize="14sp" />
-
-            <ImageView
-                android:visibility="invisible"
-                android:src="@mipmap/cancel"
-                android:id="@+id/img_clear"
-                android:layout_marginBottom="10dp"
-                android:layout_marginEnd="30dp"
-                android:layout_gravity="end|bottom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </FrameLayout>
-
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            tools:context=".fragments.ShortCodeFragment">
 
-            <TextView
-                android:textColor="@color/home_unselect_color"
-                android:id="@+id/tv_paste"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_marginEnd="16dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_button"
-                android:gravity="center"
-                android:text="@string/search"
-                android:textSize="16sp" />
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_marginTop="20dp">
 
-            <TextView
-                android:textColor="@color/home_unselect_color"
-                android:id="@+id/tv_download"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_button"
-                android:gravity="center"
-                android:text="@string/download"
-                android:textSize="16sp" />
+                <EditText
+                    android:id="@+id/et_shortcode"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="12dp"
+                    android:background="@drawable/bg_edit"
+                    android:gravity="top|start"
+                    android:hint="@string/search_hint"
+                    android:paddingLeft="12dp"
+                    android:paddingTop="5dp"
+                    android:paddingRight="12dp"
+                    android:paddingBottom="5dp"
+                    android:textSize="14sp" />
+
+                <ImageView
+                    android:id="@+id/img_clear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|bottom"
+                    android:layout_marginEnd="30dp"
+                    android:layout_marginBottom="10dp"
+                    android:src="@mipmap/cancel"
+                    android:visibility="invisible" />
+            </FrameLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_paste"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_button"
+                    android:gravity="center"
+                    android:text="@string/search"
+                    android:textColor="@color/home_unselect_color"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_download"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_button"
+                    android:gravity="center"
+                    android:text="@string/download"
+                    android:textColor="@color/home_unselect_color"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="320dp"
+                android:layout_marginTop="20dp">
+
+                <com.youth.banner.Banner
+                    android:id="@+id/banner"
+                    android:layout_width="320dp"
+                    android:layout_height="320dp"
+                    android:layout_gravity="center_horizontal"
+                    app:banner_infinite_loop="false" />
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="invisible" />
+            </FrameLayout>
+
+
         </LinearLayout>
 
-        <FrameLayout
-            android:id="@+id/container"
-            android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:layout_marginTop="20dp"
-            >
-
-            <com.youth.banner.Banner
-                app:banner_infinite_loop="false"
-                android:id="@+id/banner"
-                android:layout_width="320dp"
-                android:layout_height="320dp"
-                android:layout_gravity="center_horizontal" />
-
-            <ProgressBar
-                android:visibility="invisible"
-                android:id="@+id/progress_bar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center" />
-        </FrameLayout>
-
-
-    </LinearLayout>
+    </ScrollView>
 
 
 </layout>

@@ -27,5 +27,8 @@
     <string name="login_failed">ログインに失敗しました</string>
     <string name="signup_failed">サインアップに失敗しました</string>
     <string name="download_finish">ダウンロード完了</string>
+    <string name="searching">検索中…</string>
+    <string name="downloading">ダウンロードしています…</string>
+    <string name="not_found">post not found</string>
 
 </resources>

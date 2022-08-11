@@ -1,5 +1,6 @@
 package com.igtools.downloader.activities
 
+import android.app.ProgressDialog
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
@@ -45,7 +46,7 @@ class BlogDetailsActivity : AppCompatActivity() {
     lateinit var binding: ActivityBlogDetailsBinding
     lateinit var adapter: MultiTypeAdapter
     var TAG = "BlogDetailsActivity"
-
+    lateinit var progressDialog: ProgressDialog
     var medias: ArrayList<MediaModel> = ArrayList()
     val gson = Gson()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,8 +87,8 @@ class BlogDetailsActivity : AppCompatActivity() {
             .setIndicator(CircleIndicator(this))
             .setAdapter(adapter)
             .isAutoLoop(false)
-
-
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage(getString(R.string.downloading))
     }
 
 
@@ -95,7 +96,7 @@ class BlogDetailsActivity : AppCompatActivity() {
 
         binding.btnDownload.setOnClickListener {
 
-            binding.progressBar.visibility = View.VISIBLE
+            progressDialog.show()
             lifecycleScope.launch {
 
                 val all:List<Deferred<Unit>> = medias.map {
@@ -112,7 +113,7 @@ class BlogDetailsActivity : AppCompatActivity() {
 
                 RecordDB.getInstance().recordDao().insert(record)
 
-                binding.progressBar.visibility = View.INVISIBLE
+                progressDialog.dismiss()
 
                 Toast.makeText(this@BlogDetailsActivity, getString(R.string.download_finish), Toast.LENGTH_SHORT).show()
 
@@ -149,7 +150,7 @@ class BlogDetailsActivity : AppCompatActivity() {
                 }
             }catch (e:Exception){
                 binding.progressBar.visibility = View.INVISIBLE
-                Toast.makeText(this@BlogDetailsActivity, "post not found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@BlogDetailsActivity, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
 
 
