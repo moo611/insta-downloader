@@ -27,6 +27,9 @@
     <string name="login_failed">로그인 실패</string>
     <string name="signup_failed">가입 실패</string>
     <string name="download_finish">다운로드 완료</string>
+    <string name="searching">검색 중…</string>
+    <string name="downloading">다운로드 중…</string>
+    <string name="not_found">post not found</string>
 
 
 </resources>
