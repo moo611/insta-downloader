@@ -137,6 +137,14 @@ class UserNameFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val res = ApiClient.getClient().getUserInfo(user, "")
+
+                val code = res.code()
+                if (code!=200){
+                    progressDialog.dismiss()
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
                 val jsonObject = res.body()
                 if (jsonObject != null) {
                     parseData(jsonObject);
@@ -151,7 +159,7 @@ class UserNameFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e(TAG,e.message+"")
                 progressDialog.dismiss()
-                Toast.makeText(context, "user not found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -170,8 +178,14 @@ class UserNameFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val res = ApiClient.getClient().getUserInfo(user, end_cursor)
-                val jsonObject = res.body()
+                val code = res.code()
+                if (code!=200){
+                    progressDialog.dismiss()
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
 
+                val jsonObject = res.body()
                 if (jsonObject != null) {
                     parseData(jsonObject);
                     if (blogs.size > 0) {
@@ -184,7 +198,7 @@ class UserNameFragment : Fragment() {
             } catch (e: Exception) {
                 isFetching = false
                 binding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(context, "user not found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
 
         }

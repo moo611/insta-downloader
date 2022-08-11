@@ -10,14 +10,14 @@
     <string name="password_hint">請輸入密碼</string>
     <string name="search">搜索</string>
     <string name="download">下載</string>
-    <string name="search_hint">請輸入要查找的instagram鏈接</string>
+    <string name="search_hint">請輸入instagram鏈接</string>
     <string name="quick_download">快速下載模式</string>
     <string name="language">語言</string>
     <string name="share">分享</string>
     <string name="app_version">App 版本</string>
-    <string name="paste_username">請輸入要查找的instagram 用戶名</string>
+    <string name="paste_username">請輸入用戶名</string>
     <string name="next_step">下一步</string>
-    <string name="hashtag">請輸入要查找的instagram 標籤</string>
+    <string name="hashtag">請輸入標籤</string>
     <string name="zh">中文</string>
     <string name="en">英文</string>
     <string name="vp_shortcode">分享鏈接</string>

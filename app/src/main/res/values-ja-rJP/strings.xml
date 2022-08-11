@@ -10,14 +10,14 @@
     <string name="password_hint">パスワードを入力してください</string>
     <string name="search">検索</string>
     <string name="download">ダウンロード</string>
-    <string name="search_hint">探しているインスタグラムのリンクを入力してください</string>
+    <string name="search_hint">ここにインスタグラムのリンクを入力してください</string>
     <string name="quick_download">クイック ダウンロード モード</string>
     <string name="language">言語</string>
     <string name="share">共有</string>
     <string name="app_version">アプリのバージョン</string>
-    <string name="paste_username">お探しの Instagram ユーザー名を入力してください</string>
+    <string name="paste_username">ここにユーザー名を入力してください</string>
     <string name="next_step">次のステップ</string>
-    <string name="hashtag">探しているインスタグラムのハッシュタグを入力してください</string>
+    <string name="hashtag">ここにハッシュタグを入力</string>
     <string name="zh">中国語</string>
     <string name="en">英語</string>
     <string name="vp_shortcode">リンク</string>

@@ -10,14 +10,14 @@
     <string name="password_hint"> Nhập mật khẩu của bạn </string>
     <string name="search"> Tìm kiếm </string>
     <string name="download"> Tải xuống </string>
-    <string name="search_hint"> Vui lòng nhập liên kết instagram mà bạn đang tìm kiếm </string>
+    <string name="search_hint"> Nhập liên kết instagram tại đây </string>
     <string name="quick_download"> Chế độ tải xuống nhanh </string>
     <string name="language"> Ngôn ngữ </string>
     <string name="share"> Chia sẻ </string>
     <string name="app_version"> Phiên bản ứng dụng </string>
-    <string name="paste_username"> Vui lòng nhập tên người dùng instagram mà bạn đang tìm kiếm </string>
+    <string name="paste_username"> Nhập tên người dùng vào đây </string>
     <string name="next_step"> Bước tiếp theo </string>
-    <string name="hashtag"> Vui lòng nhập thẻ bắt đầu bằng # trên instagram mà bạn đang tìm kiếm </string>
+    <string name="hashtag"> Nhập thẻ bắt đầu bằng # tại đây </string>
     <string name="zh"> Tiếng Trung </string>
     <string name="en"> Tiếng Anh </string>
     <string name="vp_shortcode"> Liên kết </string>

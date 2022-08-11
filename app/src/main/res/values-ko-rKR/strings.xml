@@ -10,14 +10,14 @@
     <string name="password_hint">비밀번호 입력</string>
     <string name="search">검색</string>
     <string name="download">다운로드</string>
-    <string name="search_hint">찾고 있는 인스타그램 링크를 입력하세요</string>
+    <string name="search_hint">여기에 인스타그램 링크를 입력하세요</string>
     <string name="quick_download">빠른 다운로드 모드</string>
     <string name="language">언어</string>
     <string name="share">공유</string>
     <string name="app_version">앱 버전</string>
-    <string name="paste_username">찾는 인스타그램 사용자 이름을 입력하세요</string>
+    <string name="paste_username">여기에 사용자 이름을 입력하세요</string>
     <string name="next_step">다음 단계</string>
-    <string name="hashtag">찾고 있는 인스타그램 해시태그를 입력하세요</string>
+    <string name="hashtag">여기에 해시태그를 입력하세요.</string>
     <string name="zh">중국어</string>
     <string name="en">영어</string>
     <string name="vp_shortcode">링크</string>

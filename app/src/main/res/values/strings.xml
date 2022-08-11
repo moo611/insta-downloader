@@ -8,14 +8,14 @@
     <string name="password_hint">Enter your password</string>
     <string name="search">Search</string>
     <string name="download">Download</string>
-    <string name="search_hint">Please enter the instagram link you are looking for</string>
+    <string name="search_hint">Enter instagram link here</string>
     <string name="quick_download">Quick Download Mode</string>
     <string name="language">Languages</string>
     <string name="share">Share</string>
     <string name="app_version">App Version</string>
-    <string name="paste_username">Please enter the instagram username you are looking for</string>
+    <string name="paste_username">Enter username here</string>
     <string name="next_step">Next Step</string>
-    <string name="hashtag">Please enter the instagram hashtag you are looking for</string>
+    <string name="hashtag">Enter hashtag here</string>
     <string name="zh">Chinese</string>
     <string name="en">English</string>
     <string name="vp_shortcode">Link</string>

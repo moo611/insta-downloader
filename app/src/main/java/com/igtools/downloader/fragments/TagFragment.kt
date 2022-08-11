@@ -35,7 +35,7 @@ class TagFragment : Fragment() {
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: BlogAdapter
     lateinit var binding: FragmentTagBinding
-    lateinit var progressDialog:ProgressDialog
+    lateinit var progressDialog: ProgressDialog
     var isFetching = false
     var isEnd = false
     var blogs: ArrayList<BlogModel> = ArrayList()
@@ -114,7 +114,7 @@ class TagFragment : Fragment() {
         binding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!binding.rv.canScrollVertically(1) && dy>0) {
+                if (!binding.rv.canScrollVertically(1) && dy > 0) {
                     //滑动到底部
 
                     loadMore()
@@ -136,14 +136,22 @@ class TagFragment : Fragment() {
 
         progressDialog.show()
         blogs.clear()
-        next_max_id=""
-        next_media_ids=""
-        next_page=1
+        next_max_id = ""
+        next_media_ids = ""
+        next_page = 1
         more_available = true
         lifecycleScope.launch {
 
             try {
                 val res = ApiClient.getClient().getTags(tag)
+
+                val code = res.code()
+                if (code!=200){
+                    progressDialog.dismiss()
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
                 val jsonObject = res.body()
                 if (jsonObject != null) {
                     parseData(jsonObject);
@@ -155,11 +163,11 @@ class TagFragment : Fragment() {
                 progressDialog.dismiss()
 
             } catch (e: Exception) {
-                Log.v(TAG,e.message+"")
+                Log.v(TAG, e.message + "")
 
                 progressDialog.dismiss()
                 Log.v(TAG, e.message + "")
-                Toast.makeText(context, "media not found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
 
             }
 
@@ -183,6 +191,14 @@ class TagFragment : Fragment() {
                     page = next_page,
                     next_media_ids = next_media_ids
                 )
+
+                val code = res.code()
+                if (code!=200){
+                    progressDialog.dismiss()
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
                 val jsonObject = res.body()
                 if (jsonObject != null) {
                     parseData(jsonObject);
@@ -198,7 +214,7 @@ class TagFragment : Fragment() {
 
                 isFetching = false
                 binding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(context, "media not found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -219,7 +235,7 @@ class TagFragment : Fragment() {
         val items = data["sections"].asJsonArray
 
         for (item in items) {
-            Log.v(TAG,"current:"+items.indexOf(item))
+            Log.v(TAG, "current:" + items.indexOf(item))
             val blogModel = BlogModel()
             blogModel.caption = item.asJsonObject["caption"].asJsonObject["text"].asString ?: ""
             //blogModel.displayUrl = item.asJsonObject["display_url"].asString

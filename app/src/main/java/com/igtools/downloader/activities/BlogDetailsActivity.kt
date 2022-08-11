@@ -134,6 +134,14 @@ class BlogDetailsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val res = ApiClient.getClient().getShortCode(url)
+
+                val code = res.code()
+                if (code!=200){
+                    binding.progressBar.visibility = View.INVISIBLE
+                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
                 val jsonObject = res.body()
                 if (jsonObject!=null){
                     parseData(jsonObject);

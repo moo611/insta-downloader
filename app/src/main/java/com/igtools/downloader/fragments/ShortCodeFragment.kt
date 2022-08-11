@@ -133,6 +133,13 @@ class ShortCodeFragment : Fragment() {
 
             try {
                 val res = ApiClient.getClient().getShortCode(url)
+
+                val code = res.code()
+                if (code!=200){
+                    binding.progressBar.visibility = View.INVISIBLE
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
                 val jsonObject = res.body()
                 if (jsonObject != null) {
                     parseData(jsonObject);
@@ -148,7 +155,7 @@ class ShortCodeFragment : Fragment() {
 
             }catch (e:Exception){
                 binding.progressBar.visibility = View.INVISIBLE
-                Toast.makeText(context,  "resource not found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,  getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
 
         }
