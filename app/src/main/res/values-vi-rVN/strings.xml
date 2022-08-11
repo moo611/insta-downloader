@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name"> IgDownloader </string>
+
+    <string name="login"> Đăng nhập </string>
+    <string name="username"> Email </string>
+    <string name="password"> Mật khẩu </string>
+    <string name="username_hint"> Nhập email của bạn </string>
+    <string name="password_hint"> Nhập mật khẩu của bạn </string>
+    <string name="search"> Tìm kiếm </string>
+    <string name="download"> Tải xuống </string>
+    <string name="search_hint"> Vui lòng nhập liên kết instagram mà bạn đang tìm kiếm </string>
+    <string name="quick_download"> Chế độ tải xuống nhanh </string>
+    <string name="language"> Ngôn ngữ </string>
+    <string name="share"> Chia sẻ </string>
+    <string name="app_version"> Phiên bản ứng dụng </string>
+    <string name="paste_username"> Vui lòng nhập tên người dùng instagram mà bạn đang tìm kiếm </string>
+    <string name="next_step"> Bước tiếp theo </string>
+    <string name="hashtag"> Vui lòng nhập thẻ bắt đầu bằng # trên instagram mà bạn đang tìm kiếm </string>
+    <string name="zh"> Tiếng Trung </string>
+    <string name="en"> Tiếng Anh </string>
+    <string name="vp_shortcode"> Liên kết </string>
+    <string name="vp_username"> Tên người dùng </string>
+    <string name="history"> Lịch sử tải xuống </string>
+    <string name="details"> Chi tiết </string>
+    <string name="login_failed"> Đăng nhập không thành công </string>
+    <string name="signup_failed"> Đăng ký Không thành công </string>
+    <string name="download_finish"> Tải xuống xong </string>
+    <string name="searching"> Đang tìm kiếm… </string>
+    <string name="downloading"> Đang tải xuống… </string>
+    <string name="not_found"> Không tìm thấy bài đăng </string>
+
+</resources>

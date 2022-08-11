@@ -29,6 +29,6 @@
     <string name="download_finish">下載完成</string>
     <string name="searching">正在搜索…</string>
     <string name="downloading">正在下載…</string>
-    <string name="not_found">post not found</string>
+    <string name="not_found">找不到帖子</string>
 
 </resources>

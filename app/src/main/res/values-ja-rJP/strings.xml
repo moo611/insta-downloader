@@ -29,6 +29,6 @@
     <string name="download_finish">ダウンロード完了</string>
     <string name="searching">検索中…</string>
     <string name="downloading">ダウンロードしています…</string>
-    <string name="not_found">post not found</string>
+    <string name="not_found">投稿が見つかりません</string>
 
 </resources>

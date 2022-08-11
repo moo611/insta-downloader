@@ -1,5 +1,6 @@
 package com.igtools.downloader
 
+import android.R.id
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
@@ -12,6 +13,9 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.igtools.downloader.activities.HistoryActivity
 import com.igtools.downloader.databinding.ActivityMainBinding
 import com.igtools.downloader.fragments.HomeFragment
@@ -30,10 +34,12 @@ class MainActivity : AppCompatActivity() {
     var fragments: MutableList<Fragment> = ArrayList()
     var lastPos = 0
 
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
+        firebaseAnalytics = Firebase.analytics
         //沉浸式状态栏
         if (Build.VERSION.SDK_INT >= 23) {
             window.decorView.systemUiVisibility =
@@ -77,6 +83,12 @@ class MainActivity : AppCompatActivity() {
 
         }
         binding.llTag.setOnClickListener {
+            val bundle = Bundle()
+            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "123")
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "hashtag")
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM,bundle)
+
             showFragment(1)
             selectPage(1)
             lastPos = 1

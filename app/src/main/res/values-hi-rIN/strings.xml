@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">IgDownloader</string>
+
+    <string name="login">लॉग इन करें</string>
+    <string name="username">ईमेल</string>
+    <string name="password">पासवर्ड</string>
+    <string name="username_hint">अपना ईमेल दर्ज करें</string>
+    <string name="password_hint">अपना पासवर्ड दर्ज करें</string>
+    <string name="search">तलाशी</string>
+    <string name="download">डाउनलोड करें</string>
+    <string name="search_hint">कृपया वह इंस्टाग्राम लिंक दर्ज करें जिसे आप ढूंढ रहे हैं</string>
+    <string name="quick_download">त्वरित डाउनलोड मोड</string>
+    <string name="language">भाषा: हिन्दी</string>
+    <string name="share">साझा करें</string>
+    <string name="app_version">एप्लिकेशन संस्करण</string>
+    <string name="paste_username">कृपया वह Instagram उपयोगकर्ता नाम दर्ज करें जिसे आप ढूंढ रहे हैं</string>
+    <string name="next_step">अगला कदम</string>
+    <string name="hashtag">कृपया वह इंस्टाग्राम हैशटैग दर्ज करें जिसे आप ढूंढ रहे हैं</string>
+    <string name="zh">चीनी</string>
+    <string name="en">अंग्रेज़ी</string>
+    <string name="vp_shortcode">लिंक</string>
+    <string name="vp_username">उपयोगकर्ता नाम</string>
+    <string name="history">इतिहास डाउनलोड करें</string>
+    <string name="details">विवरण</string>
+    <string name="login_failed">लॉगिन विफल</string>
+    <string name="signup_failed">साइन अप विफल</string>
+    <string name="download_finish">डाउनलोड पूरा हो गया है</string>
+    <string name="searching">खोज कर…</string>
+    <string name="downloading">डाउनलोड हो रहा है…</string>
+    <string name="not_found">पोस्ट नहीं मिली</string>
+
+</resources>

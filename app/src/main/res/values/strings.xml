@@ -27,5 +27,5 @@
     <string name="download_finish">Download Finished</string>
     <string name="searching">Searching…</string>
     <string name="downloading">Downloading…</string>
-    <string name="not_found">post not found</string>
+    <string name="not_found">Post not found</string>
 </resources>

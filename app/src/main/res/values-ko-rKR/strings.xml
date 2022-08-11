@@ -29,7 +29,7 @@
     <string name="download_finish">다운로드 완료</string>
     <string name="searching">검색 중…</string>
     <string name="downloading">다운로드 중…</string>
-    <string name="not_found">post not found</string>
+    <string name="not_found">게시물을 찾을 수 없습니다</string>
 
 
 </resources>
