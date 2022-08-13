@@ -4,15 +4,16 @@
     android:layout_height="match_parent"
     >
 
-    <com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
-        android:visibility="visible"
-        android:id="@+id/player"
+
+    <ImageView
+        android:scaleType="centerCrop"
+        android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    <ProgressBar
-        android:visibility="invisible"
-        android:id="@+id/progress_bar"
+        android:layout_height="match_parent"/>
+
+    <ImageView
         android:layout_gravity="center"
+        android:src="@drawable/video_play_normal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 

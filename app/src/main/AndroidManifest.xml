@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
-        android:name="com.igtools.igdownloader.BaseApplication"
+        android:name=".BaseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -17,19 +17,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IgDownloader">
         <activity
-            android:name="com.igtools.igdownloader.activities.HistoryActivity"
+            android:name=".activities.VideoActivity"
             android:exported="false" />
         <activity
-            android:name="com.igtools.igdownloader.activities.SignupActivity"
+            android:name=".activities.HistoryActivity"
             android:exported="false" />
         <activity
-            android:name="com.igtools.igdownloader.activities.BlogDetailsActivity"
+            android:name=".activities.SignupActivity"
             android:exported="false" />
         <activity
-            android:name="com.igtools.igdownloader.activities.LoginActivity"
+            android:name=".activities.BlogDetailsActivity"
             android:exported="false" />
         <activity
-            android:name="com.igtools.igdownloader.MainActivity"
+            android:name=".activities.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

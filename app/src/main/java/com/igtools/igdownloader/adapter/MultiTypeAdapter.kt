@@ -1,17 +1,17 @@
 package com.igtools.igdownloader.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.igtools.igdownloader.R
+import com.igtools.igdownloader.activities.VideoActivity
 import com.igtools.igdownloader.models.MediaModel
-import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
 import com.youth.banner.adapter.BannerAdapter
 import com.youth.banner.util.BannerUtils
 
@@ -47,19 +47,21 @@ class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel?>?)
             }
             2 -> {
                 val videoHolder = holder as VideoHolder
-                videoHolder.player.setUp(data?.videoUrl, true, null)
-                videoHolder.player.backButton.visibility = View.GONE
-                //增加封面
-                val imageView = ImageView(context)
-                imageView.scaleType = ImageView.ScaleType.CENTER_CROP
-                Glide.with(context).load(data?.thumbnailUrl).placeholder(
-                    ColorDrawable(
-                        ContextCompat.getColor(
-                            context, R.color.gray_1
-                        )
+                Glide.with(context)
+                    .load(data?.thumbnailUrl)
+                    .thumbnail(/*sizeMultiplier=*/ 0.25f)
+                    .placeholder(ColorDrawable(ContextCompat.getColor(context, R.color.gray_1)))
+                    .into(videoHolder.imageView)
+
+                videoHolder.imageView.setOnClickListener {
+
+                    context.startActivity(
+                        Intent(context, VideoActivity::class.java)
+                            .putExtra("url", data?.videoUrl)
+                            .putExtra("thumbnailUrl", data?.thumbnailUrl)
                     )
-                ).thumbnail(/*sizeMultiplier=*/ 0.25f).into(imageView)
-                videoHolder.player.thumbImageView = imageView
+
+                }
             }
         }
 
@@ -76,12 +78,8 @@ class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel?>?)
     }
 
     internal inner class VideoHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var player: StandardGSYVideoPlayer = itemView.findViewById(R.id.player)
-        var progressBar: ProgressBar
+        var imageView: ImageView = itemView.findViewById(R.id.imageView)
 
-        init {
-            progressBar = itemView.findViewById(R.id.progress_bar)
-        }
     }
 
 }

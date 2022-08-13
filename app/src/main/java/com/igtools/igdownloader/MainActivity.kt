@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
@@ -37,6 +38,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //Android 点击 Home 键后再点击 APP 图标，APP 显示退出之前的界面
+        if (!isTaskRoot) {
+            finish();
+            return;
+        }
 
         firebaseAnalytics = Firebase.analytics
         //沉浸式状态栏
@@ -53,6 +59,21 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
+    //app 退出时，让 app 在后台运行，类似于 home 键的功能，最小化
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            moveTaskToBack(false)
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onBackPressed() {
+        moveTaskToBack(false)
+        super.onBackPressed()
+    }
+
 
     fun initViews() {
         val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")

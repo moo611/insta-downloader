@@ -29,6 +29,7 @@ import com.igtools.igdownloader.utils.FileUtils
 import com.igtools.igdownloader.utils.KeyboardUtils
 import com.igtools.igdownloader.utils.RegexUtils
 import com.youth.banner.indicator.CircleIndicator
+import com.youth.banner.listener.OnPageChangeListener
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -99,7 +100,6 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-
     private fun initViews() {
 
         binding.tvDownload.isEnabled = false
@@ -113,7 +113,6 @@ class ShortCodeFragment : Fragment() {
             .setIndicator(CircleIndicator(context))
             .setAdapter(adapter)
             .isAutoLoop(false)
-
 
 
         progressDialog = ProgressDialog(requireContext())
