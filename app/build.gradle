@@ -12,7 +12,7 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "com.igtools.downloader"
+        applicationId "com.igtools.igdownloader"
         minSdk 21
         targetSdk 31
         versionCode 1

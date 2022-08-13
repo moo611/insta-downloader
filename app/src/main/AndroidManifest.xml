@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.igtools.downloader">
+    package="com.igtools.igdownloader">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
-        android:name=".BaseApplication"
+        android:name="com.igtools.igdownloader.BaseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -17,19 +17,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IgDownloader">
         <activity
-            android:name=".activities.HistoryActivity"
+            android:name="com.igtools.igdownloader.activities.HistoryActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.SignupActivity"
+            android:name="com.igtools.igdownloader.activities.SignupActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.BlogDetailsActivity"
+            android:name="com.igtools.igdownloader.activities.BlogDetailsActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.LoginActivity"
+            android:name="com.igtools.igdownloader.activities.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name="com.igtools.igdownloader.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
