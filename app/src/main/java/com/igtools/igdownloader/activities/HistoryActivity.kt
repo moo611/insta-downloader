@@ -86,7 +86,7 @@ class HistoryActivity : AppCompatActivity() {
                     gson.fromJson(record.content, genericType<ArrayList<MediaModel>>())
 
                 titles.add(mediaModels[0].title ?: "")
-                thumbnails.add(mediaModels[0].thumbnailPath?:"")
+                thumbnails.add(mediaModels[0].thumbnailUrl)
                 usernames.add(mediaModels[0].username)
                 avatars.add(mediaModels[0].avatar)
                 contents.add(record.content)

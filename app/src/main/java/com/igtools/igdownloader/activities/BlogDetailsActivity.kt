@@ -170,6 +170,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             //enable download
             binding.btnDownload.isEnabled = true
             binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+            binding.tvTitle.text = medias[0].title
         }
 
     }

@@ -297,7 +297,6 @@ class ShortCodeFragment : Fragment() {
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
             withContext(Dispatchers.IO) {
                 saveFile(responseBody.body(), file, 1)
-                media.thumbnailPath = file.absolutePath
             }
         } else {
             //video
@@ -308,7 +307,6 @@ class ShortCodeFragment : Fragment() {
 
             withContext(Dispatchers.IO) {
                 saveFile(responseBody.body(), file, 2)
-                media.videoPath = file.absolutePath
             }
 
         }
