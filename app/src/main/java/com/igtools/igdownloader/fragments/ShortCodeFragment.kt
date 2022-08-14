@@ -1,6 +1,8 @@
 package com.igtools.igdownloader.fragments
 
 import android.app.ProgressDialog
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -30,10 +32,7 @@ import com.igtools.igdownloader.utils.KeyboardUtils
 import com.igtools.igdownloader.utils.RegexUtils
 import com.youth.banner.indicator.CircleIndicator
 import com.youth.banner.listener.OnPageChangeListener
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
@@ -52,7 +51,7 @@ class ShortCodeFragment : Fragment() {
     lateinit var adapter: MultiTypeAdapter
     var TAG = "ShortCodeFragment"
     var medias: ArrayList<MediaModel> = ArrayList()
-
+    var oldText = ""
     lateinit var progressDialog: ProgressDialog
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,16 +84,21 @@ class ShortCodeFragment : Fragment() {
                     }
                 }
             } else {
-//                val clipboard =
-//                    requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                val item = clipboard.primaryClip?.getItemAt(0)
-//                val pasteData = item?.text
-//
-//                if (pasteData != null) {
-//                    binding.etShortcode.setText(pasteData)
-//                }
+                val clipboard =
+                    requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val item = clipboard.primaryClip?.getItemAt(0)
+                val pasteData = item?.text
+
+                if (pasteData != null) {
+                    binding.etShortcode.setText(pasteData)
+                }
             }
 
+            val newText = binding.etShortcode.text.toString()
+            if (newText != oldText) {
+                oldText = newText
+                getData(newText)
+            }
 
         }
 
@@ -103,10 +107,10 @@ class ShortCodeFragment : Fragment() {
     private fun initViews() {
 
         binding.tvDownload.isEnabled = false
-        binding.tvPaste.isEnabled = false
+        binding.tvSearch.isEnabled = false
         binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
-        binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.black))
-        binding.container.visibility = View.GONE
+        binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
+
         adapter = MultiTypeAdapter(requireContext(), medias)
         binding.banner
             .addBannerLifecycleObserver(this)
@@ -116,14 +120,16 @@ class ShortCodeFragment : Fragment() {
 
 
         progressDialog = ProgressDialog(requireContext())
-        progressDialog.setMessage(getString(R.string.downloading))
+        progressDialog.setMessage(getString(R.string.searching))
 
 
     }
 
 
     private fun getData(url: String) {
-        binding.progressBar.visibility = View.VISIBLE
+
+        progressDialog.show()
+
         medias.clear()
 
         lifecycleScope.launch {
@@ -132,9 +138,10 @@ class ShortCodeFragment : Fragment() {
                 val res = ApiClient.getClient().getShortCode(url)
 
                 val code = res.code()
-                if (code!=200){
-                    binding.progressBar.visibility = View.INVISIBLE
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                if (code != 200) {
+                    progressDialog.dismiss()
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                     return@launch
                 }
                 val jsonObject = res.body()
@@ -148,11 +155,11 @@ class ShortCodeFragment : Fragment() {
                     }
 
                 }
-                binding.progressBar.visibility = View.INVISIBLE
+                progressDialog.dismiss()
 
-            }catch (e:Exception){
-                binding.progressBar.visibility = View.INVISIBLE
-                Toast.makeText(context,  getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                progressDialog.dismiss()
+                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -208,7 +215,7 @@ class ShortCodeFragment : Fragment() {
 
         binding.tvDownload.setOnClickListener {
 
-            progressDialog.show()
+            binding.progressBar.visibility = View.VISIBLE
             lifecycleScope.launch {
 
                 val all: List<Deferred<Unit>> = medias.map {
@@ -225,7 +232,7 @@ class ShortCodeFragment : Fragment() {
 
                 RecordDB.getInstance().recordDao().insert(record)
 
-                progressDialog.dismiss()
+                binding.progressBar.visibility = View.INVISIBLE
 
                 Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                     .show()
@@ -234,12 +241,12 @@ class ShortCodeFragment : Fragment() {
             }
 
         }
-        binding.tvPaste.setOnClickListener {
+        binding.tvSearch.setOnClickListener {
             binding.etShortcode.clearFocus()
             KeyboardUtils.closeKeybord(binding.etShortcode, context)
             binding.tvDownload.isEnabled = false
             binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
-            binding.container.visibility = View.VISIBLE
+
             getData(binding.etShortcode.text.toString())
         }
 
@@ -251,12 +258,16 @@ class ShortCodeFragment : Fragment() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
                 if (binding.etShortcode.text.isNotEmpty()) {
-                    binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.white))
-                    binding.tvPaste.isEnabled = true
+                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.white))
+                    binding.tvSearch.isEnabled = true
                     binding.imgClear.visibility = View.VISIBLE
+
+
                 } else {
-                    binding.tvPaste.setTextColor(requireContext().resources!!.getColor(R.color.home_unselect_color))
-                    binding.tvPaste.isEnabled = false
+                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
+                    binding.tvSearch.isEnabled = false
+                    binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
+                    binding.tvDownload.isEnabled = false
                     binding.imgClear.visibility = View.INVISIBLE
                 }
 
@@ -271,7 +282,7 @@ class ShortCodeFragment : Fragment() {
         binding.imgClear.setOnClickListener {
 
             binding.etShortcode.setText("")
-
+            oldText = ""
         }
 
     }
@@ -283,35 +294,31 @@ class ShortCodeFragment : Fragment() {
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-
-            try {
-                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
-                responseBody.body()?.let { saveFile(it, file, 1) }
-
-            } catch (e: Error) {
-                //errFlag = true
+            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+            withContext(Dispatchers.IO) {
+                saveFile(responseBody.body(), file, 1)
+                media.thumbnailPath = file.absolutePath
             }
-
-
         } else {
             //video
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-            try {
-                val responseBody = media.videoUrl?.let { ApiClient.getClient().downloadUrl(it) }
-                responseBody?.body()?.let { saveFile(it, file, 2) }
+            val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
 
-            } catch (e: Error) {
-                //errFlag = true
+            withContext(Dispatchers.IO) {
+                saveFile(responseBody.body(), file, 2)
+                media.videoPath = file.absolutePath
             }
 
         }
 
     }
 
-    private fun saveFile(body: ResponseBody, file: File, type: Int) {
-
+    private fun saveFile(body: ResponseBody?, file: File, type: Int) {
+        if (body == null) {
+            return
+        }
         var input: InputStream? = null
         try {
             input = body.byteStream()
@@ -325,6 +332,7 @@ class ShortCodeFragment : Fragment() {
                 }
                 output.flush()
             }
+            //存到相册
             if (type == 1) {
                 val bitmap = BitmapFactory.decodeFile(file.absolutePath)
                 FileUtils.saveImageToAlbum(requireContext(), bitmap, file.name)

@@ -3,10 +3,10 @@ package com.igtools.igdownloader.activities
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
@@ -40,6 +40,7 @@ class VideoActivity : AppCompatActivity() {
         thumbnailUrl = intent.extras?.getString("thumbnailUrl")
         binding.player.setUp(url, true, null)
         binding.player.backButton.visibility = View.GONE
+        binding.player.startPlayLogic()
         //增加封面
         val imageView = ImageView(this)
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP

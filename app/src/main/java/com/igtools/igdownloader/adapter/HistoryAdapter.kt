@@ -8,10 +8,12 @@ import android.view.LayoutInflater
 import com.igtools.igdownloader.R
 import com.bumptech.glide.Glide
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import android.widget.TextView
+import java.io.File
 import java.util.ArrayList
 
 /**
@@ -30,7 +32,7 @@ class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
     }
 
     override fun onBindViewHolder(holder: HistoryHolder, position: Int) {
-        Glide.with(c).load(thumbnails[position])
+        Glide.with(c).load(Uri.fromFile(File(thumbnails[position])))
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
             .into(holder.thumbnail)
         holder.caption.text = titles[position]
