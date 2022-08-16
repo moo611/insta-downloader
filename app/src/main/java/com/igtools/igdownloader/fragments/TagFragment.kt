@@ -62,7 +62,7 @@ class TagFragment : Fragment() {
         binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
-
+        progressDialog.setCancelable(false)
         adapter = BlogAdapter(requireContext(), blogs)
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter

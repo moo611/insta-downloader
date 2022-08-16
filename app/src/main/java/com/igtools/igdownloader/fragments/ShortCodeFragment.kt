@@ -47,12 +47,14 @@ import java.util.*
 
 class ShortCodeFragment : Fragment() {
 
+    lateinit var progressDialog: ProgressDialog
     lateinit var binding: FragmentShortCodeBinding
     lateinit var adapter: MultiTypeAdapter
     var TAG = "ShortCodeFragment"
     var medias: ArrayList<MediaModel> = ArrayList()
     var oldText = ""
-    lateinit var progressDialog: ProgressDialog
+    var isDownloading = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -121,7 +123,7 @@ class ShortCodeFragment : Fragment() {
 
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
-
+        progressDialog.setCancelable(false)
 
     }
 
@@ -214,7 +216,10 @@ class ShortCodeFragment : Fragment() {
     private fun setListeners() {
 
         binding.tvDownload.setOnClickListener {
-
+            if (isDownloading){
+                return@setOnClickListener
+            }
+            isDownloading = true
             binding.progressBar.visibility = View.VISIBLE
             lifecycleScope.launch {
 
@@ -233,7 +238,7 @@ class ShortCodeFragment : Fragment() {
                 RecordDB.getInstance().recordDao().insert(record)
 
                 binding.progressBar.visibility = View.INVISIBLE
-
+                isDownloading = false
                 Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                     .show()
 

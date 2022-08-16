@@ -62,16 +62,13 @@ class MainActivity : AppCompatActivity() {
 
     //app 退出时，让 app 在后台运行，类似于 home 键的功能，最小化
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            moveTaskToBack(false)
-            return true
+        when (keyCode) {
+            KeyEvent.KEYCODE_BACK -> {
+                moveTaskToBack(true)
+                return true
+            }
         }
-        return super.onKeyDown(keyCode, event)
-    }
-
-    override fun onBackPressed() {
-        moveTaskToBack(false)
-        super.onBackPressed()
+        return false
     }
 
 

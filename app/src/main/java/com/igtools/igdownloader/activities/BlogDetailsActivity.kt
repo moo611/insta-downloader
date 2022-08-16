@@ -39,12 +39,14 @@ import kotlin.collections.ArrayList
 
 class BlogDetailsActivity : AppCompatActivity() {
 
+    val gson = Gson()
     lateinit var binding: ActivityBlogDetailsBinding
     lateinit var adapter: MultiTypeAdapter
-    var TAG = "BlogDetailsActivity"
     lateinit var progressDialog: ProgressDialog
+    var TAG = "BlogDetailsActivity"
     var medias: ArrayList<MediaModel> = ArrayList()
-    val gson = Gson()
+    var isDownloading = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -91,7 +93,10 @@ class BlogDetailsActivity : AppCompatActivity() {
     private fun setListeners() {
 
         binding.btnDownload.setOnClickListener {
-
+            if (isDownloading){
+                return@setOnClickListener
+            }
+            isDownloading = true
             progressDialog.show()
             lifecycleScope.launch {
 
@@ -110,7 +115,7 @@ class BlogDetailsActivity : AppCompatActivity() {
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog.dismiss()
-
+                isDownloading = false
                 Toast.makeText(this@BlogDetailsActivity, getString(R.string.download_finish), Toast.LENGTH_SHORT).show()
 
 

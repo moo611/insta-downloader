@@ -17,8 +17,8 @@ import com.igtools.igdownloader.databinding.FragmentHomeBinding
 class HomeFragment : Fragment() {
 
     lateinit var mAdapter:ViewPagerAdapter
-    val TAG="HomeFragment"
     lateinit var binding:FragmentHomeBinding
+    val TAG="HomeFragment"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

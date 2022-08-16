@@ -28,15 +28,17 @@ import kotlinx.coroutines.launch
  * @Date: 2022/7/21
  */
 class UserNameFragment : Fragment() {
+
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: BlogAdapter
     lateinit var progressDialog:ProgressDialog
-    var TAG = "UserNameFragment"
     lateinit var binding: FragmentUserNameBinding
+    var TAG = "UserNameFragment"
     var blogs: ArrayList<BlogModel> = ArrayList()
     var cursor = ""
     var isFetching = false
     var isEnd = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -58,6 +60,8 @@ class UserNameFragment : Fragment() {
 
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
+        progressDialog.setCancelable(false)
+
         adapter = BlogAdapter(requireContext(), blogs)
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter
