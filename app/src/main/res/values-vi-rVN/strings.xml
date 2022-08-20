@@ -30,5 +30,5 @@
     <string name="searching"> Đang tìm kiếm… </string>
     <string name="downloading"> Đang tải xuống… </string>
     <string name="not_found"> Không tìm thấy bài đăng </string>
-
+    <string name="invalid_url">url không hợp lệ</string>
 </resources>

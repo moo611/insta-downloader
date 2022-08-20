@@ -25,10 +25,7 @@ import com.igtools.igdownloader.room.RecordDB
 import com.igtools.igdownloader.utils.DateUtils
 import com.igtools.igdownloader.utils.FileUtils
 import com.youth.banner.indicator.CircleIndicator
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
@@ -107,7 +104,7 @@ class BlogDetailsActivity : AppCompatActivity() {
                 }
 
                 all.awaitAll()
-                Log.v(TAG,"finish")
+                //Log.v(TAG,"finish")
                 val record = Record()
                 record.createdTime = DateUtils.getDate(Date())
                 record.content = Gson().toJson(medias)
@@ -226,9 +223,9 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     }
 
-    private suspend fun downloadMedia(media: MediaModel) {
+    private suspend fun downloadMedia(media: MediaModel?) {
 
-        if (media.mediaType == 1) {
+        if (media?.mediaType == 1) {
             //image
             val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
@@ -236,7 +233,9 @@ class BlogDetailsActivity : AppCompatActivity() {
 
             try {
                 val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
-                responseBody.body()?.let { saveFile(it, file, 1) }
+                withContext(Dispatchers.IO) {
+                    saveFile(responseBody.body(), file, 1)
+                }
 
             } catch (e: Error) {
                 //errFlag = true
@@ -249,8 +248,10 @@ class BlogDetailsActivity : AppCompatActivity() {
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
             try {
-                val responseBody = media.videoUrl?.let { ApiClient.getClient().downloadUrl(it) }
-                responseBody?.body()?.let { saveFile(it, file, 2) }
+                val responseBody = ApiClient.getClient().downloadUrl(media?.videoUrl!!)
+                withContext(Dispatchers.IO) {
+                    saveFile(responseBody.body(), file, 2)
+                }
 
             } catch (e: Error) {
                // errFlag = true
@@ -260,8 +261,10 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     }
 
-    private fun saveFile(body: ResponseBody, file: File, type: Int) {
-
+    private fun saveFile(body: ResponseBody?, file: File, type: Int) {
+        if (body == null) {
+            return
+        }
         var input: InputStream? = null
         try {
             input = body.byteStream()

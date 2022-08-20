@@ -30,5 +30,5 @@
     <string name="searching">正在搜索…</string>
     <string name="downloading">正在下載…</string>
     <string name="not_found">找不到帖子</string>
-
+    <string name="invalid_url">無效的網址</string>
 </resources>

@@ -179,7 +179,7 @@ class UserNameFragment : Fragment() {
                 val res = ApiClient.getClient().getUserInfo(user, end_cursor)
                 val code = res.code()
                 if (code!=200){
-                    progressDialog.dismiss()
+                    binding.progressBottom.visibility = View.VISIBLE
                     Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
                     return@launch
                 }

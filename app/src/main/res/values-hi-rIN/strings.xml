@@ -30,5 +30,5 @@
     <string name="searching">खोज कर…</string>
     <string name="downloading">डाउनलोड हो रहा है…</string>
     <string name="not_found">पोस्ट नहीं मिली</string>
-
+    <string name="invalid_url">अवैध यूआरएल</string>
 </resources>

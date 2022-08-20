@@ -1,5 +1,7 @@
 package com.igtools.igdownloader
 
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
@@ -8,7 +10,9 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -21,6 +25,10 @@ import com.igtools.igdownloader.databinding.ActivityMainBinding
 import com.igtools.igdownloader.fragments.HomeFragment
 import com.igtools.igdownloader.fragments.SettingFragment
 import com.igtools.igdownloader.fragments.TagFragment
+import com.igtools.igdownloader.models.IntentEvent
+import com.igtools.igdownloader.utils.RegexUtils
+import com.igtools.igdownloader.utils.ShareUtils
+import org.greenrobot.eventbus.EventBus
 
 
 /**
@@ -37,7 +45,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+
         //Android 点击 Home 键后再点击 APP 图标，APP 显示退出之前的界面
         if (!isTaskRoot) {
             finish();
@@ -45,18 +55,46 @@ class MainActivity : AppCompatActivity() {
         }
 
         firebaseAnalytics = Firebase.analytics
-        //沉浸式状态栏
-        if (Build.VERSION.SDK_INT >= 23) {
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            window.statusBarColor = Color.TRANSPARENT
-        }
-
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         initViews()
         setListeners()
 
+
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        //Toast.makeText(this,"new intent",Toast.LENGTH_SHORT).show()
+        binding.imgHome.post {
+
+            if (intent?.action == Intent.ACTION_SEND) {
+                if ("text/plain" == intent.type) {
+                    intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+                        // Update UI to reflect text being shared
+
+                        val urls = RegexUtils.extractUrls(it)
+                        if (urls.size > 0 && ShareUtils.getData("keyword") != urls[0]) {
+                            ShareUtils.putData("keyword", urls[0])
+                            EventBus.getDefault().post(IntentEvent(urls[0]))
+                        }
+
+                    }
+                }
+            } else {
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val item = clipboard.primaryClip?.getItemAt(0)
+                item?.text?.toString()?.let {
+
+                    if (ShareUtils.getData("keyword") != it) {
+                        ShareUtils.putData("keyword", it)
+                        EventBus.getDefault().post(IntentEvent(it))
+                    }
+
+                }
+
+            }
+        }
 
     }
 
@@ -73,6 +111,16 @@ class MainActivity : AppCompatActivity() {
 
 
     fun initViews() {
+
+        //沉浸式状态栏
+        if (Build.VERSION.SDK_INT >= 23) {
+            window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            window.statusBarColor = Color.TRANSPARENT
+        }
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
         val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
         binding.appTitle.typeface = typeface
 
@@ -104,7 +152,7 @@ class MainActivity : AppCompatActivity() {
             bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "123")
             bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "hashtag")
             bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM,bundle)
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
             showFragment(1)
             selectPage(1)
@@ -170,4 +218,5 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
 }

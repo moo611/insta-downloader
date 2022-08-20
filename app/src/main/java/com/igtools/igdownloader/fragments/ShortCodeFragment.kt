@@ -1,9 +1,6 @@
 package com.igtools.igdownloader.fragments
 
 import android.app.ProgressDialog
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Environment
@@ -13,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -23,17 +21,18 @@ import com.igtools.igdownloader.R
 import com.igtools.igdownloader.adapter.MultiTypeAdapter
 import com.igtools.igdownloader.api.retrofit.ApiClient
 import com.igtools.igdownloader.databinding.FragmentShortCodeBinding
+import com.igtools.igdownloader.models.IntentEvent
 import com.igtools.igdownloader.models.MediaModel
 import com.igtools.igdownloader.models.Record
 import com.igtools.igdownloader.room.RecordDB
 import com.igtools.igdownloader.utils.DateUtils
 import com.igtools.igdownloader.utils.FileUtils
 import com.igtools.igdownloader.utils.KeyboardUtils
-import com.igtools.igdownloader.utils.RegexUtils
 import com.youth.banner.indicator.CircleIndicator
-import com.youth.banner.listener.OnPageChangeListener
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -52,7 +51,6 @@ class ShortCodeFragment : Fragment() {
     lateinit var adapter: MultiTypeAdapter
     var TAG = "ShortCodeFragment"
     var medias: ArrayList<MediaModel> = ArrayList()
-    var oldText = ""
     var isDownloading = false
 
     override fun onCreateView(
@@ -68,43 +66,6 @@ class ShortCodeFragment : Fragment() {
         return binding.root;
     }
 
-    override fun onResume() {
-        super.onResume()
-
-
-        binding.etShortcode.post {
-
-            val intent = activity?.intent
-            if (intent?.action == Intent.ACTION_SEND) {
-                if ("text/plain" == intent.type) {
-                    intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-                        // Update UI to reflect text being shared
-
-                        val urls = RegexUtils.extractUrls(it)
-                        binding.etShortcode.setText(urls[0])
-
-                    }
-                }
-            } else {
-                val clipboard =
-                    requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val item = clipboard.primaryClip?.getItemAt(0)
-                val pasteData = item?.text
-
-                if (pasteData != null) {
-                    binding.etShortcode.setText(pasteData)
-                }
-            }
-
-            val newText = binding.etShortcode.text.toString()
-            if (newText != oldText) {
-                oldText = newText
-                getData(newText)
-            }
-
-        }
-
-    }
 
     private fun initViews() {
 
@@ -130,8 +91,13 @@ class ShortCodeFragment : Fragment() {
 
     private fun getData(url: String) {
 
-        progressDialog.show()
+        val isValid = URLUtil.isValidUrl(url)
+        if (!isValid){
+            Toast.makeText(context,getString(R.string.invalid_url),Toast.LENGTH_SHORT).show()
+            return
+        }
 
+        progressDialog.show()
         medias.clear()
 
         lifecycleScope.launch {
@@ -285,16 +251,14 @@ class ShortCodeFragment : Fragment() {
         })
 
         binding.imgClear.setOnClickListener {
-
             binding.etShortcode.setText("")
-            oldText = ""
         }
 
     }
 
-    private suspend fun downloadMedia(media: MediaModel) {
+    private suspend fun downloadMedia(media: MediaModel?) {
 
-        if (media.mediaType == 1) {
+        if (media?.mediaType == 1) {
             //image
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
@@ -308,7 +272,7 @@ class ShortCodeFragment : Fragment() {
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-            val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
+            val responseBody = ApiClient.getClient().downloadUrl(media?.videoUrl!!)
 
             withContext(Dispatchers.IO) {
                 saveFile(responseBody.body(), file, 2)
@@ -352,5 +316,22 @@ class ShortCodeFragment : Fragment() {
 
     }
 
+    @Subscribe
+    fun onKeywordReceive(intentEvent: IntentEvent){
 
+        val keyword = intentEvent.str
+        binding.etShortcode.setText(keyword)
+        getData(keyword)
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this);
+    }
 }
