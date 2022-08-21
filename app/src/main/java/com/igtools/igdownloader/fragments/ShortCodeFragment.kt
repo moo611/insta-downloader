@@ -321,6 +321,13 @@ class ShortCodeFragment : Fragment() {
 
         val keyword = intentEvent.str
         binding.etShortcode.setText(keyword)
+
+        binding.etShortcode.clearFocus()
+        KeyboardUtils.closeKeybord(binding.etShortcode, context)
+        binding.tvDownload.isEnabled = false
+        binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
+
+
         getData(keyword)
 
     }

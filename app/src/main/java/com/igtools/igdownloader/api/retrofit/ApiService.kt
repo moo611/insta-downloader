@@ -1,11 +1,10 @@
 package com.igtools.igdownloader.api.retrofit
 
 import com.google.gson.JsonObject
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Query
-import retrofit2.http.Url
+import retrofit2.http.*
 
 interface ApiService {
 
@@ -34,5 +33,9 @@ interface ApiService {
         @Query("page") page: Int,
         @Query("next_media_ids") next_media_ids: String
     ): Response<JsonObject>
+
+
+    @POST("api/taginfo/more")
+    suspend fun postMoreTags(@Body body:RequestBody):Response<JsonObject>
 
 }

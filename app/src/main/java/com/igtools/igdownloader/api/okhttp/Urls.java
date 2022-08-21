@@ -2,11 +2,11 @@ package com.igtools.igdownloader.api.okhttp;
 
 public class Urls {
 
-    //public static String BASE_URL_PY = "http://192.168.0.100:3000";
+    public static String BASE_URL_PY = "http://192.168.31.54:3000";
 
     //public static String BASE_URL_PY = "http://192.168.100.38:3000";
 
-    public static String BASE_URL_PY = "http://35.90.136.197:3000";
+    //public static String BASE_URL_PY = "http://35.90.136.197:3000";
 
     public static String BASE_URL_JAVA = "http://192.168.100.209:8080";
 

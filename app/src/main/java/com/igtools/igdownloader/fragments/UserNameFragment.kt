@@ -132,6 +132,8 @@ class UserNameFragment : Fragment() {
     private fun refresh(user: String) {
         Log.v(TAG,"refresh")
         blogs.clear()
+        isEnd = false
+
         progressDialog.show()
         lifecycleScope.launch {
             try {
@@ -189,10 +191,9 @@ class UserNameFragment : Fragment() {
                     parseData(jsonObject);
                     if (blogs.size > 0) {
                         adapter.setDatas(blogs)
-
                     }
-                    isFetching = false
                 }
+                isFetching = false
                 binding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
                 isFetching = false

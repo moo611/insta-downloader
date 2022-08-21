@@ -21,7 +21,7 @@ object ApiClient {
         builder.readTimeout(60, TimeUnit.SECONDS)
 
         val client = builder.build()
-
+        //BaseApplication.baseUrl = Urls.BASE_URL_PY
         return Retrofit.Builder().baseUrl(BaseApplication.baseUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create()).build()
