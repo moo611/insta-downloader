@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import com.google.android.gms.ads.AdRequest
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.adapter.ViewPagerAdapter
 import com.igtools.igdownloader.databinding.FragmentHomeBinding
@@ -29,12 +30,14 @@ class HomeFragment : Fragment() {
 
         initViews()
 
-
         return binding.root
     }
 
 
     fun initViews(){
+
+        val adRequest: AdRequest = AdRequest.Builder().build()
+        binding.adView.loadAd(adRequest)
 
         val fragments:ArrayList<Fragment> = ArrayList()
         fragments.add(ShortCodeFragment())

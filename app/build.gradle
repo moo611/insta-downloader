@@ -7,6 +7,7 @@ plugins {
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
 }
+apply from: "../utils.gradle"
 
 android {
     compileSdk 31
@@ -26,6 +27,8 @@ android {
             }
         }
     }
+
+    setProperty("archivesBaseName", getArtifactName(defaultConfig))
 
     dataBinding {
         enabled = true
@@ -95,4 +98,6 @@ dependencies {
     //eventbus
     implementation("org.greenrobot:eventbus:3.3.1")
 
+    //admob
+    implementation 'com.google.android.gms:play-services-ads:21.1.0'
 }

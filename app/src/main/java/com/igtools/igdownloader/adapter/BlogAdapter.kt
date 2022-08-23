@@ -16,8 +16,8 @@ import android.widget.ImageView
 import com.igtools.igdownloader.activities.BlogDetailsActivity
 import java.util.ArrayList
 
-class BlogAdapter(var c: Context, blogs: List<BlogModel>) : RecyclerView.Adapter<BlogViewHolder>() {
-    var blogs: List<BlogModel> = ArrayList()
+class BlogAdapter(var c: Context) : RecyclerView.Adapter<BlogViewHolder>() {
+     var blogs: ArrayList<BlogModel> = ArrayList()
 
     inner class BlogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var imgThumbnail: ImageView = itemView.findViewById(R.id.img_thumbnail)
@@ -25,13 +25,16 @@ class BlogAdapter(var c: Context, blogs: List<BlogModel>) : RecyclerView.Adapter
 
     }
 
-    init {
-        this.blogs = blogs
-    }
-
-    fun setDatas(blogs: List<BlogModel>) {
+    fun refresh(blogs: ArrayList<BlogModel>) {
         this.blogs = blogs
         notifyDataSetChanged()
+    }
+
+    fun loadMore(blogs:List<BlogModel>){
+        val index = this.blogs.size
+        this.blogs.addAll(blogs)
+        notifyItemRangeInserted(index,blogs.size)
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BlogViewHolder {

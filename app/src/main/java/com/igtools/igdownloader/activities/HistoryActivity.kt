@@ -10,6 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.igtools.igdownloader.R
@@ -33,6 +37,7 @@ class HistoryActivity : AppCompatActivity() {
     var usernames: ArrayList<String> = ArrayList()
     var gson = Gson()
     val TAG = "DownloadActivity"
+    private var mInterstitialAd: InterstitialAd? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //沉浸式状态栏
@@ -42,8 +47,28 @@ class HistoryActivity : AppCompatActivity() {
             window.statusBarColor = Color.TRANSPARENT
         }
         binding = DataBindingUtil.setContentView(this, R.layout.activity_history)
+        //initAds()
         initViews()
         getData()
+    }
+
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build();
+
+        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(p0: InterstitialAd) {
+                    super.onAdLoaded(p0)
+                    mInterstitialAd = p0
+
+                    mInterstitialAd?.show(this@HistoryActivity)
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    super.onAdFailedToLoad(p0)
+                    mInterstitialAd = null;
+                }
+            })
     }
 
     private fun initViews() {
@@ -52,7 +77,7 @@ class HistoryActivity : AppCompatActivity() {
         adapter = HistoryAdapter(this)
         binding.rv.adapter = adapter
         binding.rv.layoutManager = LinearLayoutManager(this)
-        adapter.onItemClickListener = object :HistoryAdapter.OnItemClickListener{
+        adapter.onItemClickListener = object : HistoryAdapter.OnItemClickListener {
             override fun onClick(position: Int) {
                 val content = contents[position]
 

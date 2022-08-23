@@ -12,6 +12,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
@@ -43,6 +47,7 @@ class BlogDetailsActivity : AppCompatActivity() {
     var TAG = "BlogDetailsActivity"
     var medias: ArrayList<MediaModel> = ArrayList()
     var isDownloading = false
+    var mInterstitialAd: InterstitialAd? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +60,7 @@ class BlogDetailsActivity : AppCompatActivity() {
         }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_blog_details)
-
+        initAds()
         initViews()
         setListeners()
 
@@ -74,7 +79,28 @@ class BlogDetailsActivity : AppCompatActivity() {
     }
 
 
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build();
+
+        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(p0: InterstitialAd) {
+                    super.onAdLoaded(p0)
+                    mInterstitialAd = p0
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    super.onAdFailedToLoad(p0)
+                    mInterstitialAd = null;
+                }
+            })
+    }
+
+
     private fun initViews() {
+        val adRequest: AdRequest = AdRequest.Builder().build()
+        binding.adView.loadAd(adRequest)
+
         binding.btnDownload.isEnabled = false
         adapter = MultiTypeAdapter(this, medias)
         binding.banner
@@ -84,6 +110,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             .isAutoLoop(false)
         progressDialog = ProgressDialog(this)
         progressDialog.setMessage(getString(R.string.downloading))
+        progressDialog.setCancelable(false)
     }
 
 
@@ -91,8 +118,11 @@ class BlogDetailsActivity : AppCompatActivity() {
 
         binding.btnDownload.setOnClickListener {
             if (isDownloading){
+                Toast.makeText(this,R.string.downloading,Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            mInterstitialAd?.show(this)
             isDownloading = true
             progressDialog.show()
             lifecycleScope.launch {

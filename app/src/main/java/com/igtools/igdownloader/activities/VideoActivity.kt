@@ -13,11 +13,13 @@ import com.bumptech.glide.Glide
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.databinding.ActivityVideoBinding
 
+
 class VideoActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityVideoBinding
     var url: String? = null
     var thumbnailUrl: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,4 +73,5 @@ class VideoActivity : AppCompatActivity() {
         binding.player.onVideoPause()
 
     }
+
 }

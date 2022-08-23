@@ -15,6 +15,10 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
@@ -52,6 +56,7 @@ class ShortCodeFragment : Fragment() {
     var TAG = "ShortCodeFragment"
     var medias: ArrayList<MediaModel> = ArrayList()
     var isDownloading = false
+    var mInterstitialAd: InterstitialAd? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,11 +64,28 @@ class ShortCodeFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_short_code, container, false)
-
+        initAds()
         initViews()
         setListeners()
 
         return binding.root;
+    }
+
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build();
+
+        InterstitialAd.load(requireContext(), "ca-app-pub-3940256099942544/1033173712", adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(p0: InterstitialAd) {
+                    super.onAdLoaded(p0)
+                    mInterstitialAd = p0
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    super.onAdFailedToLoad(p0)
+                    mInterstitialAd = null;
+                }
+            })
     }
 
 
@@ -183,8 +205,12 @@ class ShortCodeFragment : Fragment() {
 
         binding.tvDownload.setOnClickListener {
             if (isDownloading){
+                Toast.makeText(requireContext(),R.string.downloading,Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            mInterstitialAd?.show(requireActivity())
+
             isDownloading = true
             binding.progressBar.visibility = View.VISIBLE
             lifecycleScope.launch {

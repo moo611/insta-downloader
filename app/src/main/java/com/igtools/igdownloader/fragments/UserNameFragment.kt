@@ -31,10 +31,11 @@ class UserNameFragment : Fragment() {
 
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: BlogAdapter
-    lateinit var progressDialog:ProgressDialog
+    lateinit var progressDialog: ProgressDialog
     lateinit var binding: FragmentUserNameBinding
     var TAG = "UserNameFragment"
-    var blogs: ArrayList<BlogModel> = ArrayList()
+
+    //var blogs: ArrayList<BlogModel> = ArrayList()
     var cursor = ""
     var isFetching = false
     var isEnd = false
@@ -62,7 +63,7 @@ class UserNameFragment : Fragment() {
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
 
-        adapter = BlogAdapter(requireContext(), blogs)
+        adapter = BlogAdapter(requireContext())
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter
         binding.rv.layoutManager = layoutManager
@@ -111,7 +112,7 @@ class UserNameFragment : Fragment() {
         binding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!binding.rv.canScrollVertically(1) && dy>0) {
+                if (!binding.rv.canScrollVertically(1) && dy > 0) {
                     //滑动到底部
 
                     loadMore(binding.etUsername.text.toString(), cursor)
@@ -130,27 +131,30 @@ class UserNameFragment : Fragment() {
 
 
     private fun refresh(user: String) {
-        Log.v(TAG,"refresh")
-        blogs.clear()
-        isEnd = false
 
+        if (isFetching) {
+            return
+        }
+        isEnd = false
         progressDialog.show()
         lifecycleScope.launch {
             try {
                 val res = ApiClient.getClient().getUserInfo(user, "")
 
                 val code = res.code()
-                if (code!=200){
+                if (code != 200) {
                     progressDialog.dismiss()
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                     return@launch
                 }
 
                 val jsonObject = res.body()
                 if (jsonObject != null) {
-                    parseData(jsonObject);
+                    val blogs: ArrayList<BlogModel> = ArrayList()
+                    parseData(jsonObject, blogs);
                     if (blogs.size > 0) {
-                        adapter.setDatas(blogs)
+                        adapter.refresh(blogs)
 
                     }
 
@@ -158,7 +162,7 @@ class UserNameFragment : Fragment() {
                 progressDialog.dismiss()
 
             } catch (e: Exception) {
-                Log.e(TAG,e.message+"")
+                Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
@@ -169,7 +173,7 @@ class UserNameFragment : Fragment() {
 
 
     private fun loadMore(user: String, end_cursor: String) {
-        Log.v(TAG,"loadmore")
+        Log.v(TAG, "loadmore")
         if (isFetching || isEnd) {
             return
         }
@@ -180,17 +184,19 @@ class UserNameFragment : Fragment() {
             try {
                 val res = ApiClient.getClient().getUserInfo(user, end_cursor)
                 val code = res.code()
-                if (code!=200){
+                if (code != 200) {
                     binding.progressBottom.visibility = View.VISIBLE
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                     return@launch
                 }
 
                 val jsonObject = res.body()
                 if (jsonObject != null) {
-                    parseData(jsonObject);
+                    val blogs: ArrayList<BlogModel> = ArrayList()
+                    parseData(jsonObject, blogs);
                     if (blogs.size > 0) {
-                        adapter.setDatas(blogs)
+                        adapter.loadMore(blogs)
                     }
                 }
                 isFetching = false
@@ -206,7 +212,7 @@ class UserNameFragment : Fragment() {
 
     }
 
-    private fun parseData(jsonObject: JsonObject) {
+    private fun parseData(jsonObject: JsonObject, blogs: ArrayList<BlogModel>) {
 
         val data = jsonObject["data"].asJsonObject
         val items = data["items"].asJsonArray
@@ -221,7 +227,8 @@ class UserNameFragment : Fragment() {
             //blogModel.displayUrl = item.asJsonObject["display_url"].asString
             blogModel.shortCode = item.asJsonObject["shortcode"].asString
             blogModel.typeName = item.asJsonObject["__typename"].asString
-            blogModel.thumbnailUrl = item.asJsonObject["thumbnail_resources"].asJsonArray[0].asJsonObject["src"].asString
+            blogModel.thumbnailUrl =
+                item.asJsonObject["thumbnail_resources"].asJsonArray[0].asJsonObject["src"].asString
             blogs.add(blogModel)
         }
 

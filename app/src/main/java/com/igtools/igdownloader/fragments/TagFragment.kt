@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.ads.AdRequest
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
@@ -37,7 +38,7 @@ class TagFragment : Fragment() {
     lateinit var binding: FragmentTagBinding
     lateinit var progressDialog: ProgressDialog
     var isFetching = false
-    var blogs: ArrayList<BlogModel> = ArrayList()
+    //var blogs: ArrayList<BlogModel> = ArrayList()
     var gson = Gson()
 
     //tag 分页信息
@@ -61,12 +62,15 @@ class TagFragment : Fragment() {
 
     private fun initViews() {
 
+        val adRequest: AdRequest = AdRequest.Builder().build()
+        binding.adView.loadAd(adRequest)
+
         binding.tvSearch.isEnabled = false
         binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
-        adapter = BlogAdapter(requireContext(), blogs)
+        adapter = BlogAdapter(requireContext())
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter
         binding.rv.layoutManager = layoutManager
@@ -134,8 +138,10 @@ class TagFragment : Fragment() {
 
     private fun refresh(tag: String) {
 
+        if (isFetching){
+            return
+        }
         progressDialog.show()
-        blogs.clear()
         next_max_id = ""
         next_media_ids.clear()
         next_page = 1
@@ -155,9 +161,10 @@ class TagFragment : Fragment() {
 
                 val jsonObject = res.body()
                 if (jsonObject != null) {
-                    parseData(jsonObject);
+                    val blogs:ArrayList<BlogModel> = ArrayList()
+                    parseData(jsonObject,blogs);
                     if (blogs.size > 0) {
-                        adapter.setDatas(blogs)
+                        adapter.refresh(blogs)
 
                     }
                 }
@@ -187,12 +194,6 @@ class TagFragment : Fragment() {
         lifecycleScope.launch {
 
             try {
-//                val res = ApiClient.getClient().getMoreTags(
-//                    max_id = next_max_id,
-//                    page = next_page,
-//                    next_media_ids = next_media_ids
-//                )
-
 
                 val params: HashMap<String, Any> = HashMap();
                 params["max_id"] = next_max_id
@@ -216,9 +217,10 @@ class TagFragment : Fragment() {
 
                 val jsonObject = res.body()
                 if (jsonObject != null) {
-                    parseData(jsonObject);
+                    val blogs:ArrayList<BlogModel> = ArrayList()
+                    parseData(jsonObject,blogs);
                     if (blogs.size > 0) {
-                        adapter.setDatas(blogs)
+                        adapter.loadMore(blogs)
 
                     }
                 }
@@ -235,7 +237,7 @@ class TagFragment : Fragment() {
 
     }
 
-    private fun parseData(jsonObject: JsonObject) {
+    private fun parseData(jsonObject: JsonObject,blogs:ArrayList<BlogModel>) {
         next_media_ids.clear()
         val data = jsonObject["data"].asJsonObject
         more_available = data["more_available"].asBoolean

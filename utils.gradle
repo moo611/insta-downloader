@@ -1,0 +1,5 @@
+ext.getArtifactName = {
+    defaultConfig ->
+        def date = new Date().format("yyyyMMdd")
+        return project.name + "-" + date
+}
