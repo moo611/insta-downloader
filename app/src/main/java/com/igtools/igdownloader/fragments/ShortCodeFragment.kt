@@ -74,7 +74,7 @@ class ShortCodeFragment : Fragment() {
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
 
-        InterstitialAd.load(requireContext(), "ca-app-pub-3940256099942544/1033173712", adRequest,
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/8844989426", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)

@@ -66,11 +66,11 @@ class BlogDetailsActivity : AppCompatActivity() {
 
         val shortCode = intent.extras?.getString("shortCode")
         if (shortCode != null) {
-            binding.btnDownload.visibility=View.VISIBLE
+            binding.btnDownload.visibility = View.VISIBLE
             getData(shortCode)
 
         } else if (intent.extras?.getString("content") != null) {
-            binding.btnDownload.visibility=View.INVISIBLE
+            binding.btnDownload.visibility = View.INVISIBLE
             getDataFromLocal(intent.extras!!.getString("content")!!)
 
         }
@@ -82,7 +82,7 @@ class BlogDetailsActivity : AppCompatActivity() {
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
 
-        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest,
+        InterstitialAd.load(this, "ca-app-pub-8609866682652024/3227198216", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)
@@ -117,8 +117,8 @@ class BlogDetailsActivity : AppCompatActivity() {
     private fun setListeners() {
 
         binding.btnDownload.setOnClickListener {
-            if (isDownloading){
-                Toast.makeText(this,R.string.downloading,Toast.LENGTH_SHORT).show()
+            if (isDownloading) {
+                Toast.makeText(this, R.string.downloading, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -127,7 +127,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             progressDialog.show()
             lifecycleScope.launch {
 
-                val all:List<Deferred<Unit>> = medias.map {
+                val all: List<Deferred<Unit>> = medias.map {
                     async {
                         downloadMedia(it)
                     }
@@ -143,7 +143,11 @@ class BlogDetailsActivity : AppCompatActivity() {
 
                 progressDialog.dismiss()
                 isDownloading = false
-                Toast.makeText(this@BlogDetailsActivity, getString(R.string.download_finish), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@BlogDetailsActivity,
+                    getString(R.string.download_finish),
+                    Toast.LENGTH_SHORT
+                ).show()
 
 
             }
@@ -164,14 +168,18 @@ class BlogDetailsActivity : AppCompatActivity() {
                 val res = ApiClient.getClient().getShortCode(url)
 
                 val code = res.code()
-                if (code!=200){
+                if (code != 200) {
                     binding.progressBar.visibility = View.INVISIBLE
-                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@BlogDetailsActivity,
+                        getString(R.string.not_found),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@launch
                 }
 
                 val jsonObject = res.body()
-                if (jsonObject!=null){
+                if (jsonObject != null) {
                     parseData(jsonObject);
                     if (medias.size > 0) {
                         adapter.setDatas(medias as List<MediaModel?>?)
@@ -184,9 +192,13 @@ class BlogDetailsActivity : AppCompatActivity() {
 
                     binding.progressBar.visibility = View.INVISIBLE
                 }
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 binding.progressBar.visibility = View.INVISIBLE
-                Toast.makeText(this@BlogDetailsActivity, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@BlogDetailsActivity,
+                    getString(R.string.not_found),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
 
@@ -284,7 +296,7 @@ class BlogDetailsActivity : AppCompatActivity() {
                 }
 
             } catch (e: Error) {
-               // errFlag = true
+                // errFlag = true
             }
 
         }
@@ -314,7 +326,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             } else {
                 FileUtils.saveVideoToAlbum(this, file)
             }
-            Log.v(TAG,file.absolutePath)
+            Log.v(TAG, file.absolutePath)
 
         } catch (e: Exception) {
             Log.e("saveFile", e.toString())
