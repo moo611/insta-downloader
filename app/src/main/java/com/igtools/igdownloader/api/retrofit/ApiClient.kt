@@ -22,6 +22,7 @@ object ApiClient {
 
         val client = builder.build()
         //BaseApplication.baseUrl = Urls.BASE_URL_PY
+        Log.v(TAG,BaseApplication.baseUrl)
         return Retrofit.Builder().baseUrl(BaseApplication.baseUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create()).build()

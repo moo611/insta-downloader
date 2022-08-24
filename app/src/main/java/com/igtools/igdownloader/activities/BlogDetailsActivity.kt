@@ -28,6 +28,7 @@ import com.igtools.igdownloader.models.Record
 import com.igtools.igdownloader.room.RecordDB
 import com.igtools.igdownloader.utils.DateUtils
 import com.igtools.igdownloader.utils.FileUtils
+import com.igtools.igdownloader.utils.getNullable
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
@@ -162,7 +163,7 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     private fun getData(url: String) {
         binding.progressBar.visibility = View.VISIBLE
-
+        medias.clear()
         lifecycleScope.launch {
             try {
                 val res = ApiClient.getClient().getShortCode(url)
@@ -220,11 +221,10 @@ class BlogDetailsActivity : AppCompatActivity() {
     }
 
     private fun parseData(jsonObject: JsonObject) {
-        medias.clear()
 
         val data = jsonObject["data"].asJsonObject
         val mediaType = data["media_type"].asInt
-
+        val productType = data["product_type"].asString
         if (mediaType == 8) {
 
             val resources = data["resources"].asJsonArray
@@ -233,35 +233,64 @@ class BlogDetailsActivity : AppCompatActivity() {
                 val mediaInfo = MediaModel()
                 mediaInfo.mediaType = res.asJsonObject["media_type"].asInt
                 mediaInfo.thumbnailUrl = res.asJsonObject["thumbnail_url"].asString
-                if (!res.asJsonObject["video_url"].isJsonNull) {
-                    mediaInfo.videoUrl = res.asJsonObject["video_url"]?.asString
-                }
-                if (!data["caption_text"].isJsonNull) {
-                    mediaInfo.title = data["caption_text"]?.asString
-                }
+                mediaInfo.videoUrl = data.getNullable("video_url")?.asString
+                mediaInfo.title = data["caption_text"]?.asString
                 mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
                 mediaInfo.username = data["user"].asJsonObject["username"].asString
 
                 medias.add(mediaInfo)
             }
-        } else if (mediaType == 1 || mediaType == 2) {
+        } else if (mediaType == 1) {
 
             val mediaInfo = MediaModel()
             mediaInfo.mediaType = mediaType
             mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
-            if (!data["video_url"].isJsonNull) {
-                mediaInfo.videoUrl = data["video_url"]?.asString
-                //mediaInfo.videoUrl = "https://ssyttest.oss-cn-hangzhou.aliyuncs.com/test/myvideo.mp4"
-            }
-            if (!data["caption_text"].isJsonNull) {
-                mediaInfo.title = data["caption_text"]?.asString
-            }
+            mediaInfo.videoUrl = data.getNullable("video_url")?.asString
+            mediaInfo.title = data["caption_text"]?.asString
             mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
             mediaInfo.username = data["user"].asJsonObject["username"].asString
 
             medias.add(mediaInfo)
-        }
+        }else if (mediaType == 2){
 
+            when (productType) {
+                "feed" -> {
+                    val mediaInfo = MediaModel()
+                    mediaInfo.mediaType = mediaType
+                    mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
+                    mediaInfo.videoUrl = data.getNullable("video_url")?.asString
+                    mediaInfo.title = data["caption_text"]?.asString
+                    mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
+                    mediaInfo.username = data["user"].asJsonObject["username"].asString
+
+                    medias.add(mediaInfo)
+                }
+                "igtv" -> {
+
+                    val mediaInfo = MediaModel()
+                    mediaInfo.mediaType = mediaType
+                    mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
+                    mediaInfo.videoUrl = data.getNullable("video_url")?.asString
+                    mediaInfo.title = data["caption_text"]?.asString
+                    mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
+                    mediaInfo.username = data["user"].asJsonObject["username"].asString
+
+                    medias.add(mediaInfo)
+
+                }
+                "clips" -> {
+                    val mediaInfo = MediaModel()
+                    mediaInfo.mediaType = mediaType
+                    mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
+                    mediaInfo.videoUrl = data.getNullable("video_url")?.asString
+                    mediaInfo.title = data["caption_text"]?.asString
+                    mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
+                    mediaInfo.username = data["user"].asJsonObject["username"].asString
+                    medias.add(mediaInfo)
+                }
+            }
+
+        }
 
     }
 
