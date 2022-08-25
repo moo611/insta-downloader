@@ -2,12 +2,11 @@ package com.igtools.igdownloader.models
 
 import android.net.Uri
 
-class MediaModel {
+class MediaModel : ResourceModel() {
 
-    var thumbnailUrl = ""
-    var videoUrl: String? = null
-    var mediaType = 1
-    var title: String? = null
-    var avatar = ""
+    var code = ""
+    var captionText:String?=null
+    var profilePicUrl = ""
     var username = ""
+    var resources: ArrayList<ResourceModel> = ArrayList()
 }

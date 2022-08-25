@@ -19,8 +19,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
-                >
+                android:layout_height="80dp">
 
                 <EditText
                     android:id="@+id/et_shortcode"
@@ -85,12 +84,27 @@
                 android:layout_height="320dp"
                 android:layout_marginTop="20dp">
 
+                <ImageView
+                    android:id="@+id/picture"
+                    android:layout_width="320dp"
+                    android:layout_height="320dp"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="invisible" />
+
                 <com.youth.banner.Banner
                     android:id="@+id/banner"
                     android:layout_width="320dp"
                     android:layout_height="320dp"
                     android:layout_gravity="center_horizontal"
                     app:banner_infinite_loop="false" />
+
+                <ImageView
+                    android:visibility="invisible"
+                    android:id="@+id/img_play"
+                    android:layout_gravity="center"
+                    android:src="@drawable/video_play_normal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
 
                 <ProgressBar
                     android:id="@+id/progress_bar"

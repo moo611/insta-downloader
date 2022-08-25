@@ -1,6 +1,7 @@
 package com.igtools.igdownloader.activities
 
 import android.app.ProgressDialog
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
@@ -8,10 +9,12 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
+import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -25,6 +28,7 @@ import com.igtools.igdownloader.api.retrofit.ApiClient
 import com.igtools.igdownloader.databinding.ActivityBlogDetailsBinding
 import com.igtools.igdownloader.models.MediaModel
 import com.igtools.igdownloader.models.Record
+import com.igtools.igdownloader.models.ResourceModel
 import com.igtools.igdownloader.room.RecordDB
 import com.igtools.igdownloader.utils.DateUtils
 import com.igtools.igdownloader.utils.FileUtils
@@ -42,11 +46,13 @@ import kotlin.collections.ArrayList
 class BlogDetailsActivity : AppCompatActivity() {
 
     val gson = Gson()
+    val TAG = "BlogDetailsActivity"
+
     lateinit var binding: ActivityBlogDetailsBinding
     lateinit var adapter: MultiTypeAdapter
     lateinit var progressDialog: ProgressDialog
-    var TAG = "BlogDetailsActivity"
-    var medias: ArrayList<MediaModel> = ArrayList()
+
+    var mediaInfo = MediaModel()
     var isDownloading = false
     var mInterstitialAd: InterstitialAd? = null
 
@@ -68,7 +74,7 @@ class BlogDetailsActivity : AppCompatActivity() {
         val shortCode = intent.extras?.getString("shortCode")
         if (shortCode != null) {
             binding.btnDownload.visibility = View.VISIBLE
-            getData(shortCode)
+            getMedia(shortCode)
 
         } else if (intent.extras?.getString("content") != null) {
             binding.btnDownload.visibility = View.INVISIBLE
@@ -103,7 +109,7 @@ class BlogDetailsActivity : AppCompatActivity() {
         binding.adView.loadAd(adRequest)
 
         binding.btnDownload.isEnabled = false
-        adapter = MultiTypeAdapter(this, medias)
+        adapter = MultiTypeAdapter(this, mediaInfo.resources)
         binding.banner
             .addBannerLifecycleObserver(this)
             .setIndicator(CircleIndicator(this))
@@ -128,7 +134,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             progressDialog.show()
             lifecycleScope.launch {
 
-                val all: List<Deferred<Unit>> = medias.map {
+                val all: List<Deferred<Unit>> = mediaInfo.resources.map {
                     async {
                         downloadMedia(it)
                     }
@@ -138,7 +144,7 @@ class BlogDetailsActivity : AppCompatActivity() {
                 //Log.v(TAG,"finish")
                 val record = Record()
                 record.createdTime = DateUtils.getDate(Date())
-                record.content = Gson().toJson(medias)
+                record.content = Gson().toJson(mediaInfo)
 
                 RecordDB.getInstance().recordDao().insert(record)
 
@@ -154,6 +160,18 @@ class BlogDetailsActivity : AppCompatActivity() {
             }
 
         }
+
+        binding.picture.setOnClickListener {
+            if (mediaInfo.mediaType == 2){
+                startActivity(
+                    Intent(this, VideoActivity::class.java)
+                        .putExtra("url", mediaInfo.videoUrl)
+                        .putExtra("thumbnailUrl", mediaInfo.thumbnailUrl)
+                )
+            }
+
+        }
+
         binding.imgBack.setOnClickListener {
             finish()
         }
@@ -161,149 +179,145 @@ class BlogDetailsActivity : AppCompatActivity() {
     }
 
 
-    private fun getData(url: String) {
-        binding.progressBar.visibility = View.VISIBLE
-        medias.clear()
+    private fun getMedia(url: String) {
+
+        val isValid = URLUtil.isValidUrl(url)
+        if (!isValid) {
+            Toast.makeText(this, getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        progressDialog.show()
+
         lifecycleScope.launch {
+
             try {
-                val res = ApiClient.getClient().getShortCode(url)
+                val res = ApiClient.getClient().getMedia(url)
 
                 val code = res.code()
                 if (code != 200) {
-                    binding.progressBar.visibility = View.INVISIBLE
-                    Toast.makeText(
-                        this@BlogDetailsActivity,
-                        getString(R.string.not_found),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    progressDialog.dismiss()
+                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                     return@launch
                 }
-
                 val jsonObject = res.body()
                 if (jsonObject != null) {
-                    parseData(jsonObject);
-                    if (medias.size > 0) {
-                        adapter.setDatas(medias as List<MediaModel?>?)
+                    val data = jsonObject["data"].asJsonObject
+                    parseData(data)
+                    if (mediaInfo.mediaType == 8) {
 
-                        //enable download
+                        if (mediaInfo.resources.size > 0) {
+                            show("album")
+                            adapter.setDatas(mediaInfo.resources as List<ResourceModel?>?)
+
+                            binding.btnDownload.isEnabled = true
+                            binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+                            binding.tvTitle.text = mediaInfo.captionText
+
+                        }
+                    } else {
+                        show("picture")
+                        Glide.with(this@BlogDetailsActivity).load(mediaInfo.thumbnailUrl)
+                            .into(binding.picture)
                         binding.btnDownload.isEnabled = true
                         binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                        binding.tvTitle.text = medias[0].title
+                        binding.tvTitle.text = mediaInfo.captionText
+
                     }
 
-                    binding.progressBar.visibility = View.INVISIBLE
                 }
+                progressDialog.dismiss()
+
             } catch (e: Exception) {
-                binding.progressBar.visibility = View.INVISIBLE
-                Toast.makeText(
-                    this@BlogDetailsActivity,
-                    getString(R.string.not_found),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Log.e(TAG, e.message + "")
+                progressDialog.dismiss()
+                Toast.makeText(this@BlogDetailsActivity, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
 
-
         }
+
     }
+
 
     private fun getDataFromLocal(content: String) {
 
-        medias = gson.fromJson(content, genericType<ArrayList<MediaModel>>())
-        if (medias.size > 0) {
-            adapter.setDatas(medias as List<MediaModel?>?)
+        mediaInfo = gson.fromJson(content, MediaModel::class.java)
+        if (mediaInfo.mediaType == 8) {
 
-            //enable download
+            if (mediaInfo.resources.size > 0) {
+                show("album")
+                adapter.setDatas(mediaInfo.resources as List<ResourceModel?>?)
+
+                binding.btnDownload.isEnabled = true
+                binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+                binding.tvTitle.text = mediaInfo.captionText
+
+            }
+        } else {
+            show("picture")
+            Glide.with(this@BlogDetailsActivity).load(mediaInfo.thumbnailUrl)
+                .into(binding.picture)
             binding.btnDownload.isEnabled = true
             binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-            binding.tvTitle.text = medias[0].title
+            binding.tvTitle.text = mediaInfo.captionText
+
         }
+
 
     }
 
     private fun parseData(jsonObject: JsonObject) {
 
-        val data = jsonObject["data"].asJsonObject
-        val mediaType = data["media_type"].asInt
-        val productType = data["product_type"].asString
+        val mediaType = jsonObject["media_type"].asInt
         if (mediaType == 8) {
 
-            val resources = data["resources"].asJsonArray
+            mediaInfo.pk = jsonObject["pk"].asString
+            mediaInfo.code = jsonObject["code"].asString
+            mediaInfo.mediaType = jsonObject["media_type"].asInt
+            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
+            mediaInfo.captionText = jsonObject["caption_text"].asString
+            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
+
+            val resources = jsonObject["resources"].asJsonArray
+            mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
             for (res in resources) {
 
-                val mediaInfo = MediaModel()
-                mediaInfo.mediaType = res.asJsonObject["media_type"].asInt
-                mediaInfo.thumbnailUrl = res.asJsonObject["thumbnail_url"].asString
-                mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-                mediaInfo.title = data["caption_text"]?.asString
-                mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-                mediaInfo.username = data["user"].asJsonObject["username"].asString
-
-                medias.add(mediaInfo)
+                val resourceInfo = ResourceModel()
+                resourceInfo.pk = res.asJsonObject["pk"].asString
+                resourceInfo.mediaType = res.asJsonObject["media_type"].asInt
+                resourceInfo.thumbnailUrl = res.asJsonObject["thumbnail_url"].asString
+                resourceInfo.videoUrl = res.asJsonObject.getNullable("video_url")?.asString
+                mediaInfo.resources.add(resourceInfo)
             }
-        } else if (mediaType == 1) {
 
-            val mediaInfo = MediaModel()
-            mediaInfo.mediaType = mediaType
-            mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
-            mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-            mediaInfo.title = data["caption_text"]?.asString
-            mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-            mediaInfo.username = data["user"].asJsonObject["username"].asString
+        } else if (mediaType == 0 || mediaType == 1 || mediaType == 2) {
 
-            medias.add(mediaInfo)
-        }else if (mediaType == 2){
 
-            when (productType) {
-                "feed" -> {
-                    val mediaInfo = MediaModel()
-                    mediaInfo.mediaType = mediaType
-                    mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
-                    mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-                    mediaInfo.title = data["caption_text"]?.asString
-                    mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-                    mediaInfo.username = data["user"].asJsonObject["username"].asString
-
-                    medias.add(mediaInfo)
-                }
-                "igtv" -> {
-
-                    val mediaInfo = MediaModel()
-                    mediaInfo.mediaType = mediaType
-                    mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
-                    mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-                    mediaInfo.title = data["caption_text"]?.asString
-                    mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-                    mediaInfo.username = data["user"].asJsonObject["username"].asString
-
-                    medias.add(mediaInfo)
-
-                }
-                "clips" -> {
-                    val mediaInfo = MediaModel()
-                    mediaInfo.mediaType = mediaType
-                    mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
-                    mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-                    mediaInfo.title = data["caption_text"]?.asString
-                    mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-                    mediaInfo.username = data["user"].asJsonObject["username"].asString
-                    medias.add(mediaInfo)
-                }
-            }
+            mediaInfo.pk = jsonObject["pk"].asString
+            mediaInfo.code = jsonObject["code"].asString
+            mediaInfo.mediaType = jsonObject["media_type"].asInt
+            mediaInfo.thumbnailUrl = jsonObject["thumbnail_url"].asString
+            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
+            mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
+            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
 
         }
 
     }
 
-    private suspend fun downloadMedia(media: MediaModel?) {
+    private suspend fun downloadMedia(media: ResourceModel?) {
 
-        if (media?.mediaType == 1) {
+        if (media?.mediaType == 1 || media?.mediaType == 0) {
             //image
             val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
 
             try {
-                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
                 withContext(Dispatchers.IO) {
                     saveFile(responseBody.body(), file, 1)
                 }
@@ -313,13 +327,13 @@ class BlogDetailsActivity : AppCompatActivity() {
             }
 
 
-        } else {
+        } else if (media?.mediaType==2){
             //video
             val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
             try {
-                val responseBody = ApiClient.getClient().downloadUrl(media?.videoUrl!!)
+                val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
                 withContext(Dispatchers.IO) {
                     saveFile(responseBody.body(), file, 2)
                 }
@@ -365,5 +379,24 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     }
 
-    inline fun <reified T> genericType() = object : TypeToken<T>() {}.type
+    private fun show(flag:String){
+
+        if (flag=="picture"){
+            binding.picture.visibility = View.VISIBLE
+            binding.banner.visibility = View.INVISIBLE
+
+            if (mediaInfo.mediaType == 0 || mediaInfo.mediaType == 1) {
+                binding.imgPlay.visibility = View.INVISIBLE
+            } else if (mediaInfo.mediaType == 2) {
+                binding.imgPlay.visibility = View.VISIBLE
+            }
+
+        }else{
+            binding.imgPlay.visibility = View.INVISIBLE
+            binding.banner.visibility = View.VISIBLE
+            binding.picture.visibility = View.INVISIBLE
+        }
+
+    }
+
 }

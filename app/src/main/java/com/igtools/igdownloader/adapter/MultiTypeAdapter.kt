@@ -11,18 +11,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.activities.VideoActivity
-import com.igtools.igdownloader.models.MediaModel
+import com.igtools.igdownloader.models.ResourceModel
 import com.youth.banner.adapter.BannerAdapter
 import com.youth.banner.util.BannerUtils
 
 /**
  * 自定义布局,多个不同UI切换
  */
-class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel?>?) :
-    BannerAdapter<MediaModel?, RecyclerView.ViewHolder>(mDatas) {
+class MultiTypeAdapter(private val context: Context, mDatas: List<ResourceModel>) :
+    BannerAdapter<ResourceModel, RecyclerView.ViewHolder>(mDatas) {
     var TAG = "MultiTypeAdapter"
     override fun onCreateHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
+            0 -> return ImageHolder(BannerUtils.getView(parent, R.layout.banner_image))
             1 -> return ImageHolder(BannerUtils.getView(parent, R.layout.banner_image))
             2 -> return VideoHolder(BannerUtils.getView(parent, R.layout.banner_video))
         }
@@ -31,12 +32,20 @@ class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel?>?)
 
     override fun onBindView(
         holder: RecyclerView.ViewHolder?,
-        data: MediaModel?,
+        data: ResourceModel?,
         position: Int,
         size: Int
     ) {
 
         when (holder?.itemViewType) {
+            0 -> {
+                val imageHolder = holder as ImageHolder
+                Glide.with(context)
+                    .load(data?.thumbnailUrl)
+                    .thumbnail(/*sizeMultiplier=*/ 0.25f)
+                    .placeholder(ColorDrawable(ContextCompat.getColor(context, R.color.gray_1)))
+                    .into(imageHolder.imageView)
+            }
             1 -> {
                 val imageHolder = holder as ImageHolder
                 Glide.with(context)
@@ -63,6 +72,7 @@ class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel?>?)
 
                 }
             }
+
         }
 
     }

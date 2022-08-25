@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.igtools.igdownloader.BaseApplication
 import com.igtools.igdownloader.models.Record
 
-@Database(entities = [Record::class], version = 1,exportSchema = true)
+@Database(entities = [Record::class], version = 2, exportSchema = true)
 abstract class RecordDB : RoomDatabase() {
 
     abstract fun recordDao(): RecordDao
@@ -24,7 +24,6 @@ abstract class RecordDB : RoomDatabase() {
             Room.databaseBuilder(
                 context.applicationContext,
                 RecordDB::class.java, "mydb"
-            )
-                .build()
+            ).fallbackToDestructiveMigration().build()
     }
 }

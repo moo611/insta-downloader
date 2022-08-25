@@ -1,6 +1,7 @@
 package com.igtools.igdownloader.fragments
 
 import android.app.ProgressDialog
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Environment
@@ -15,6 +16,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -22,12 +24,14 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
+import com.igtools.igdownloader.activities.VideoActivity
 import com.igtools.igdownloader.adapter.MultiTypeAdapter
 import com.igtools.igdownloader.api.retrofit.ApiClient
 import com.igtools.igdownloader.databinding.FragmentShortCodeBinding
 import com.igtools.igdownloader.models.IntentEvent
 import com.igtools.igdownloader.models.MediaModel
 import com.igtools.igdownloader.models.Record
+import com.igtools.igdownloader.models.ResourceModel
 import com.igtools.igdownloader.room.RecordDB
 import com.igtools.igdownloader.utils.DateUtils
 import com.igtools.igdownloader.utils.FileUtils
@@ -55,9 +59,10 @@ class ShortCodeFragment : Fragment() {
     lateinit var binding: FragmentShortCodeBinding
     lateinit var adapter: MultiTypeAdapter
     var TAG = "ShortCodeFragment"
-    var medias: ArrayList<MediaModel> = ArrayList()
+
     var isDownloading = false
     var mInterstitialAd: InterstitialAd? = null
+    var mediaInfo = MediaModel()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -97,7 +102,7 @@ class ShortCodeFragment : Fragment() {
         binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
         binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
 
-        adapter = MultiTypeAdapter(requireContext(), medias)
+        adapter = MultiTypeAdapter(requireContext(), mediaInfo.resources)
         binding.banner
             .addBannerLifecycleObserver(this)
             .setIndicator(CircleIndicator(context))
@@ -112,21 +117,20 @@ class ShortCodeFragment : Fragment() {
     }
 
 
-    private fun getData(url: String) {
+    private fun getMedia(url: String) {
 
         val isValid = URLUtil.isValidUrl(url)
-        if (!isValid){
-            Toast.makeText(context,getString(R.string.invalid_url),Toast.LENGTH_SHORT).show()
+        if (!isValid) {
+            Toast.makeText(context, getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
             return
         }
 
         progressDialog.show()
-        medias.clear()
 
         lifecycleScope.launch {
 
             try {
-                val res = ApiClient.getClient().getShortCode(url)
+                val res = ApiClient.getClient().getMedia(url)
 
                 val code = res.code()
                 if (code != 200) {
@@ -137,19 +141,30 @@ class ShortCodeFragment : Fragment() {
                 }
                 val jsonObject = res.body()
                 if (jsonObject != null) {
-                    parseData(jsonObject);
-                    if (medias.size > 0) {
-                        adapter.setDatas(medias as List<MediaModel?>?)
+                    val data = jsonObject["data"].asJsonObject
+                    parseData(data)
+                    if (mediaInfo.mediaType == 8) {
+                        if (mediaInfo.resources.size > 0) {
+                            show("banner")
+                            adapter.setDatas(mediaInfo.resources as List<ResourceModel?>?)
+                            binding.tvDownload.isEnabled = true
+                            binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
 
+                        }
+                    } else {
+                        show("picture")
+                        Glide.with(requireContext()).load(mediaInfo.thumbnailUrl)
+                            .into(binding.picture)
                         binding.tvDownload.isEnabled = true
                         binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
+
                     }
 
                 }
                 progressDialog.dismiss()
 
             } catch (e: Exception) {
-                Log.e(TAG,e.message+"")
+                Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
@@ -158,86 +173,50 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun parseData(jsonObject: JsonObject) {
+    private fun getStories(url: String) {
 
-        val data = jsonObject["data"].asJsonObject
-        val mediaType = data["media_type"].asInt
-        val productType = data["product_type"].asString
-        if (mediaType == 8) {
+        progressDialog.show()
 
-            val resources = data["resources"].asJsonArray
-            for (res in resources) {
+        lifecycleScope.launch {
 
-                val mediaInfo = MediaModel()
-                mediaInfo.mediaType = res.asJsonObject["media_type"].asInt
-                mediaInfo.thumbnailUrl = res.asJsonObject["thumbnail_url"].asString
-                mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-                mediaInfo.title = data["caption_text"]?.asString
-                mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-                mediaInfo.username = data["user"].asJsonObject["username"].asString
+            try {
+                val res = ApiClient.getClient().getStory(url)
 
-                medias.add(mediaInfo)
-            }
-        } else if (mediaType == 1) {
-
-            val mediaInfo = MediaModel()
-            mediaInfo.mediaType = mediaType
-            mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
-            mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-            mediaInfo.title = data["caption_text"]?.asString
-            mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-            mediaInfo.username = data["user"].asJsonObject["username"].asString
-
-            medias.add(mediaInfo)
-        }else if (mediaType == 2){
-
-            when (productType) {
-                "feed" -> {
-                    val mediaInfo = MediaModel()
-                    mediaInfo.mediaType = mediaType
-                    mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
-                    mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-                    mediaInfo.title = data["caption_text"]?.asString
-                    mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-                    mediaInfo.username = data["user"].asJsonObject["username"].asString
-
-                    medias.add(mediaInfo)
+                val code = res.code()
+                if (code != 200) {
+                    progressDialog.dismiss()
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
+                    return@launch
                 }
-                "igtv" -> {
-
-                    val mediaInfo = MediaModel()
-                    mediaInfo.mediaType = mediaType
-                    mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
-                    mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-                    mediaInfo.title = data["caption_text"]?.asString
-                    mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-                    mediaInfo.username = data["user"].asJsonObject["username"].asString
-
-                    medias.add(mediaInfo)
+                val jsonObject = res.body()
+                if (jsonObject != null) {
+                    val data = jsonObject["data"].asJsonObject
+                    parseData(data)
+                    show("picture")
+                    Glide.with(requireContext()).load(mediaInfo.thumbnailUrl).into(binding.picture)
+                    binding.tvDownload.isEnabled = true
+                    binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
 
                 }
-                "clips" -> {
-                    val mediaInfo = MediaModel()
-                    mediaInfo.mediaType = mediaType
-                    mediaInfo.thumbnailUrl = data["thumbnail_url"].asString
-                    mediaInfo.videoUrl = data.getNullable("video_url")?.asString
-                    mediaInfo.title = data["caption_text"]?.asString
-                    mediaInfo.avatar = data["user"].asJsonObject["profile_pic_url"].asString
-                    mediaInfo.username = data["user"].asJsonObject["username"].asString
-                    medias.add(mediaInfo)
-                }
+                progressDialog.dismiss()
+
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                progressDialog.dismiss()
+                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
 
         }
 
-
     }
+
 
     private fun setListeners() {
 
         binding.tvDownload.setOnClickListener {
-            if (isDownloading){
-                Toast.makeText(requireContext(),R.string.downloading,Toast.LENGTH_SHORT).show()
+            if (isDownloading) {
+                Toast.makeText(requireContext(), R.string.downloading, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -246,18 +225,21 @@ class ShortCodeFragment : Fragment() {
             isDownloading = true
             binding.progressBar.visibility = View.VISIBLE
             lifecycleScope.launch {
-
-                val all: List<Deferred<Unit>> = medias.map {
-                    async {
-                        downloadMedia(it)
+                if (mediaInfo.mediaType == 8) {
+                    val all: List<Deferred<Unit>> = mediaInfo.resources.map {
+                        async {
+                            downloadMedia(it)
+                        }
                     }
+                    all.awaitAll()
+                } else {
+                    downloadMedia(mediaInfo)
                 }
 
-                all.awaitAll()
                 Log.v(TAG, "finish")
                 val record = Record()
                 record.createdTime = DateUtils.getDate(Date())
-                record.content = Gson().toJson(medias)
+                record.content = Gson().toJson(mediaInfo)
 
                 RecordDB.getInstance().recordDao().insert(record)
 
@@ -276,7 +258,25 @@ class ShortCodeFragment : Fragment() {
             binding.tvDownload.isEnabled = false
             binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
 
-            getData(binding.etShortcode.text.toString())
+            val keyword = binding.etShortcode.text.toString()
+            if (keyword.contains("stories")) {
+                getStories(keyword)
+            } else {
+                getMedia(keyword)
+            }
+
+        }
+
+        binding.imgPlay.setOnClickListener {
+
+            if (mediaInfo.mediaType == 2) {
+                startActivity(
+                    Intent(requireContext(), VideoActivity::class.java)
+                        .putExtra("url", mediaInfo.videoUrl)
+                        .putExtra("thumbnailUrl", mediaInfo.thumbnailUrl)
+                )
+            }
+
         }
 
         binding.etShortcode.addTextChangedListener(object : TextWatcher {
@@ -314,26 +314,69 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private suspend fun downloadMedia(media: MediaModel?) {
+    private fun parseData(jsonObject: JsonObject) {
 
-        if (media?.mediaType == 1) {
+        val mediaType = jsonObject["media_type"].asInt
+        Log.v(TAG, "mediaType:$mediaType")
+        if (mediaType == 8) {
+
+            mediaInfo.pk = jsonObject["pk"].asString
+            mediaInfo.code = jsonObject["code"].asString
+            mediaInfo.mediaType = jsonObject["media_type"].asInt
+            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
+            mediaInfo.captionText = jsonObject["caption_text"].asString
+            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
+
+            val resources = jsonObject["resources"].asJsonArray
+            mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
+            for (res in resources) {
+
+                val resourceInfo = ResourceModel()
+                resourceInfo.pk = res.asJsonObject["pk"].asString
+                resourceInfo.mediaType = res.asJsonObject["media_type"].asInt
+                resourceInfo.thumbnailUrl = res.asJsonObject["thumbnail_url"].asString
+                resourceInfo.videoUrl = res.asJsonObject.getNullable("video_url")?.asString
+                mediaInfo.resources.add(resourceInfo)
+            }
+
+        } else if (mediaType == 0 || mediaType == 1 || mediaType == 2) {
+
+
+            mediaInfo.pk = jsonObject["pk"].asString
+            mediaInfo.code = jsonObject["code"].asString
+            mediaInfo.mediaType = jsonObject["media_type"].asInt
+            mediaInfo.thumbnailUrl = jsonObject["thumbnail_url"].asString
+            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
+            mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
+            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
+
+        }
+
+    }
+
+    private suspend fun downloadMedia(media: ResourceModel?) {
+
+        if (media?.mediaType == 1 || media?.mediaType == 0) {
             //image
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
             withContext(Dispatchers.IO) {
                 saveFile(responseBody.body(), file, 1)
             }
-        } else {
+        } else if (media?.mediaType == 2) {
             //video
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-            val responseBody = ApiClient.getClient().downloadUrl(media?.videoUrl!!)
-
-            withContext(Dispatchers.IO) {
-                saveFile(responseBody.body(), file, 2)
+            if (media.videoUrl != null) {
+                val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
+                withContext(Dispatchers.IO) {
+                    saveFile(responseBody.body(), file, 2)
+                }
             }
 
         }
@@ -374,8 +417,26 @@ class ShortCodeFragment : Fragment() {
 
     }
 
+    private fun show(flag: String) {
+
+        if (flag == "picture") {
+            binding.picture.visibility = View.VISIBLE
+            binding.banner.visibility = View.INVISIBLE
+            if (mediaInfo.mediaType == 0 || mediaInfo.mediaType == 1) {
+                binding.imgPlay.visibility = View.INVISIBLE
+            } else if (mediaInfo.mediaType == 2) {
+                binding.imgPlay.visibility = View.VISIBLE
+            }
+        } else {
+            binding.imgPlay.visibility = View.INVISIBLE
+            binding.banner.visibility = View.VISIBLE
+            binding.picture.visibility = View.INVISIBLE
+        }
+
+    }
+
     @Subscribe
-    fun onKeywordReceive(intentEvent: IntentEvent){
+    fun onKeywordReceive(intentEvent: IntentEvent) {
 
         val keyword = intentEvent.str
         binding.etShortcode.setText(keyword)
@@ -385,8 +446,12 @@ class ShortCodeFragment : Fragment() {
         binding.tvDownload.isEnabled = false
         binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
 
+        if (keyword.contains("stories")) {
+            getStories(keyword)
+        } else {
+            getMedia(keyword)
+        }
 
-        getData(keyword)
 
     }
 

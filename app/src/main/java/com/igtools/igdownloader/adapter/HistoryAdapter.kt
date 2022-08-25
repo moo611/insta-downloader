@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import android.widget.TextView
+import com.igtools.igdownloader.models.MediaModel
 import java.io.File
 import java.util.ArrayList
 
@@ -21,10 +22,8 @@ import java.util.ArrayList
  * @Date: 2022/8/4
  */
 class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
-    var thumbnails: List<String> = ArrayList()
-    var titles: List<String> = ArrayList()
-    var usernames: List<String> = ArrayList()
-    var avatars: List<String> = ArrayList()
+
+    var medias: List<MediaModel> = ArrayList()
     var onItemClickListener: OnItemClickListener? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryHolder {
         val v = LayoutInflater.from(c).inflate(R.layout.item_history, parent, false)
@@ -32,33 +31,25 @@ class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
     }
 
     override fun onBindViewHolder(holder: HistoryHolder, position: Int) {
-        Glide.with(c).load(thumbnails[position])
+        Glide.with(c).load(medias[position].thumbnailUrl)
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
             .into(holder.thumbnail)
-        holder.caption.text = titles[position]
+        holder.caption.text = medias[position].captionText
         holder.itemView.setOnClickListener { v: View? -> onItemClickListener!!.onClick(position) }
         Glide.with(c)
-            .load(avatars[position])
+            .load(medias[position].profilePicUrl)
             .circleCrop()
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
             .into(holder.avatar)
-        holder.username.text = usernames[position]
+        holder.username.text = medias[position].username
     }
 
     override fun getItemCount(): Int {
-        return thumbnails.size
+        return medias.size
     }
 
-    fun setDatas(
-        thumbnails: List<String>,
-        titles: List<String>,
-        usernames: List<String>,
-        avatars: List<String>
-    ) {
-        this.thumbnails = thumbnails
-        this.titles = titles
-        this.usernames = usernames
-        this.avatars = avatars
+    fun setDatas(medias: ArrayList<MediaModel>) {
+        this.medias = medias
         notifyDataSetChanged()
     }
 
@@ -69,7 +60,6 @@ class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
         var username: TextView = itemView.findViewById(R.id.tv_username)
 
     }
-
 
 
     interface OnItemClickListener {

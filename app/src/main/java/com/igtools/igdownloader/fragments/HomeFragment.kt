@@ -41,7 +41,8 @@ class HomeFragment : Fragment() {
 
         val fragments:ArrayList<Fragment> = ArrayList()
         fragments.add(ShortCodeFragment())
-        fragments.add(UserNameFragment())
+        //fragments.add(UserNameFragment())
+        fragments.add(UserFragment())
         val titles:ArrayList<String> = ArrayList()
         titles.add(getString(R.string.vp_shortcode))
         titles.add(getString(R.string.vp_username))

@@ -18,9 +18,18 @@ interface ApiService {
         @Query("end_cursor") end_cursor: String
     ): Response<JsonObject>
 
+    @GET("api/usermedias")
+    suspend fun getUserMedias(
+        @Query("username") user: String,
+        @Query("end_cursor") end_cursor: String
+    ): Response<JsonObject>
+
 
     @GET("api/mediainfo")
-    suspend fun getShortCode(@Query("url") url: String): Response<JsonObject>
+    suspend fun getMedia(@Query("url") url: String): Response<JsonObject>
+
+    @GET("api/mediastory")
+    suspend fun getStory(@Query("url") code: String): Response<JsonObject>
 
     @GET("api/taginfo")
     suspend fun getTags(
@@ -36,6 +45,6 @@ interface ApiService {
 
 
     @POST("api/taginfo/more")
-    suspend fun postMoreTags(@Body body:RequestBody):Response<JsonObject>
+    suspend fun postMoreTags(@Body body: RequestBody): Response<JsonObject>
 
 }
