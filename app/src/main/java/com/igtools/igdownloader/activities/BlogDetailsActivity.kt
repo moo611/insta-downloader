@@ -181,11 +181,11 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     private fun getMedia(url: String) {
 
-        val isValid = URLUtil.isValidUrl(url)
-        if (!isValid) {
-            Toast.makeText(this, getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
-            return
-        }
+//        val isValid = URLUtil.isValidUrl(url)
+//        if (!isValid) {
+//            Toast.makeText(this, getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
+//            return
+//        }
 
         progressDialog.show()
 
@@ -278,7 +278,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject["caption_text"].asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
             val resources = jsonObject["resources"].asJsonArray
             mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
@@ -302,7 +302,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
         }
 

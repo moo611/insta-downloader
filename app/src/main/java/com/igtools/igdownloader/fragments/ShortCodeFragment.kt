@@ -326,7 +326,7 @@ class ShortCodeFragment : Fragment() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject["caption_text"].asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
             val resources = jsonObject["resources"].asJsonArray
             mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
@@ -350,7 +350,7 @@ class ShortCodeFragment : Fragment() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
         }
 

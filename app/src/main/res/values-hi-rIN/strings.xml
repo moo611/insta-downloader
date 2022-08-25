@@ -31,4 +31,5 @@
     <string name="downloading">डाउनलोड हो रहा है…</string>
     <string name="not_found">पोस्ट नहीं मिली</string>
     <string name="invalid_url">अवैध यूआरएल</string>
+    <string name = "too_many">बहुत अधिक अनुरोध</string>
 </resources>

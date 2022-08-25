@@ -131,13 +131,19 @@ class UserFragment : Fragment() {
         progressDialog.show()
         lifecycleScope.launch {
             try {
-                val res = ApiClient.getClient().getUserInfo(user, "")
+                val res = ApiClient.getClient().getUserMedias(user, "")
 
                 val code = res.code()
                 if (code != 200) {
                     progressDialog.dismiss()
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                        .show()
+                    if (code == 429){
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    }else{
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
                     return@launch
                 }
 
@@ -145,14 +151,10 @@ class UserFragment : Fragment() {
                 if (jsonObject != null) {
                     val medias: ArrayList<MediaModel> = ArrayList()
 
-                    cursor = jsonObject["end_cursor"].asString
-                    if (cursor == "") {
-                        isEnd = true
-                    }
+                    val items = jsonObject["data"].asJsonArray
 
-                    val items = jsonObject["items"].asJsonArray
                     for (item in items) {
-                        parseData(medias, jsonObject)
+                        parseData(medias, item as JsonObject)
                     }
 
                     if (medias.size > 0) {
@@ -160,6 +162,10 @@ class UserFragment : Fragment() {
 
                     }
 
+                    cursor = jsonObject["end_cursor"].asString
+                    if (cursor == "") {
+                        isEnd = true
+                    }
                 }
                 isFetching = false
                 progressDialog.dismiss()
@@ -186,36 +192,43 @@ class UserFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                val res = ApiClient.getClient().getUserInfo(user, end_cursor)
+                val res = ApiClient.getClient().getUserMedias(user, end_cursor)
                 val code = res.code()
                 if (code != 200) {
-                    binding.progressBottom.visibility = View.VISIBLE
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                        .show()
+                    isFetching = false
+                    binding.progressBottom.visibility = View.INVISIBLE
+                    if (code == 429){
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    }else{
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
                     return@launch
                 }
 
                 val jsonObject = res.body()
                 if (jsonObject != null) {
                     val medias: ArrayList<MediaModel> = ArrayList()
-                    val items = jsonObject["items"].asJsonArray
-
-                    cursor = jsonObject["end_cursor"].asString
-                    if (cursor == "") {
-                        isEnd = true
-                    }
-
+                    val items = jsonObject["data"].asJsonArray
                     for (item in items) {
-                        parseData(medias, jsonObject)
+                        parseData(medias, item as JsonObject)
                     }
 
                     if (medias.size > 0) {
                         adapter.loadMore(medias)
                     }
+
+                    cursor = jsonObject["end_cursor"].asString
+                    if (cursor == "") {
+                        isEnd = true
+                    }
                 }
                 isFetching = false
                 binding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
+                Log.e(TAG,e.message+"")
                 isFetching = false
                 binding.progressBottom.visibility = View.INVISIBLE
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
@@ -237,7 +250,7 @@ class UserFragment : Fragment() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject["caption_text"].asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
             val resources = jsonObject["resources"].asJsonArray
             mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
@@ -261,7 +274,7 @@ class UserFragment : Fragment() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject["profile_pic_url"].asString
+            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
             medias.add(mediaInfo)
         }
 

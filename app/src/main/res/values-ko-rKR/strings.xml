@@ -31,5 +31,5 @@
     <string name="downloading">다운로드 중…</string>
     <string name="not_found">게시물을 찾을 수 없습니다</string>
     <string name="invalid_url">잘못된 URL</string>
-
+    <string name="too_many">너무 많은 요청</string>
 </resources>

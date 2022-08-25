@@ -31,6 +31,6 @@
     <string name="downloading">ダウンロードしています…</string>
     <string name="not_found">投稿が見つかりません</string>
     <string name="invalid_url">無効なURL</string>
-
+    <string name="too_many">リクエスト多すぎ</string>
 
 </resources>

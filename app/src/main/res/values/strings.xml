@@ -29,6 +29,6 @@
     <string name="downloading">Downloading…</string>
     <string name="not_found">Post not found</string>
     <string name="invalid_url">Invalid Url</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="too_many">Too many requests</string>
 </resources>
