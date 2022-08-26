@@ -25,6 +25,7 @@ import com.igtools.igdownloader.databinding.ActivityMainBinding
 import com.igtools.igdownloader.fragments.HomeFragment
 import com.igtools.igdownloader.fragments.SettingFragment
 import com.igtools.igdownloader.fragments.TagFragment
+import com.igtools.igdownloader.fragments.TagFragment2
 import com.igtools.igdownloader.models.IntentEvent
 import com.igtools.igdownloader.utils.RegexUtils
 import com.igtools.igdownloader.utils.ShareUtils
@@ -131,7 +132,7 @@ class MainActivity : AppCompatActivity() {
 
 
         fragments.add(HomeFragment())
-        fragments.add(TagFragment())
+        fragments.add(TagFragment2())
         fragments.add(SettingFragment())
 
         showFragment(lastPos)

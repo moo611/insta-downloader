@@ -12,31 +12,26 @@ interface ApiService {
     suspend fun downloadUrl(@Url url: String): Response<ResponseBody>
 
 
-    @GET("api/userinfo")
+    @GET("/api/userinfo")
     suspend fun getUserInfo(
         @Query("user") user: String,
         @Query("end_cursor") end_cursor: String
     ): Response<JsonObject>
 
-    @GET("api/usermedias")
-    suspend fun getUserMedias(
-        @Query("username") user: String,
-        @Query("end_cursor") end_cursor: String
-    ): Response<JsonObject>
 
-
-    @GET("api/mediainfo")
+    @GET("/api/mediainfo")
     suspend fun getMedia(@Query("url") url: String): Response<JsonObject>
 
-    @GET("api/mediastory")
+    @GET("/api/mediastory")
     suspend fun getStory(@Query("url") code: String): Response<JsonObject>
 
-    @GET("api/taginfo")
+    @GET("/api/taginfo")
     suspend fun getTags(
         @Query("tag") tag: String
     ): Response<JsonObject>
 
-    @GET("api/taginfo/more")
+
+    @GET("/api/taginfo/more")
     suspend fun getMoreTags(
         @Query("max_id") max_id: String,
         @Query("page") page: Int,
@@ -44,7 +39,21 @@ interface ApiService {
     ): Response<JsonObject>
 
 
-    @POST("api/taginfo/more")
+    @POST("/api/taginfo/more")
     suspend fun postMoreTags(@Body body: RequestBody): Response<JsonObject>
+
+
+    @GET("/api/v2/usermedias")
+    suspend fun getUserMedias(
+        @Query("username") user: String,
+        @Query("end_cursor") end_cursor: String
+    ): Response<JsonObject>
+
+
+    @GET("/api/v2/tagmedias")
+    suspend fun getTagMedias(
+        @Query("tagname") tagname: String,
+        @Query("type") type: String
+    ): Response<JsonObject>
 
 }

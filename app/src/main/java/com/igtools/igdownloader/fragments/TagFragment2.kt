@@ -5,61 +5,61 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.ads.AdRequest
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
+import com.igtools.igdownloader.adapter.BlogAdapter
 import com.igtools.igdownloader.adapter.BlogAdapter2
 import com.igtools.igdownloader.api.retrofit.ApiClient
-import com.igtools.igdownloader.databinding.FragmentUserBinding
+import com.igtools.igdownloader.databinding.FragmentTag2Binding
 import com.igtools.igdownloader.models.MediaModel
 import com.igtools.igdownloader.models.ResourceModel
 import com.igtools.igdownloader.utils.KeyboardUtils
 import com.igtools.igdownloader.utils.getNullable
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 
-class UserFragment : Fragment() {
-
-    val TAG = "UserFragment"
-
+class TagFragment2 : Fragment() {
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: BlogAdapter2
+    lateinit var binding: FragmentTag2Binding
     lateinit var progressDialog: ProgressDialog
-    lateinit var binding: FragmentUserBinding
-
-    var cursor = ""
+    val TAG = "TagFragment2"
     var loadingMore = false
-    var isEnd = false
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_user, container, false)
 
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tag2, container, false)
 
         initViews()
         setListeners()
         return binding.root
+        
+        
     }
+    
+    
+    fun initViews(){
+        val adRequest: AdRequest = AdRequest.Builder().build()
+        binding.adView.loadAd(adRequest)
 
-    private fun initViews() {
         binding.tvSearch.isEnabled = false
         binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
-
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
-
         adapter = BlogAdapter2(requireContext())
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter
@@ -70,22 +70,23 @@ class UserFragment : Fragment() {
             }
         }
     }
-
-    private fun setListeners() {
+    
+    
+    private fun setListeners(){
         binding.tvSearch.setOnClickListener {
-            binding.etUsername.clearFocus()
-            KeyboardUtils.closeKeybord(binding.etUsername, context)
-            refresh(binding.etUsername.text.toString())
+            binding.etTag.clearFocus()
+            KeyboardUtils.closeKeybord(binding.etTag, context)
+            refresh(binding.etTag.text.toString())
         }
 
-        binding.etUsername.addTextChangedListener(object : TextWatcher {
+        binding.etTag.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
-                if (binding.etUsername.text.isNotEmpty()) {
+                if (binding.etTag.text.isNotEmpty()) {
                     binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.white))
                     binding.tvSearch.isEnabled = true
                     binding.imgClear.visibility = View.VISIBLE
@@ -102,141 +103,124 @@ class UserFragment : Fragment() {
             }
 
         })
+        
+//        binding.btnMore.setOnClickListener {
+//
+//            loadMore(binding.etTag.text.toString())
+//
+//        }
 
-        binding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (!binding.rv.canScrollVertically(1) && dy > 0) {
-                    //滑动到底部
-
-                    loadMore(binding.etUsername.text.toString(), cursor)
-
-                }
-
-            }
-        })
+//        binding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//                super.onScrolled(recyclerView, dx, dy)
+//                if (!binding.rv.canScrollVertically(1) && dy > 0) {
+//                    //滑动到底部
+//
+//                    loadMore()
+//
+//                }
+//
+//            }
+//        })
 
         binding.imgClear.setOnClickListener {
-            binding.etUsername.setText("")
-        }
 
+            binding.etTag.setText("")
+
+        }
+        
     }
 
-    private fun refresh(user: String) {
-
-        if (loadingMore) {
+    private fun refresh(tag: String) {
+        if (loadingMore){
             return
         }
-        isEnd = false
         progressDialog.show()
+        
         lifecycleScope.launch {
+
             try {
-                val res = ApiClient.getClient().getUserMedias(user, "")
-                
+                val res = ApiClient.getClient().getTagMedias(tag,"2")
                 progressDialog.dismiss()
                 val code = res.code()
                 if (code != 200) {
-                    
-                    if (code == 429){
-                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
-                            .show()
-                    }else{
-                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                            .show()
-                    }
 
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                     return@launch
                 }
 
                 val jsonObject = res.body()
                 if (jsonObject != null) {
-                    val medias: ArrayList<MediaModel> = ArrayList()
-
+                    val medias:ArrayList<MediaModel> = ArrayList()
                     val items = jsonObject["data"].asJsonArray
-
-                    for (item in items) {
-                        parseData(medias, item as JsonObject)
+                    for (item in items){
+                        parseData(medias,item as JsonObject);
                     }
 
                     if (medias.size > 0) {
                         adapter.refresh(medias)
 
                     }
-
-                    cursor = jsonObject["end_cursor"].asString
-                    if (cursor == "") {
-                        isEnd = true
-                    }
                 }
-                
+
             } catch (e: Exception) {
-                Log.e(TAG, e.message + "")
-                
+                Log.v(TAG, e.message + "")
                 progressDialog.dismiss()
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+
             }
+
+
         }
-
-
     }
-
-
-    private fun loadMore(user: String, end_cursor: String) {
-
-        if (loadingMore || isEnd) {
+    
+    private fun loadMore(tag: String){
+        if (loadingMore){
             return
         }
         loadingMore = true
-        binding.progressBottom.visibility = View.VISIBLE
+        progressDialog.show()
 
         lifecycleScope.launch {
+
             try {
-                val res = ApiClient.getClient().getUserMedias(user, end_cursor)
+                val res = ApiClient.getClient().getTagMedias(tag,"2")
                 
                 loadingMore = false
-                binding.progressBottom.visibility = View.INVISIBLE
+                progressDialog.dismiss()
                 val code = res.code()
                 if (code != 200) {
-                    
-                    if (code == 429){
-                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
-                            .show()
-                    }else{
-                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                     return@launch
                 }
 
                 val jsonObject = res.body()
                 if (jsonObject != null) {
-                    val medias: ArrayList<MediaModel> = ArrayList()
+                    val medias:ArrayList<MediaModel> = ArrayList()
                     val items = jsonObject["data"].asJsonArray
-                    for (item in items) {
-                        parseData(medias, item as JsonObject)
+                    for (item in items){
+                        parseData(medias,item as JsonObject);
                     }
 
                     if (medias.size > 0) {
                         adapter.loadMore(medias)
-                    }
 
-                    cursor = jsonObject["end_cursor"].asString
-                    if (cursor == "") {
-                        isEnd = true
                     }
                 }
                 
             } catch (e: Exception) {
-                Log.e(TAG,e.message+"")
                 loadingMore = false
-                binding.progressBottom.visibility = View.INVISIBLE
+                progressDialog.dismiss()
+                Log.v(TAG, e.message + "")
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+
             }
 
+
         }
-
-
+        
     }
 
     private fun parseData(medias:ArrayList<MediaModel>, jsonObject: JsonObject) {
@@ -279,5 +263,5 @@ class UserFragment : Fragment() {
         }
 
     }
-
+    
 }

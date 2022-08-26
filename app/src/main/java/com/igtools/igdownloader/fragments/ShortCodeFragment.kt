@@ -131,10 +131,10 @@ class ShortCodeFragment : Fragment() {
 
             try {
                 val res = ApiClient.getClient().getMedia(url)
-
+                progressDialog.dismiss()
                 val code = res.code()
                 if (code != 200) {
-                    progressDialog.dismiss()
+
                     Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
                         .show()
                     return@launch
@@ -161,7 +161,6 @@ class ShortCodeFragment : Fragment() {
                     }
 
                 }
-                progressDialog.dismiss()
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
