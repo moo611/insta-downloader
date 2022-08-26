@@ -38,6 +38,7 @@ class UserFragment : Fragment() {
     var cursor = ""
     var loadingMore = false
     var isEnd = false
+    var userId = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -127,20 +128,21 @@ class UserFragment : Fragment() {
         if (loadingMore) {
             return
         }
+        userId = ""
         isEnd = false
         progressDialog.show()
         lifecycleScope.launch {
             try {
-                val res = ApiClient.getClient().getUserMedias(user, "")
-                
+                val res = ApiClient.getClient().getUserMedias(user, "", userId)
+
                 progressDialog.dismiss()
                 val code = res.code()
                 if (code != 200) {
-                    
-                    if (code == 429){
+
+                    if (code == 429) {
                         Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
                             .show()
-                    }else{
+                    } else {
                         Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
                             .show()
                     }
@@ -153,7 +155,7 @@ class UserFragment : Fragment() {
                     val medias: ArrayList<MediaModel> = ArrayList()
 
                     val items = jsonObject["data"].asJsonArray
-
+                    userId = jsonObject["user_id"].asString
                     for (item in items) {
                         parseData(medias, item as JsonObject)
                     }
@@ -168,10 +170,10 @@ class UserFragment : Fragment() {
                         isEnd = true
                     }
                 }
-                
+
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
-                
+
                 progressDialog.dismiss()
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
@@ -191,17 +193,17 @@ class UserFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                val res = ApiClient.getClient().getUserMedias(user, end_cursor)
-                
+                val res = ApiClient.getClient().getUserMedias(user, end_cursor, userId)
+
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
                 val code = res.code()
                 if (code != 200) {
-                    
-                    if (code == 429){
+
+                    if (code == 429) {
                         Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
                             .show()
-                    }else{
+                    } else {
                         Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
                             .show()
                     }
@@ -226,9 +228,9 @@ class UserFragment : Fragment() {
                         isEnd = true
                     }
                 }
-                
+
             } catch (e: Exception) {
-                Log.e(TAG,e.message+"")
+                Log.e(TAG, e.message + "")
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
@@ -239,7 +241,7 @@ class UserFragment : Fragment() {
 
     }
 
-    private fun parseData(medias:ArrayList<MediaModel>, jsonObject: JsonObject) {
+    private fun parseData(medias: ArrayList<MediaModel>, jsonObject: JsonObject) {
         val mediaInfo = MediaModel()
         val mediaType = jsonObject["media_type"].asInt
         if (mediaType == 8) {
@@ -250,7 +252,8 @@ class UserFragment : Fragment() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject["caption_text"].asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+            mediaInfo.profilePicUrl =
+                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
             val resources = jsonObject["resources"].asJsonArray
             mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
@@ -274,7 +277,8 @@ class UserFragment : Fragment() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+            mediaInfo.profilePicUrl =
+                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
             medias.add(mediaInfo)
         }
 

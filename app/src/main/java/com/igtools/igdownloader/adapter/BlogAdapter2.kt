@@ -10,13 +10,15 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.gson.Gson
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.activities.BlogDetailsActivity
 import com.igtools.igdownloader.models.MediaModel
 
-class BlogAdapter2(var c: Context): RecyclerView.Adapter<BlogAdapter2.BlogViewHolder>() {
+class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewHolder>() {
 
-    var blogs:ArrayList<MediaModel> = ArrayList()
+    var blogs: ArrayList<MediaModel> = ArrayList()
+    val gson = Gson()
 
     inner class BlogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var imgThumbnail: ImageView = itemView.findViewById(R.id.img_thumbnail)
@@ -29,10 +31,10 @@ class BlogAdapter2(var c: Context): RecyclerView.Adapter<BlogAdapter2.BlogViewHo
         notifyDataSetChanged()
     }
 
-    fun loadMore(blogs:ArrayList<MediaModel>){
+    fun loadMore(blogs: ArrayList<MediaModel>) {
         val index = this.blogs.size
         this.blogs.addAll(blogs)
-        notifyItemRangeInserted(index,blogs.size)
+        notifyItemRangeInserted(index, blogs.size)
 
     }
 
@@ -47,12 +49,18 @@ class BlogAdapter2(var c: Context): RecyclerView.Adapter<BlogAdapter2.BlogViewHo
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
             .into(holder.imgThumbnail)
         holder.itemView.setOnClickListener {
+//            c.startActivity(
+//                Intent(
+//                    c,
+//                    BlogDetailsActivity::class.java
+//                ).putExtra("shortCode", blogs[position].code)
+//            )
+            val mediaModel = gson.toJson(blogs[position])
             c.startActivity(
-                Intent(
-                    c,
-                    BlogDetailsActivity::class.java
-                ).putExtra("shortCode", blogs[position].code)
+                Intent(c, BlogDetailsActivity::class.java)
+                    .putExtra("content", mediaModel).putExtra("flag",true)
             )
+
         }
         val typename = blogs[position].mediaType
         if (typename == 8) {

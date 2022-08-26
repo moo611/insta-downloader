@@ -58,7 +58,7 @@ class HistoryActivity : AppCompatActivity() {
                     Intent(
                         this@HistoryActivity,
                         BlogDetailsActivity::class.java
-                    ).putExtra("content", content)
+                    ).putExtra("content", content).putExtra("flag",false)
                 )
             }
 

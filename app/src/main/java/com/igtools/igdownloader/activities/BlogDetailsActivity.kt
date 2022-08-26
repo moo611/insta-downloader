@@ -71,17 +71,18 @@ class BlogDetailsActivity : AppCompatActivity() {
         initViews()
         setListeners()
 
-        val shortCode = intent.extras?.getString("shortCode")
-        if (shortCode != null) {
-            binding.btnDownload.visibility = View.VISIBLE
-            getMedia(shortCode)
+//        val shortCode = intent.extras?.getString("shortCode")
 
-        } else if (intent.extras?.getString("content") != null) {
+        if (intent.extras?.getString("content") != null) {
             binding.btnDownload.visibility = View.INVISIBLE
             getDataFromLocal(intent.extras!!.getString("content")!!)
 
         }
-
+        if (intent.extras!!.getBoolean("flag")){
+            binding.btnDownload.visibility = View.VISIBLE
+        }else{
+            binding.btnDownload.visibility = View.INVISIBLE
+        }
 
     }
 
@@ -162,7 +163,7 @@ class BlogDetailsActivity : AppCompatActivity() {
         }
 
         binding.picture.setOnClickListener {
-            if (mediaInfo.mediaType == 2){
+            if (mediaInfo.mediaType == 2) {
                 startActivity(
                     Intent(this, VideoActivity::class.java)
                         .putExtra("url", mediaInfo.videoUrl)
@@ -174,67 +175,6 @@ class BlogDetailsActivity : AppCompatActivity() {
 
         binding.imgBack.setOnClickListener {
             finish()
-        }
-
-    }
-
-
-    private fun getMedia(url: String) {
-
-//        val isValid = URLUtil.isValidUrl(url)
-//        if (!isValid) {
-//            Toast.makeText(this, getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
-//            return
-//        }
-
-        progressDialog.show()
-
-        lifecycleScope.launch {
-
-            try {
-                val res = ApiClient.getClient().getMedia(url)
-
-                val code = res.code()
-                if (code != 200) {
-                    progressDialog.dismiss()
-                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                        .show()
-                    return@launch
-                }
-                val jsonObject = res.body()
-                if (jsonObject != null) {
-                    val data = jsonObject["data"].asJsonObject
-                    parseData(data)
-                    if (mediaInfo.mediaType == 8) {
-
-                        if (mediaInfo.resources.size > 0) {
-                            show("album")
-                            adapter.setDatas(mediaInfo.resources as List<ResourceModel?>?)
-
-                            binding.btnDownload.isEnabled = true
-                            binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                            binding.tvTitle.text = mediaInfo.captionText
-
-                        }
-                    } else {
-                        show("picture")
-                        Glide.with(this@BlogDetailsActivity).load(mediaInfo.thumbnailUrl)
-                            .into(binding.picture)
-                        binding.btnDownload.isEnabled = true
-                        binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                        binding.tvTitle.text = mediaInfo.captionText
-
-                    }
-
-                }
-                progressDialog.dismiss()
-
-            } catch (e: Exception) {
-                Log.e(TAG, e.message + "")
-                progressDialog.dismiss()
-                Toast.makeText(this@BlogDetailsActivity, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
-            }
-
         }
 
     }
@@ -278,7 +218,8 @@ class BlogDetailsActivity : AppCompatActivity() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject["caption_text"].asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+            mediaInfo.profilePicUrl =
+                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
             val resources = jsonObject["resources"].asJsonArray
             mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
@@ -302,7 +243,8 @@ class BlogDetailsActivity : AppCompatActivity() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+            mediaInfo.profilePicUrl =
+                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
         }
 
@@ -327,7 +269,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             }
 
 
-        } else if (media?.mediaType==2){
+        } else if (media?.mediaType == 2) {
             //video
             val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
@@ -379,9 +321,9 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     }
 
-    private fun show(flag:String){
+    private fun show(flag: String) {
 
-        if (flag=="picture"){
+        if (flag == "picture") {
             binding.picture.visibility = View.VISIBLE
             binding.banner.visibility = View.INVISIBLE
 
@@ -391,12 +333,14 @@ class BlogDetailsActivity : AppCompatActivity() {
                 binding.imgPlay.visibility = View.VISIBLE
             }
 
-        }else{
+        } else {
             binding.imgPlay.visibility = View.INVISIBLE
             binding.banner.visibility = View.VISIBLE
             binding.picture.visibility = View.INVISIBLE
         }
 
     }
+
+    inline fun <reified T> genericType() = object : TypeToken<T>() {}.type
 
 }

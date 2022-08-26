@@ -45,8 +45,9 @@ interface ApiService {
 
     @GET("/api/v2/usermedias")
     suspend fun getUserMedias(
-        @Query("username") user: String,
-        @Query("end_cursor") end_cursor: String
+        @Query("username") username: String,
+        @Query("end_cursor") end_cursor: String,
+        @Query("user_id") user_id: String
     ): Response<JsonObject>
 
 
