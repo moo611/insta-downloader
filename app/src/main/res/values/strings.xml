@@ -31,6 +31,5 @@
     <string name="invalid_url">Invalid Url</string>
 
     <string name="too_many">Too many requests</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

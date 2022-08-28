@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">IgDownloader</string>
+
+    <string name="login">Войти</string>
+    <string name="username">Электронная почта</string>
+    <string name="password">Пароль</string>
+    <string name="username_hint">Введите адрес электронной почты</string>
+    <string name="password_hint">Введите пароль</string>
+    <string name="search">Поиск</string>
+    <string name="download">Загрузить</string>
+    <string name="search_hint">Введите ссылку на инстаграм здесь</string>
+    <string name="quick_download">Режим быстрой загрузки</string>
+    <string name="language">Языки</string>
+    <string name="share">Поделиться</string>
+    <string name="app_version">Версия приложения</string>
+    <string name="paste_username">Введите здесь имя пользователя</string>
+    <string name="next_step">Следующий шаг</string>
+    <string name="hashtag">Введите хэштег здесь</string>
+    <string name="zh">Китайский</string>
+    <string name="en">английский</string>
+    <string name="vp_shortcode">Ссылка</string>
+    <string name="vp_username">Имя пользователя</string>
+    <string name="history">История загрузок</string>
+    <string name="details">Подробнее</string>
+    <string name="login_failed">Ошибка входа</string>
+    <string name="signup_failed">Ошибка регистрации</string>
+    <string name="download_finish">Загрузка завершена</string>
+    <string name="searching">Поиск…</string>
+    <string name="downloading">Загрузка…</string>
+    <string name="not_found">Сообщение не найдено</string>
+    <string name="invalid_url">Неверный URL</string>
+
+    <string name="too_many">Слишком много запросов</string>
+
+</resources>

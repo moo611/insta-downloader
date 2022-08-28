@@ -33,10 +33,7 @@ import com.igtools.igdownloader.models.MediaModel
 import com.igtools.igdownloader.models.Record
 import com.igtools.igdownloader.models.ResourceModel
 import com.igtools.igdownloader.room.RecordDB
-import com.igtools.igdownloader.utils.DateUtils
-import com.igtools.igdownloader.utils.FileUtils
-import com.igtools.igdownloader.utils.KeyboardUtils
-import com.igtools.igdownloader.utils.getNullable
+import com.igtools.igdownloader.utils.*
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
@@ -118,7 +115,7 @@ class ShortCodeFragment : Fragment() {
 
 
     private fun getMedia(url: String) {
-
+        mediaInfo = MediaModel()
         val isValid = URLUtil.isValidUrl(url)
         if (!isValid) {
             Toast.makeText(context, getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
@@ -258,6 +255,7 @@ class ShortCodeFragment : Fragment() {
             binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
 
             val keyword = binding.etShortcode.text.toString()
+            ShareUtils.putData("keyword", keyword)
             if (keyword.contains("stories")) {
                 getStories(keyword)
             } else {
