@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">IgDownloader</string>
+
+    <string name="login">Masuk</string>
+    <string name="username">Email</string>
+    <string name="password">Password</string>
+    <string name="username_hint">Masukkan email Anda</string>
+    <string name="password_hint">Masukkan kata sandi Anda</string>
+    <string name="search">Cari</string>
+    <string name="download">Unduh</string>
+    <string name="search_hint">Masukkan link instagram di sini</string>
+    <string name="quick_download">Mode Unduhan Cepat</string>
+    <string name="language">Bahasa</string>
+    <string name="share">Bagikan</string>
+    <string name="app_version">Versi Aplikasi</string>
+    <string name="paste_username">Masukkan nama pengguna di sini</string>
+    <string name="next_step">Langkah Selanjutnya</string>
+    <string name="hashtag">Masukkan hashtag di sini</string>
+    <string name="zh">Cina</string>
+    <string name="en">Bahasa Inggris</string>
+    <string name="vp_shortcode">Tautan</string>
+    <string name="vp_username">Nama pengguna</string>
+    <string name="history">Riwayat Unduhan</string>
+    <string name="details">Detail</string>
+    <string name="login_failed">Login Gagal</string>
+    <string name="signup_failed">Gagal Mendaftar</string>
+    <string name="download_finish">Unduhan Selesai</string>
+    <string name="searching">Mencari…</string>
+    <string name="downloading">Mengunduh…</string>
+    <string name="not_found">Pos tidak ditemukan</string>
+    <string name="invalid_url">Url Tidak Valid</string>
+
+    <string name="too_many">Terlalu banyak permintaan</string>
+
+</resources>
