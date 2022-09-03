@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.ads.AdRequest
 import com.google.gson.Gson
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.adapter.HistoryAdapter
@@ -46,7 +47,8 @@ class HistoryActivity : AppCompatActivity() {
 
     private fun initViews() {
 
-
+        val adRequest = AdRequest.Builder().build();
+        binding.adView.loadAd(adRequest)
         adapter = HistoryAdapter(this)
         binding.rv.adapter = adapter
         binding.rv.layoutManager = LinearLayoutManager(this)

@@ -48,20 +48,17 @@ class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewH
             .load(blogs[position].thumbnailUrl)
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
             .into(holder.imgThumbnail)
+
         holder.itemView.setOnClickListener {
-//            c.startActivity(
-//                Intent(
-//                    c,
-//                    BlogDetailsActivity::class.java
-//                ).putExtra("shortCode", blogs[position].code)
-//            )
+
             val mediaModel = gson.toJson(blogs[position])
             c.startActivity(
                 Intent(c, BlogDetailsActivity::class.java)
-                    .putExtra("content", mediaModel).putExtra("flag",true)
+                    .putExtra("content", mediaModel).putExtra("flag", true)
             )
 
         }
+
         val typename = blogs[position].mediaType
         if (typename == 8) {
             holder.imgCollections.visibility = View.VISIBLE

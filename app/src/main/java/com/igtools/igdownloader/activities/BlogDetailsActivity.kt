@@ -15,7 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -51,9 +53,9 @@ class BlogDetailsActivity : AppCompatActivity() {
     lateinit var binding: ActivityBlogDetailsBinding
     lateinit var adapter: MultiTypeAdapter
     lateinit var progressDialog: ProgressDialog
-
+    var isBack = false
     var mediaInfo = MediaModel()
-    var isDownloading = false
+
     var mInterstitialAd: InterstitialAd? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,16 +73,14 @@ class BlogDetailsActivity : AppCompatActivity() {
         initViews()
         setListeners()
 
-//        val shortCode = intent.extras?.getString("shortCode")
-
         if (intent.extras?.getString("content") != null) {
             binding.btnDownload.visibility = View.INVISIBLE
             getDataFromLocal(intent.extras!!.getString("content")!!)
 
         }
-        if (intent.extras!!.getBoolean("flag")){
+        if (intent.extras!!.getBoolean("flag")) {
             binding.btnDownload.visibility = View.VISIBLE
-        }else{
+        } else {
             binding.btnDownload.visibility = View.INVISIBLE
         }
 
@@ -90,7 +90,7 @@ class BlogDetailsActivity : AppCompatActivity() {
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
 
-        InterstitialAd.load(this, "ca-app-pub-8609866682652024/3227198216", adRequest,
+        InterstitialAd.load(this, "ca-app-pub-8609866682652024/8199213476", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)
@@ -102,12 +102,33 @@ class BlogDetailsActivity : AppCompatActivity() {
                     mInterstitialAd = null;
                 }
             })
+
+        mInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+
+            override fun onAdDismissedFullScreenContent() {
+                // Called when ad is dismissed.
+                Log.d(TAG, "Ad dismissed fullscreen content.")
+                mInterstitialAd = null
+                if (isBack) {
+                    finish()
+                }
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                // Called when ad fails to show.
+                Log.e(TAG, "Ad failed to show fullscreen content.")
+                mInterstitialAd = null
+                if (isBack) {
+                    finish()
+                }
+            }
+
+        }
     }
 
 
     private fun initViews() {
         val adRequest: AdRequest = AdRequest.Builder().build()
-        binding.adView.loadAd(adRequest)
 
         binding.btnDownload.isEnabled = false
         adapter = MultiTypeAdapter(this, mediaInfo.resources)
@@ -125,16 +146,16 @@ class BlogDetailsActivity : AppCompatActivity() {
     private fun setListeners() {
 
         binding.btnDownload.setOnClickListener {
-            if (isDownloading) {
-                Toast.makeText(this, R.string.downloading, Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
 
-            mInterstitialAd?.show(this)
-            isDownloading = true
-            progressDialog.show()
+
             lifecycleScope.launch {
 
+                val oldRecord= RecordDB.getInstance().recordDao().findById(mediaInfo.shareCode)
+                if (oldRecord!=null){
+                    Toast.makeText(this@BlogDetailsActivity,"exist",Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+                progressDialog.show()
                 val all: List<Deferred<Unit>> = mediaInfo.resources.map {
                     async {
                         downloadMedia(it)
@@ -143,20 +164,18 @@ class BlogDetailsActivity : AppCompatActivity() {
 
                 all.awaitAll()
                 //Log.v(TAG,"finish")
-                val record = Record()
-                record.createdTime = DateUtils.getDate(Date())
-                record.content = Gson().toJson(mediaInfo)
-
+                val record = Record(mediaInfo.code,Gson().toJson(mediaInfo),DateUtils.getDate(Date()))
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog.dismiss()
-                isDownloading = false
+                isBack = false
+                mInterstitialAd?.show(this@BlogDetailsActivity)
+
                 Toast.makeText(
                     this@BlogDetailsActivity,
                     getString(R.string.download_finish),
                     Toast.LENGTH_SHORT
                 ).show()
-
 
             }
 
@@ -174,7 +193,7 @@ class BlogDetailsActivity : AppCompatActivity() {
         }
 
         binding.imgBack.setOnClickListener {
-            finish()
+            onBackPressed()
         }
 
     }
@@ -204,51 +223,11 @@ class BlogDetailsActivity : AppCompatActivity() {
 
         }
 
+        binding.username.text = mediaInfo.username
+        Glide.with(this).load(mediaInfo.profilePicUrl).circleCrop().into(binding.avatar)
 
     }
 
-    private fun parseData(jsonObject: JsonObject) {
-
-        val mediaType = jsonObject["media_type"].asInt
-        if (mediaType == 8) {
-
-            mediaInfo.pk = jsonObject["pk"].asString
-            mediaInfo.code = jsonObject["code"].asString
-            mediaInfo.mediaType = jsonObject["media_type"].asInt
-            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
-            mediaInfo.captionText = jsonObject["caption_text"].asString
-            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl =
-                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
-
-            val resources = jsonObject["resources"].asJsonArray
-            mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
-            for (res in resources) {
-
-                val resourceInfo = ResourceModel()
-                resourceInfo.pk = res.asJsonObject["pk"].asString
-                resourceInfo.mediaType = res.asJsonObject["media_type"].asInt
-                resourceInfo.thumbnailUrl = res.asJsonObject["thumbnail_url"].asString
-                resourceInfo.videoUrl = res.asJsonObject.getNullable("video_url")?.asString
-                mediaInfo.resources.add(resourceInfo)
-            }
-
-        } else if (mediaType == 0 || mediaType == 1 || mediaType == 2) {
-
-
-            mediaInfo.pk = jsonObject["pk"].asString
-            mediaInfo.code = jsonObject["code"].asString
-            mediaInfo.mediaType = jsonObject["media_type"].asInt
-            mediaInfo.thumbnailUrl = jsonObject["thumbnail_url"].asString
-            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
-            mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
-            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl =
-                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
-
-        }
-
-    }
 
     private suspend fun downloadMedia(media: ResourceModel?) {
 
@@ -341,6 +320,16 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     }
 
-    inline fun <reified T> genericType() = object : TypeToken<T>() {}.type
+    override fun onBackPressed() {
+        super.onBackPressed()
+        isBack = true
+        if (mInterstitialAd == null) {
+            finish()
+        } else {
+            mInterstitialAd?.show(this)
+        }
+
+
+    }
 
 }

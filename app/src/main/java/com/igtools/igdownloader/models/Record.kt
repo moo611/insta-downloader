@@ -5,16 +5,15 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "record")
-class Record {
+data class Record(
     @PrimaryKey
-    var id: Int?=null
-
+    var id: String,
     @ColumnInfo(name = "content")
-    var content: String=""
-
+    var content: String?,
     @ColumnInfo(name = "created_time")
-    var createdTime: String=""
-}
+    var createdTime: String?
+
+)
 
 
 

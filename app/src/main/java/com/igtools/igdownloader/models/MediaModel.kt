@@ -9,4 +9,5 @@ class MediaModel : ResourceModel() {
     var profilePicUrl:String?=null
     var username = ""
     var resources: ArrayList<ResourceModel> = ArrayList()
+    var shareCode = ""
 }

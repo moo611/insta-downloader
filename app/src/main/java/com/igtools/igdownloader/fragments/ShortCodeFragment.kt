@@ -17,6 +17,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -24,6 +25,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
+import com.igtools.igdownloader.activities.BlogDetailsActivity
 import com.igtools.igdownloader.activities.VideoActivity
 import com.igtools.igdownloader.adapter.MultiTypeAdapter
 import com.igtools.igdownloader.api.retrofit.ApiClient
@@ -54,12 +56,12 @@ class ShortCodeFragment : Fragment() {
 
     lateinit var progressDialog: ProgressDialog
     lateinit var binding: FragmentShortCodeBinding
-    lateinit var adapter: MultiTypeAdapter
+
     var TAG = "ShortCodeFragment"
 
-    var isDownloading = false
+    val gson = Gson()
     var mInterstitialAd: InterstitialAd? = null
-    var mediaInfo = MediaModel()
+    var curMediaInfo:MediaModel?=null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,7 +78,7 @@ class ShortCodeFragment : Fragment() {
 
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
-
+        //inter
         InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/8844989426", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
@@ -89,23 +91,12 @@ class ShortCodeFragment : Fragment() {
                     mInterstitialAd = null;
                 }
             })
+        //banner
+        binding.adView.loadAd(adRequest)
     }
 
 
     private fun initViews() {
-
-        binding.tvDownload.isEnabled = false
-        binding.tvSearch.isEnabled = false
-        binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
-        binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
-
-        adapter = MultiTypeAdapter(requireContext(), mediaInfo.resources)
-        binding.banner
-            .addBannerLifecycleObserver(this)
-            .setIndicator(CircleIndicator(context))
-            .setAdapter(adapter)
-            .isAutoLoop(false)
-
 
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
@@ -114,47 +105,72 @@ class ShortCodeFragment : Fragment() {
     }
 
 
-    private fun getMedia(url: String) {
-        mediaInfo = MediaModel()
+    private fun autoStart() {
+
+        binding.etShortcode.clearFocus()
+        KeyboardUtils.closeKeybord(binding.etShortcode, context)
+        val url = binding.etShortcode.text.toString()
+
         val isValid = URLUtil.isValidUrl(url)
         if (!isValid) {
             Toast.makeText(context, getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
             return
         }
 
-        progressDialog.show()
+        if (url.contains("stories")) {
+            getStories(url)
+        } else {
+            getMedia(url)
+        }
 
+
+    }
+
+
+    private fun getMedia(url: String) {
         lifecycleScope.launch {
-
+            val shareCode = UrlUtils.extractMedia(url)
+            Log.v(TAG, shareCode)
+            val record = RecordDB.getInstance().recordDao().findById(shareCode)
+            if (record != null) {
+                Toast.makeText(requireContext(), "exist", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            progressDialog.show()
             try {
                 val res = ApiClient.getClient().getMedia(url)
-                progressDialog.dismiss()
                 val code = res.code()
-                if (code != 200) {
-
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                        .show()
-                    return@launch
-                }
                 val jsonObject = res.body()
-                if (jsonObject != null) {
+                if (code == 200 && jsonObject != null) {
+                    binding.container.visibility = View.VISIBLE
                     val data = jsonObject["data"].asJsonObject
-                    parseData(data)
+                    val mediaInfo = parseData(data)
+                    curMediaInfo = mediaInfo
                     if (mediaInfo.mediaType == 8) {
                         if (mediaInfo.resources.size > 0) {
-                            show("banner")
-                            adapter.setDatas(mediaInfo.resources as List<ResourceModel?>?)
-                            binding.tvDownload.isEnabled = true
-                            binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
-
+                            Glide.with(requireContext()).load(mediaInfo.resources[0].thumbnailUrl)
+                                .into(binding.picture)
                         }
                     } else {
-                        show("picture")
                         Glide.with(requireContext()).load(mediaInfo.thumbnailUrl)
                             .into(binding.picture)
-                        binding.tvDownload.isEnabled = true
-                        binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
+                    }
+                    Glide.with(requireContext()).load(mediaInfo.profilePicUrl).circleCrop()
+                        .into(binding.avatar)
+                    binding.username.text = mediaInfo.username
+                    progressDialog.dismiss()
 
+                    mediaInfo.shareCode = shareCode;
+                    downloadAndSave(mediaInfo)
+
+                } else {
+                    progressDialog.dismiss()
+                    if (code == 429) {
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
                     }
 
                 }
@@ -171,31 +187,47 @@ class ShortCodeFragment : Fragment() {
 
     private fun getStories(url: String) {
 
-        progressDialog.show()
-
         lifecycleScope.launch {
 
+            val shareCode = UrlUtils.extractStory(url)
+            Log.v(TAG, shareCode)
+
+            val record = RecordDB.getInstance().recordDao().findById(shareCode)
+            if (record != null) {
+                Toast.makeText(requireContext(), "exist", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            progressDialog.show()
+
             try {
+
                 val res = ApiClient.getClient().getStory(url)
-
                 val code = res.code()
-                if (code != 200) {
-                    progressDialog.dismiss()
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                        .show()
-                    return@launch
-                }
                 val jsonObject = res.body()
-                if (jsonObject != null) {
+                if (code == 200 && jsonObject != null) {
+                    binding.container.visibility = View.VISIBLE
                     val data = jsonObject["data"].asJsonObject
-                    parseData(data)
-                    show("picture")
+                    val mediaInfo = parseData(data)
+                    curMediaInfo = mediaInfo
                     Glide.with(requireContext()).load(mediaInfo.thumbnailUrl).into(binding.picture)
-                    binding.tvDownload.isEnabled = true
-                    binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.white))
+                    Glide.with(requireContext()).load(mediaInfo.profilePicUrl).circleCrop()
+                        .into(binding.avatar)
+                    binding.username.text = mediaInfo.username
+                    progressDialog.dismiss()
 
+                    mediaInfo.shareCode = shareCode;
+                    downloadAndSave(mediaInfo)
+
+                } else {
+                    progressDialog.dismiss()
+                    if (code == 429) {
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
-                progressDialog.dismiss()
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
@@ -207,72 +239,40 @@ class ShortCodeFragment : Fragment() {
 
     }
 
+    private suspend fun downloadAndSave(mediaInfo: MediaModel) = withContext(Dispatchers.Main) {
+
+        val all: List<Deferred<Unit>> = mediaInfo.resources.map {
+            async {
+                downloadMedia(it)
+            }
+        }
+        all.awaitAll()
+        //Log.v(TAG,"finish")
+        val record = Record(mediaInfo.shareCode, Gson().toJson(mediaInfo), DateUtils.getDate(Date()))
+        RecordDB.getInstance().recordDao().insert(record)
+
+        Toast.makeText(
+            requireContext(),
+            getString(R.string.download_finish),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
 
     private fun setListeners() {
 
-        binding.tvDownload.setOnClickListener {
-            if (isDownloading) {
-                Toast.makeText(requireContext(), R.string.downloading, Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            mInterstitialAd?.show(requireActivity())
-
-            isDownloading = true
-            binding.progressBar.visibility = View.VISIBLE
-            lifecycleScope.launch {
-                if (mediaInfo.mediaType == 8) {
-                    val all: List<Deferred<Unit>> = mediaInfo.resources.map {
-                        async {
-                            downloadMedia(it)
-                        }
-                    }
-                    all.awaitAll()
-                } else {
-                    downloadMedia(mediaInfo)
-                }
-
-                Log.v(TAG, "finish")
-                val record = Record()
-                record.createdTime = DateUtils.getDate(Date())
-                record.content = Gson().toJson(mediaInfo)
-
-                RecordDB.getInstance().recordDao().insert(record)
-
-                binding.progressBar.visibility = View.INVISIBLE
-                isDownloading = false
-                Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
-                    .show()
-
-
-            }
-
-        }
-        binding.tvSearch.setOnClickListener {
-            binding.etShortcode.clearFocus()
-            KeyboardUtils.closeKeybord(binding.etShortcode, context)
-            binding.tvDownload.isEnabled = false
-            binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
-
-            val keyword = binding.etShortcode.text.toString()
-            ShareUtils.putData("keyword", keyword)
-            if (keyword.contains("stories")) {
-                getStories(keyword)
-            } else {
-                getMedia(keyword)
-            }
-
+        binding.btnDownload.setOnClickListener {
+            autoStart()
         }
 
-        binding.imgPlay.setOnClickListener {
-
-            if (mediaInfo.mediaType == 2) {
-                startActivity(
-                    Intent(requireContext(), VideoActivity::class.java)
-                        .putExtra("url", mediaInfo.videoUrl)
-                        .putExtra("thumbnailUrl", mediaInfo.thumbnailUrl)
-                )
-            }
+        binding.container.setOnClickListener {
+            val content = gson.toJson(curMediaInfo)
+            startActivity(
+                Intent(
+                    requireContext(),
+                    BlogDetailsActivity::class.java
+                ).putExtra("content", content).putExtra("flag", false)
+            )
 
         }
 
@@ -284,16 +284,8 @@ class ShortCodeFragment : Fragment() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
                 if (binding.etShortcode.text.isNotEmpty()) {
-                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.white))
-                    binding.tvSearch.isEnabled = true
                     binding.imgClear.visibility = View.VISIBLE
-
-
                 } else {
-                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
-                    binding.tvSearch.isEnabled = false
-                    binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
-                    binding.tvDownload.isEnabled = false
                     binding.imgClear.visibility = View.INVISIBLE
                 }
 
@@ -309,10 +301,25 @@ class ShortCodeFragment : Fragment() {
             binding.etShortcode.setText("")
         }
 
+        binding.adView.adListener = object : AdListener() {
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                // Code to be executed when an ad request fails.
+                Log.e(TAG, adError.message)
+            }
+
+            override fun onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+                binding.adView.visibility = View.VISIBLE
+            }
+
+
+        }
+
     }
 
-    private fun parseData(jsonObject: JsonObject) {
-
+    private fun parseData(jsonObject: JsonObject):MediaModel {
+        val mediaInfo = MediaModel()
         val mediaType = jsonObject["media_type"].asInt
         Log.v(TAG, "mediaType:$mediaType")
         if (mediaType == 8) {
@@ -323,7 +330,8 @@ class ShortCodeFragment : Fragment() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject["caption_text"].asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+            mediaInfo.profilePicUrl =
+                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
             val resources = jsonObject["resources"].asJsonArray
             mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
@@ -347,9 +355,12 @@ class ShortCodeFragment : Fragment() {
             mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
             mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
             mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl = jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+            mediaInfo.profilePicUrl =
+                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
 
         }
+
+        return mediaInfo
 
     }
 
@@ -414,41 +425,15 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun show(flag: String) {
-
-        if (flag == "picture") {
-            binding.picture.visibility = View.VISIBLE
-            binding.banner.visibility = View.INVISIBLE
-            if (mediaInfo.mediaType == 0 || mediaInfo.mediaType == 1) {
-                binding.imgPlay.visibility = View.INVISIBLE
-            } else if (mediaInfo.mediaType == 2) {
-                binding.imgPlay.visibility = View.VISIBLE
-            }
-        } else {
-            binding.imgPlay.visibility = View.INVISIBLE
-            binding.banner.visibility = View.VISIBLE
-            binding.picture.visibility = View.INVISIBLE
-        }
-
-    }
 
     @Subscribe
     fun onKeywordReceive(intentEvent: IntentEvent) {
 
         val keyword = intentEvent.str
         binding.etShortcode.setText(keyword)
-
-        binding.etShortcode.clearFocus()
-        KeyboardUtils.closeKeybord(binding.etShortcode, context)
-        binding.tvDownload.isEnabled = false
-        binding.tvDownload.setTextColor(requireContext().resources!!.getColor(R.color.black))
-
-        if (keyword.contains("stories")) {
-            getStories(keyword)
-        } else {
-            getMedia(keyword)
+        if (ShareUtils.getData("isAuto") == null || ShareUtils.getData("isAuto").toBoolean()) {
+            autoStart()
         }
-
 
     }
 

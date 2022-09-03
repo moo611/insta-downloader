@@ -9,7 +9,7 @@ import com.igtools.igdownloader.models.Record
 @Dao
 interface RecordDao {
 
-    @Query("SELECT * FROM Record ORDER BY id DESC")
+    @Query("SELECT * FROM Record ORDER BY created_time ASC")
     suspend fun all(): List<Record>
 
     @Insert
@@ -17,4 +17,8 @@ interface RecordDao {
 
     @Delete
     suspend fun delete(record: Record?)
+
+    @Query("SELECT * FROM Record WHERE id = :code")
+    suspend fun findById(code: String): Record?
+
 }

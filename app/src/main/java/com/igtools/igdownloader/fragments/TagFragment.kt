@@ -15,6 +15,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
@@ -37,9 +40,10 @@ class TagFragment : Fragment() {
     lateinit var adapter: BlogAdapter
     lateinit var binding: FragmentTagBinding
     lateinit var progressDialog: ProgressDialog
-    var isFetching = false
+    var loadingMore = false
     //var blogs: ArrayList<BlogModel> = ArrayList()
     var gson = Gson()
+    var mInterstitialAd: InterstitialAd? = null
 
     //tag 分页信息
     var next_media_ids: ArrayList<String> = ArrayList()
@@ -53,7 +57,7 @@ class TagFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tag, container, false)
-
+        initAds()
         initViews()
         setListeners()
         return binding.root
@@ -62,11 +66,6 @@ class TagFragment : Fragment() {
 
     private fun initViews() {
 
-        val adRequest: AdRequest = AdRequest.Builder().build()
-        binding.adView.loadAd(adRequest)
-
-        binding.tvSearch.isEnabled = false
-        binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
@@ -82,11 +81,33 @@ class TagFragment : Fragment() {
 
     }
 
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build();
+        //inter
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/2208520199", adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(p0: InterstitialAd) {
+                    super.onAdLoaded(p0)
+                    mInterstitialAd = p0
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    super.onAdFailedToLoad(p0)
+                    mInterstitialAd = null;
+                }
+            })
+
+    }
+
     private fun setListeners() {
 
-        binding.tvSearch.setOnClickListener {
+        binding.btnSearch.setOnClickListener {
             binding.etTag.clearFocus()
             KeyboardUtils.closeKeybord(binding.etTag, context)
+            if (binding.etTag.text.toString().isEmpty()){
+                Toast.makeText(requireContext(),"Please enter username first",Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             refresh(binding.etTag.text.toString())
         }
 
@@ -98,12 +119,10 @@ class TagFragment : Fragment() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
                 if (binding.etTag.text.isNotEmpty()) {
-                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.white))
-                    binding.tvSearch.isEnabled = true
+                    
                     binding.imgClear.visibility = View.VISIBLE
                 } else {
-                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.home_unselect_color))
-                    binding.tvSearch.isEnabled = false
+                    
                     binding.imgClear.visibility = View.INVISIBLE
                 }
 
@@ -138,7 +157,7 @@ class TagFragment : Fragment() {
 
     private fun refresh(tag: String) {
 
-        if (isFetching){
+        if (loadingMore){
             return
         }
         progressDialog.show()
@@ -185,10 +204,10 @@ class TagFragment : Fragment() {
 
 
     private fun loadMore() {
-        if (isFetching || !more_available) {
+        if (loadingMore || !more_available) {
             return
         }
-        isFetching = true
+        loadingMore = true
         binding.progressBottom.visibility = View.VISIBLE
 
         lifecycleScope.launch {
@@ -224,11 +243,11 @@ class TagFragment : Fragment() {
 
                     }
                 }
-                isFetching = false
+                loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
                 Log.v(TAG,e.message+"")
-                isFetching = false
+                loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }

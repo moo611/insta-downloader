@@ -14,6 +14,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.adapter.BlogAdapter2
@@ -39,6 +43,7 @@ class UserFragment : Fragment() {
     var loadingMore = false
     var isEnd = false
     var userId = ""
+    var mInterstitialAd: InterstitialAd? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,15 +52,13 @@ class UserFragment : Fragment() {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_user, container, false)
 
-
+        initAds()
         initViews()
         setListeners()
         return binding.root
     }
 
     private fun initViews() {
-        binding.tvSearch.isEnabled = false
-        binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.black))
 
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
@@ -72,10 +75,33 @@ class UserFragment : Fragment() {
         }
     }
 
+
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build();
+        //inter
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/2974806950", adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(p0: InterstitialAd) {
+                    super.onAdLoaded(p0)
+                    mInterstitialAd = p0
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    super.onAdFailedToLoad(p0)
+                    mInterstitialAd = null;
+                }
+            })
+
+    }
+
     private fun setListeners() {
-        binding.tvSearch.setOnClickListener {
+        binding.btnSearch.setOnClickListener {
             binding.etUsername.clearFocus()
             KeyboardUtils.closeKeybord(binding.etUsername, context)
+            if (binding.etUsername.text.toString().isEmpty()){
+                Toast.makeText(requireContext(),"Please enter username first",Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             refresh(binding.etUsername.text.toString())
         }
 
@@ -87,12 +113,10 @@ class UserFragment : Fragment() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
                 if (binding.etUsername.text.isNotEmpty()) {
-                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.white))
-                    binding.tvSearch.isEnabled = true
+
                     binding.imgClear.visibility = View.VISIBLE
                 } else {
-                    binding.tvSearch.setTextColor(requireContext().resources!!.getColor(R.color.home_unselect_color))
-                    binding.tvSearch.isEnabled = false
+
                     binding.imgClear.visibility = View.INVISIBLE
                 }
 
@@ -134,24 +158,9 @@ class UserFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val res = ApiClient.getClient().getUserMedias(user, "", userId)
-
-                progressDialog.dismiss()
                 val code = res.code()
-                if (code != 200) {
-
-                    if (code == 429) {
-                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
-                    return@launch
-                }
-
                 val jsonObject = res.body()
-                if (jsonObject != null) {
+                if (code ==200 && jsonObject != null) {
                     val medias: ArrayList<MediaModel> = ArrayList()
 
                     val items = jsonObject["data"].asJsonArray
@@ -169,7 +178,18 @@ class UserFragment : Fragment() {
                     if (cursor == "") {
                         isEnd = true
                     }
+                }else{
+
+                    if (code == 429) {
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
                 }
+                progressDialog.dismiss()
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
@@ -194,25 +214,9 @@ class UserFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val res = ApiClient.getClient().getUserMedias(user, end_cursor, userId)
-
-                loadingMore = false
-                binding.progressBottom.visibility = View.INVISIBLE
                 val code = res.code()
-                if (code != 200) {
-
-                    if (code == 429) {
-                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
-                    return@launch
-                }
-
                 val jsonObject = res.body()
-                if (jsonObject != null) {
+                if (code == 200 && jsonObject != null) {
                     val medias: ArrayList<MediaModel> = ArrayList()
                     val items = jsonObject["data"].asJsonArray
                     for (item in items) {
@@ -227,8 +231,17 @@ class UserFragment : Fragment() {
                     if (cursor == "") {
                         isEnd = true
                     }
+                }else{
+                    if (code == 429) {
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
-
+                loadingMore = false
+                binding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 loadingMore = false

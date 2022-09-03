@@ -15,8 +15,7 @@ class BaseApplication : Application() {
     companion object {
         lateinit var mContext: Context
 
-        var isAuto = true
-        var baseUrl = ""
+        var baseUrl = "http://34.221.49.20:3000"
 
     }
 

@@ -19,101 +19,107 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="80dp">
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp">
 
                 <EditText
                     android:id="@+id/et_shortcode"
                     android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:layout_marginLeft="12dp"
-                    android:layout_marginRight="12dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
                     android:background="@drawable/bg_edit"
-                    android:gravity="top|start"
+                    android:gravity="center_vertical|start"
                     android:hint="@string/search_hint"
+                    android:singleLine="true"
+                    android:maxLines="1"
                     android:paddingLeft="12dp"
-                    android:paddingTop="5dp"
-                    android:paddingRight="12dp"
-                    android:paddingBottom="5dp"
-                    android:textSize="14sp" />
+                    android:paddingRight="40dp"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
 
                 <ImageView
                     android:id="@+id/img_clear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end|bottom"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="end|center_vertical"
                     android:layout_marginEnd="30dp"
-                    android:layout_marginBottom="10dp"
-                    android:src="@mipmap/cancel"
+                    android:src="@drawable/close"
                     android:visibility="invisible" />
             </FrameLayout>
 
 
-            <LinearLayout
+            <Button
+                android:id="@+id/btn_download"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_margin="20dp"
-                android:orientation="horizontal">
+                android:gravity="center"
+                android:text="@string/download"
+                android:textSize="16sp" />
 
-                <TextView
-                    android:id="@+id/tv_search"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_button"
-                    android:gravity="center"
-                    android:text="@string/search"
-                    android:textColor="@color/home_unselect_color"
-                    android:textSize="16sp" />
+            <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+                android:visibility="gone"
+                android:id="@+id/adView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                ads:adSize="MEDIUM_RECTANGLE"
+                ads:adUnitId="ca-app-pub-8609866682652024/6724687573" />
 
-                <TextView
-                    android:id="@+id/tv_download"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_button"
-                    android:gravity="center"
-                    android:text="@string/download"
-                    android:textColor="@color/home_unselect_color"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <FrameLayout
-                android:id="@+id/container"
+            <androidx.cardview.widget.CardView
+                android:visibility="gone"
+                android:id="@id/container"
+                app:cardCornerRadius="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="320dp"
-                android:layout_marginTop="20dp">
+                android:layout_height="200dp"
+                android:layout_margin="20dp">
 
-                <ImageView
-                    android:id="@+id/picture"
-                    android:layout_width="320dp"
-                    android:layout_height="320dp"
-                    android:layout_gravity="center_horizontal"
-                    android:visibility="invisible" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    >
 
-                <com.youth.banner.Banner
-                    android:id="@+id/banner"
-                    android:layout_width="320dp"
-                    android:layout_height="320dp"
-                    android:layout_gravity="center_horizontal"
-                    app:banner_infinite_loop="false" />
+                    <ImageView
+                        android:id="@+id/picture"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:scaleType="centerCrop" />
 
-                <ImageView
-                    android:visibility="invisible"
-                    android:id="@+id/img_play"
-                    android:layout_gravity="center"
-                    android:src="@drawable/video_play_normal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    <ImageView
+                        android:id="@+id/img_play"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/video_play_normal"
+                        android:visibility="invisible" />
 
-                <ProgressBar
-                    android:id="@+id/progress_bar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:visibility="invisible" />
-            </FrameLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_gravity="bottom"
+                        android:background="#555555"
+                        android:gravity="center_vertical">
 
+                        <ImageView
+                            android:id="@+id/avatar"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_marginLeft="12dp" />
+
+                        <TextView
+                            android:id="@+id/username"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:textColor="@color/white"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                </FrameLayout>
+
+            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
 

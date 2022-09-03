@@ -1,12 +1,11 @@
 package com.igtools.igdownloader.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import com.google.android.gms.ads.AdRequest
+import androidx.fragment.app.Fragment
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.adapter.ViewPagerAdapter
 import com.igtools.igdownloader.databinding.FragmentHomeBinding
@@ -36,12 +35,8 @@ class HomeFragment : Fragment() {
 
     fun initViews(){
 
-        val adRequest: AdRequest = AdRequest.Builder().build()
-        binding.adView.loadAd(adRequest)
-
         val fragments:ArrayList<Fragment> = ArrayList()
         fragments.add(ShortCodeFragment())
-        //fragments.add(UserNameFragment())
         fragments.add(UserFragment())
         val titles:ArrayList<String> = ArrayList()
         titles.add(getString(R.string.vp_shortcode))

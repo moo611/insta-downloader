@@ -11,6 +11,7 @@ import com.igtools.igdownloader.BuildConfig
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.databinding.FragmentSettingBinding
 import com.igtools.igdownloader.utils.FileUtils
+import com.igtools.igdownloader.utils.ShareUtils
 
 
 /**
@@ -48,7 +49,7 @@ class SettingFragment : Fragment() {
 
         }
 
-        binding.mySwitch.setOnCheckedChangeListener { _, b -> BaseApplication.isAuto = b }
+        binding.mySwitch.setOnCheckedChangeListener { _, b -> ShareUtils.putData("isAuto",b.toString()) }
 
     }
 

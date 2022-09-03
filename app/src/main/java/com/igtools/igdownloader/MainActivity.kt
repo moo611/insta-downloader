@@ -7,12 +7,11 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -25,7 +24,6 @@ import com.igtools.igdownloader.databinding.ActivityMainBinding
 import com.igtools.igdownloader.fragments.HomeFragment
 import com.igtools.igdownloader.fragments.SettingFragment
 import com.igtools.igdownloader.fragments.TagFragment
-import com.igtools.igdownloader.fragments.TagFragment2
 import com.igtools.igdownloader.models.IntentEvent
 import com.igtools.igdownloader.utils.RegexUtils
 import com.igtools.igdownloader.utils.ShareUtils
@@ -37,7 +35,7 @@ import org.greenrobot.eventbus.EventBus
  * @Date: 2022/7/21
  */
 class MainActivity : AppCompatActivity() {
-
+    val TAG="MainActivityTest"
     lateinit var binding: ActivityMainBinding
     var imageViews: MutableList<ImageView> = ArrayList()
     var fragments: MutableList<Fragment> = ArrayList()
@@ -59,56 +57,53 @@ class MainActivity : AppCompatActivity() {
 
         initViews()
         setListeners()
-
+        handleText(intent)
 
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-
+        Log.v(TAG,"on new intent")
         //Toast.makeText(this,"new intent",Toast.LENGTH_SHORT).show()
-        binding.imgHome.post {
+        handleText(intent)
 
-            if (intent?.action == Intent.ACTION_SEND) {
-                if ("text/plain" == intent.type) {
-                    intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-                        // Update UI to reflect text being shared
+    }
 
-                        val urls = RegexUtils.extractUrls(it)
-                        if (urls.size > 0 && ShareUtils.getData("keyword") != urls[0]) {
-                            ShareUtils.putData("keyword", urls[0])
-                            EventBus.getDefault().post(IntentEvent(urls[0]))
-                        }
+    fun handleText(newintent:Intent?) {
+        Log.v(TAG,newintent?.action+newintent?.type+"")
+        if (newintent?.action == Intent.ACTION_SEND) {
+            if ("text/plain" == newintent.type) {
+                newintent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+                    // Update UI to reflect text being shared
 
-                    }
-                }
-            } else {
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val item = clipboard.primaryClip?.getItemAt(0)
-                item?.text?.toString()?.let {
+                    val urls = RegexUtils.extractUrls(it)
+                    if (urls.size > 0) {
 
-                    if (ShareUtils.getData("keyword") != it) {
-                        ShareUtils.putData("keyword", it)
-                        EventBus.getDefault().post(IntentEvent(it))
+                        EventBus.getDefault().post(IntentEvent(urls[0]))
                     }
 
                 }
-
             }
-        }
+        } else {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val item = clipboard.primaryClip?.getItemAt(0)
+            item?.text?.toString()?.let {
+                    EventBus.getDefault().post(IntentEvent(it))
+            }
 
+        }
     }
 
     //app 退出时，让 app 在后台运行，类似于 home 键的功能，最小化
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        when (keyCode) {
-            KeyEvent.KEYCODE_BACK -> {
-                moveTaskToBack(true)
-                return true
-            }
-        }
-        return false
-    }
+//    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+//        when (keyCode) {
+//            KeyEvent.KEYCODE_BACK -> {
+//                moveTaskToBack(true)
+//                return true
+//            }
+//        }
+//        return false
+//    }
 
 
     fun initViews() {
@@ -132,7 +127,7 @@ class MainActivity : AppCompatActivity() {
 
 
         fragments.add(HomeFragment())
-        fragments.add(TagFragment2())
+        fragments.add(TagFragment())
         fragments.add(SettingFragment())
 
         showFragment(lastPos)
