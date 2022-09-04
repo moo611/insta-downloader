@@ -238,7 +238,7 @@ class ShortCodeFragment : Fragment() {
     }
 
     private suspend fun downloadAndSave(mediaInfo: MediaModel) = withContext(Dispatchers.Main) {
-
+        binding.progressbar.visibility = View.VISIBLE
         val all: List<Deferred<Unit>> = mediaInfo.resources.map {
             async {
                 downloadMedia(it)
@@ -248,7 +248,7 @@ class ShortCodeFragment : Fragment() {
         //Log.v(TAG,"finish")
         val record = Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
         RecordDB.getInstance().recordDao().insert(record)
-
+        binding.progressbar.visibility = View.INVISIBLE
         Toast.makeText(
             requireContext(),
             getString(R.string.download_finish),
