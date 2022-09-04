@@ -33,5 +33,9 @@
     <string name="invalid_url">Неверный URL</string>
 
     <string name="too_many">Слишком много запросов</string>
+    <string name="exist">Загрузка уже существует, проверьте историю</string>
+    <string name="note">Мы поддерживаем доступ только к общедоступной информации об учетной записи</string>
+    <string name="empty_username">пожалуйста, введите имя пользователя</string>
+    <string name="empty_tag">Пожалуйста, введите хэштег</string>
 
 </resources>

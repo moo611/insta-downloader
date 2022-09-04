@@ -22,6 +22,13 @@
             android:src="@mipmap/collections_white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+        <ImageView
+            android:id="@+id/img_player"
+            android:layout_margin="5dp"
+            android:layout_gravity="end|bottom"
+            android:src="@mipmap/player"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </FrameLayout>
 
 

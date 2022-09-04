@@ -32,4 +32,10 @@
     <string name="not_found"> Không tìm thấy bài đăng </string>
     <string name="invalid_url">url không hợp lệ</string>
     <string name = "too_many"> Quá nhiều yêu cầu </string>
+
+    <string name="exist">Tải xuống đã tồn tại, vui lòng kiểm tra lịch sử</string>
+    <string name="note">Chúng tôi chỉ hỗ trợ quyền truy cập vào thông tin tài khoản công khai</string>
+    <string name="empty_username">Vui lòng nhập tên người dùng</string>
+    <string name="empty_tag">Vui lòng nhập thẻ bắt đầu bằng #</string>
+
 </resources>

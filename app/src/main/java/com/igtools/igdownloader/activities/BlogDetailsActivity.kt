@@ -128,7 +128,6 @@ class BlogDetailsActivity : AppCompatActivity() {
 
 
     private fun initViews() {
-        val adRequest: AdRequest = AdRequest.Builder().build()
 
         binding.btnDownload.isEnabled = false
         adapter = MultiTypeAdapter(this, mediaInfo.resources)
@@ -150,9 +149,9 @@ class BlogDetailsActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
 
-                val oldRecord= RecordDB.getInstance().recordDao().findById(mediaInfo.shareCode)
-                if (oldRecord!=null){
-                    Toast.makeText(this@BlogDetailsActivity,"exist",Toast.LENGTH_SHORT).show()
+                val oldRecord = RecordDB.getInstance().recordDao().findById(mediaInfo.code)
+                if (oldRecord != null) {
+                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.exist), Toast.LENGTH_SHORT).show()
                     return@launch
                 }
                 progressDialog.show()
@@ -164,7 +163,8 @@ class BlogDetailsActivity : AppCompatActivity() {
 
                 all.awaitAll()
                 //Log.v(TAG,"finish")
-                val record = Record(mediaInfo.code,Gson().toJson(mediaInfo),DateUtils.getDate(Date()))
+                val record =
+                    Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog.dismiss()
@@ -209,7 +209,7 @@ class BlogDetailsActivity : AppCompatActivity() {
                 adapter.setDatas(mediaInfo.resources as List<ResourceModel?>?)
 
                 binding.btnDownload.isEnabled = true
-                binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+                //binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
                 binding.tvTitle.text = mediaInfo.captionText
 
             }
@@ -218,7 +218,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             Glide.with(this@BlogDetailsActivity).load(mediaInfo.thumbnailUrl)
                 .into(binding.picture)
             binding.btnDownload.isEnabled = true
-            binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+            //binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
             binding.tvTitle.text = mediaInfo.captionText
 
         }

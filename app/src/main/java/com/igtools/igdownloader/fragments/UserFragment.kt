@@ -99,7 +99,7 @@ class UserFragment : Fragment() {
             binding.etUsername.clearFocus()
             KeyboardUtils.closeKeybord(binding.etUsername, context)
             if (binding.etUsername.text.toString().isEmpty()){
-                Toast.makeText(requireContext(),"Please enter username first",Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(),getString(R.string.empty_username),Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             refresh(binding.etUsername.text.toString())
@@ -157,10 +157,13 @@ class UserFragment : Fragment() {
         progressDialog.show()
         lifecycleScope.launch {
             try {
-                val res = ApiClient.getClient().getUserMedias(user, "", userId)
+                val res = ApiClient.getClient2().getUserMedias(user, "", userId)
                 val code = res.code()
                 val jsonObject = res.body()
                 if (code ==200 && jsonObject != null) {
+
+                    mInterstitialAd?.show(requireActivity())
+
                     val medias: ArrayList<MediaModel> = ArrayList()
 
                     val items = jsonObject["data"].asJsonArray
@@ -213,7 +216,7 @@ class UserFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                val res = ApiClient.getClient().getUserMedias(user, end_cursor, userId)
+                val res = ApiClient.getClient2().getUserMedias(user, end_cursor, userId)
                 val code = res.code()
                 val jsonObject = res.body()
                 if (code == 200 && jsonObject != null) {

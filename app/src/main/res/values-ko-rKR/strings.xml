@@ -32,4 +32,11 @@
     <string name="not_found">게시물을 찾을 수 없습니다</string>
     <string name="invalid_url">잘못된 URL</string>
     <string name="too_many">너무 많은 요청</string>
+
+    <string name="exist">다운로드가 이미 있습니다. 기록을 확인하세요.</string>
+    <string name="note">공개 계정 정보에 대한 액세스만 지원합니다.</string>
+    <string name="empty_username">사용자 이름을 입력하십시오</string>
+    <string name="empty_tag">해시태그를 입력해주세요</string>
+
+
 </resources>

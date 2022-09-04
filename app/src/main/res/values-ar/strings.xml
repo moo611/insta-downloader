@@ -33,5 +33,9 @@
     <string name="invalid_url"> عنوان Url غير صالح </string>
 
     <string name="too_many"> طلبات كثيرة جدًا </string>
+    <string name="exist">التنزيل موجود بالفعل ، يرجى التحقق من التاريخ</string>
+    <string name="note">نحن ندعم فقط الوصول إلى معلومات الحساب العام</string>
+    <string name="empty_username">الرجاء إدخال اسم المستخدم</string>
+    <string name="empty_tag">الرجاء إدخال الهاشتاج</string>
 
 </resources>

@@ -13,17 +13,18 @@ import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.activities.BlogDetailsActivity
+import com.igtools.igdownloader.activities.TagBlogDetails
 import com.igtools.igdownloader.models.MediaModel
 
 class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewHolder>() {
 
     var blogs: ArrayList<MediaModel> = ArrayList()
     val gson = Gson()
-
+    var fromTag = false
     inner class BlogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var imgThumbnail: ImageView = itemView.findViewById(R.id.img_thumbnail)
         var imgCollections: ImageView = itemView.findViewById(R.id.img_collections)
-
+        var imgPlayer: ImageView = itemView.findViewById(R.id.img_player)
     }
 
     fun refresh(blogs: ArrayList<MediaModel>) {
@@ -52,18 +53,34 @@ class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewH
         holder.itemView.setOnClickListener {
 
             val mediaModel = gson.toJson(blogs[position])
-            c.startActivity(
-                Intent(c, BlogDetailsActivity::class.java)
-                    .putExtra("content", mediaModel).putExtra("flag", true)
-            )
+            if (fromTag){
+                //tag的结果没有resources，因此需要调接口重新获取子集
+                c.startActivity(
+                    Intent(c, TagBlogDetails::class.java)
+                        .putExtra("content", mediaModel).putExtra("flag", true)
+                )
+            }else{
+                c.startActivity(
+                    Intent(c, BlogDetailsActivity::class.java)
+                        .putExtra("content", mediaModel).putExtra("flag", true)
+                )
+            }
 
         }
 
         val typename = blogs[position].mediaType
         if (typename == 8) {
             holder.imgCollections.visibility = View.VISIBLE
+            holder.imgPlayer.visibility = View.INVISIBLE
         } else {
             holder.imgCollections.visibility = View.INVISIBLE
+
+            if (typename == 1) {
+                holder.imgPlayer.visibility = View.INVISIBLE
+            } else {
+                holder.imgPlayer.visibility = View.VISIBLE
+            }
+
         }
     }
 

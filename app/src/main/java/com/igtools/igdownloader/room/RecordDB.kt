@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.igtools.igdownloader.BaseApplication
 import com.igtools.igdownloader.models.Record
 
-@Database(entities = [Record::class], version = 3, exportSchema = true)
+@Database(entities = [Record::class], version = 4, exportSchema = true)
 abstract class RecordDB : RoomDatabase() {
 
     abstract fun recordDao(): RecordDao

@@ -33,5 +33,9 @@
     <string name="invalid_url">Url Tidak Valid</string>
 
     <string name="too_many">Terlalu banyak permintaan</string>
+    <string name="exist">Download sudah ada, silahkan cek history</string>
+    <string name="note">Kami hanya mendukung akses ke informasi akun publik</string>
+    <string name="empty_username">silakan masukkan nama pengguna</string>
+    <string name="empty_tag">Silakan masukkan hastag</string>
 
 </resources>

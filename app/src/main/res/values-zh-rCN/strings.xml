@@ -32,4 +32,10 @@
     <string name="not_found">找不到帖子</string>
     <string name="invalid_url">无效的网址</string>
     <string name="too_many">请求太多</string>
+
+    <string name="exist">下载已存在，请查看历史记录</string>
+    <string name="note">我们只支持获取公开账户资料</string>
+    <string name="empty_username">请输入用户名</string>
+    <string name="empty_tag">请输入标签</string>
+
 </resources>

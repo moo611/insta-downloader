@@ -22,10 +22,12 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.adapter.BlogAdapter
+import com.igtools.igdownloader.adapter.BlogAdapter2
 import com.igtools.igdownloader.api.retrofit.ApiClient
 import com.igtools.igdownloader.databinding.FragmentTagBinding
-import com.igtools.igdownloader.models.BlogModel
+import com.igtools.igdownloader.models.MediaModel
 import com.igtools.igdownloader.utils.KeyboardUtils
+import com.igtools.igdownloader.utils.getNullable
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
@@ -37,11 +39,11 @@ import java.lang.Exception
  */
 class TagFragment : Fragment() {
     lateinit var layoutManager: GridLayoutManager
-    lateinit var adapter: BlogAdapter
+    lateinit var adapter: BlogAdapter2
     lateinit var binding: FragmentTagBinding
     lateinit var progressDialog: ProgressDialog
     var loadingMore = false
-    //var blogs: ArrayList<BlogModel> = ArrayList()
+    //var medias: ArrayList<MediaModel> = ArrayList()
     var gson = Gson()
     var mInterstitialAd: InterstitialAd? = null
 
@@ -69,7 +71,8 @@ class TagFragment : Fragment() {
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
-        adapter = BlogAdapter(requireContext())
+        adapter = BlogAdapter2(requireContext())
+        adapter.fromTag=true
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter
         binding.rv.layoutManager = layoutManager
@@ -105,7 +108,7 @@ class TagFragment : Fragment() {
             binding.etTag.clearFocus()
             KeyboardUtils.closeKeybord(binding.etTag, context)
             if (binding.etTag.text.toString().isEmpty()){
-                Toast.makeText(requireContext(),"Please enter username first",Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(),getString(R.string.empty_tag),Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             refresh(binding.etTag.text.toString())
@@ -168,23 +171,24 @@ class TagFragment : Fragment() {
         lifecycleScope.launch {
 
             try {
-                val res = ApiClient.getClient().getTags(tag)
+                val res = ApiClient.getClient3().getTags(tag)
 
                 val code = res.code()
-                if (code != 200) {
-                    progressDialog.dismiss()
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                        .show()
-                    return@launch
-                }
-
                 val jsonObject = res.body()
-                if (jsonObject != null) {
-                    val blogs:ArrayList<BlogModel> = ArrayList()
-                    parseData(jsonObject,blogs);
-                    if (blogs.size > 0) {
-                        adapter.refresh(blogs)
+                if (code==200 && jsonObject != null) {
+                    val medias:ArrayList<MediaModel> = ArrayList()
+                    parseData(jsonObject,medias);
+                    if (medias.size > 0) {
+                        adapter.refresh(medias)
 
+                    }
+                }else{
+                    if (code == 429) {
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
                 progressDialog.dismiss()
@@ -225,23 +229,27 @@ class TagFragment : Fragment() {
                         "application/json;charset=UTF-8".toMediaTypeOrNull(), strEntity
                     );
 
-                val res = ApiClient.getClient().postMoreTags(body = body)
+                val res = ApiClient.getClient3().postMoreTags(body = body)
                 val code = res.code()
-                if (code != 200) {
-                    progressDialog.dismiss()
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                        .show()
-                    return@launch
-                }
-
+                
                 val jsonObject = res.body()
-                if (jsonObject != null) {
-                    val blogs:ArrayList<BlogModel> = ArrayList()
-                    parseData(jsonObject,blogs);
-                    if (blogs.size > 0) {
-                        adapter.loadMore(blogs)
+                if (code == 200 && jsonObject != null) {
+                    val medias:ArrayList<MediaModel> = ArrayList()
+                    parseData(jsonObject,medias);
+                    if (medias.size > 0) {
+                        adapter.loadMore(medias)
 
                     }
+                }else{
+
+                    if (code == 429) {
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                    
                 }
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
@@ -256,7 +264,7 @@ class TagFragment : Fragment() {
 
     }
 
-    private fun parseData(jsonObject: JsonObject,blogs:ArrayList<BlogModel>) {
+    private fun parseData(jsonObject: JsonObject,medias:ArrayList<MediaModel>) {
         next_media_ids.clear()
         val data = jsonObject["data"].asJsonObject
         more_available = data["more_available"].asBoolean
@@ -273,33 +281,35 @@ class TagFragment : Fragment() {
         val items = data["sections"].asJsonArray
 
         for (item in items) {
+            val mediaModel = MediaModel()
             Log.v(TAG, "current:" + items.indexOf(item))
-            val blogModel = BlogModel()
-            blogModel.caption = item.asJsonObject["caption"].asJsonObject["text"].asString ?: ""
-            //blogModel.displayUrl = item.asJsonObject["display_url"].asString
-            blogModel.shortCode = item.asJsonObject["code"].asString
-            //blogModel.typeName = item.asJsonObject["__typename"].asString
-            val type = item.asJsonObject["media_type"].asInt
-            if (type == 8) {
-                blogModel.typeName = "GraphSidecar"
+            mediaModel.pk = item.asJsonObject["pk"].asString
+            mediaModel.captionText = item.asJsonObject["caption"].asJsonObject["text"].asString ?: ""
+            mediaModel.code = item.asJsonObject["code"].asString
+            mediaModel.mediaType = item.asJsonObject["media_type"].asInt
+
+            if (mediaModel.mediaType == 8) {
+
                 val candidates = item.asJsonObject["carousel_media"]
                     .asJsonArray[0]
                     .asJsonObject["image_versions2"]
                     .asJsonObject["candidates"]
                     .asJsonArray
-                blogModel.thumbnailUrl = candidates[candidates.size() - 1]
+                mediaModel.thumbnailUrl = candidates[candidates.size() - 1]
                     .asJsonObject["url"]
                     .asString
 
             } else {
-                blogModel.typeName = "others"
+
                 val candidates =
                     item.asJsonObject["image_versions2"].asJsonObject["candidates"].asJsonArray
-                blogModel.thumbnailUrl =
+                mediaModel.thumbnailUrl =
                     candidates[candidates.size() - 1].asJsonObject["url"].asString
 
             }
-            blogs.add(blogModel)
+            mediaModel.username = item.asJsonObject["user"].asJsonObject["username"].asString
+            mediaModel.profilePicUrl = item.asJsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+            medias.add(mediaModel)
         }
 
 

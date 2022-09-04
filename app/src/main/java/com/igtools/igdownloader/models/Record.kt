@@ -3,6 +3,7 @@ package com.igtools.igdownloader.models
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.*
 
 @Entity(tableName = "record")
 data class Record(
@@ -11,7 +12,7 @@ data class Record(
     @ColumnInfo(name = "content")
     var content: String?,
     @ColumnInfo(name = "created_time")
-    var createdTime: String?
+    var createdTime: Long?
 
 )
 

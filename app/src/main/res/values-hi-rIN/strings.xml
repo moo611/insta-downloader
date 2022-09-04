@@ -32,4 +32,9 @@
     <string name="not_found">पोस्ट नहीं मिली</string>
     <string name="invalid_url">अवैध यूआरएल</string>
     <string name = "too_many">बहुत अधिक अनुरोध</string>
+    <string name="exist">डाउनलोड पहले से मौजूद है, कृपया इतिहास जांचें</string>
+    <string name="note">हम केवल सार्वजनिक खाते की जानकारी तक पहुंच का समर्थन करते हैं</string>
+    <string name="empty_username">कृपया उपयोगकर्ता नाम दर्ज करें</string>
+    <string name="empty_tag">कृपया हैशटैग दर्ज करें</string>
+
 </resources>

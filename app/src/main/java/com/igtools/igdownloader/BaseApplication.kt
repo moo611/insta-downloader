@@ -15,8 +15,11 @@ class BaseApplication : Application() {
     companion object {
         lateinit var mContext: Context
 
-        var baseUrl = "http://34.221.49.20:3000"
-
+        //var baseUrl = "http://34.221.49.20:3000"
+        var serverIp = "http://34.221.49.20"
+        var port1 = "3000"
+        var port2 = "4000"
+        var port3 = "5000"
     }
 
     override fun onCreate() {
@@ -30,14 +33,21 @@ class BaseApplication : Application() {
         remoteConfig.setConfigSettingsAsync(configSettings)
 
         remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    baseUrl = remoteConfig.getString("ip")
-                    Log.v(TAG, baseUrl)
-                } else {
-                    Log.e(TAG,"fetch failed")
-                }
-
+            if (task.isSuccessful) {
+                Log.v(TAG,"task success")
+                serverIp = remoteConfig.getString("server_ip")
+                port1 = remoteConfig.getString("port1")
+                port2 = remoteConfig.getString("port2")
+                port3 = remoteConfig.getString("port3")
+                Log.v(TAG, serverIp)
+                Log.v(TAG, port1)
+                Log.v(TAG, port2)
+                Log.v(TAG, port3)
+            } else {
+                Log.e(TAG, "fetch failed")
             }
+
+        }
         MobileAds.initialize(this)
     }
 

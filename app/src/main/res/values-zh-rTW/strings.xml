@@ -31,4 +31,10 @@
     <string name="downloading">正在下載…</string>
     <string name="not_found">找不到帖子</string>
     <string name="invalid_url">無效的網址</string>
+
+    <string name="exist">下載已存在，請查看歷史記錄</string>
+    <string name="note">我們只支持獲取公開賬戶資料</string>
+    <string name="empty_username">請輸入用戶名</string>
+    <string name="empty_tag">請輸入標籤</string>
+
 </resources>

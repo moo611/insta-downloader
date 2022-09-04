@@ -31,5 +31,9 @@
     <string name="invalid_url">Invalid Url</string>
 
     <string name="too_many">Too many requests</string>
+    <string name="exist">Download already exists, please check history</string>
+    <string name="note">We only support access to public account information</string>
+    <string name="empty_username">Please enter username</string>
+    <string name="empty_tag">Please enter hashtag</string>
 
 </resources>

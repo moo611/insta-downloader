@@ -32,5 +32,9 @@
     <string name="not_found">投稿が見つかりません</string>
     <string name="invalid_url">無効なURL</string>
     <string name="too_many">リクエスト多すぎ</string>
+    <string name="exist">ダウンロードは既に存在します。履歴を確認してください</string>
+    <string name="note">公開アカウント情報へのアクセスのみをサポートしています</string>
+    <string name="empty_username">ユーザー名を入力してください</string>
+    <string name="empty_tag">ハッシュタグを入力してください</string>
 
 </resources>

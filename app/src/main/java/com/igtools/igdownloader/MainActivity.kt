@@ -35,7 +35,7 @@ import org.greenrobot.eventbus.EventBus
  * @Date: 2022/7/21
  */
 class MainActivity : AppCompatActivity() {
-    val TAG="MainActivityTest"
+    val TAG = "MainActivityTest"
     lateinit var binding: ActivityMainBinding
     var imageViews: MutableList<ImageView> = ArrayList()
     var fragments: MutableList<Fragment> = ArrayList()
@@ -61,49 +61,45 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Log.v(TAG,"on new intent")
+        Log.v(TAG, "on new intent")
         //Toast.makeText(this,"new intent",Toast.LENGTH_SHORT).show()
         handleText(intent)
 
     }
 
-    fun handleText(newintent:Intent?) {
-        Log.v(TAG,newintent?.action+newintent?.type+"")
-        if (newintent?.action == Intent.ACTION_SEND) {
-            if ("text/plain" == newintent.type) {
-                newintent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-                    // Update UI to reflect text being shared
+    fun handleText(newintent: Intent?) {
+        //这里要加延时，否则会获取不到intent或者clipboarditem
+        binding.imgDownload.post {
+            Log.v(TAG, newintent?.action + newintent?.type + "")
+            if (newintent?.action == Intent.ACTION_SEND) {
+                if ("text/plain" == newintent.type) {
+                    newintent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+                        // Update UI to reflect text being shared
 
-                    val urls = RegexUtils.extractUrls(it)
-                    if (urls.size > 0) {
+                        val urls = RegexUtils.extractUrls(it)
+                        if (urls.size > 0) {
 
-                        EventBus.getDefault().post(IntentEvent(urls[0]))
+                            EventBus.getDefault().post(IntentEvent(urls[0]))
+                        }
+
                     }
-
                 }
-            }
-        } else {
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val item = clipboard.primaryClip?.getItemAt(0)
-            item?.text?.toString()?.let {
-                    EventBus.getDefault().post(IntentEvent(it))
+            } else {
+
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val item = clipboard.primaryClip?.getItemAt(0)
+                Log.v(TAG, "item:$item")
+                if (item?.text?.toString() != null && item.text.toString().isNotEmpty()) {
+                    Log.v(TAG, "text:" + item.text.toString())
+                    EventBus.getDefault().post(IntentEvent(item.text.toString()))
+                }
             }
 
         }
     }
-
-    //app 退出时，让 app 在后台运行，类似于 home 键的功能，最小化
-//    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-//        when (keyCode) {
-//            KeyEvent.KEYCODE_BACK -> {
-//                moveTaskToBack(true)
-//                return true
-//            }
-//        }
-//        return false
-//    }
 
 
     fun initViews() {
