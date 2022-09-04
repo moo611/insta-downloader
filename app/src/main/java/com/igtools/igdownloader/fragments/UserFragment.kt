@@ -216,7 +216,7 @@ class UserFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                val res = ApiClient.getClient2().getUserMedias(user, end_cursor, userId)
+                val res = ApiClient.getClient2().getUserMediasMore(user, end_cursor, userId)
                 val code = res.code()
                 val jsonObject = res.body()
                 if (code == 200 && jsonObject != null) {

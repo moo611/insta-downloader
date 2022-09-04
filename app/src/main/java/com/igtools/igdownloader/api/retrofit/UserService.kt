@@ -15,4 +15,12 @@ interface UserService {
         @Query("user_id") user_id: String
     ): Response<JsonObject>
 
+
+
+    @GET("/api/v2/usermedias/more")
+    suspend fun getUserMediasMore(
+        @Query("username") username: String,
+        @Query("end_cursor") end_cursor: String,
+        @Query("user_id") user_id: String
+    ): Response<JsonObject>
 }

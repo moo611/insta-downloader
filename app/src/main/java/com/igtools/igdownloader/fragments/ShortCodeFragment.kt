@@ -239,12 +239,18 @@ class ShortCodeFragment : Fragment() {
 
     private suspend fun downloadAndSave(mediaInfo: MediaModel) = withContext(Dispatchers.Main) {
         binding.progressbar.visibility = View.VISIBLE
-        val all: List<Deferred<Unit>> = mediaInfo.resources.map {
-            async {
-                downloadMedia(it)
+
+        if (mediaInfo.mediaType==8){
+            val all: List<Deferred<Unit>> = mediaInfo.resources.map {
+                async {
+                    downloadMedia(it)
+                }
             }
+            all.awaitAll()
+        }else{
+            downloadMedia(mediaInfo)
         }
-        all.awaitAll()
+
         //Log.v(TAG,"finish")
         val record = Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
         RecordDB.getInstance().recordDao().insert(record)

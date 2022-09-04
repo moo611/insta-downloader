@@ -142,13 +142,18 @@ class TagBlogDetails : AppCompatActivity() {
                     return@launch
                 }
                 progressDialog.show()
-                val all: List<Deferred<Unit>> = mediaInfo.resources.map {
-                    async {
-                        downloadMedia(it)
+                if (mediaInfo.mediaType==8){
+                    val all: List<Deferred<Unit>> = mediaInfo.resources.map {
+                        async {
+                            downloadMedia(it)
+                        }
                     }
+
+                    all.awaitAll()
+                }else{
+                    downloadMedia(mediaInfo)
                 }
 
-                all.awaitAll()
                 //Log.v(TAG,"finish")
                 val record =
                     Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
@@ -242,25 +247,6 @@ class TagBlogDetails : AppCompatActivity() {
 
         }
 
-    }
-
-    private suspend fun downloadAndSave(mediaInfo: MediaModel) = withContext(Dispatchers.Main) {
-
-        val all: List<Deferred<Unit>> = mediaInfo.resources.map {
-            async {
-                downloadMedia(it)
-            }
-        }
-        all.awaitAll()
-        //Log.v(TAG,"finish")
-        val record = Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
-        RecordDB.getInstance().recordDao().insert(record)
-
-        Toast.makeText(
-            this@TagBlogDetails,
-            getString(R.string.download_finish),
-            Toast.LENGTH_SHORT
-        ).show()
     }
 
 
