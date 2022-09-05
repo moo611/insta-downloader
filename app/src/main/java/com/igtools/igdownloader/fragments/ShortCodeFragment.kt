@@ -3,6 +3,7 @@ package com.igtools.igdownloader.fragments
 import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
@@ -16,7 +17,12 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
@@ -38,6 +44,7 @@ import com.igtools.igdownloader.room.RecordDB
 import com.igtools.igdownloader.utils.*
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
+import okhttp3.Dispatcher
 import okhttp3.ResponseBody
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -56,13 +63,13 @@ class ShortCodeFragment : Fragment() {
 
     lateinit var progressDialog: ProgressDialog
     lateinit var binding: FragmentShortCodeBinding
-
+    lateinit var glideListener: RequestListener<Drawable>
     var TAG = "ShortCodeFragment"
 
     val gson = Gson()
     var mInterstitialAd: InterstitialAd? = null
-    var curMediaInfo:MediaModel?=null
-
+    var curMediaInfo: MediaModel? = null
+    lateinit var circularProgressDrawable: CircularProgressDrawable
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -102,6 +109,11 @@ class ShortCodeFragment : Fragment() {
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
 
+        circularProgressDrawable = CircularProgressDrawable(requireContext())
+        circularProgressDrawable.strokeWidth = 5f
+        circularProgressDrawable.centerRadius = 30f
+        circularProgressDrawable.start()
+
     }
 
 
@@ -125,143 +137,6 @@ class ShortCodeFragment : Fragment() {
 
 
     }
-
-
-    private fun getMedia(url: String) {
-        lifecycleScope.launch {
-            val shareCode = UrlUtils.extractMedia(url)
-            Log.v(TAG, shareCode)
-            val record = RecordDB.getInstance().recordDao().findById(shareCode)
-            if (record != null) {
-                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-            progressDialog.show()
-            try {
-                val res = ApiClient.getClient().getMedia(url)
-                val code = res.code()
-                val jsonObject = res.body()
-                if (code == 200 && jsonObject != null) {
-                    binding.container.visibility = View.VISIBLE
-                    val data = jsonObject["data"].asJsonObject
-                    val mediaInfo = parseData(data)
-                    curMediaInfo = mediaInfo
-                    if (mediaInfo.mediaType == 8) {
-                        if (mediaInfo.resources.size > 0) {
-                            Glide.with(requireContext()).load(mediaInfo.resources[0].thumbnailUrl)
-                                .into(binding.picture)
-                        }
-                    } else {
-                        Glide.with(requireContext()).load(mediaInfo.thumbnailUrl)
-                            .into(binding.picture)
-                    }
-                    Glide.with(requireContext()).load(mediaInfo.profilePicUrl).circleCrop()
-                        .into(binding.avatar)
-                    binding.username.text = mediaInfo.username
-                    //因为有下载，所以要先关闭弹窗
-                    progressDialog.dismiss()
-                    downloadAndSave(mediaInfo)
-                    mInterstitialAd?.show(requireActivity())
-                } else {
-                    progressDialog.dismiss()
-                    if (code == 429) {
-                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
-                }
-
-            } catch (e: Exception) {
-                Log.e(TAG, e.message + "")
-                progressDialog.dismiss()
-                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
-            }
-
-        }
-
-    }
-
-    private fun getStories(url: String) {
-
-        lifecycleScope.launch {
-
-            val shareCode = UrlUtils.extractStory(url)
-            Log.v(TAG, shareCode)
-
-            val record = RecordDB.getInstance().recordDao().findById(shareCode)
-            if (record != null) {
-                Toast.makeText(requireContext(), "exist", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-            progressDialog.show()
-
-            try {
-
-                val res = ApiClient.getClient().getStory(url)
-                val code = res.code()
-                val jsonObject = res.body()
-                if (code == 200 && jsonObject != null) {
-                    binding.container.visibility = View.VISIBLE
-                    val data = jsonObject["data"].asJsonObject
-                    val mediaInfo = parseData(data)
-                    curMediaInfo = mediaInfo
-                    Glide.with(requireContext()).load(mediaInfo.thumbnailUrl).into(binding.picture)
-                    Glide.with(requireContext()).load(mediaInfo.profilePicUrl).circleCrop()
-                        .into(binding.avatar)
-                    binding.username.text = mediaInfo.username
-                    //因为有下载，所以要先关闭弹窗
-                    progressDialog.dismiss()
-                    downloadAndSave(mediaInfo)
-                    mInterstitialAd?.show(requireActivity())
-                } else {
-                    progressDialog.dismiss()
-                    if (code == 429) {
-                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-
-            } catch (e: Exception) {
-                Log.e(TAG, e.message + "")
-                progressDialog.dismiss()
-                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
-            }
-
-        }
-
-    }
-
-    private suspend fun downloadAndSave(mediaInfo: MediaModel) = withContext(Dispatchers.Main) {
-        binding.progressbar.visibility = View.VISIBLE
-
-        if (mediaInfo.mediaType==8){
-            val all: List<Deferred<Unit>> = mediaInfo.resources.map {
-                async {
-                    downloadMedia(it)
-                }
-            }
-            all.awaitAll()
-        }else{
-            downloadMedia(mediaInfo)
-        }
-
-        //Log.v(TAG,"finish")
-        val record = Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
-        RecordDB.getInstance().recordDao().insert(record)
-        binding.progressbar.visibility = View.INVISIBLE
-        Toast.makeText(
-            requireContext(),
-            getString(R.string.download_finish),
-            Toast.LENGTH_SHORT
-        ).show()
-    }
-
 
     private fun setListeners() {
 
@@ -320,9 +195,171 @@ class ShortCodeFragment : Fragment() {
 
         }
 
+        glideListener = object : RequestListener<Drawable> {
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Drawable>?,
+                isFirstResource: Boolean
+            ): Boolean {
+                binding.progressbar.visibility = View.INVISIBLE
+                return false;
+            }
+
+            override fun onResourceReady(
+                resource: Drawable?,
+                model: Any?,
+                target: Target<Drawable>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean
+            ): Boolean {
+
+                binding.progressbar.visibility = View.INVISIBLE
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.download_finish),
+                    Toast.LENGTH_SHORT
+                ).show()
+                mInterstitialAd?.show(requireActivity())
+                return false;
+
+            }
+
+        }
+
     }
 
-    private fun parseData(jsonObject: JsonObject):MediaModel {
+    /**
+     * 获取video,image,igtv,reel
+     */
+    private fun getMedia(url: String) {
+        lifecycleScope.launch {
+            val shareCode = UrlUtils.extractMedia(url)
+            Log.v(TAG, shareCode)
+            val record = RecordDB.getInstance().recordDao().findById(shareCode)
+            if (record != null) {
+                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
+                    .show()
+                return@launch
+            }
+            progressDialog.show()
+            try {
+                val res = ApiClient.getClient().getMedia(url)
+                val code = res.code()
+                val jsonObject = res.body()
+                if (code == 200 && jsonObject != null) {
+                    binding.container.visibility = View.VISIBLE
+                    val data = jsonObject["data"].asJsonObject
+                    val mediaInfo = parseData(data)
+                    curMediaInfo = mediaInfo
+                    if (mediaInfo.mediaType == 8) {
+                        if (mediaInfo.resources.size > 0) {
+                            Glide.with(requireContext()).load(mediaInfo.resources[0].thumbnailUrl)
+                                .listener(glideListener)
+                                .into(binding.picture)
+                        }
+                    } else {
+                        Glide.with(requireContext()).load(mediaInfo.thumbnailUrl)
+                            .listener(glideListener)
+                            .into(binding.picture)
+                    }
+                    Glide.with(requireContext()).load(mediaInfo.profilePicUrl).circleCrop()
+                        .into(binding.avatar)
+                    binding.username.text = mediaInfo.username
+                    //因为有下载，所以要先关闭弹窗
+                    progressDialog.dismiss()
+                    //downloadAndSave(mediaInfo)
+                    downloadAll(mediaInfo)
+                    val record2 = Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
+                    RecordDB.getInstance().recordDao().insert(record2)
+
+                } else {
+                    progressDialog.dismiss()
+                    if (code == 429) {
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                progressDialog.dismiss()
+                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+            }
+
+        }
+
+    }
+
+    /**
+     * 获取story
+     */
+    private fun getStories(url: String) {
+
+        lifecycleScope.launch {
+
+            val shareCode = UrlUtils.extractStory(url)
+            Log.v(TAG, shareCode)
+
+            val record = RecordDB.getInstance().recordDao().findById(shareCode)
+            if (record != null) {
+                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
+                    .show()
+                return@launch
+            }
+            progressDialog.show()
+
+            try {
+
+                val res = ApiClient.getClient().getStory(url)
+                val code = res.code()
+                val jsonObject = res.body()
+                if (code == 200 && jsonObject != null) {
+                    binding.container.visibility = View.VISIBLE
+                    val data = jsonObject["data"].asJsonObject
+                    val mediaInfo = parseData(data)
+                    curMediaInfo = mediaInfo
+                    Glide.with(requireContext()).load(mediaInfo.thumbnailUrl)
+                        .listener(glideListener).into(binding.picture)
+                    Glide.with(requireContext()).load(mediaInfo.profilePicUrl).circleCrop()
+                        .into(binding.avatar)
+                    binding.username.text = mediaInfo.username
+                    //因为有下载，所以要先关闭弹窗
+                    progressDialog.dismiss()
+                    //downloadAndSave(mediaInfo)
+                    downloadAll(mediaInfo)
+                    val record2 = Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
+                    RecordDB.getInstance().recordDao().insert(record2)
+
+                } else {
+                    progressDialog.dismiss()
+                    if (code == 429) {
+                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                progressDialog.dismiss()
+                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+            }
+
+        }
+
+    }
+
+    /**
+     * 解析数据
+     */
+    private fun parseData(jsonObject: JsonObject): MediaModel {
         val mediaInfo = MediaModel()
         val mediaType = jsonObject["media_type"].asInt
         Log.v(TAG, "mediaType:$mediaType")
@@ -368,17 +405,37 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private suspend fun downloadMedia(media: ResourceModel?) {
+    /**
+     * 下载多个
+     */
 
-        if (media?.mediaType == 1 || media?.mediaType == 0) {
+    private suspend fun downloadAll(mediaInfo: MediaModel) = coroutineScope {
+        if (mediaInfo.mediaType == 8) {
+            mediaInfo.resources.map {
+
+                async {
+                    download(it)
+                }
+
+            }
+        } else {
+            download(mediaInfo)
+        }
+    }
+
+
+    /**
+     * 下载单个图片或视频
+     */
+    private suspend fun download(media: ResourceModel?) = withContext(Dispatchers.IO) {
+        if (media?.mediaType == 1) {
             //image
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
-            withContext(Dispatchers.IO) {
-                saveFile(responseBody.body(), file, 1)
-            }
+            saveFile(responseBody.body(), file, 1)
+
         } else if (media?.mediaType == 2) {
             //video
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
@@ -386,15 +443,16 @@ class ShortCodeFragment : Fragment() {
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
-                withContext(Dispatchers.IO) {
-                    saveFile(responseBody.body(), file, 2)
-                }
+                saveFile(responseBody.body(), file, 2)
+
             }
 
         }
-
     }
 
+    /**
+     * 保存文件到本地
+     */
     private fun saveFile(body: ResponseBody?, file: File, type: Int) {
         if (body == null) {
             return
