@@ -19,6 +19,9 @@ import androidx.fragment.app.FragmentTransaction
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.igtools.igdownloader.activities.HistoryActivity
 import com.igtools.igdownloader.databinding.ActivityMainBinding
 import com.igtools.igdownloader.fragments.HomeFragment
@@ -57,7 +60,35 @@ class MainActivity : AppCompatActivity() {
 
         initViews()
         setListeners()
-        handleText(intent)
+
+        if (BaseApplication.serverIp == "") {
+            val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
+            val configSettings = remoteConfigSettings {
+                minimumFetchIntervalInSeconds = 3600
+            }
+            remoteConfig.setConfigSettingsAsync(configSettings)
+
+            remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.v(TAG, "task success")
+                    BaseApplication.serverIp = remoteConfig.getString("server_ip")
+                    BaseApplication.port1 = remoteConfig.getString("port1")
+                    BaseApplication.port2 = remoteConfig.getString("port2")
+                    BaseApplication.port3 = remoteConfig.getString("port3")
+                    Log.v(TAG, BaseApplication.serverIp)
+                    Log.v(TAG, BaseApplication.port1)
+                    Log.v(TAG, BaseApplication.port2)
+                    Log.v(TAG, BaseApplication.port3)
+                    handleText(intent)
+                } else {
+                    Log.e(TAG, "fetch failed")
+                }
+
+            }
+        }else{
+            handleText(intent)
+        }
+
 
     }
 

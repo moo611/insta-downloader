@@ -40,8 +40,8 @@ class LoginActivity : AppCompatActivity() {
     private fun setListener() {
 
         binding.btnLogin.setOnClickListener {
-
-            doLogin()
+            val url = "https://www.instagram.com/accounts/login"
+            startActivity(Intent(this, WebActivity::class.java).putExtra("url", url))
 
         }
 
@@ -54,19 +54,23 @@ class LoginActivity : AppCompatActivity() {
         OkhttpHelper.getInstance().postJson(
             Urls.LOGIN, params, object :
                 OkhttpListener {
-            override fun onSuccess(jsonObject: JsonObject) {
-                val token = jsonObject["data"]?.asString
-                token?.let { ShareUtils.putData("token", it) }
+                override fun onSuccess(jsonObject: JsonObject) {
+                    val token = jsonObject["data"]?.asString
+                    token?.let { ShareUtils.putData("token", it) }
 
-                startActivity(Intent(this@LoginActivity,MainActivity::class.java))
-            }
+                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                }
 
-            override fun onFail(message: String?) {
-                Toast.makeText(this@LoginActivity,getString(R.string.login_failed),Toast.LENGTH_SHORT).show()
-            }
+                override fun onFail(message: String?) {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        getString(R.string.login_failed),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
 
-        })
+            })
 
     }
 }

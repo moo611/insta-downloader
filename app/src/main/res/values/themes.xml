@@ -23,4 +23,17 @@
     </style>
 
 
+    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <!--窗体背景透明-->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!--activity背景变暗-->
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowAnimationStyle">@style/DialogBottomAnim</item>
+
+    </style>
+
+    <style name="DialogBottomAnim" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_up_anim</item>
+        <item name="android:windowExitAnimation">@anim/dialog_down_anim</item>
+    </style>
 </resources>

@@ -295,6 +295,20 @@ class ShortCodeFragment : Fragment() {
 
     }
 
+    private fun getMediaData(){
+
+
+        lifecycleScope.launch {
+
+
+
+
+        }
+
+    }
+
+
+
     /**
      * 获取story
      */

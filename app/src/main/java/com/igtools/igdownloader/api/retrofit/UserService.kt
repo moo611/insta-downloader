@@ -2,8 +2,7 @@ package com.igtools.igdownloader.api.retrofit
 
 import com.google.gson.JsonObject
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface UserService {
 
@@ -16,11 +15,28 @@ interface UserService {
     ): Response<JsonObject>
 
 
-
     @GET("/api/v2/usermedias/more")
     suspend fun getUserMediasMore(
         @Query("username") username: String,
         @Query("end_cursor") end_cursor: String,
         @Query("user_id") user_id: String
     ): Response<JsonObject>
+
+
+    @GET
+    suspend fun getUserMedia(
+        @Url url: String,
+        @HeaderMap headers:HashMap<String,String>,
+        @Query("username") username: String
+    ): Response<JsonObject>
+
+
+    @GET
+    suspend fun getUserMediaMore(
+        @Url url: String,
+        @HeaderMap headers:HashMap<String,String>,
+        @Query("query_hash") query_hash: String,
+        @Query("variables") variables: String
+    ): Response<JsonObject>
+
 }
