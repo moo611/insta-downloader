@@ -19,5 +19,12 @@ interface TagService {
     suspend fun postMoreTags(@Body body: RequestBody): Response<JsonObject>
 
 
+    @GET
+    suspend fun getTagData(@Url url:String,@HeaderMap map:HashMap<String,String>,@Query("tag_name")tag:String): Response<JsonObject>
+
+
+    @POST
+    @FormUrlEncoded
+    suspend fun getMoreTagData(@Url url:String,@HeaderMap map:HashMap<String,String>,@FieldMap queries:HashMap<String,Any>): Response<JsonObject>
 
 }

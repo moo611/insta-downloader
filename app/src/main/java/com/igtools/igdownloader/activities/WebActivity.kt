@@ -37,7 +37,9 @@ class WebActivity : AppCompatActivity() {
 
         }
 
-
+        binding.flBack.setOnClickListener {
+            finish()
+        }
 
     }
 

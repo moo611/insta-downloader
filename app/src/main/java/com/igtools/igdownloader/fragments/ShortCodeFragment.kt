@@ -145,7 +145,7 @@ class ShortCodeFragment : Fragment() {
 
 
     private fun autoStart() {
-
+        Log.v(TAG,ShareUtils.getData("cookie")+"")
         binding.etShortcode.clearFocus()
         KeyboardUtils.closeKeybord(binding.etShortcode, context)
         val url = binding.etShortcode.text.toString()
@@ -390,7 +390,8 @@ class ShortCodeFragment : Fragment() {
     }
 
     private fun handleError(){
-        if (ShareUtils.getData("cookie")==null){
+        val cookie = ShareUtils.getData("cookie")
+        if (cookie==null || !cookie.contains("sessionid")){
             bottomDialog.show()
         }else{
             Toast.makeText(requireContext(),getString(R.string.not_found),Toast.LENGTH_SHORT).show()
@@ -568,7 +569,7 @@ class ShortCodeFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == LOGIN_REQ && resultCode == 200) {
+        if (requestCode == LOGIN_REQ && resultCode == 200) {
             autoStart()
         }
     }

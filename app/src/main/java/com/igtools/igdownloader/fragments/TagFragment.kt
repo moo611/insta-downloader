@@ -1,6 +1,7 @@
 package com.igtools.igdownloader.fragments
 
 import android.app.ProgressDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -21,13 +22,18 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
+import com.igtools.igdownloader.activities.WebActivity
 import com.igtools.igdownloader.adapter.BlogAdapter
 import com.igtools.igdownloader.adapter.BlogAdapter2
+import com.igtools.igdownloader.api.okhttp.Urls
 import com.igtools.igdownloader.api.retrofit.ApiClient
 import com.igtools.igdownloader.databinding.FragmentTagBinding
 import com.igtools.igdownloader.models.MediaModel
 import com.igtools.igdownloader.utils.KeyboardUtils
+import com.igtools.igdownloader.utils.ShareUtils
 import com.igtools.igdownloader.utils.getNullable
+import com.igtools.igdownloader.widgets.dialog.BottomDialog
+import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
@@ -42,8 +48,9 @@ class TagFragment : Fragment() {
     lateinit var adapter: BlogAdapter2
     lateinit var binding: FragmentTagBinding
     lateinit var progressDialog: ProgressDialog
+    lateinit var bottomDialog: BottomDialog
+
     var loadingMore = false
-    //var medias: ArrayList<MediaModel> = ArrayList()
     var gson = Gson()
     var mInterstitialAd: InterstitialAd? = null
 
@@ -52,7 +59,9 @@ class TagFragment : Fragment() {
     var next_max_id = ""
     var more_available = true
     var next_page = 1
+
     val TAG = "TagFragment"
+    val LOGIN_REQ = 1000
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -72,7 +81,7 @@ class TagFragment : Fragment() {
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
         adapter = BlogAdapter2(requireContext())
-        adapter.fromTag=true
+        adapter.fromTag = true
         layoutManager = GridLayoutManager(context, 3)
         binding.rv.adapter = adapter
         binding.rv.layoutManager = layoutManager
@@ -81,6 +90,21 @@ class TagFragment : Fragment() {
                 return 1
             }
         }
+
+        bottomDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
+        val bottomView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_bottom, null)
+        bottomView.btn_login.setOnClickListener {
+
+            val url = "https://www.instagram.com/accounts/login"
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
+            bottomDialog.dismiss()
+        }
+        bottomDialog.setContent(bottomView)
 
     }
 
@@ -107,11 +131,18 @@ class TagFragment : Fragment() {
         binding.btnSearch.setOnClickListener {
             binding.etTag.clearFocus()
             KeyboardUtils.closeKeybord(binding.etTag, context)
-            if (binding.etTag.text.toString().isEmpty()){
-                Toast.makeText(requireContext(),getString(R.string.empty_tag),Toast.LENGTH_SHORT).show()
+            if (binding.etTag.text.toString().isEmpty()) {
+                Toast.makeText(requireContext(), getString(R.string.empty_tag), Toast.LENGTH_SHORT)
+                    .show()
                 return@setOnClickListener
             }
-            refresh(binding.etTag.text.toString())
+            val cookie = ShareUtils.getData("cookie")
+            if (cookie == null || !cookie.contains("sessionid")) {
+                bottomDialog.show()
+            } else {
+                refresh(binding.etTag.text.toString())
+            }
+
         }
 
         binding.etTag.addTextChangedListener(object : TextWatcher {
@@ -122,10 +153,10 @@ class TagFragment : Fragment() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
                 if (binding.etTag.text.isNotEmpty()) {
-                    
+
                     binding.imgClear.visibility = View.VISIBLE
                 } else {
-                    
+
                     binding.imgClear.visibility = View.INVISIBLE
                 }
 
@@ -158,38 +189,46 @@ class TagFragment : Fragment() {
 
     }
 
-    private fun refresh(tag: String) {
-
-        if (loadingMore){
-            return
-        }
-        progressDialog.show()
+    private fun clearData() {
         next_max_id = ""
         next_media_ids.clear()
         next_page = 1
         more_available = true
+    }
+
+    private fun refresh(tag: String) {
+
+        if (loadingMore) {
+            return
+        }
+        progressDialog.show()
+        clearData()
         lifecycleScope.launch {
 
             try {
-                val res = ApiClient.getClient3().getTags(tag)
+
+                val cookie = ShareUtils.getData("cookie")
+                Log.v(TAG, cookie + "")
+                //Log.v(TAG,userAgent+"")
+                val map: HashMap<String, String> = HashMap()
+                map["Cookie"] = cookie!!
+                map["User-Agent"] = Urls.USER_AGENT
+
+                val res = ApiClient.getClient3().getTagData(Urls.TAG_INFO, map, tag)
 
                 val code = res.code()
                 val jsonObject = res.body()
-                if (code==200 && jsonObject != null) {
-                    val medias:ArrayList<MediaModel> = ArrayList()
-                    parseData(jsonObject,medias);
+                if (code == 200 && jsonObject != null) {
+                    val medias: ArrayList<MediaModel> = ArrayList()
+                    parseData(jsonObject, medias);
                     if (medias.size > 0) {
                         adapter.refresh(medias)
 
                     }
-                }else{
-                    if (code == 429) {
-                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                            .show()
-                    }
+                } else {
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
+
                 }
                 progressDialog.dismiss()
 
@@ -197,7 +236,6 @@ class TagFragment : Fragment() {
                 Log.v(TAG, e.message + "")
 
                 progressDialog.dismiss()
-                Log.v(TAG, e.message + "")
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
 
             }
@@ -218,43 +256,40 @@ class TagFragment : Fragment() {
 
             try {
 
-                val params: HashMap<String, Any> = HashMap();
-                params["max_id"] = next_max_id
-                params["page"] = next_page
-                params["next_media_ids"] = next_media_ids
-                val strEntity = gson.toJson(params);
+                val cookie = ShareUtils.getData("cookie")
+                Log.v(TAG, cookie + "")
+                //Log.v(TAG,userAgent+"")
+                val map: HashMap<String, String> = HashMap()
+                map["Cookie"] = cookie!!
+                map["User-Agent"] = Urls.USER_AGENT
 
-                val body = RequestBody
-                    .create(
-                        "application/json;charset=UTF-8".toMediaTypeOrNull(), strEntity
-                    );
+                val queries: HashMap<String, Any> = HashMap();
+                queries["max_id"] = next_max_id
+                queries["page"] = next_page
+                queries["next_media_ids"] = next_media_ids
+                queries["include_persistent"] = 0
+                queries["surface"] = "grid"
+                queries["tab"] = "recent"
 
-                val res = ApiClient.getClient3().postMoreTags(body = body)
+                val res = ApiClient.getClient3().getMoreTagData(Urls.TAG_INFO_MORE, map, queries)
                 val code = res.code()
-                
+
                 val jsonObject = res.body()
                 if (code == 200 && jsonObject != null) {
-                    val medias:ArrayList<MediaModel> = ArrayList()
-                    parseData(jsonObject,medias);
+                    val medias: ArrayList<MediaModel> = ArrayList()
+                    parseData(jsonObject, medias);
                     if (medias.size > 0) {
                         adapter.loadMore(medias)
 
                     }
-                }else{
-
-                    if (code == 429) {
-                        Toast.makeText(context, getString(R.string.too_many), Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                    
+                } else {
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                 }
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
-                Log.v(TAG,e.message+"")
+                Log.v(TAG, e.message + "")
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
@@ -264,7 +299,7 @@ class TagFragment : Fragment() {
 
     }
 
-    private fun parseData(jsonObject: JsonObject,medias:ArrayList<MediaModel>) {
+    private fun parseData(jsonObject: JsonObject, medias: ArrayList<MediaModel>) {
         next_media_ids.clear()
         val data = jsonObject["data"].asJsonObject
         more_available = data["more_available"].asBoolean
@@ -277,14 +312,15 @@ class TagFragment : Fragment() {
                 next_media_ids.add(id.asString)
             }
         }
-        Log.v(TAG,next_media_ids.toString())
+        Log.v(TAG, next_media_ids.toString())
         val items = data["sections"].asJsonArray
 
         for (item in items) {
             val mediaModel = MediaModel()
             Log.v(TAG, "current:" + items.indexOf(item))
             mediaModel.pk = item.asJsonObject["pk"].asString
-            mediaModel.captionText = item.asJsonObject["caption"].asJsonObject["text"].asString ?: ""
+            mediaModel.captionText =
+                item.asJsonObject["caption"].asJsonObject["text"].asString ?: ""
             mediaModel.code = item.asJsonObject["code"].asString
             mediaModel.mediaType = item.asJsonObject["media_type"].asInt
 
@@ -308,10 +344,25 @@ class TagFragment : Fragment() {
 
             }
             mediaModel.username = item.asJsonObject["user"].asJsonObject["username"].asString
-            mediaModel.profilePicUrl = item.asJsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+            mediaModel.profilePicUrl =
+                item.asJsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
             medias.add(mediaModel)
         }
 
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LOGIN_REQ) {
+
+            if (resultCode == 200) {
+                refresh(binding.etTag.text.toString())
+
+            }
+
+        }
 
     }
 

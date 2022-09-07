@@ -216,9 +216,12 @@ class UserFragment : Fragment() {
                     val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
+                }else{
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
                 }
                 Log.e(TAG, res.errorBody()?.string()+"")
                 progressDialog.dismiss()
+
             }catch (e:Exception){
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
@@ -267,6 +270,8 @@ class UserFragment : Fragment() {
                     val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
+                }else{
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
                 }
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
