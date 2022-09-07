@@ -8,13 +8,22 @@
 
 
     <TextView
-        android:text="you don't needyou don't needyou don't needyou don't needyou don't needyou don't needyou don't needyou don't needyou don't need"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:text="@string/long_text1"
         android:id="@+id/tv1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <TextView
-        android:text="storyyou don't needyou don't needyou don't needyou don't needyou don't needyou don't needyou don't needyou don't needyou don't needyou don't need"
+        android:textSize="12sp"
+        android:text="@string/long_text2"
         android:id="@+id/tv2"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:text="@string/long_text3"
         android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>

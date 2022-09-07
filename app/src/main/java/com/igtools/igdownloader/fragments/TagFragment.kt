@@ -206,7 +206,7 @@ class TagFragment : Fragment() {
         clearData()
         lifecycleScope.launch {
 
-//            try {
+            try {
 
                 val cookie = ShareUtils.getData("cookie")
                 Log.v(TAG, cookie + "")
@@ -249,13 +249,13 @@ class TagFragment : Fragment() {
                 }
                 progressDialog.dismiss()
 
-//            } catch (e: Exception) {
-//                Log.v(TAG, e.message + "")
-//
-//                progressDialog.dismiss()
-//                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
-//
-//            }
+            } catch (e: Exception) {
+                Log.v(TAG, e.message + "")
+
+                progressDialog.dismiss()
+                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+
+            }
 
 
         }
@@ -271,7 +271,7 @@ class TagFragment : Fragment() {
 
         lifecycleScope.launch {
 
-//            try {
+            try {
 
                 val cookie = ShareUtils.getData("cookie")
                 Log.v(TAG, cookie + "")
@@ -322,12 +322,12 @@ class TagFragment : Fragment() {
 
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
-//            } catch (e: Exception) {
-//                Log.v(TAG, e.message + "")
-//                loadingMore = false
-//                binding.progressBottom.visibility = View.INVISIBLE
-//                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
-//            }
+            } catch (e: Exception) {
+                Log.v(TAG, e.message + "")
+                loadingMore = false
+                binding.progressBottom.visibility = View.INVISIBLE
+                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+            }
 
         }
 

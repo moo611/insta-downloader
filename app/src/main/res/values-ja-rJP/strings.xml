@@ -29,7 +29,7 @@
     <string name="download_finish">ダウンロード完了</string>
     <string name="searching">検索中…</string>
     <string name="downloading">ダウンロードしています…</string>
-    <string name="not_found">投稿が見つかりません</string>
+    <string name="not_found">投稿できません</string>
     <string name="invalid_url">無効なURL</string>
     <string name="too_many">リクエスト多すぎ</string>
     <string name="exist">ダウンロードは既に存在します。履歴を確認してください</string>
@@ -37,5 +37,8 @@
     <string name="empty_username">ユーザー名を入力してください</string>
     <string name="empty_tag">ハッシュタグを入力してください</string>
     <string name="log_out">ログアウト</string>
-
+    <string name="long_text1">公開の instagram 投稿をダウンロードするためにログインする必要はありません。インスタグラムの要件により、非公開の投稿やストーリーをダウンロードするにはログインする必要があります。</string>
+    <string name="long_text2">※非公開の動画やストーリーをダウンロードする場合、ログインアカウントはお互いにフォローしているアカウントである必要があり、ダウンロードしたことで相手のアカウントへのアクセス履歴が残ることはありません。</string>
+    <string name="long_text3">あなたは公式インスタグラムのウェブサイトにログインしています。私たちはあなたの情報を収集しません</string>
+    <string name="parse_error">解析例外</string>
 </resources>

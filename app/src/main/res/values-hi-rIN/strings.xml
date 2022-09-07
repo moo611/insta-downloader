@@ -29,7 +29,7 @@
     <string name="download_finish">डाउनलोड पूरा हो गया है</string>
     <string name="searching">खोज कर…</string>
     <string name="downloading">डाउनलोड हो रहा है…</string>
-    <string name="not_found">पोस्ट नहीं मिली</string>
+    <string name="not_found">पोस्ट उपलब्ध नहीं है</string>
     <string name="invalid_url">अवैध यूआरएल</string>
     <string name = "too_many">बहुत अधिक अनुरोध</string>
     <string name="exist">डाउनलोड पहले से मौजूद है, कृपया इतिहास जांचें</string>
@@ -37,5 +37,8 @@
     <string name="empty_username">कृपया उपयोगकर्ता नाम दर्ज करें</string>
     <string name="empty_tag">कृपया हैशटैग दर्ज करें</string>
     <string name="log_out">लॉग आउट</string>
-
+    <string name="long_text1">सार्वजनिक इंस्टाग्राम पोस्ट डाउनलोड करने के लिए आपको लॉग इन करने की आवश्यकता नहीं है। इंस्टाग्राम की आवश्यकताओं के अनुसार, निजी पोस्ट और कहानियों को डाउनलोड करने के लिए आपको लॉग इन करना होगा।</string>
+    <string name="long_text2">sनोट: निजी वीडियो और कहानियों को डाउनलोड करते समय, लॉगिन खाता वह खाता होना चाहिए जिसे आप और व्यक्ति एक-दूसरे का अनुसरण करते हैं। आपका डाउनलोड दूसरे पक्ष के खाता एक्सेस रिकॉर्ड पर निशान नहीं छोड़ेगा।</string>
+    <string name="long_text3">आप आधिकारिक इंस्टाग्राम वेबसाइट पर लॉग इन हैं, हम आपकी जानकारी एकत्र नहीं करेंगे</string>
+    <string name="parse_error">पार्स अपवाद</string>
 </resources>

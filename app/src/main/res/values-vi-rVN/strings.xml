@@ -29,7 +29,7 @@
     <string name="download_finish"> Tải xuống xong </string>
     <string name="searching"> Đang tìm kiếm… </string>
     <string name="downloading"> Đang tải xuống… </string>
-    <string name="not_found"> Không tìm thấy bài đăng </string>
+    <string name="not_found"> bài đăng không có sẵn </string>
     <string name="invalid_url">url không hợp lệ</string>
     <string name = "too_many"> Quá nhiều yêu cầu </string>
 
@@ -38,5 +38,9 @@
     <string name="empty_username">Vui lòng nhập tên người dùng</string>
     <string name="empty_tag">Vui lòng nhập thẻ bắt đầu bằng #</string>
     <string name="log_out">đăng xuất</string>
+    <string name="long_text1">Bạn không cần phải đăng nhập để tải các bài đăng trên instagram công khai. Theo yêu cầu của instagram, bạn cần đăng nhập để tải xuống các bài đăng và câu chuyện riêng tư.</string>
+    <string name="long_text2">Lưu ý: Khi tải video và truyện riêng tư, tài khoản đăng nhập phải là tài khoản mà bạn và người đó theo dõi nhau, việc bạn tải xuống sẽ không để lại dấu vết trên hồ sơ truy cập tài khoản của bên kia.</string>
+    <string name="long_text3">Bạn đã đăng nhập vào trang web chính thức của instagram, chúng tôi sẽ không thu thập thông tin của bạn</string>
+    <string name="parse_error">Phân tích cú pháp ngoại lệ</string>
 
 </resources>

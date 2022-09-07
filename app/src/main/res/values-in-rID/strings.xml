@@ -29,7 +29,7 @@
     <string name="download_finish">Unduhan Selesai</string>
     <string name="searching">Mencari…</string>
     <string name="downloading">Mengunduh…</string>
-    <string name="not_found">Pos tidak ditemukan</string>
+    <string name="not_found">pos tidak tersedia</string>
     <string name="invalid_url">Url Tidak Valid</string>
 
     <string name="too_many">Terlalu banyak permintaan</string>
@@ -38,5 +38,8 @@
     <string name="empty_username">silakan masukkan nama pengguna</string>
     <string name="empty_tag">Silakan masukkan hastag</string>
     <string name="log_out">keluar</string>
-
+    <string name="long_text1">Anda tidak perlu masuk untuk mengunduh posting instagram publik. Menurut persyaratan instagram, Anda harus masuk untuk mengunduh posting dan cerita pribadi.</string>
+    <string name="long_text2">Catatan: Saat mengunduh video dan cerita pribadi, akun masuk harus akun yang Anda dan orang tersebut ikuti satu sama lain. Unduhan Anda tidak akan meninggalkan jejak pada catatan akses akun pihak lain.</string>
+    <string name="long_text3">Anda masuk ke situs web instagram resmi, kami tidak akan mengumpulkan informasi Anda</string>
+    <string name="parse_error">Mengurai pengecualian</string>
 </resources>

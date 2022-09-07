@@ -29,7 +29,7 @@
     <string name="download_finish">Загрузка завершена</string>
     <string name="searching">Поиск…</string>
     <string name="downloading">Загрузка…</string>
-    <string name="not_found">Сообщение не найдено</string>
+    <string name="not_found">пост недоступен</string>
     <string name="invalid_url">Неверный URL</string>
 
     <string name="too_many">Слишком много запросов</string>
@@ -38,5 +38,8 @@
     <string name="empty_username">пожалуйста, введите имя пользователя</string>
     <string name="empty_tag">Пожалуйста, введите хэштег</string>
     <string name="log_out">выйти</string>
-
+    <string name="long_text1">Вам не нужно входить в систему, чтобы загружать общедоступные посты в Instagram. Согласно требованиям Instagram, вам необходимо войти в систему, чтобы загружать личные сообщения и истории.</string>
+    <string name="long_text2">Примечание. При загрузке частных видео и историй учетная запись для входа должна быть учетной записью, которую вы и человек подписываете друг на друга. Ваша загрузка не оставит следов в записях доступа к учетной записи другой стороны.</string>
+    <string name="long_text3">Вы вошли на официальный сайт instagram, мы не будем собирать вашу информацию</string>
+    <string name="parse_error">Разобрать исключение</string>
 </resources>

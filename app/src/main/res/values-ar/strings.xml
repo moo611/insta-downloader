@@ -29,7 +29,7 @@
     <string name="download_finish"> انتهى التنزيل </string>
     <string name="searching">يبحث</string>
     <string name="downloading"> جارى التحميل</string>
-    <string name="not_found"> ​​لم يتم العثور على المشاركة </string>
+    <string name="not_found"> آخر غير متوفر </string>
     <string name="invalid_url"> عنوان Url غير صالح </string>
 
     <string name="too_many"> طلبات كثيرة جدًا </string>
@@ -38,5 +38,8 @@
     <string name="empty_username">الرجاء إدخال اسم المستخدم</string>
     <string name="empty_tag">الرجاء إدخال الهاشتاج</string>
     <string name="log_out">تسجيل خروج</string>
-
+    <string name="long_text1">لست بحاجة إلى تسجيل الدخول لتنزيل منشورات Instagram العامة. وفقًا لمتطلبات instagram ، يلزمك تسجيل الدخول لتنزيل المنشورات والقصص الخاصة.</string>
+    <string name="long_text2">ملاحظة: عند تنزيل مقاطع فيديو وقصص خاصة ، يجب أن يكون حساب تسجيل الدخول هو الحساب الذي تتابعك أنت والشخص الآخر. لن يترك التنزيل آثارًا على سجلات الوصول إلى حساب الطرف الآخر.</string>
+    <string name="long_text3">لقد قمت بتسجيل الدخول إلى موقع instagram الرسمي ، ولن نقوم بجمع معلوماتك</string>
+    <string name="parse_error">استثناء التحليل</string>
 </resources>

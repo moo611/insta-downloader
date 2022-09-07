@@ -218,16 +218,16 @@ class UserFragment : Fragment() {
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
                 }else{
+                    Log.e(TAG, res.errorBody()?.string()+"")
                     Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
                 }
-                Log.e(TAG, res.errorBody()?.string()+"")
+
                 progressDialog.dismiss()
 
             }catch (e:Exception){
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-//                binding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -273,9 +273,10 @@ class UserFragment : Fragment() {
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
                 }else{
+                    Log.e(TAG,res.errorBody()?.string()+"")
                     Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
                 }
-                Log.e(TAG,res.errorBody()?.string()+"")
+
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
             }catch (e:Exception){

@@ -79,7 +79,7 @@ class ShortCodeFragment : Fragment() {
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
     lateinit var circularProgressDrawable: CircularProgressDrawable
-    var isFromDownload=false
+    var isFromDownload = false
     private val LOGIN_REQ = 1000
 
     override fun onCreateView(
@@ -168,9 +168,9 @@ class ShortCodeFragment : Fragment() {
 
         } else {
             val cookie = ShareUtils.getData("cookie")
-            if (cookie!=null){
+            if (cookie != null) {
                 getMediaData()
-            }else{
+            } else {
                 getMediaOld()
             }
 
@@ -257,7 +257,7 @@ class ShortCodeFragment : Fragment() {
             ): Boolean {
 
                 binding.progressbar.visibility = View.INVISIBLE
-                if (isFromDownload){
+                if (isFromDownload) {
 
                     Toast.makeText(
                         requireContext(),
@@ -288,7 +288,7 @@ class ShortCodeFragment : Fragment() {
             val record = RecordDB.getInstance().recordDao().findById(shortCode)
 
             if (record != null) {
-                curMediaInfo = gson.fromJson(record.content,MediaModel::class.java)
+                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
                 updateUI()
                 Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
                     .show()
@@ -300,7 +300,7 @@ class ShortCodeFragment : Fragment() {
                 val map: HashMap<String, String> = HashMap()
                 map["Cookie"] = Urls.Cookie
                 val cookie = ShareUtils.getData("cookie")
-                if (cookie!=null && cookie.contains("sessionid")){
+                if (cookie != null && cookie.contains("sessionid")) {
                     map["Cookie"] = cookie
                 }
 
@@ -330,16 +330,16 @@ class ShortCodeFragment : Fragment() {
                     } else {
                         download(curMediaInfo)
                     }
-                }else{
-                    handleError()
+                } else {
+                    Log.e(TAG, res.errorBody()?.string() + "")
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                 }
-                Log.e(TAG, res.errorBody()?.string() + "")
-
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                handleError()
+                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
 
             }
         }
@@ -348,7 +348,7 @@ class ShortCodeFragment : Fragment() {
     /**
      * 不登录情况下
      */
-    private fun getMediaOld(){
+    private fun getMediaOld() {
 
         val shortCode = getShortCode()
 
@@ -381,18 +381,14 @@ class ShortCodeFragment : Fragment() {
                     download(curMediaInfo)
                     mInterstitialAd?.show(requireActivity())
                 } else {
-//                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-//                        .show()
-                    if (ShareUtils.getData("cookie")==null){
-                        bottomDialog.show()
-                    }
+                    handleError()
 
                 }
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
             }
 
 
@@ -438,16 +434,24 @@ class ShortCodeFragment : Fragment() {
                     saveRecord(pk)
                     download(curMediaInfo)
                 } else {
-                    handleError()
+                    Log.e(TAG, res.errorBody()?.string() + "")
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.not_found),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
                 }
-
-                Log.e(TAG, res.errorBody()?.string() + "")
-
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                handleError()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.parse_error),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
             }
         }
 
@@ -483,7 +487,7 @@ class ShortCodeFragment : Fragment() {
     }
 
 
-    private fun parseMedia(jsonObject: JsonObject):MediaModel {
+    private fun parseMedia(jsonObject: JsonObject): MediaModel {
         val mediaModel = MediaModel()
         val shortcode_media = jsonObject["data"].asJsonObject["shortcode_media"].asJsonObject
         val __typename = shortcode_media["__typename"].asString
@@ -535,7 +539,7 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun parseMediaOld(jsonObject: JsonObject):MediaModel{
+    private fun parseMediaOld(jsonObject: JsonObject): MediaModel {
         val mediaInfo = MediaModel()
         val mediaType = jsonObject["media_type"].asInt
         Log.v(TAG, "mediaType:$mediaType")
@@ -561,7 +565,7 @@ class ShortCodeFragment : Fragment() {
                 resourceInfo.videoUrl = res.asJsonObject.getNullable("video_url")?.asString
                 mediaInfo.resources.add(resourceInfo)
             }
-            if (resources.size()>0){
+            if (resources.size() > 0) {
                 mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
             }
 
