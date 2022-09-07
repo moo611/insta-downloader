@@ -79,7 +79,7 @@ class ShortCodeFragment : Fragment() {
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
     lateinit var circularProgressDrawable: CircularProgressDrawable
-
+    var isFromDownload=false
     private val LOGIN_REQ = 1000
 
     override fun onCreateView(
@@ -145,7 +145,7 @@ class ShortCodeFragment : Fragment() {
 
 
     private fun autoStart() {
-        Log.v(TAG,ShareUtils.getData("cookie")+"")
+        Log.v(TAG, ShareUtils.getData("cookie") + "")
         binding.etShortcode.clearFocus()
         KeyboardUtils.closeKeybord(binding.etShortcode, context)
         val url = binding.etShortcode.text.toString()
@@ -158,7 +158,8 @@ class ShortCodeFragment : Fragment() {
 
 
         if (url.contains("stories")) {
-            if (ShareUtils.getData("cookie") == null) {
+            val cookie = ShareUtils.getData("cookie")
+            if (cookie == null) {
                 bottomDialog.show()
             } else {
                 val shortCode = getShortCode()
@@ -166,8 +167,12 @@ class ShortCodeFragment : Fragment() {
             }
 
         } else {
-            val shortCode = getShortCode()
-            getMediaData(shortCode)
+            val cookie = ShareUtils.getData("cookie")
+            if (cookie!=null){
+                getMediaData()
+            }else{
+                getMediaOld()
+            }
 
         }
 
@@ -238,7 +243,8 @@ class ShortCodeFragment : Fragment() {
                 target: Target<Drawable>?,
                 isFirstResource: Boolean
             ): Boolean {
-                binding.progressbar.visibility = View.INVISIBLE
+//                isFromDownload = false
+//                binding.progressbar.visibility = View.INVISIBLE
                 return false;
             }
 
@@ -251,11 +257,15 @@ class ShortCodeFragment : Fragment() {
             ): Boolean {
 
                 binding.progressbar.visibility = View.INVISIBLE
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.download_finish),
-                    Toast.LENGTH_SHORT
-                ).show()
+                if (isFromDownload){
+
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.download_finish),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                isFromDownload = false
                 mInterstitialAd?.show(requireActivity())
                 return false;
 
@@ -267,11 +277,12 @@ class ShortCodeFragment : Fragment() {
 
     /**
      * 获取video,image,igtv,reel
+     * 登录情况下
      */
 
-    private fun getMediaData(shortCode: String) {
-        progressDialog.show()
+    private fun getMediaData() {
 
+        val shortCode = getShortCode()
         lifecycleScope.launch {
             //检查是否已存在
             val record = RecordDB.getInstance().recordDao().findById(shortCode)
@@ -281,10 +292,10 @@ class ShortCodeFragment : Fragment() {
                 updateUI()
                 Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
                     .show()
-                progressDialog.dismiss()
+
                 return@launch
             }
-
+            progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
                 map["Cookie"] = Urls.Cookie
@@ -306,6 +317,7 @@ class ShortCodeFragment : Fragment() {
                 if (code == 200 && jsonObject != null) {
                     curMediaInfo = parseMedia(jsonObject)
                     saveRecord(shortCode)
+                    isFromDownload = true
                     updateUI()
 
                     if (curMediaInfo?.mediaType == 8) {
@@ -331,34 +343,86 @@ class ShortCodeFragment : Fragment() {
 
             }
         }
+    }
+
+    /**
+     * 不登录情况下
+     */
+    private fun getMediaOld(){
+
+        val shortCode = getShortCode()
+
+        lifecycleScope.launch {
+            val record = RecordDB.getInstance().recordDao().findById(shortCode)
+
+            if (record != null) {
+                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
+                updateUI()
+                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
+                    .show()
+
+                return@launch
+            }
+
+            progressDialog.show()
+            try {
+                val res = ApiClient.getClient().getMedia(shortCode)
+                val code = res.code()
+                val jsonObject = res.body()
+
+                progressDialog.dismiss()
+                if (code == 200 && jsonObject != null) {
+                    binding.container.visibility = View.VISIBLE
+                    val data = jsonObject["data"].asJsonObject
+                    curMediaInfo = parseMediaOld(data)
+                    isFromDownload = true
+                    updateUI()
+                    saveRecord(shortCode)
+                    download(curMediaInfo)
+                    mInterstitialAd?.show(requireActivity())
+                } else {
+//                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+//                        .show()
+                    if (ShareUtils.getData("cookie")==null){
+                        bottomDialog.show()
+                    }
+
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                progressDialog.dismiss()
+                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+            }
+
+
+        }
+
 
     }
+
 
     /**
      * 获取story
      */
     private fun getStoryData(pk: String) {
-        progressDialog.show()
+
         lifecycleScope.launch {
             //检查是否已存在
             val record = RecordDB.getInstance().recordDao().findById(pk)
             if (record != null) {
-                curMediaInfo = gson.fromJson(record.content,MediaModel::class.java)
+                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
                 updateUI()
                 Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
                     .show()
-                progressDialog.dismiss()
+
                 return@launch
             }
+            progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-                ShareUtils.getData("cookie")?.also { a ->
-                    // then-block
-                    map["Cookie"] = a
-                } ?: run {
-                    // else-block
-                    map["Cookie"] = Urls.Cookie
-                }
+                val cookie = ShareUtils.getData("cookie")
+                map["Cookie"] = cookie!!
                 map["User-Agent"] = Urls.USER_AGENT
 
                 val url = Urls.STORY_INFO + "/media/" + pk + "/info"
@@ -369,10 +433,11 @@ class ShortCodeFragment : Fragment() {
                 progressDialog.dismiss()
                 if (code == 200 && jsonObject != null) {
                     curMediaInfo = parseStory(jsonObject)
+                    isFromDownload = true
                     updateUI()
                     saveRecord(pk)
                     download(curMediaInfo)
-                }else{
+                } else {
                     handleError()
                 }
 
@@ -388,33 +453,37 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun handleError(){
+    private fun handleError() {
         val cookie = ShareUtils.getData("cookie")
-        if (cookie==null || !cookie.contains("sessionid")){
+        if (cookie == null) {
             bottomDialog.show()
-        }else{
-            Toast.makeText(requireContext(),getString(R.string.not_found),Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
+
     private fun updateUI() {
+
         binding.container.visibility = View.VISIBLE
+        binding.progressbar.visibility = View.VISIBLE
         binding.username.text = curMediaInfo?.captionText
         Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl).listener(glideListener)
             .into(binding.picture)
         Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).into(binding.avatar)
     }
 
-    private fun saveRecord(id:String){
+    private fun saveRecord(id: String) {
         lifecycleScope.launch {
-            val record = Record(id,gson.toJson(curMediaInfo),System.currentTimeMillis())
+            val record = Record(id, gson.toJson(curMediaInfo), System.currentTimeMillis())
             RecordDB.getInstance().recordDao().insert(record)
         }
 
     }
 
-    private fun parseMedia(jsonObject: JsonObject): MediaModel {
 
+    private fun parseMedia(jsonObject: JsonObject):MediaModel {
         val mediaModel = MediaModel()
         val shortcode_media = jsonObject["data"].asJsonObject["shortcode_media"].asJsonObject
         val __typename = shortcode_media["__typename"].asString
@@ -463,6 +532,56 @@ class ShortCodeFragment : Fragment() {
         }
 
         return mediaModel
+
+    }
+
+    private fun parseMediaOld(jsonObject: JsonObject):MediaModel{
+        val mediaInfo = MediaModel()
+        val mediaType = jsonObject["media_type"].asInt
+        Log.v(TAG, "mediaType:$mediaType")
+        if (mediaType == 8) {
+
+            mediaInfo.pk = jsonObject["pk"].asString
+            mediaInfo.code = jsonObject["code"].asString
+            mediaInfo.mediaType = jsonObject["media_type"].asInt
+            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
+            mediaInfo.captionText = jsonObject["caption_text"].asString
+            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
+            mediaInfo.profilePicUrl =
+                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+
+            val resources = jsonObject["resources"].asJsonArray
+            mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
+            for (res in resources) {
+
+                val resourceInfo = ResourceModel()
+                resourceInfo.pk = res.asJsonObject["pk"].asString
+                resourceInfo.mediaType = res.asJsonObject["media_type"].asInt
+                resourceInfo.thumbnailUrl = res.asJsonObject["thumbnail_url"].asString
+                resourceInfo.videoUrl = res.asJsonObject.getNullable("video_url")?.asString
+                mediaInfo.resources.add(resourceInfo)
+            }
+            if (resources.size()>0){
+                mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
+            }
+
+        } else if (mediaType == 1 || mediaType == 2) {
+
+
+            mediaInfo.pk = jsonObject["pk"].asString
+            mediaInfo.code = jsonObject["code"].asString
+            mediaInfo.mediaType = jsonObject["media_type"].asInt
+            mediaInfo.thumbnailUrl = jsonObject["thumbnail_url"].asString
+            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
+            mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
+            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
+            mediaInfo.profilePicUrl =
+                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+
+        }
+
+        return mediaInfo
+
     }
 
     private fun parseStory(jsonObject: JsonObject): MediaModel {

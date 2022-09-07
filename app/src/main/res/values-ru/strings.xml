@@ -37,5 +37,6 @@
     <string name="note">Мы поддерживаем доступ только к общедоступной информации об учетной записи</string>
     <string name="empty_username">пожалуйста, введите имя пользователя</string>
     <string name="empty_tag">Пожалуйста, введите хэштег</string>
+    <string name="log_out">выйти</string>
 
 </resources>

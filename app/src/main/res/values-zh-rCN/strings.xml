@@ -37,5 +37,6 @@
     <string name="note">我们只支持获取公开账户资料</string>
     <string name="empty_username">请输入用户名</string>
     <string name="empty_tag">请输入标签</string>
+    <string name="log_out">登出</string>
 
 </resources>

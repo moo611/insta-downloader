@@ -37,5 +37,6 @@
     <string name="note">Kami hanya mendukung akses ke informasi akun publik</string>
     <string name="empty_username">silakan masukkan nama pengguna</string>
     <string name="empty_tag">Silakan masukkan hastag</string>
+    <string name="log_out">keluar</string>
 
 </resources>

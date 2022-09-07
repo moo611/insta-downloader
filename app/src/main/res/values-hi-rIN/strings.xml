@@ -36,5 +36,6 @@
     <string name="note">हम केवल सार्वजनिक खाते की जानकारी तक पहुंच का समर्थन करते हैं</string>
     <string name="empty_username">कृपया उपयोगकर्ता नाम दर्ज करें</string>
     <string name="empty_tag">कृपया हैशटैग दर्ज करें</string>
+    <string name="log_out">लॉग आउट</string>
 
 </resources>

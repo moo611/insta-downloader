@@ -37,6 +37,7 @@
     <string name="note">공개 계정 정보에 대한 액세스만 지원합니다.</string>
     <string name="empty_username">사용자 이름을 입력하십시오</string>
     <string name="empty_tag">해시태그를 입력해주세요</string>
+    <string name="log_out">로그 아웃</string>
 
 
 </resources>

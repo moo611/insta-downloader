@@ -126,7 +126,7 @@ class UserFragment : Fragment() {
             }
             //refresh(binding.etUsername.text.toString())
             val cookie = ShareUtils.getData("cookie")
-            if (cookie == null || !cookie.contains("sessionid")){
+            if (cookie == null){
                 bottomDialog.show()
             }else{
                 getData()
@@ -252,7 +252,7 @@ class UserFragment : Fragment() {
                 variables["id"] = userId
                 variables["first"] = 12
                 variables["after"] = cursor
-                Log.v(TAG,"variables:"+variables)
+                //Log.v(TAG,"variables:"+variables)
                 val res = ApiClient.getClient2().getUserMediaMore(Urls.USER_INFO_MORE,map,Urls.QUERY_HASH_USER,gson.toJson(variables))
                 val code = res.code()
                 val jsonObject = res.body()

@@ -16,10 +16,10 @@ class BaseApplication : Application() {
         lateinit var mContext: Context
 
         //var baseUrl = "http://34.221.49.20:3000"
-        var serverIp = ""
-        var port1 = ""
-        var port2 = ""
-        var port3 = ""
+        var serverIp = "http://54.190.47.148"
+        var port1 = "3000"
+        var port2 = "4000"
+        var port3 = "5000"
     }
 
     override fun onCreate() {

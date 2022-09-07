@@ -39,7 +39,7 @@ public class Urls {
 
     public static String TAG_INFO = "https://i.instagram.com/api/v1/tags/web_info/";
 
-    public static String TAG_INFO_MORE = "https://i.instagram.com/api/v1/tags/love/sections/";
+    public static String TAG_INFO_MORE = "https://i.instagram.com/api/v1";
 
     public static String Cookie = "ig_did=A8F8C51C-8894-4E9B-9D04-5385C0214F17; ig_nrcb=1; mid=Yxdq1AABAAEr_ud4lmfg5dAjDguR; csrftoken=w5TAjYlGKRp0KVgsVlN65qyPemoJSzZn; ds_user_id=54892279902; sessionid=54892279902%3AnOHAY7ugSR6YDF%3A29%3AAYe6vs6KKFSsdI7w-Ik5e2l2PK_zX_O1J0mt_xKdGw; rur=\"NAO\\05454892279902\\0541694056708:01f734ecd178ce8c4ca7597d796aff0b1d66890d6feaceeec7e5be899c09efc21b3ab78b\"";
 

@@ -36,5 +36,6 @@
     <string name="note">公開アカウント情報へのアクセスのみをサポートしています</string>
     <string name="empty_username">ユーザー名を入力してください</string>
     <string name="empty_tag">ハッシュタグを入力してください</string>
+    <string name="log_out">ログアウト</string>
 
 </resources>

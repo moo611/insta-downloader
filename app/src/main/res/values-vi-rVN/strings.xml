@@ -37,5 +37,6 @@
     <string name="note">Chúng tôi chỉ hỗ trợ quyền truy cập vào thông tin tài khoản công khai</string>
     <string name="empty_username">Vui lòng nhập tên người dùng</string>
     <string name="empty_tag">Vui lòng nhập thẻ bắt đầu bằng #</string>
+    <string name="log_out">đăng xuất</string>
 
 </resources>

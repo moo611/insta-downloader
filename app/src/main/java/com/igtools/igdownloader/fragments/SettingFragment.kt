@@ -39,6 +39,13 @@ class SettingFragment : Fragment() {
 
         binding.tvVersion.text = BuildConfig.VERSION_NAME
 
+        val cookie = ShareUtils.getData("cookie")
+        if (cookie == null){
+            binding.llLogout.visibility = View.VISIBLE
+        }else{
+            binding.llLogout.visibility = View.INVISIBLE
+        }
+
     }
 
     private fun setListeners() {
@@ -47,6 +54,9 @@ class SettingFragment : Fragment() {
 
             FileUtils.share(requireContext(), "app")
 
+        }
+        binding.llLogout.setOnClickListener {
+            ShareUtils.getEdit().remove("cookie")
         }
 
         binding.mySwitch.setOnCheckedChangeListener { _, b -> ShareUtils.putData("isAuto",b.toString()) }

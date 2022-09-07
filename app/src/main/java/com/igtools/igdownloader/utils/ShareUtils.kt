@@ -8,6 +8,9 @@ object ShareUtils {
 
     private val sp:SharedPreferences = BaseApplication.mContext.getSharedPreferences("ig-downloader",0);
 
+    fun getEdit():SharedPreferences.Editor{
+        return sp.edit()
+    }
 
     fun getData(key:String):String?{
 

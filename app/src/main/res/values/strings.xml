@@ -35,5 +35,6 @@
     <string name="note">We only support access to public account information</string>
     <string name="empty_username">Please enter username</string>
     <string name="empty_tag">Please enter hashtag</string>
+    <string name="log_out">Log Out</string>
 
 </resources>

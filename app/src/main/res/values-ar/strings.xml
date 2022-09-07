@@ -37,5 +37,6 @@
     <string name="note">نحن ندعم فقط الوصول إلى معلومات الحساب العام</string>
     <string name="empty_username">الرجاء إدخال اسم المستخدم</string>
     <string name="empty_tag">الرجاء إدخال الهاشتاج</string>
+    <string name="log_out">تسجيل خروج</string>
 
 </resources>

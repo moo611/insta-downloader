@@ -36,5 +36,6 @@
     <string name="note">我們只支持獲取公開賬戶資料</string>
     <string name="empty_username">請輸入用戶名</string>
     <string name="empty_tag">請輸入標籤</string>
+    <string name="log_out">登出</string>
 
 </resources>

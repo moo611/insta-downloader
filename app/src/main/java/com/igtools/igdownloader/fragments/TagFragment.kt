@@ -20,6 +20,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.activities.WebActivity
@@ -137,7 +138,7 @@ class TagFragment : Fragment() {
                 return@setOnClickListener
             }
             val cookie = ShareUtils.getData("cookie")
-            if (cookie == null || !cookie.contains("sessionid")) {
+            if (cookie == null) {
                 bottomDialog.show()
             } else {
                 refresh(binding.etTag.text.toString())
@@ -205,7 +206,7 @@ class TagFragment : Fragment() {
         clearData()
         lifecycleScope.launch {
 
-            try {
+//            try {
 
                 val cookie = ShareUtils.getData("cookie")
                 Log.v(TAG, cookie + "")
@@ -220,7 +221,23 @@ class TagFragment : Fragment() {
                 val jsonObject = res.body()
                 if (code == 200 && jsonObject != null) {
                     val medias: ArrayList<MediaModel> = ArrayList()
-                    parseData(jsonObject, medias);
+
+                    next_media_ids.clear()
+                    val data = jsonObject["data"].asJsonObject
+                    val recent = data["recent"].asJsonObject
+                    more_available = recent["more_available"].asBoolean
+                    next_max_id = recent["next_max_id"].asString
+                    next_page = recent["next_page"].asInt
+                    val ids = recent["next_media_ids"].asJsonArray
+                    if (ids.size() > 0) {
+
+                        for (id in ids) {
+                            next_media_ids.add(id.asString)
+                        }
+                    }
+                    Log.v(TAG, next_media_ids.toString())
+                    val sections = recent["sections"].asJsonArray
+                    parseData(sections, medias);
                     if (medias.size > 0) {
                         adapter.refresh(medias)
 
@@ -232,13 +249,13 @@ class TagFragment : Fragment() {
                 }
                 progressDialog.dismiss()
 
-            } catch (e: Exception) {
-                Log.v(TAG, e.message + "")
-
-                progressDialog.dismiss()
-                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
-
-            }
+//            } catch (e: Exception) {
+//                Log.v(TAG, e.message + "")
+//
+//                progressDialog.dismiss()
+//                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+//
+//            }
 
 
         }
@@ -254,7 +271,7 @@ class TagFragment : Fragment() {
 
         lifecycleScope.launch {
 
-            try {
+//            try {
 
                 val cookie = ShareUtils.getData("cookie")
                 Log.v(TAG, cookie + "")
@@ -262,7 +279,8 @@ class TagFragment : Fragment() {
                 val map: HashMap<String, String> = HashMap()
                 map["Cookie"] = cookie!!
                 map["User-Agent"] = Urls.USER_AGENT
-
+                map["X-CSRFToken"] = extractToken(cookie)!!
+                Log.v(TAG,extractToken(cookie)!!)
                 val queries: HashMap<String, Any> = HashMap();
                 queries["max_id"] = next_max_id
                 queries["page"] = next_page
@@ -270,83 +288,104 @@ class TagFragment : Fragment() {
                 queries["include_persistent"] = 0
                 queries["surface"] = "grid"
                 queries["tab"] = "recent"
-
-                val res = ApiClient.getClient3().getMoreTagData(Urls.TAG_INFO_MORE, map, queries)
+                val tag = binding.etTag.text.toString()
+                val url = Urls.TAG_INFO_MORE + "/tags/" + tag + "/sections/"
+                val res = ApiClient.getClient3().getMoreTagData(url, map, queries)
                 val code = res.code()
 
                 val jsonObject = res.body()
                 if (code == 200 && jsonObject != null) {
                     val medias: ArrayList<MediaModel> = ArrayList()
-                    parseData(jsonObject, medias);
+                    next_media_ids.clear()
+                    more_available = jsonObject["more_available"].asBoolean
+                    next_max_id = jsonObject["next_max_id"].asString
+                    next_page = jsonObject["next_page"].asInt
+                    val ids = jsonObject["next_media_ids"].asJsonArray
+                    if (ids.size() > 0) {
+
+                        for (id in ids) {
+                            next_media_ids.add(id.asString)
+                        }
+                    }
+                    Log.v(TAG, next_media_ids.toString())
+                    val sections = jsonObject["sections"].asJsonArray
+                    parseData(sections, medias);
                     if (medias.size > 0) {
                         adapter.loadMore(medias)
 
                     }
                 } else {
+                    Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
                         .show()
                 }
+
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
-            } catch (e: Exception) {
-                Log.v(TAG, e.message + "")
-                loadingMore = false
-                binding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
-            }
+//            } catch (e: Exception) {
+//                Log.v(TAG, e.message + "")
+//                loadingMore = false
+//                binding.progressBottom.visibility = View.INVISIBLE
+//                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+//            }
 
         }
 
     }
 
-    private fun parseData(jsonObject: JsonObject, medias: ArrayList<MediaModel>) {
-        next_media_ids.clear()
-        val data = jsonObject["data"].asJsonObject
-        more_available = data["more_available"].asBoolean
-        next_max_id = data["next_max_id"].asString
-        next_page = data["next_page"].asInt
-        val ids = data["next_media_ids"].asJsonArray
-        if (ids.size() > 0) {
+    private fun extractToken(cookie: String): String? {
 
-            for (id in ids) {
-                next_media_ids.add(id.asString)
+        val strings = cookie.split(";")
+        for (str  in strings){
+            val str2 =  str.trim()
+            if (str2.startsWith("csrftoken=")){
+                return str2.substring(10,str2.length)
             }
         }
-        Log.v(TAG, next_media_ids.toString())
-        val items = data["sections"].asJsonArray
+        return null
+    }
 
-        for (item in items) {
-            val mediaModel = MediaModel()
-            Log.v(TAG, "current:" + items.indexOf(item))
-            mediaModel.pk = item.asJsonObject["pk"].asString
-            mediaModel.captionText =
-                item.asJsonObject["caption"].asJsonObject["text"].asString ?: ""
-            mediaModel.code = item.asJsonObject["code"].asString
-            mediaModel.mediaType = item.asJsonObject["media_type"].asInt
+    private fun parseData(sections: JsonArray, medias: ArrayList<MediaModel>) {
 
-            if (mediaModel.mediaType == 8) {
 
-                val candidates = item.asJsonObject["carousel_media"]
-                    .asJsonArray[0]
-                    .asJsonObject["image_versions2"]
-                    .asJsonObject["candidates"]
-                    .asJsonArray
-                mediaModel.thumbnailUrl = candidates[candidates.size() - 1]
-                    .asJsonObject["url"]
-                    .asString
+        for (section in sections) {
+            Log.v(TAG, "--------section:" + sections.indexOf(section))
+            val items = section.asJsonObject["layout_content"].asJsonObject["medias"].asJsonArray
+            for (item in items) {
+                Log.v(TAG, "--------item:" + items.indexOf(item))
+                val mediaModel = MediaModel()
+                val media = item.asJsonObject["media"]
+                mediaModel.pk = media.asJsonObject["pk"].asString
+                mediaModel.captionText = media.asJsonObject["caption"]?.asJsonObject?.get("text")?.asString
+                mediaModel.code = media.asJsonObject["code"].asString
+                mediaModel.mediaType = media.asJsonObject["media_type"].asInt
 
-            } else {
+                if (mediaModel.mediaType == 8) {
 
-                val candidates =
-                    item.asJsonObject["image_versions2"].asJsonObject["candidates"].asJsonArray
-                mediaModel.thumbnailUrl =
-                    candidates[candidates.size() - 1].asJsonObject["url"].asString
+                    val candidates = media.asJsonObject["carousel_media"]
+                        .asJsonArray[0]
+                        .asJsonObject["image_versions2"]
+                        .asJsonObject["candidates"]
+                        .asJsonArray
+                    mediaModel.thumbnailUrl = candidates[candidates.size() - 1]
+                        .asJsonObject["url"]
+                        .asString
 
+                } else {
+
+                    val candidates =
+                        media.asJsonObject["image_versions2"].asJsonObject["candidates"].asJsonArray
+                    mediaModel.thumbnailUrl =
+                        candidates[candidates.size() - 1].asJsonObject["url"].asString
+
+                }
+                mediaModel.username = media.asJsonObject["user"].asJsonObject["username"].asString
+                mediaModel.profilePicUrl =
+                    media.asJsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
+                medias.add(mediaModel)
             }
-            mediaModel.username = item.asJsonObject["user"].asJsonObject["username"].asString
-            mediaModel.profilePicUrl =
-                item.asJsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
-            medias.add(mediaModel)
+
+
         }
 
 
