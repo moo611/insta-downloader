@@ -3,6 +3,7 @@ package com.igtools.igdownloader.fragments
 import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Environment
@@ -14,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -79,7 +81,7 @@ class ShortCodeFragment : Fragment() {
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
     lateinit var circularProgressDrawable: CircularProgressDrawable
-    var isFromDownload = false
+
     private val LOGIN_REQ = 1000
 
     override fun onCreateView(
@@ -243,8 +245,8 @@ class ShortCodeFragment : Fragment() {
                 target: Target<Drawable>?,
                 isFirstResource: Boolean
             ): Boolean {
-//                isFromDownload = false
-//                binding.progressbar.visibility = View.INVISIBLE
+
+                binding.progressbar.visibility = View.INVISIBLE
                 return false;
             }
 
@@ -257,16 +259,6 @@ class ShortCodeFragment : Fragment() {
             ): Boolean {
 
                 binding.progressbar.visibility = View.INVISIBLE
-                if (isFromDownload) {
-
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.download_finish),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                isFromDownload = false
-                mInterstitialAd?.show(requireActivity())
                 return false;
 
             }
@@ -317,9 +309,7 @@ class ShortCodeFragment : Fragment() {
                 if (code == 200 && jsonObject != null) {
                     curMediaInfo = parseMedia(jsonObject)
                     saveRecord(shortCode)
-                    isFromDownload = true
                     updateUI()
-
                     if (curMediaInfo?.mediaType == 8) {
                         curMediaInfo?.resources?.map {
 
@@ -330,6 +320,8 @@ class ShortCodeFragment : Fragment() {
                     } else {
                         download(curMediaInfo)
                     }
+                    Toast.makeText(context,getString(R.string.download_finish),Toast.LENGTH_SHORT).show()
+                    mInterstitialAd?.show(requireActivity())
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
@@ -375,10 +367,21 @@ class ShortCodeFragment : Fragment() {
                     binding.container.visibility = View.VISIBLE
                     val data = jsonObject["data"].asJsonObject
                     curMediaInfo = parseMediaOld(data)
-                    isFromDownload = true
+
                     updateUI()
                     saveRecord(shortCode)
-                    download(curMediaInfo)
+                    if (curMediaInfo?.mediaType == 8) {
+                        curMediaInfo?.resources?.map {
+
+                            launch {
+                                download(it)
+                            }
+                        }
+                    } else {
+                        download(curMediaInfo)
+                    }
+
+                    Toast.makeText(context,getString(R.string.download_finish),Toast.LENGTH_SHORT).show()
                     mInterstitialAd?.show(requireActivity())
                 } else {
                     handleError()
@@ -429,10 +432,12 @@ class ShortCodeFragment : Fragment() {
                 progressDialog.dismiss()
                 if (code == 200 && jsonObject != null) {
                     curMediaInfo = parseStory(jsonObject)
-                    isFromDownload = true
+
                     updateUI()
                     saveRecord(pk)
                     download(curMediaInfo)
+                    Toast.makeText(context,getString(R.string.download_finish),Toast.LENGTH_SHORT).show()
+                    mInterstitialAd?.show(requireActivity())
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(
@@ -473,9 +478,13 @@ class ShortCodeFragment : Fragment() {
         binding.container.visibility = View.VISIBLE
         binding.progressbar.visibility = View.VISIBLE
         binding.username.text = curMediaInfo?.captionText
-        Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl).listener(glideListener)
+        Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
+            .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
+            .listener(glideListener)
             .into(binding.picture)
-        Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).into(binding.avatar)
+        Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
+            .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
+            .into(binding.avatar)
     }
 
     private fun saveRecord(id: String) {
