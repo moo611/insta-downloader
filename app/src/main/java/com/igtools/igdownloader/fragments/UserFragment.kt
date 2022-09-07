@@ -201,6 +201,7 @@ class UserFragment : Fragment() {
                 if (code==200 && jsonObject!=null){
                     val user = jsonObject["data"].asJsonObject["user"].asJsonObject
                     userId = user["id"].asString
+                    Log.v(TAG,"user_id:"+userId)
                     val edge_owner_to_timeline_media = user["edge_owner_to_timeline_media"].asJsonObject
                     val edges = edge_owner_to_timeline_media["edges"].asJsonArray
                     if (edges.size()>0){
@@ -249,9 +250,10 @@ class UserFragment : Fragment() {
                 binding.progressBottom.visibility = View.VISIBLE
                 val variables:HashMap<String,Any> = HashMap()
                 variables["id"] = userId
-                variables["first"] = 33
+                variables["first"] = 12
                 variables["after"] = cursor
-                val res = ApiClient.getClient2().getUserMediaMore(Urls.USER_INFO_MORE,map,Urls.QUERY_HASH,gson.toJson(variables))
+                Log.v(TAG,"variables:"+variables)
+                val res = ApiClient.getClient2().getUserMediaMore(Urls.USER_INFO_MORE,map,Urls.QUERY_HASH_USER,gson.toJson(variables))
                 val code = res.code()
                 val jsonObject = res.body()
                 if (code ==200 && jsonObject!=null){
@@ -273,6 +275,7 @@ class UserFragment : Fragment() {
                 }else{
                     Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
                 }
+                Log.e(TAG,res.errorBody()?.string()+"")
                 loadingMore = false
                 binding.progressBottom.visibility = View.INVISIBLE
             }catch (e:Exception){

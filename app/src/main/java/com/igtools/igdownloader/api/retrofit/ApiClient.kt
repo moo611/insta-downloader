@@ -5,18 +5,20 @@ import com.igtools.igdownloader.BaseApplication
 import okhttp3.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
+
 object ApiClient {
     val TAG = "ApiClient"
 
-    const val proxyPort = 1000 //your proxy port
+    const val proxyPort = 16732 //your proxy port
 
-    const val proxyHost = "proxy.smartproxycn.com"
-    const val username = "moo611"
-    const val password = "1234"
+    const val proxyHost = "170.106.148.245"
+//    const val username = "moo611_area-RU_city-moscow"
+//    const val password = "1234"
 
     fun getClient(): UrlService {
 

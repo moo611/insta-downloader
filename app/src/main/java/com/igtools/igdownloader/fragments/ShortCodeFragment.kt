@@ -287,13 +287,12 @@ class ShortCodeFragment : Fragment() {
 
             try {
                 val map: HashMap<String, String> = HashMap()
-                ShareUtils.getData("cookie")?.also { a ->
-                    // then-block
-                    map["Cookie"] = a
-                } ?: run {
-                    // else-block
-                    map["Cookie"] = Urls.Cookie
+                map["Cookie"] = Urls.Cookie
+                val cookie = ShareUtils.getData("cookie")
+                if (cookie!=null && cookie.contains("sessionid")){
+                    map["Cookie"] = cookie
                 }
+
                 map["User-Agent"] = Urls.USER_AGENT
 
                 val map2: HashMap<String, String> = HashMap()
