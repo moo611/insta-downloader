@@ -224,19 +224,7 @@ class TagBlogDetails : AppCompatActivity() {
                     mediaInfo = parseMedia(jsonObject)
                     saveRecord(shortCode)
                     updateUI()
-                    if (mediaInfo.mediaType == 8) {
-                        val all: List<Deferred<Unit>> = mediaInfo.resources.map {
-                            async {
-                                download(it)
-                            }
-                        }
 
-                        all.awaitAll()
-                    } else {
-                        download(mediaInfo)
-                    }
-                    Toast.makeText(this@TagBlogDetails,getString(R.string.download_finish),Toast.LENGTH_SHORT).show()
-                    mInterstitialAd?.show(this@TagBlogDetails)
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(this@TagBlogDetails, getString(R.string.not_found), Toast.LENGTH_SHORT)
