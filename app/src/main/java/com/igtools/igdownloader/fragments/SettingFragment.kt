@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.igtools.igdownloader.BaseApplication
@@ -41,9 +42,9 @@ class SettingFragment : Fragment() {
 
         val cookie = ShareUtils.getData("cookie")
         if (cookie == null){
-            binding.llLogout.visibility = View.VISIBLE
-        }else{
             binding.llLogout.visibility = View.INVISIBLE
+        }else{
+            binding.llLogout.visibility = View.VISIBLE
         }
 
     }
@@ -57,6 +58,8 @@ class SettingFragment : Fragment() {
         }
         binding.llLogout.setOnClickListener {
             ShareUtils.getEdit().remove("cookie")
+            binding.llLogout.visibility = View.INVISIBLE
+            //Toast.makeText(requireContext(),)
         }
 
         binding.mySwitch.setOnCheckedChangeListener { _, b -> ShareUtils.putData("isAuto",b.toString()) }
