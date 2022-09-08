@@ -40,6 +40,6 @@
     <string name="log_out">登出</string>
     <string name="long_text1">您无需登录即可下载公共instagram帖子。根据instagram要求，您需要登录才能下载私人帖子和故事。</string>
     <string name="long_text2">注意：下载私人视频和story时，登录的账号必须是你和这个人互相关注的账号，你的下载不会在对方的账号访问记录留下痕迹</string>
-    <string name="long_text3">您登录的是instagram官方网站，我们不会收集您的信息</string>
+    <string name="long_text3">我们不会收集您的个人信息。instagram可能会封掉您的账号，因此不要用您的主要账号</string>
     <string name="parse_error">解析异常</string>
 </resources>

@@ -38,6 +38,6 @@
     <string name="log_out">Log Out</string>
     <string name="long_text1">You don\'t need to log in to download public instagram posts. According to instagram requirements, you need to be logged in to download private posts and stories.</string>
     <string name="long_text2">Note: When downloading private videos and stories, the login account must be the account that you and the person follow each other. Your download will not leave traces on the other party\'s account access records.</string>
-    <string name="long_text3">You are logged in to the official instagram website, we will not collect your information</string>
+    <string name="long_text3">We do not collect your personal information. instagram may ban your account so don\'t use your main account</string>
     <string name="parse_error">Parse exception</string>
 </resources>

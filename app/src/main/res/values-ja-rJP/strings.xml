@@ -39,6 +39,6 @@
     <string name="log_out">ログアウト</string>
     <string name="long_text1">公開の instagram 投稿をダウンロードするためにログインする必要はありません。インスタグラムの要件により、非公開の投稿やストーリーをダウンロードするにはログインする必要があります。</string>
     <string name="long_text2">※非公開の動画やストーリーをダウンロードする場合、ログインアカウントはお互いにフォローしているアカウントである必要があり、ダウンロードしたことで相手のアカウントへのアクセス履歴が残ることはありません。</string>
-    <string name="long_text3">あなたは公式インスタグラムのウェブサイトにログインしています。私たちはあなたの情報を収集しません</string>
+    <string name="long_text3">私たちはあなたの個人情報を収集しません。 Instagramはアカウントを禁止する場合があるため、メインアカウントは使用しないでください</string>
     <string name="parse_error">解析例外</string>
 </resources>

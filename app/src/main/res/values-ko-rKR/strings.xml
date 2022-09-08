@@ -40,7 +40,7 @@
     <string name="log_out">로그 아웃</string>
     <string name="long_text1">공개 인스타그램 게시물을 다운로드하기 위해 로그인할 필요가 없습니다. 인스타그램 요구 사항에 따라 비공개 게시물과 스토리를 다운로드하려면 로그인해야 합니다.</string>
     <string name="long_text2">참고: 비공개 동영상 및 스토리 다운로드 시 로그인 계정은 나와 상대방이 팔로우하는 계정이어야 하며 다운로드 시 상대방의 계정 접속 기록에 흔적이 남지 않습니다.</string>
-    <string name="long_text3">공식 인스타그램 웹사이트에 로그인되어 있습니다. 귀하의 정보를 수집하지 않습니다.</string>
+    <string name="long_text3">우리는 귀하의 개인 정보를 수집하지 않습니다. 인스타그램은 귀하의 계정을 금지할 수 있으므로 기본 계정을 사용하지 마십시오</string>
     <string name="parse_error">구문 분석 예외</string>
 
 </resources>
