@@ -57,7 +57,7 @@ class SettingFragment : Fragment() {
 
         }
         binding.llLogout.setOnClickListener {
-            ShareUtils.getEdit().remove("cookie")
+            ShareUtils.getEdit().remove("cookie").apply()
             binding.llLogout.visibility = View.INVISIBLE
             //Toast.makeText(requireContext(),)
         }
