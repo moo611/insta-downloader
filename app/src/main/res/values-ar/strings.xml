@@ -29,7 +29,7 @@
     <string name="download_finish"> انتهى التنزيل </string>
     <string name="searching">يبحث</string>
     <string name="downloading"> جارى التحميل</string>
-    <string name="not_found"> آخر غير متوفر </string>
+    <string name="not_found">المشاركة غير متاحة مؤقتًا ، يرجى المحاولة مرة أخرى بعد بضع دقائق</string>
     <string name="invalid_url"> عنوان Url غير صالح </string>
 
     <string name="too_many"> طلبات كثيرة جدًا </string>

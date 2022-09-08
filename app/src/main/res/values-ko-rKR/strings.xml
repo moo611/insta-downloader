@@ -29,7 +29,7 @@
     <string name="download_finish">다운로드 완료</string>
     <string name="searching">검색 중…</string>
     <string name="downloading">다운로드 중…</string>
-    <string name="not_found">게시물을 사용할 수 없습니다</string>
+    <string name="not_found">게시물을 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.</string>
     <string name="invalid_url">잘못된 URL</string>
     <string name="too_many">너무 많은 요청</string>
 

@@ -29,7 +29,7 @@
     <string name="download_finish">Загрузка завершена</string>
     <string name="searching">Поиск…</string>
     <string name="downloading">Загрузка…</string>
-    <string name="not_found">пост недоступен</string>
+    <string name="not_found">Сообщение временно недоступно, повторите попытку через несколько минут.</string>
     <string name="invalid_url">Неверный URL</string>
 
     <string name="too_many">Слишком много запросов</string>

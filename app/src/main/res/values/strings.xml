@@ -27,7 +27,7 @@
     <string name="download_finish">Download Finished</string>
     <string name="searching">Searching…</string>
     <string name="downloading">Downloading…</string>
-    <string name="not_found">Post not available</string>
+    <string name="not_found">Post is temporarily unavailable, please try again in a few minutes</string>
     <string name="invalid_url">Invalid Url</string>
 
     <string name="too_many">Too many requests</string>

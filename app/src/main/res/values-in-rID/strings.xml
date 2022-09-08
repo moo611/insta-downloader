@@ -29,7 +29,7 @@
     <string name="download_finish">Unduhan Selesai</string>
     <string name="searching">Mencari…</string>
     <string name="downloading">Mengunduh…</string>
-    <string name="not_found">pos tidak tersedia</string>
+    <string name="not_found">Posting sementara tidak tersedia, silakan coba lagi dalam beberapa menit</string>
     <string name="invalid_url">Url Tidak Valid</string>
 
     <string name="too_many">Terlalu banyak permintaan</string>

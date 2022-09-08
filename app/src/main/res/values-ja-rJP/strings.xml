@@ -29,7 +29,7 @@
     <string name="download_finish">ダウンロード完了</string>
     <string name="searching">検索中…</string>
     <string name="downloading">ダウンロードしています…</string>
-    <string name="not_found">投稿できません</string>
+    <string name="not_found">投稿は一時的に利用できません。数分後にもう一度お試しください</string>
     <string name="invalid_url">無効なURL</string>
     <string name="too_many">リクエスト多すぎ</string>
     <string name="exist">ダウンロードは既に存在します。履歴を確認してください</string>

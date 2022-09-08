@@ -29,7 +29,7 @@
     <string name="download_finish">डाउनलोड पूरा हो गया है</string>
     <string name="searching">खोज कर…</string>
     <string name="downloading">डाउनलोड हो रहा है…</string>
-    <string name="not_found">पोस्ट उपलब्ध नहीं है</string>
+    <string name="not_found">पोस्ट अस्थायी रूप से अनुपलब्ध है, कृपया कुछ मिनटों में पुन: प्रयास करें</string>
     <string name="invalid_url">अवैध यूआरएल</string>
     <string name = "too_many">बहुत अधिक अनुरोध</string>
     <string name="exist">डाउनलोड पहले से मौजूद है, कृपया इतिहास जांचें</string>

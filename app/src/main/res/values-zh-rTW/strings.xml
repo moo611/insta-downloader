@@ -29,7 +29,7 @@
     <string name="download_finish">下載完成</string>
     <string name="searching">正在搜索…</string>
     <string name="downloading">正在下載…</string>
-    <string name="not_found">帖子不可用</string>
+    <string name="not_found">帖子暫時不可用，請過幾分鐘後再試</string>
     <string name="invalid_url">無效的網址</string>
 
     <string name="exist">下載已存在，請查看歷史記錄</string>

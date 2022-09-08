@@ -29,7 +29,7 @@
     <string name="download_finish"> Tải xuống xong </string>
     <string name="searching"> Đang tìm kiếm… </string>
     <string name="downloading"> Đang tải xuống… </string>
-    <string name="not_found"> bài đăng không có sẵn </string>
+    <string name="not_found"> Bài đăng tạm thời không khả dụng, vui lòng thử lại sau ít phút </string>
     <string name="invalid_url">url không hợp lệ</string>
     <string name = "too_many"> Quá nhiều yêu cầu </string>
 
