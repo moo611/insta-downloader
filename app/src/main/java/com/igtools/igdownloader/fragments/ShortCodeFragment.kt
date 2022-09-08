@@ -311,12 +311,13 @@ class ShortCodeFragment : Fragment() {
                     saveRecord(shortCode)
                     updateUI()
                     if (curMediaInfo?.mediaType == 8) {
-                        curMediaInfo?.resources?.map {
-
-                            launch {
+                        val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
+                            async {
                                 download(it)
                             }
                         }
+
+                        all.awaitAll()
                     } else {
                         download(curMediaInfo)
                     }
@@ -371,12 +372,13 @@ class ShortCodeFragment : Fragment() {
                     updateUI()
                     saveRecord(shortCode)
                     if (curMediaInfo?.mediaType == 8) {
-                        curMediaInfo?.resources?.map {
-
-                            launch {
+                        val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
+                            async {
                                 download(it)
                             }
                         }
+
+                        all.awaitAll()
                     } else {
                         download(curMediaInfo)
                     }
