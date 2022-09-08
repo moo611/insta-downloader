@@ -12,4 +12,5 @@
     <color name="home_unselect_color">#666666</color>
     <color name="gray_1">#F3F3F3</color>
     <color name="light">#800de6e8</color>
+    <color name="red">#ff0000</color>
 </resources>
