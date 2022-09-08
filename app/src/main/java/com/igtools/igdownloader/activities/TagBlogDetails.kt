@@ -3,6 +3,7 @@ package com.igtools.igdownloader.activities
 import android.app.ProgressDialog
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
@@ -23,6 +25,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.adapter.MultiTypeAdapter
+import com.igtools.igdownloader.api.okhttp.Urls
 import com.igtools.igdownloader.api.retrofit.ApiClient
 import com.igtools.igdownloader.databinding.ActivityTagBlogDetailsBinding
 import com.igtools.igdownloader.models.IntentEvent
@@ -145,13 +148,13 @@ class TagBlogDetails : AppCompatActivity() {
                 if (mediaInfo.mediaType==8){
                     val all: List<Deferred<Unit>> = mediaInfo.resources.map {
                         async {
-                            downloadMedia(it)
+                            download(it)
                         }
                     }
 
                     all.awaitAll()
                 }else{
-                    downloadMedia(mediaInfo)
+                    download(mediaInfo)
                 }
 
                 //Log.v(TAG,"finish")
@@ -180,153 +183,175 @@ class TagBlogDetails : AppCompatActivity() {
     private fun getDataFromServer(content:String){
         mediaInfo = gson.fromJson(content, MediaModel::class.java)
 
-        getMedia(mediaInfo.code)
+        getMedia()
 
     }
 
-    private fun getMedia(url: String) {
+    private fun getMedia() {
+        val shortCode = mediaInfo.code
         lifecycleScope.launch {
+            //检查是否已存在
+            val record = RecordDB.getInstance().recordDao().findById(shortCode)
 
-            val record = RecordDB.getInstance().recordDao().findById(mediaInfo.code)
             if (record != null) {
-                Toast.makeText(this@TagBlogDetails, getString(R.string.exist), Toast.LENGTH_SHORT).show()
+                mediaInfo = gson.fromJson(record.content, MediaModel::class.java)
+                updateUI()
+                Toast.makeText(this@TagBlogDetails, getString(R.string.exist), Toast.LENGTH_SHORT)
+                    .show()
+
                 return@launch
             }
             progressDialog.show()
             try {
-                val res = ApiClient.getClient().getMedia(url)
+                val map: HashMap<String, String> = HashMap()
+                map["Cookie"] = Urls.Cookie
+                val cookie = ShareUtils.getData("cookie")
+                if (cookie != null && cookie.contains("sessionid")) {
+                    map["Cookie"] = cookie
+                }
+
+                map["User-Agent"] = Urls.USER_AGENT
+
+                val map2: HashMap<String, String> = HashMap()
+                map2["shortcode"] = shortCode
+
+                val res = ApiClient.getClient()
+                    .getMediaData(Urls.MEDIA_INFO, map, Urls.QUERY_HASH, gson.toJson(map2))
                 val code = res.code()
                 val jsonObject = res.body()
-                if (code == 200 && jsonObject != null) {
-                    binding.container.visibility = View.VISIBLE
-                    val data = jsonObject["data"].asJsonObject
-                    mediaInfo = parseData(data)
-
-                    if (mediaInfo.mediaType == 8) {
-
-                        if (mediaInfo.resources.size > 0) {
-                            show("album")
-                            adapter.setDatas(mediaInfo.resources as List<ResourceModel?>?)
-
-                            binding.btnDownload.isEnabled = true
-                            //binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                            binding.tvTitle.text = mediaInfo.captionText
-
-                        }
-                    } else {
-                        show("picture")
-                        Glide.with(this@TagBlogDetails).load(mediaInfo.thumbnailUrl)
-                            .into(binding.picture)
-                        binding.btnDownload.isEnabled = true
-                        //binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                        binding.tvTitle.text = mediaInfo.captionText
-
-                    }
-
-                    binding.username.text = mediaInfo.username
-                    Glide.with(this@TagBlogDetails).load(mediaInfo.profilePicUrl).circleCrop().into(binding.avatar)
-
-                } else {
-
-                    if (code == 429) {
-                        Toast.makeText(this@TagBlogDetails, getString(R.string.too_many), Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        Toast.makeText(this@TagBlogDetails, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
-                }
                 progressDialog.dismiss()
+                if (code == 200 && jsonObject != null) {
+                    mediaInfo = parseMedia(jsonObject)
+                    saveRecord(shortCode)
+                    updateUI()
+                    if (mediaInfo.mediaType == 8) {
+                        val all: List<Deferred<Unit>> = mediaInfo.resources.map {
+                            async {
+                                download(it)
+                            }
+                        }
+
+                        all.awaitAll()
+                    } else {
+                        download(mediaInfo)
+                    }
+                    Toast.makeText(this@TagBlogDetails,getString(R.string.download_finish),Toast.LENGTH_SHORT).show()
+                    mInterstitialAd?.show(this@TagBlogDetails)
+                } else {
+                    Log.e(TAG, res.errorBody()?.string() + "")
+                    Toast.makeText(this@TagBlogDetails, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
+                }
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                Toast.makeText(this@TagBlogDetails, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
-            }
+                Toast.makeText(this@TagBlogDetails, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
 
+            }
         }
 
     }
 
 
-    private fun parseData(jsonObject: JsonObject):MediaModel {
-        val mediaInfo = MediaModel()
-        val mediaType = jsonObject["media_type"].asInt
-        Log.v(TAG, "mediaType:$mediaType")
-        if (mediaType == 8) {
-
-            mediaInfo.pk = jsonObject["pk"].asString
-            mediaInfo.code = jsonObject["code"].asString
-            mediaInfo.mediaType = jsonObject["media_type"].asInt
-            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
-            mediaInfo.captionText = jsonObject["caption_text"].asString
-            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl =
-                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
-
-            val resources = jsonObject["resources"].asJsonArray
-            mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
-            for (res in resources) {
-
-                val resourceInfo = ResourceModel()
-                resourceInfo.pk = res.asJsonObject["pk"].asString
-                resourceInfo.mediaType = res.asJsonObject["media_type"].asInt
-                resourceInfo.thumbnailUrl = res.asJsonObject["thumbnail_url"].asString
-                resourceInfo.videoUrl = res.asJsonObject.getNullable("video_url")?.asString
-                mediaInfo.resources.add(resourceInfo)
-            }
-
-        } else if (mediaType == 0 || mediaType == 1 || mediaType == 2) {
-
-
-            mediaInfo.pk = jsonObject["pk"].asString
-            mediaInfo.code = jsonObject["code"].asString
-            mediaInfo.mediaType = jsonObject["media_type"].asInt
-            mediaInfo.thumbnailUrl = jsonObject["thumbnail_url"].asString
-            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
-            mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
-            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl =
-                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
-
-        }
-
-        return mediaInfo
-
-    }
-
-    private fun show(flag: String) {
-
-        if (flag == "picture") {
-            binding.picture.visibility = View.VISIBLE
-            binding.banner.visibility = View.INVISIBLE
-
-            if (mediaInfo.mediaType == 0 || mediaInfo.mediaType == 1) {
-                binding.imgPlay.visibility = View.INVISIBLE
-            } else if (mediaInfo.mediaType == 2) {
-                binding.imgPlay.visibility = View.VISIBLE
-            }
-
+    private fun parseMedia(jsonObject: JsonObject): MediaModel {
+        val mediaModel = MediaModel()
+        val shortcode_media = jsonObject["data"].asJsonObject["shortcode_media"].asJsonObject
+        val __typename = shortcode_media["__typename"].asString
+        if (__typename == "GraphImage") {
+            mediaModel.mediaType = 1
+        } else if (__typename == "GraphVideo") {
+            mediaModel.mediaType = 2
         } else {
+            mediaModel.mediaType = 8
+        }
+
+        mediaModel.code = shortcode_media["shortcode"].asString
+        mediaModel.pk = shortcode_media["id"].asString
+        val edge_media_to_caption = shortcode_media["edge_media_to_caption"].asJsonObject
+        val edges = edge_media_to_caption["edges"].asJsonArray
+        if (edges.size() > 0) {
+            mediaModel.captionText = edges[0].asJsonObject["node"].asJsonObject["text"].asString
+        }
+        mediaModel.videoUrl = shortcode_media.getNullable("video_url")?.asString
+        mediaModel.thumbnailUrl = shortcode_media["display_url"].asString
+        val owner = shortcode_media["owner"].asJsonObject
+        mediaModel.profilePicUrl = owner["profile_pic_url"].asString
+        mediaModel.username = owner["username"].asString
+        if (shortcode_media.has("edge_sidecar_to_children")) {
+            val edge_sidecar_to_children = shortcode_media["edge_sidecar_to_children"].asJsonObject
+            val children = edge_sidecar_to_children["edges"].asJsonArray
+            if (children.size() > 0) {
+                for (child in children) {
+                    val resource = ResourceModel()
+                    resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
+                    resource.thumbnailUrl =
+                        child.asJsonObject["node"].asJsonObject["display_url"].asString
+                    resource.videoUrl =
+                        child.asJsonObject["node"].asJsonObject.getNullable("video_url")?.asString
+                    val typeName = child.asJsonObject["node"].asJsonObject["__typename"].asString
+                    if (typeName == "GraphImage") {
+                        resource.mediaType = 1
+                    } else if (typeName == "GraphVideo") {
+                        resource.mediaType = 2
+                    } else {
+                        resource.mediaType = 8
+                    }
+                    mediaModel.resources.add(resource)
+                }
+            }
+        }
+
+        return mediaModel
+
+    }
+
+    private fun saveRecord(id: String) {
+        lifecycleScope.launch {
+            val record = Record(id, gson.toJson(mediaInfo), System.currentTimeMillis())
+            RecordDB.getInstance().recordDao().insert(record)
+        }
+
+    }
+
+    private fun updateUI() {
+
+        if (mediaInfo.mediaType == 8) {
             binding.imgPlay.visibility = View.INVISIBLE
             binding.banner.visibility = View.VISIBLE
             binding.picture.visibility = View.INVISIBLE
+            adapter.setDatas(mediaInfo.resources)
+
+        } else if (mediaInfo.mediaType == 1){
+            binding.picture.visibility = View.VISIBLE
+            binding.banner.visibility = View.INVISIBLE
+            binding.imgPlay.visibility = View.INVISIBLE
+            Glide.with(this).load(mediaInfo.thumbnailUrl).placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1))).into(binding.picture)
+        }else if (mediaInfo.mediaType == 2){
+            binding.picture.visibility = View.VISIBLE
+            binding.banner.visibility = View.INVISIBLE
+            binding.imgPlay.visibility = View.VISIBLE
+            Glide.with(this).load(mediaInfo.thumbnailUrl).placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1))).into(binding.picture)
         }
+
+        Glide.with(this).load(mediaInfo.profilePicUrl)
+            .placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1)))
+            .circleCrop().into(binding.avatar)
+        binding.username.text = mediaInfo.username
+        binding.tvTitle.text = mediaInfo.captionText
 
     }
 
-    private suspend fun downloadMedia(media: ResourceModel?) {
+    private suspend fun download(media: ResourceModel?) = withContext(Dispatchers.IO) {
 
-        if (media?.mediaType == 1 || media?.mediaType == 0) {
+        if (media?.mediaType == 1) {
             //image
             val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
-            withContext(Dispatchers.IO) {
-                saveFile(responseBody.body(), file, 1)
-            }
+            saveFile(responseBody.body(), file, 1)
+
         } else if (media?.mediaType == 2) {
             //video
             val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
@@ -334,13 +359,11 @@ class TagBlogDetails : AppCompatActivity() {
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
-                withContext(Dispatchers.IO) {
-                    saveFile(responseBody.body(), file, 2)
-                }
+                saveFile(responseBody.body(), file, 2)
+
             }
 
         }
-
     }
 
     private fun saveFile(body: ResponseBody?, file: File, type: Int) {
@@ -387,5 +410,7 @@ class TagBlogDetails : AppCompatActivity() {
 
 
     }
+
+
 
 }
