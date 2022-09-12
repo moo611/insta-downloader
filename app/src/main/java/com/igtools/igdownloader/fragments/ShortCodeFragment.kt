@@ -393,7 +393,11 @@ class ShortCodeFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                //fix crash
+                if (isAdded){
+                    Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                }
+
             }
 
 
