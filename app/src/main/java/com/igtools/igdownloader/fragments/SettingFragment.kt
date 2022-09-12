@@ -46,6 +46,11 @@ class SettingFragment : Fragment() {
 
         binding.tvVersion.text = BuildConfig.VERSION_NAME
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+
         val cookie = ShareUtils.getData("cookie")
         if (cookie == null){
             binding.llLogout.visibility = View.INVISIBLE

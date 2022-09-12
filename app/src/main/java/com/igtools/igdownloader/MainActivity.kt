@@ -61,34 +61,7 @@ class MainActivity : AppCompatActivity() {
         initViews()
         setListeners()
 
-        if (BaseApplication.serverIp == "") {
-            val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-            val configSettings = remoteConfigSettings {
-                minimumFetchIntervalInSeconds = 3600
-            }
-            remoteConfig.setConfigSettingsAsync(configSettings)
-
-            remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.v(TAG, "task success")
-                    BaseApplication.serverIp = remoteConfig.getString("server_ip")
-                    BaseApplication.port1 = remoteConfig.getString("port1")
-                    BaseApplication.port2 = remoteConfig.getString("port2")
-                    BaseApplication.port3 = remoteConfig.getString("port3")
-                    Log.v(TAG, BaseApplication.serverIp)
-                    Log.v(TAG, BaseApplication.port1)
-                    Log.v(TAG, BaseApplication.port2)
-                    Log.v(TAG, BaseApplication.port3)
-                    handleText(intent)
-                } else {
-                    Log.e(TAG, "fetch failed")
-                }
-
-            }
-        }else{
-            handleText(intent)
-        }
-
+        handleText(intent)
 
     }
 
