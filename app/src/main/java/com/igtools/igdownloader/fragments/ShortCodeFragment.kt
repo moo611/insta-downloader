@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -329,8 +330,8 @@ class ShortCodeFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
-
+                //Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                bottomDialog.show()
             }
         }
     }
