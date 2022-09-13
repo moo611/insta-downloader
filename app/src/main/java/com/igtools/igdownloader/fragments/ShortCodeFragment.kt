@@ -290,13 +290,17 @@ class ShortCodeFragment : Fragment() {
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-                map["Cookie"] = Urls.Cookie
-                val cookie = ShareUtils.getData("cookie")
-                if (cookie != null && cookie.contains("sessionid")) {
-                    map["Cookie"] = cookie
-                }
-
+//                map["Cookie"] = Urls.Cookie
+//                val cookie = ShareUtils.getData("cookie")
+//                if (cookie != null && cookie.contains("sessionid")) {
+//                    map["Cookie"] = cookie
+//                }
+//
+//                map["User-Agent"] = Urls.USER_AGENT
+                map["CsrfToken"] = Urls.CsrfToken
+                map["Referer"] = "https://www.instagram.com/"
                 map["User-Agent"] = Urls.USER_AGENT
+
 
                 val map2: HashMap<String, String> = HashMap()
                 map2["shortcode"] = shortCode
