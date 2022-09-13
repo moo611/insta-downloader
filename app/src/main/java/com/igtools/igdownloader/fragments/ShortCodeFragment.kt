@@ -169,12 +169,8 @@ class ShortCodeFragment : Fragment() {
             }
 
         } else {
-            val cookie = ShareUtils.getData("cookie")
-            if (cookie != null) {
-                getMediaData()
-            } else {
-                getMediaOld()
-            }
+
+            getMediaData()
 
         }
 
@@ -290,17 +286,13 @@ class ShortCodeFragment : Fragment() {
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-//                map["Cookie"] = Urls.Cookie
-//                val cookie = ShareUtils.getData("cookie")
-//                if (cookie != null && cookie.contains("sessionid")) {
-//                    map["Cookie"] = cookie
-//                }
-//
-//                map["User-Agent"] = Urls.USER_AGENT
-                map["CsrfToken"] = Urls.CsrfToken
-                map["Referer"] = "https://www.instagram.com/"
-                map["User-Agent"] = Urls.USER_AGENT
+                map["Cookie"] = Urls.Cookie
+                val cookie = ShareUtils.getData("cookie")
+                if (cookie != null && cookie.contains("sessionid")) {
+                    map["Cookie"] = cookie
+                }
 
+                map["User-Agent"] = Urls.USER_AGENT
 
                 val map2: HashMap<String, String> = HashMap()
                 map2["shortcode"] = shortCode
@@ -325,7 +317,8 @@ class ShortCodeFragment : Fragment() {
                     } else {
                         download(curMediaInfo)
                     }
-                    Toast.makeText(context,getString(R.string.download_finish),Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
+                        .show()
                     mInterstitialAd?.show(requireActivity())
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
@@ -340,74 +333,6 @@ class ShortCodeFragment : Fragment() {
 
             }
         }
-    }
-
-    /**
-     * 不登录情况下
-     */
-    private fun getMediaOld() {
-
-        val shortCode = getShortCode()
-
-        lifecycleScope.launch {
-            val record = RecordDB.getInstance().recordDao().findById(shortCode)
-
-            if (record != null) {
-                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
-                updateUI()
-                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
-                    .show()
-
-                return@launch
-            }
-
-            progressDialog.show()
-            try {
-                val res = ApiClient.getClient().getMedia(shortCode)
-                val code = res.code()
-                val jsonObject = res.body()
-
-                progressDialog.dismiss()
-                if (code == 200 && jsonObject != null) {
-                    binding.container.visibility = View.VISIBLE
-                    val data = jsonObject["data"].asJsonObject
-                    curMediaInfo = parseMediaOld(data)
-
-                    updateUI()
-                    saveRecord(shortCode)
-                    if (curMediaInfo?.mediaType == 8) {
-                        val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
-                            async {
-                                download(it)
-                            }
-                        }
-
-                        all.awaitAll()
-                    } else {
-                        download(curMediaInfo)
-                    }
-
-                    Toast.makeText(context,getString(R.string.download_finish),Toast.LENGTH_SHORT).show()
-                    mInterstitialAd?.show(requireActivity())
-                } else {
-                    handleError()
-
-                }
-
-            } catch (e: Exception) {
-                Log.e(TAG, e.message + "")
-                progressDialog.dismiss()
-                //fix crash
-                if (isAdded){
-                    Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
-                }
-
-            }
-
-
-        }
-
-
     }
 
 
@@ -446,7 +371,8 @@ class ShortCodeFragment : Fragment() {
                     updateUI()
                     saveRecord(pk)
                     download(curMediaInfo)
-                    Toast.makeText(context,getString(R.string.download_finish),Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
+                        .show()
                     mInterstitialAd?.show(requireActivity())
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
@@ -558,54 +484,6 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun parseMediaOld(jsonObject: JsonObject): MediaModel {
-        val mediaInfo = MediaModel()
-        val mediaType = jsonObject["media_type"].asInt
-        Log.v(TAG, "mediaType:$mediaType")
-        if (mediaType == 8) {
-
-            mediaInfo.pk = jsonObject["pk"].asString
-            mediaInfo.code = jsonObject["code"].asString
-            mediaInfo.mediaType = jsonObject["media_type"].asInt
-            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
-            mediaInfo.captionText = jsonObject["caption_text"].asString
-            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl =
-                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
-
-            val resources = jsonObject["resources"].asJsonArray
-            mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
-            for (res in resources) {
-
-                val resourceInfo = ResourceModel()
-                resourceInfo.pk = res.asJsonObject["pk"].asString
-                resourceInfo.mediaType = res.asJsonObject["media_type"].asInt
-                resourceInfo.thumbnailUrl = res.asJsonObject["thumbnail_url"].asString
-                resourceInfo.videoUrl = res.asJsonObject.getNullable("video_url")?.asString
-                mediaInfo.resources.add(resourceInfo)
-            }
-            if (resources.size() > 0) {
-                mediaInfo.thumbnailUrl = resources[0].asJsonObject["thumbnail_url"].asString
-            }
-
-        } else if (mediaType == 1 || mediaType == 2) {
-
-
-            mediaInfo.pk = jsonObject["pk"].asString
-            mediaInfo.code = jsonObject["code"].asString
-            mediaInfo.mediaType = jsonObject["media_type"].asInt
-            mediaInfo.thumbnailUrl = jsonObject["thumbnail_url"].asString
-            mediaInfo.videoUrl = jsonObject.getNullable("video_url")?.asString
-            mediaInfo.captionText = jsonObject.getNullable("caption_text")?.asString
-            mediaInfo.username = jsonObject["user"].asJsonObject["username"].asString
-            mediaInfo.profilePicUrl =
-                jsonObject["user"].asJsonObject.getNullable("profile_pic_url")?.asString
-
-        }
-
-        return mediaInfo
-
-    }
 
     private fun parseStory(jsonObject: JsonObject): MediaModel {
         val mediaModel = MediaModel()
