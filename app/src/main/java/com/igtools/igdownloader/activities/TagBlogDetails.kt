@@ -204,7 +204,8 @@ class TagBlogDetails : AppCompatActivity() {
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-                map["Cookie"] = Urls.Cookie
+                val random = (0..2).random()
+                map["Cookie"] = Urls.Cookies[random]
                 val cookie = ShareUtils.getData("cookie")
                 if (cookie != null && cookie.contains("sessionid")) {
                     map["Cookie"] = cookie

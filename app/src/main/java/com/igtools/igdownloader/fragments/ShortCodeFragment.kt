@@ -14,7 +14,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
-import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -31,14 +30,11 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.google.android.gms.dynamic.IFragmentWrapper
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.igdownloader.R
 import com.igtools.igdownloader.activities.BlogDetailsActivity
-import com.igtools.igdownloader.activities.VideoActivity
 import com.igtools.igdownloader.activities.WebActivity
-import com.igtools.igdownloader.adapter.MultiTypeAdapter
 import com.igtools.igdownloader.api.okhttp.Urls
 import com.igtools.igdownloader.api.retrofit.ApiClient
 import com.igtools.igdownloader.databinding.FragmentShortCodeBinding
@@ -49,19 +45,14 @@ import com.igtools.igdownloader.models.ResourceModel
 import com.igtools.igdownloader.room.RecordDB
 import com.igtools.igdownloader.utils.*
 import com.igtools.igdownloader.widgets.dialog.BottomDialog
-import com.youth.banner.indicator.CircleIndicator
 import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.*
-import okhttp3.Dispatcher
 import okhttp3.ResponseBody
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
-import tv.danmaku.ijk.media.player.MediaInfo
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.util.*
-import kotlin.collections.HashMap
 
 
 /**
@@ -165,8 +156,7 @@ class ShortCodeFragment : Fragment() {
             if (cookie == null) {
                 bottomDialog.show()
             } else {
-                val shortCode = getShortCode()
-                getStoryData(shortCode)
+                getStoryData()
             }
 
         } else {
@@ -272,6 +262,10 @@ class ShortCodeFragment : Fragment() {
     private fun getMediaData() {
 
         val shortCode = getShortCode()
+        if (shortCode == null){
+            Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+            return
+        }
         lifecycleScope.launch {
             //检查是否已存在
             val record = RecordDB.getInstance().recordDao().findById(shortCode)
@@ -287,7 +281,8 @@ class ShortCodeFragment : Fragment() {
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-                map["Cookie"] = Urls.Cookie
+                val random = (0..2).random()
+                map["Cookie"] = Urls.Cookies[random]
                 val cookie = ShareUtils.getData("cookie")
                 if (cookie != null && cookie.contains("sessionid")) {
                     map["Cookie"] = cookie
@@ -340,8 +335,12 @@ class ShortCodeFragment : Fragment() {
     /**
      * 获取story
      */
-    private fun getStoryData(pk: String) {
-
+    private fun getStoryData() {
+        val pk = getShortCode()
+        if (pk == null){
+            Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+            return
+        }
         lifecycleScope.launch {
             //检查是否已存在
             val record = RecordDB.getInstance().recordDao().findById(pk)
@@ -594,13 +593,13 @@ class ShortCodeFragment : Fragment() {
         }
     }
 
-    private fun getShortCode(): String {
-        var shortCode = ""
+    private fun getShortCode(): String? {
+        val shortCode: String?
         val url = binding.etShortcode.text.toString()
-        if (!url.contains("story")) {
-            shortCode = UrlUtils.extractMedia(url)
+        shortCode = if (!url.contains("story")) {
+            UrlUtils.extractMedia(url)
         } else {
-            shortCode = UrlUtils.extractStory(url)
+            UrlUtils.extractStory(url)
         }
         return shortCode
     }

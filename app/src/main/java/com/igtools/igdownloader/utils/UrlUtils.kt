@@ -8,15 +8,21 @@ object UrlUtils {
 
     val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 
-    fun extractMedia(url:String):String{
+    fun extractMedia(url:String):String?{
 
         val newurl = URL(url)
-        return newurl.path.split("/")[2]
+        if (newurl.path.split("/").size>2){
+            return newurl.path.split("/")[2]
+        }
+        return null
     }
 
-    fun extractStory(url:String):String{
+    fun extractStory(url:String):String?{
         val newurl = URL(url)
-        return newurl.path.split("/")[3]
+        if (newurl.path.split("/").size>3){
+            return newurl.path.split("/")[3]
+        }
+        return null
     }
 
     fun code2pk(code:String):Long{
