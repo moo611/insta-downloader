@@ -294,7 +294,7 @@ class ShortCodeFragment : Fragment() {
                 map2["shortcode"] = shortCode
 
                 val res = ApiClient.getClient()
-                    .getMediaData(Urls.MEDIA_INFO, map, Urls.QUERY_HASH, gson.toJson(map2))
+                    .getMediaData(Urls.GRAPH_QL, map, Urls.QUERY_HASH, gson.toJson(map2))
                 val code = res.code()
                 val jsonObject = res.body()
                 progressDialog.dismiss()
@@ -359,7 +359,7 @@ class ShortCodeFragment : Fragment() {
                 map["Cookie"] = cookie!!
                 map["User-Agent"] = Urls.USER_AGENT
 
-                val url = Urls.STORY_INFO + "/media/" + pk + "/info"
+                val url = Urls.PRIVATE_API + "/media/" + pk + "/info"
                 val res = ApiClient.getClient()
                     .getStoryData(url, map)
                 val code = res.code()

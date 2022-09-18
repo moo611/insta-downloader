@@ -2,30 +2,10 @@ package com.igtools.videodownloader.api.okhttp;
 
 public class Urls {
 
-    public static String BASE_URL_PY = "http://192.168.31.54:3000";
-
-    //public static String BASE_URL_PY = "http://192.168.100.38:3000";
-
-    //public static String BASE_URL_PY = "http://35.90.136.197:3000";
-
-    public static String BASE_URL_JAVA = "http://192.168.100.209:8080";
-
-    public static String SHORT_CODE = BASE_URL_PY + "/api/mediainfo";
-
-    public static String USER_NAME = BASE_URL_PY + "/api/userinfo";
-
-    public static String USER_TAG = BASE_URL_PY + "/api/taginfo";
-
-    public static String LOGIN = BASE_URL_JAVA + "/auth/login";
-
-    public static String SIGN_UP = BASE_URL_JAVA + "/auth/signup";
-
-    public static String SEND_CODE = BASE_URL_JAVA + "/auth/code";
-
 
     public static String USER_INFO = "https://i.instagram.com/api/v1/users/web_profile_info/";
 
-    public static String USER_INFO_MORE = "https://www.instagram.com/graphql/query/";
+    public static String GRAPH_QL = "https://www.instagram.com/graphql/query/";
 
     public static String USER_AGENT = "Mozilla/5.0 (Linux; Android 10; SM-G973F Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/86.0.4240.198 Mobile Safari/537.36 Instagram 166.1.0.42.245 Android (29/10; 420dpi; 1080x2042; samsung; SM-G973F; beyond1; exynos9820; en_GB; 256099204)";
 
@@ -33,13 +13,11 @@ public class Urls {
 
     public static String QUERY_HASH_USER = "69cba40317214236af40e7efa697781d";
 
-    public static String MEDIA_INFO = "https://www.instagram.com/graphql/query/";
-
-    public static String STORY_INFO = "https://i.instagram.com/api/v1";
+    public static String PRIVATE_API = "https://i.instagram.com/api/v1";
 
     public static String TAG_INFO = "https://i.instagram.com/api/v1/tags/web_info/";
 
-    public static String TAG_INFO_MORE = "https://i.instagram.com/api/v1";
+
     //1.moo61147 2.moo611534 3.moo61111(x)4.moo61143 5.moo61123
     public static String[] Cookies = {
             "ig_did=A2BE5747-4C82-4218-8674-0EFCC56660A7; ig_nrcb=1; mid=YyHECgABAAF-7KdHOI_jASsNSWED; csrftoken=jzifji7XlGWxOofURjQY4R3c7VdwyMEj; ds_user_id=55111971277; sessionid=55111971277%3AwXAETLKBa9N6Yk%3A24%3AAYeCFZLdNy61DKPcb6d9DEqmGsHTuIX8rLZqPMgXlQ; dpr=3; datr=UsQhYzz7SZjp4DQ3m-O4EDJ9; rur=\"NAO\\05455111971277\\0541694693343:01f710867a08bcaf48bca48ed3dc705f79a46358955020570b860d5aa53b33821cd86e24\"",

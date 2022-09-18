@@ -285,7 +285,7 @@ class TagFragment : Fragment() {
                 queries["surface"] = "grid"
                 queries["tab"] = "recent"
                 val tag = binding.etTag.text.toString()
-                val url = Urls.TAG_INFO_MORE + "/tags/" + tag + "/sections/"
+                val url = Urls.PRIVATE_API + "/tags/" + tag + "/sections/"
                 val res = ApiClient.getClient3().getMoreTagData(url, map, queries)
                 val code = res.code()
 

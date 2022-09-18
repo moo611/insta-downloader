@@ -218,7 +218,7 @@ class TagBlogDetails : AppCompatActivity() {
                 map2["shortcode"] = code!!
 
                 val res = ApiClient.getClient()
-                    .getMediaData(Urls.MEDIA_INFO, map, Urls.QUERY_HASH, gson.toJson(map2))
+                    .getMediaData(Urls.GRAPH_QL, map, Urls.QUERY_HASH, gson.toJson(map2))
                 val code = res.code()
                 val jsonObject = res.body()
                 progressDialog.dismiss()

@@ -249,10 +249,10 @@ class UserFragment : Fragment() {
                 binding.progressBottom.visibility = View.VISIBLE
                 val variables:HashMap<String,Any> = HashMap()
                 variables["id"] = userId
-                variables["first"] = 12
+                variables["first"] = 24
                 variables["after"] = cursor
                 //Log.v(TAG,"variables:"+variables)
-                val res = ApiClient.getClient2().getUserMediaMore(Urls.USER_INFO_MORE,map,Urls.QUERY_HASH_USER,gson.toJson(variables))
+                val res = ApiClient.getClient2().getUserMediaMore(Urls.GRAPH_QL,map,Urls.QUERY_HASH_USER,gson.toJson(variables))
                 val code = res.code()
                 val jsonObject = res.body()
                 if (code ==200 && jsonObject!=null){
