@@ -281,7 +281,7 @@ class ShortCodeFragment : Fragment() {
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-                val random = (0..2).random()
+                val random = (0..4).random()
                 map["Cookie"] = Urls.Cookies[random]
                 val cookie = ShareUtils.getData("cookie")
                 if (cookie != null && cookie.contains("sessionid")) {
@@ -502,6 +502,18 @@ class ShortCodeFragment : Fragment() {
                 mediaModel.thumbnailUrl = candidates[size - 1].asJsonObject["url"].asString
             }
             mediaModel.pk = item["pk"].asString
+
+            if (mediaModel.mediaType == 2){
+                val video_versions = item["video_versions"].asJsonArray
+                if (video_versions.size()>0){
+                    mediaModel.videoUrl = video_versions[0].asJsonObject["url"].asString
+                }
+            }
+
+            if (jsonObject.has("caption")){
+                mediaModel.captionText = jsonObject["caption"].asJsonObject["text"].asString
+            }
+
         }
 
         return mediaModel

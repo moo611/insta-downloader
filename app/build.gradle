@@ -11,7 +11,7 @@ apply from: "../utils.gradle"
 
 android {
     compileSdk 31
-
+    aaptOptions { cruncherEnabled = false }
     defaultConfig {
         applicationId "com.igtools.videodownloader"
         minSdk 21

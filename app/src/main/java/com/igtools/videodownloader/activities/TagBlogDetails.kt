@@ -48,9 +48,11 @@ class TagBlogDetails : AppCompatActivity() {
 
     lateinit var binding:ActivityTagBlogDetailsBinding
     lateinit var progressDialog: ProgressDialog
+    lateinit var progressDialog2: ProgressDialog
     var mediaInfo = MediaModel()
     var isBack = false
     lateinit var adapter: MultiTypeAdapter
+    var code:String?=null
     var mInterstitialAd: InterstitialAd? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,15 +68,12 @@ class TagBlogDetails : AppCompatActivity() {
         initViews()
         setListeners()
 
-        if (intent.extras?.getString("content") != null) {
-            binding.btnDownload.visibility = View.INVISIBLE
-            getDataFromServer(intent.extras!!.getString("content")!!)
-
-        }
         if (intent.extras!!.getBoolean("flag")) {
             binding.btnDownload.visibility = View.VISIBLE
+            getDataFromServer()
         } else {
             binding.btnDownload.visibility = View.INVISIBLE
+            getDataFromLocal()
         }
     }
 
@@ -129,6 +128,9 @@ class TagBlogDetails : AppCompatActivity() {
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
 
+        progressDialog2 = ProgressDialog(this)
+        progressDialog2.setMessage(getString(R.string.downloading))
+        progressDialog2.setCancelable(false)
 
     }
 
@@ -136,12 +138,12 @@ class TagBlogDetails : AppCompatActivity() {
 
         binding.btnDownload.setOnClickListener {
             lifecycleScope.launch {
-                val oldRecord = RecordDB.getInstance().recordDao().findById(mediaInfo.code)
+                val oldRecord = RecordDB.getInstance().recordDao().findById(code!!)
                 if (oldRecord != null) {
                     Toast.makeText(this@TagBlogDetails, getString(R.string.exist), Toast.LENGTH_SHORT).show()
                     return@launch
                 }
-                progressDialog.show()
+                progressDialog2.show()
                 if (mediaInfo.mediaType==8){
                     val all: List<Deferred<Unit>> = mediaInfo.resources.map {
                         async {
@@ -159,7 +161,7 @@ class TagBlogDetails : AppCompatActivity() {
                     Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
                 RecordDB.getInstance().recordDao().insert(record)
 
-                progressDialog.dismiss()
+                progressDialog2.dismiss()
                 isBack = false
                 mInterstitialAd?.show(this@TagBlogDetails)
 
@@ -177,25 +179,27 @@ class TagBlogDetails : AppCompatActivity() {
         }
     }
 
-    private fun getDataFromServer(content:String){
-        mediaInfo = gson.fromJson(content, MediaModel::class.java)
+    private fun getDataFromLocal(){
+        val content = intent.extras!!.getString("content")
+        mediaInfo = gson.fromJson(content,MediaModel::class.java)
+        code = mediaInfo.code
+    }
 
+    private fun getDataFromServer(){
+        code = intent.extras!!.getString("code")
         getMedia()
 
     }
 
     private fun getMedia() {
-        val shortCode = mediaInfo.code
+
         lifecycleScope.launch {
             //检查是否已存在
-            val record = RecordDB.getInstance().recordDao().findById(shortCode)
+            val record = RecordDB.getInstance().recordDao().findById(code!!)
 
             if (record != null) {
                 mediaInfo = gson.fromJson(record.content, MediaModel::class.java)
                 updateUI()
-                Toast.makeText(this@TagBlogDetails, getString(R.string.exist), Toast.LENGTH_SHORT)
-                    .show()
-
                 return@launch
             }
             progressDialog.show()
@@ -211,7 +215,7 @@ class TagBlogDetails : AppCompatActivity() {
                 map["User-Agent"] = Urls.USER_AGENT
 
                 val map2: HashMap<String, String> = HashMap()
-                map2["shortcode"] = shortCode
+                map2["shortcode"] = code!!
 
                 val res = ApiClient.getClient()
                     .getMediaData(Urls.MEDIA_INFO, map, Urls.QUERY_HASH, gson.toJson(map2))
@@ -220,7 +224,6 @@ class TagBlogDetails : AppCompatActivity() {
                 progressDialog.dismiss()
                 if (code == 200 && jsonObject != null) {
                     mediaInfo = parseMedia(jsonObject)
-                    saveRecord(shortCode)
                     updateUI()
 
                 } else {
@@ -289,14 +292,6 @@ class TagBlogDetails : AppCompatActivity() {
         }
 
         return mediaModel
-
-    }
-
-    private fun saveRecord(id: String) {
-        lifecycleScope.launch {
-            val record = Record(id, gson.toJson(mediaInfo), System.currentTimeMillis())
-            RecordDB.getInstance().recordDao().insert(record)
-        }
 
     }
 

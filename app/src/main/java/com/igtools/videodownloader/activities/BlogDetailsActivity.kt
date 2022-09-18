@@ -49,7 +49,7 @@ class BlogDetailsActivity : AppCompatActivity() {
     lateinit var progressDialog: ProgressDialog
     var isBack = false
     var mediaInfo = MediaModel()
-
+    var code:String?=null
     var mInterstitialAd: InterstitialAd? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,16 +67,12 @@ class BlogDetailsActivity : AppCompatActivity() {
         initViews()
         setListeners()
 
-        if (intent.extras?.getString("content") != null) {
-            binding.btnDownload.visibility = View.INVISIBLE
-            getDataFromLocal(intent.extras!!.getString("content")!!)
-
-        }
         if (intent.extras!!.getBoolean("flag")) {
             binding.btnDownload.visibility = View.VISIBLE
         } else {
             binding.btnDownload.visibility = View.INVISIBLE
         }
+        getDataFromLocal()
 
     }
 
@@ -143,7 +139,7 @@ class BlogDetailsActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
 
-                val oldRecord = RecordDB.getInstance().recordDao().findById(mediaInfo.code)
+                val oldRecord = RecordDB.getInstance().recordDao().findById(code!!)
                 if (oldRecord != null) {
                     Toast.makeText(this@BlogDetailsActivity, getString(R.string.exist), Toast.LENGTH_SHORT).show()
                     return@launch
@@ -198,9 +194,10 @@ class BlogDetailsActivity : AppCompatActivity() {
     }
 
 
-    private fun getDataFromLocal(content: String) {
-
+    private fun getDataFromLocal() {
+        val content = intent.extras!!.getString("content")!!
         mediaInfo = gson.fromJson(content, MediaModel::class.java)
+        code = mediaInfo.code
         if (mediaInfo.mediaType == 8) {
 
             if (mediaInfo.resources.size > 0) {

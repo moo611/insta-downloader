@@ -57,7 +57,7 @@ class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewH
                 //tag的结果没有resources，因此需要调接口重新获取子集
                 c.startActivity(
                     Intent(c, TagBlogDetails::class.java)
-                        .putExtra("content", mediaModel).putExtra("flag", true)
+                        .putExtra("code", blogs[position].code).putExtra("flag", true)
                 )
             }else{
                 c.startActivity(
