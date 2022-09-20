@@ -34,10 +34,22 @@ android {
         enabled = true
     }
 
+    signingConfigs {// 自动化打包配置
+        myconfig {// 线上环境
+            keyAlias 'key0'
+            keyPassword '123456'
+            storeFile file('igvideo')
+            storePassword '123456'
+        }
+
+
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.myconfig
         }
     }
     compileOptions {
