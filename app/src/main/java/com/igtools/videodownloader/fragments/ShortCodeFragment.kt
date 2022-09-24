@@ -281,7 +281,8 @@ class ShortCodeFragment : Fragment() {
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-                val random = (0..4).random()
+                val size = Urls.Cookies.size
+                val random = (0 until size).random()
                 map["Cookie"] = Urls.Cookies[random]
                 val cookie = ShareUtils.getData("cookie")
                 if (cookie != null && cookie.contains("sessionid")) {
