@@ -54,6 +54,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     }
 
     override fun initView() {
+        initAds()
         mBinding.btnDownload.isEnabled = false
         adapter = MultiTypeAdapter(this, mediaInfo.resources)
         mBinding.banner
@@ -72,7 +73,8 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         }
 
         mBinding.btnDownload.setOnClickListener {
-
+            isBack = false
+            mInterstitialAd?.show(this@BlogDetailsActivity)
 
             lifecycleScope.launch {
 
@@ -104,8 +106,6 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog.dismiss()
-                isBack = false
-                mInterstitialAd?.show(this@BlogDetailsActivity)
 
                 Toast.makeText(
                     this@BlogDetailsActivity,
@@ -142,7 +142,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
 
-        InterstitialAd.load(this, "ca-app-pub-8609866682652024/8199213476", adRequest,
+        InterstitialAd.load(this, "ca-app-pub-8609866682652024/5709188020", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)

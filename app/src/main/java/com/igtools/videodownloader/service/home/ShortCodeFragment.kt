@@ -77,6 +77,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     }
 
     override fun initView() {
+        initAds()
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
@@ -208,7 +209,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
         //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/8844989426", adRequest,
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/3456228078", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)
@@ -303,8 +304,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 progressDialog.dismiss()
                 if (code == 200 && jsonObject != null) {
                     curMediaInfo = parseMedia(jsonObject)
-                    saveRecord(shortCode)
+                    mInterstitialAd?.show(requireActivity())
                     updateUI()
+                    saveRecord(shortCode)
+
                     if (curMediaInfo?.mediaType == 8) {
                         val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
                             async {
@@ -318,7 +321,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     }
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
-                    mInterstitialAd?.show(requireActivity())
 
                     getRecentData()
 
@@ -373,13 +375,13 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 progressDialog.dismiss()
                 if (code == 200 && jsonObject != null) {
                     curMediaInfo = parseStory(jsonObject)
-
+                    mInterstitialAd?.show(requireActivity())
                     updateUI()
                     saveRecord(pk)
                     download(curMediaInfo)
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
-                    mInterstitialAd?.show(requireActivity())
+
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(

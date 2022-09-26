@@ -57,7 +57,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
     val LOGIN_REQ = 1000
 
     override fun initView() {
-
+        initAds()
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
@@ -154,7 +154,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
         //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/2208520199", adRequest,
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/3446573494", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)
@@ -182,6 +182,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
         if (loadingMore) {
             return
         }
+        mInterstitialAd?.show(requireActivity())
         progressDialog.show()
         clearData()
         lifecycleScope.launch {

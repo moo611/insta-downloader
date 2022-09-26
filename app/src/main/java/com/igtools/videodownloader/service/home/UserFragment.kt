@@ -137,14 +137,14 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     }
 
     override fun initData() {
-
+        initAds()
     }
 
 
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
         //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/2974806950", adRequest,
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/1157367794", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)
@@ -201,6 +201,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
+                    mInterstitialAd?.show(requireActivity())
                 }else{
                     Log.e(TAG, res.errorBody()?.string()+"")
                     Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()

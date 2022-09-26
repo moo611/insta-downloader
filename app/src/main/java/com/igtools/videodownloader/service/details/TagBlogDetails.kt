@@ -59,6 +59,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
     }
 
     override fun initView() {
+        initAds()
         adapter = MultiTypeAdapter(this, mediaInfo.resources)
         mBinding.banner
             .addBannerLifecycleObserver(this)
@@ -76,6 +77,8 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
 
         mBinding.btnDownload.setOnClickListener {
+            isBack = false
+            mInterstitialAd?.show(this@TagBlogDetails)
             lifecycleScope.launch {
                 val oldRecord = RecordDB.getInstance().recordDao().findById(code!!)
                 if (oldRecord != null) {
@@ -101,9 +104,6 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog2.dismiss()
-                isBack = false
-                mInterstitialAd?.show(this@TagBlogDetails)
-
                 Toast.makeText(
                     this@TagBlogDetails,
                     getString(R.string.download_finish),
@@ -132,7 +132,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
     private fun initAds(){
         val adRequest = AdRequest.Builder().build();
 
-        InterstitialAd.load(this, "ca-app-pub-8609866682652024/8199213476", adRequest,
+        InterstitialAd.load(this, "ca-app-pub-8609866682652024/5709188020", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)

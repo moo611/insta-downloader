@@ -66,7 +66,7 @@
                 android:layout_gravity="center_horizontal"
                 android:visibility="gone"
                 ads:adSize="MEDIUM_RECTANGLE"
-                ads:adUnitId="ca-app-pub-8609866682652024/6724687573" />
+                ads:adUnitId="ca-app-pub-8609866682652024/6273963100" />
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/container"
