@@ -42,5 +42,6 @@
     <string name="long_text2">Lưu ý: Khi tải video và truyện riêng tư, tài khoản đăng nhập phải là tài khoản mà bạn và người đó theo dõi nhau, việc bạn tải xuống sẽ không để lại dấu vết trên hồ sơ truy cập tài khoản của bên kia.</string>
     <string name="long_text3">Chúng tôi không thu thập thông tin cá nhân của bạn. instagram có thể cấm tài khoản của bạn nên không sử dụng tài khoản chính của bạn</string>
     <string name="parse_error">Phân tích cú pháp ngoại lệ</string>
+    <string name="recent_download">Recent Download</string>
 
 </resources>

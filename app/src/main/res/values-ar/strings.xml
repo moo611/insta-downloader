@@ -42,4 +42,5 @@
     <string name="long_text2">ملاحظة: عند تنزيل مقاطع فيديو وقصص خاصة ، يجب أن يكون حساب تسجيل الدخول هو الحساب الذي تتابعك أنت والشخص الآخر. لن يترك التنزيل آثارًا على سجلات الوصول إلى حساب الطرف الآخر.</string>
     <string name="long_text3">نحن لا نجمع معلوماتك الشخصية. قد يحظر instagram حسابك ، لذا لا تستخدم حسابك الرئيسي</string>
     <string name="parse_error">استثناء التحليل</string>
+    <string name="recent_download">Recent Download</string>
 </resources>

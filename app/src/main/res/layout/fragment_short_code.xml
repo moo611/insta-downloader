@@ -12,6 +12,7 @@
         android:layout_height="match_parent">
 
         <LinearLayout
+            android:background="#f0f0f0"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -100,7 +101,7 @@
                         android:background="#80999999"
                         android:gravity="center_vertical">
 
-                        <ImageView
+                        <com.igtools.videodownloader.widgets.RoundImageView
                             android:id="@+id/avatar"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
@@ -139,7 +140,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
-                        android:text="Recent download"
+                        android:text="@string/recent_download"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 

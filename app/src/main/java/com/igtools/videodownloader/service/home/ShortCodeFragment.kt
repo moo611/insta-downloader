@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -63,7 +64,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     lateinit var circularProgressDrawable: CircularProgressDrawable
     lateinit var glideListener: RequestListener<Drawable>
     lateinit var bottomDialog: BottomDialog
-
+    lateinit var recentAdapter: RecentAdapter
     var TAG = "ShortCodeFragment"
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
@@ -184,7 +185,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     }
 
     override fun initData() {
-
+        recentAdapter = RecentAdapter(requireContext())
+        mBinding.rv.adapter = recentAdapter
+        mBinding.rv.layoutManager = GridLayoutManager(requireContext(),4)
+        getRecentData()
     }
 
     private fun initAds() {
@@ -523,15 +527,22 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         }
     }
 
-    private fun getLocalData(){
-
+    private fun getRecentData(){
+        val medias:ArrayList<MediaModel> = ArrayList()
+        var records: ArrayList<Record>
         lifecycleScope.launch {
+            records = RecordDB.getInstance().recordDao().recent() as ArrayList<Record>
+            Log.v(TAG, records.size.toString())
+            for (record in records) {
 
+                val mediaModel = gson.fromJson(record.content, MediaModel::class.java)
+                medias.add(mediaModel)
 
-
+            }
+            recentAdapter.setDatas(medias)
+            
         }
-
-
+        
     }
 
 

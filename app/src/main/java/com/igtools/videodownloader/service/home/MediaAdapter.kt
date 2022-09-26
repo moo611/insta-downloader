@@ -40,7 +40,7 @@ class MediaAdapter(var c: Context) : RecyclerView.Adapter<MediaAdapter.BlogViewH
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BlogViewHolder {
-        val v = LayoutInflater.from(c).inflate(R.layout.item_blog, parent, false)
+        val v = LayoutInflater.from(c).inflate(R.layout.item_media, parent, false)
         return BlogViewHolder(v)
     }
 

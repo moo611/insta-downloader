@@ -12,6 +12,9 @@ interface RecordDao {
     @Query("SELECT * FROM Record ORDER BY created_time DESC")
     suspend fun all(): List<Record>
 
+    @Query("SELECT * FROM Record ORDER BY created_time DESC limit 8")
+    suspend fun recent(): List<Record>
+
     @Insert
     suspend fun insert(record: Record?)
 

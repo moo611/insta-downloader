@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
+        <com.igtools.videodownloader.widgets.RoundImageView
             android:id="@+id/img_avatar"
             android:layout_marginStart="12dp"
             android:layout_width="30dp"
