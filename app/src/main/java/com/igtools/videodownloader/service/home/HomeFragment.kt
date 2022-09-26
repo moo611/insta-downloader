@@ -17,7 +17,7 @@ import com.igtools.videodownloader.databinding.FragmentHomeBinding
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     lateinit var mAdapter: ViewPagerAdapter
-    lateinit var binding:FragmentHomeBinding
+    
     val TAG="HomeFragment"
 
 
@@ -34,9 +34,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         titles.add(getString(R.string.vp_shortcode))
         titles.add(getString(R.string.vp_username))
         mAdapter = ViewPagerAdapter(childFragmentManager,titles,fragments)
-        binding.viewpager.adapter = mAdapter
+        mBinding.viewpager.adapter = mAdapter
 
-        binding.tabLayout.setupWithViewPager(binding.viewpager)
+        mBinding.tabLayout.setupWithViewPager(mBinding.viewpager)
     }
 
     override fun initData() {

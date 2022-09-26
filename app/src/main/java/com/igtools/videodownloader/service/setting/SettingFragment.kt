@@ -27,17 +27,15 @@ import com.igtools.videodownloader.utils.ShareUtils
  */
 class SettingFragment : BaseFragment<FragmentSettingBinding>() {
 
-    lateinit var binding: FragmentSettingBinding
-
-
+    
     override fun onResume() {
         super.onResume()
 
         val cookie = ShareUtils.getData("cookie")
         if (cookie == null){
-            binding.llLogout.visibility = View.INVISIBLE
+            mBinding.llLogout.visibility = View.INVISIBLE
         }else{
-            binding.llLogout.visibility = View.VISIBLE
+            mBinding.llLogout.visibility = View.VISIBLE
         }
 
     }
@@ -65,20 +63,20 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
     }
 
     override fun initView() {
-        binding.tvVersion.text = BuildConfig.VERSION_NAME
-        binding.llShare.setOnClickListener {
+        mBinding.tvVersion.text = BuildConfig.VERSION_NAME
+        mBinding.llShare.setOnClickListener {
 
             FileUtils.share(requireContext(), "app")
 
         }
-        binding.llLogout.setOnClickListener {
+        mBinding.llLogout.setOnClickListener {
             ShareUtils.getEdit().remove("cookie").apply()
             clearCookies(requireContext())
-            binding.llLogout.visibility = View.INVISIBLE
+            mBinding.llLogout.visibility = View.INVISIBLE
             Toast.makeText(requireContext(),getString(R.string.log_out),Toast.LENGTH_SHORT).show()
         }
 
-        binding.mySwitch.setOnCheckedChangeListener { _, b -> ShareUtils.putData("isAuto",b.toString()) }
+        mBinding.mySwitch.setOnCheckedChangeListener { _, b -> ShareUtils.putData("isAuto",b.toString()) }
 
     }
 

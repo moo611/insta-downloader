@@ -2,16 +2,12 @@ package com.igtools.videodownloader.service.home
 
 import android.app.ProgressDialog
 import android.content.Intent
-import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +16,6 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.service.web.WebActivity
@@ -44,9 +39,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
 
     lateinit var layoutManager: GridLayoutManager
-    lateinit var adapter: BlogAdapter2
+    lateinit var adapter: MediaAdapter
     lateinit var progressDialog: ProgressDialog
-    lateinit var binding: FragmentUserBinding
+    
     lateinit var bottomDialog:BottomDialog
     var cursor = ""
     var loadingMore = false
@@ -63,10 +58,10 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
 
-        adapter = BlogAdapter2(requireContext())
+        adapter = MediaAdapter(requireContext())
         layoutManager = GridLayoutManager(context, 3)
-        binding.rv.adapter = adapter
-        binding.rv.layoutManager = layoutManager
+        mBinding.rv.adapter = adapter
+        mBinding.rv.layoutManager = layoutManager
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return 1
@@ -83,14 +78,14 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         }
         bottomDialog.setContent(bottomView)
 
-        binding.btnSearch.setOnClickListener {
-            binding.etUsername.clearFocus()
-            KeyboardUtils.closeKeybord(binding.etUsername, context)
-            if (binding.etUsername.text.toString().isEmpty()){
+        mBinding.btnSearch.setOnClickListener {
+            mBinding.etUsername.clearFocus()
+            KeyboardUtils.closeKeybord(mBinding.etUsername, context)
+            if (mBinding.etUsername.text.toString().isEmpty()){
                 Toast.makeText(requireContext(),getString(R.string.empty_username),Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            //refresh(binding.etUsername.text.toString())
+            //refresh(mBinding.etUsername.text.toString())
             val cookie = ShareUtils.getData("cookie")
             if (cookie == null){
                 bottomDialog.show()
@@ -100,19 +95,19 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
         }
 
-        binding.etUsername.addTextChangedListener(object : TextWatcher {
+        mBinding.etUsername.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
-                if (binding.etUsername.text.isNotEmpty()) {
+                if (mBinding.etUsername.text.isNotEmpty()) {
 
-                    binding.imgClear.visibility = View.VISIBLE
+                    mBinding.imgClear.visibility = View.VISIBLE
                 } else {
 
-                    binding.imgClear.visibility = View.INVISIBLE
+                    mBinding.imgClear.visibility = View.INVISIBLE
                 }
 
             }
@@ -123,10 +118,10 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
         })
 
-        binding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        mBinding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!binding.rv.canScrollVertically(1) && dy > 0) {
+                if (!mBinding.rv.canScrollVertically(1) && dy > 0) {
                     //滑动到底部
 
                     getDataMore()
@@ -136,8 +131,8 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             }
         })
 
-        binding.imgClear.setOnClickListener {
-            binding.etUsername.setText("")
+        mBinding.imgClear.setOnClickListener {
+            mBinding.etUsername.setText("")
         }
     }
 
@@ -184,7 +179,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         lifecycleScope.launch {
             try {
                 progressDialog.show()
-                val res = ApiClient.getClient2().getUserMedia(Urls.USER_INFO,map,binding.etUsername.text.toString())
+                val res = ApiClient.getClient2().getUserMedia(Urls.USER_INFO,map,mBinding.etUsername.text.toString())
                 val code = res.code()
                 val jsonObject = res.body()
                 if (code==200 && jsonObject!=null){
@@ -236,7 +231,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         map["User-Agent"] = Urls.USER_AGENT
         lifecycleScope.launch {
             try {
-                binding.progressBottom.visibility = View.VISIBLE
+                mBinding.progressBottom.visibility = View.VISIBLE
                 val variables:HashMap<String,Any> = HashMap()
                 variables["id"] = userId
                 variables["first"] = 24
@@ -267,11 +262,11 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 }
 
                 loadingMore = false
-                binding.progressBottom.visibility = View.INVISIBLE
+                mBinding.progressBottom.visibility = View.INVISIBLE
             }catch (e:Exception){
                 Log.e(TAG, e.message + "")
                 loadingMore = false
-                binding.progressBottom.visibility = View.INVISIBLE
+                mBinding.progressBottom.visibility = View.INVISIBLE
                 Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
 

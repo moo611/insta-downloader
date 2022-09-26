@@ -16,9 +16,9 @@ import com.igtools.videodownloader.service.details.BlogDetailsActivity
 import com.igtools.videodownloader.service.details.TagBlogDetails
 import com.igtools.videodownloader.models.MediaModel
 
-class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewHolder>() {
+class MediaAdapter(var c: Context) : RecyclerView.Adapter<MediaAdapter.BlogViewHolder>() {
 
-    var blogs: ArrayList<MediaModel> = ArrayList()
+    var medias: ArrayList<MediaModel> = ArrayList()
     val gson = Gson()
     var fromTag = false
     inner class BlogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -27,15 +27,15 @@ class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewH
         var imgPlayer: ImageView = itemView.findViewById(R.id.img_player)
     }
 
-    fun refresh(blogs: ArrayList<MediaModel>) {
-        this.blogs = blogs
+    fun refresh(medias: ArrayList<MediaModel>) {
+        this.medias = medias
         notifyDataSetChanged()
     }
 
-    fun loadMore(blogs: ArrayList<MediaModel>) {
-        val index = this.blogs.size
-        this.blogs.addAll(blogs)
-        notifyItemRangeInserted(index, blogs.size)
+    fun loadMore(medias: ArrayList<MediaModel>) {
+        val index = this.medias.size
+        this.medias.addAll(medias)
+        notifyItemRangeInserted(index, medias.size)
 
     }
 
@@ -46,18 +46,18 @@ class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewH
 
     override fun onBindViewHolder(holder: BlogViewHolder, position: Int) {
         Glide.with(c)
-            .load(blogs[position].thumbnailUrl)
+            .load(medias[position].thumbnailUrl)
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
             .into(holder.imgThumbnail)
 
         holder.itemView.setOnClickListener {
 
-            val mediaModel = gson.toJson(blogs[position])
+            val mediaModel = gson.toJson(medias[position])
             if (fromTag){
                 //tag的结果没有resources，因此需要调接口重新获取子集
                 c.startActivity(
                     Intent(c, TagBlogDetails::class.java)
-                        .putExtra("code", blogs[position].code).putExtra("flag", true)
+                        .putExtra("code", medias[position].code).putExtra("flag", true)
                 )
             }else{
                 c.startActivity(
@@ -68,7 +68,7 @@ class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewH
 
         }
 
-        val typename = blogs[position].mediaType
+        val typename = medias[position].mediaType
         if (typename == 8) {
             holder.imgCollections.visibility = View.VISIBLE
             holder.imgPlayer.visibility = View.INVISIBLE
@@ -85,7 +85,7 @@ class BlogAdapter2(var c: Context) : RecyclerView.Adapter<BlogAdapter2.BlogViewH
     }
 
     override fun getItemCount(): Int {
-        return blogs.size
+        return medias.size
     }
 
 }

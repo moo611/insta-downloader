@@ -2,16 +2,12 @@ package com.igtools.videodownloader.service.tag
 
 import android.app.ProgressDialog
 import android.content.Intent
-import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,11 +16,10 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.service.web.WebActivity
-import com.igtools.videodownloader.service.home.BlogAdapter2
+import com.igtools.videodownloader.service.home.MediaAdapter
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.databinding.FragmentTagBinding
@@ -43,8 +38,8 @@ import java.lang.Exception
  */
 class TagFragment : BaseFragment<FragmentTagBinding>() {
     lateinit var layoutManager: GridLayoutManager
-    lateinit var adapter: BlogAdapter2
-    lateinit var binding: FragmentTagBinding
+    lateinit var adapter: MediaAdapter
+    
     lateinit var progressDialog: ProgressDialog
     lateinit var bottomDialog: BottomDialog
 
@@ -66,11 +61,11 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
-        adapter = BlogAdapter2(requireContext())
+        adapter = MediaAdapter(requireContext())
         adapter.fromTag = true
         layoutManager = GridLayoutManager(context, 3)
-        binding.rv.adapter = adapter
-        binding.rv.layoutManager = layoutManager
+        mBinding.rv.adapter = adapter
+        mBinding.rv.layoutManager = layoutManager
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return 1
@@ -92,10 +87,10 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
         }
         bottomDialog.setContent(bottomView)
 
-        binding.btnSearch.setOnClickListener {
-            binding.etTag.clearFocus()
-            KeyboardUtils.closeKeybord(binding.etTag, context)
-            if (binding.etTag.text.toString().isEmpty()) {
+        mBinding.btnSearch.setOnClickListener {
+            mBinding.etTag.clearFocus()
+            KeyboardUtils.closeKeybord(mBinding.etTag, context)
+            if (mBinding.etTag.text.toString().isEmpty()) {
                 Toast.makeText(requireContext(), getString(R.string.empty_tag), Toast.LENGTH_SHORT)
                     .show()
                 return@setOnClickListener
@@ -104,24 +99,24 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
             if (cookie == null) {
                 bottomDialog.show()
             } else {
-                refresh(binding.etTag.text.toString())
+                refresh(mBinding.etTag.text.toString())
             }
 
         }
 
-        binding.etTag.addTextChangedListener(object : TextWatcher {
+        mBinding.etTag.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
-                if (binding.etTag.text.isNotEmpty()) {
+                if (mBinding.etTag.text.isNotEmpty()) {
 
-                    binding.imgClear.visibility = View.VISIBLE
+                    mBinding.imgClear.visibility = View.VISIBLE
                 } else {
 
-                    binding.imgClear.visibility = View.INVISIBLE
+                    mBinding.imgClear.visibility = View.INVISIBLE
                 }
 
             }
@@ -132,10 +127,10 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
 
         })
 
-        binding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        mBinding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!binding.rv.canScrollVertically(1) && dy > 0) {
+                if (!mBinding.rv.canScrollVertically(1) && dy > 0) {
                     //滑动到底部
 
                     loadMore()
@@ -145,9 +140,9 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
             }
         })
 
-        binding.imgClear.setOnClickListener {
+        mBinding.imgClear.setOnClickListener {
 
-            binding.etTag.setText("")
+            mBinding.etTag.setText("")
 
         }
     }
@@ -252,7 +247,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
             return
         }
         loadingMore = true
-        binding.progressBottom.visibility = View.VISIBLE
+        mBinding.progressBottom.visibility = View.VISIBLE
 
         lifecycleScope.launch {
 
@@ -273,7 +268,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
                 queries["include_persistent"] = 0
                 queries["surface"] = "grid"
                 queries["tab"] = "recent"
-                val tag = binding.etTag.text.toString()
+                val tag = mBinding.etTag.text.toString()
                 val url = Urls.PRIVATE_API + "/tags/" + tag + "/sections/"
                 val res = ApiClient.getClient3().getMoreTagData(url, map, queries)
                 val code = res.code()
@@ -306,11 +301,11 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
                 }
 
                 loadingMore = false
-                binding.progressBottom.visibility = View.INVISIBLE
+                mBinding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
                 Log.v(TAG, e.message + "")
                 loadingMore = false
-                binding.progressBottom.visibility = View.INVISIBLE
+                mBinding.progressBottom.visibility = View.INVISIBLE
                 Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
             }
 
@@ -382,7 +377,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
         if (requestCode == LOGIN_REQ) {
 
             if (resultCode == 200) {
-                refresh(binding.etTag.text.toString())
+                refresh(mBinding.etTag.text.toString())
 
             }
 

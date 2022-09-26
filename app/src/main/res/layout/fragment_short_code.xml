@@ -31,10 +31,10 @@
                     android:background="@drawable/bg_edit"
                     android:gravity="center_vertical|start"
                     android:hint="@string/search_hint"
-                    android:singleLine="true"
                     android:maxLines="1"
                     android:paddingLeft="12dp"
                     android:paddingRight="40dp"
+                    android:singleLine="true"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -59,26 +59,25 @@
                 android:textSize="16sp" />
 
             <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
-                android:visibility="gone"
                 android:id="@+id/adView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:visibility="gone"
                 ads:adSize="MEDIUM_RECTANGLE"
                 ads:adUnitId="ca-app-pub-8609866682652024/6724687573" />
 
             <androidx.cardview.widget.CardView
-                android:visibility="invisible"
-                android:id="@id/container"
-                app:cardCornerRadius="8dp"
+                android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:layout_margin="20dp">
+                android:layout_margin="10dp"
+                android:visibility="gone"
+                app:cardCornerRadius="8dp">
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    >
+                    android:layout_height="match_parent">
 
                     <ImageView
                         android:id="@+id/picture"
@@ -89,10 +88,11 @@
 
 
                     <ProgressBar
-                        android:layout_gravity="center"
                         android:id="@+id/progressbar"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
@@ -107,13 +107,13 @@
                             android:layout_marginLeft="12dp" />
 
                         <TextView
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:singleLine="true"
                             android:id="@+id/username"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:textColor="@color/white"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -124,30 +124,29 @@
 
 
             <androidx.cardview.widget.CardView
-                android:visibility="invisible"
-                android:id="@id/container"
-                app:cardCornerRadius="8dp"
+                android:id="@+id/container2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp">
+                android:layout_margin="10dp"
+                app:cardCornerRadius="8dp">
 
                 <LinearLayout
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_margin="10dp"
                         android:text="Recent download"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:textColor="@color/black"
+                        android:textSize="16sp" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
+                        android:layout_height="match_parent" />
 
 
                 </LinearLayout>

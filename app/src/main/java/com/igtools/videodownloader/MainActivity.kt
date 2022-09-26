@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import com.fagaia.farm.base.BaseActivity
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -32,19 +33,20 @@ import org.greenrobot.eventbus.EventBus
  * @Author: desong
  * @Date: 2022/7/21
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity<ActivityMainBinding>(){
     val TAG = "MainActivityTest"
-    lateinit var binding: ActivityMainBinding
+    
     var imageViews: MutableList<ImageView> = ArrayList()
     var fragments: MutableList<Fragment> = ArrayList()
     var lastPos = 0
 
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun getLayoutId(): Int {
+        return R.layout.activity_main
+    }
 
-        super.onCreate(savedInstanceState)
-
+    override fun initView() {
         //Android 点击 Home 键后再点击 APP 图标，APP 显示退出之前的界面
         if (!isTaskRoot) {
             finish();
@@ -53,14 +55,63 @@ class MainActivity : AppCompatActivity() {
 
         firebaseAnalytics = Firebase.analytics
 
-        initViews()
-        setListeners()
+        val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
+        mBinding.appTitle.typeface = typeface
 
-        handleText(intent)
+        //添加imageviews
+        imageViews.add(mBinding.imgHome)
+        imageViews.add(mBinding.imgTag)
+        imageViews.add(mBinding.imgMine)
 
+
+        fragments.add(HomeFragment())
+        fragments.add(TagFragment())
+        fragments.add(SettingFragment())
+
+        showFragment(lastPos)
+        selectPage(0)
+
+        mBinding.llHome.setOnClickListener {
+            //throw RuntimeException("Test Crash") // Force a crash
+            showFragment(0)
+            selectPage(0)
+            lastPos = 0
+
+        }
+        mBinding.llTag.setOnClickListener {
+            val bundle = Bundle()
+            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "123")
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "hashtag")
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+
+            showFragment(1)
+            selectPage(1)
+            lastPos = 1
+
+        }
+        mBinding.llMine.setOnClickListener {
+            showFragment(2)
+            selectPage(2)
+            lastPos = 2
+
+        }
+
+        mBinding.imgCamera.setOnClickListener {
+
+            val launchIntent = packageManager.getLaunchIntentForPackage("com.instagram.android")
+            launchIntent?.let { startActivity(it) }
+        }
+        mBinding.imgDownload.setOnClickListener {
+            startActivity(Intent(this, HistoryActivity::class.java))
+        }
     }
 
+    override fun initData() {
+        handleText(intent)
+    }
 
+    
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         Log.v(TAG, "on new intent")
@@ -71,7 +122,7 @@ class MainActivity : AppCompatActivity() {
 
     fun handleText(newintent: Intent?) {
         //这里要加延时，否则会获取不到intent或者clipboarditem
-        binding.imgDownload.post {
+        mBinding.imgDownload.post {
             Log.v(TAG, newintent?.action + newintent?.type + "")
             if (newintent?.action == Intent.ACTION_SEND) {
                 if ("text/plain" == newintent.type) {
@@ -99,74 +150,8 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-
-
-    fun initViews() {
-
-        //沉浸式状态栏
-        if (Build.VERSION.SDK_INT >= 23) {
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            window.statusBarColor = Color.TRANSPARENT
-        }
-
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
-        val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
-        binding.appTitle.typeface = typeface
-
-        //添加imageviews
-        imageViews.add(binding.imgHome)
-        imageViews.add(binding.imgTag)
-        imageViews.add(binding.imgMine)
-
-
-        fragments.add(HomeFragment())
-        fragments.add(TagFragment())
-        fragments.add(SettingFragment())
-
-        showFragment(lastPos)
-        selectPage(0)
-    }
-
-    private fun setListeners() {
-
-        binding.llHome.setOnClickListener {
-            //throw RuntimeException("Test Crash") // Force a crash
-            showFragment(0)
-            selectPage(0)
-            lastPos = 0
-
-        }
-        binding.llTag.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "123")
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "hashtag")
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
-
-            showFragment(1)
-            selectPage(1)
-            lastPos = 1
-
-        }
-        binding.llMine.setOnClickListener {
-            showFragment(2)
-            selectPage(2)
-            lastPos = 2
-
-        }
-
-        binding.imgCamera.setOnClickListener {
-
-            val launchIntent = packageManager.getLaunchIntentForPackage("com.instagram.android")
-            launchIntent?.let { startActivity(it) }
-        }
-        binding.imgDownload.setOnClickListener {
-            startActivity(Intent(this, HistoryActivity::class.java))
-        }
-    }
-
+    
+    
 
     /**
      * 切换fragment性能优化,使每个fragment只实例化一次
@@ -209,5 +194,7 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
+
 
 }

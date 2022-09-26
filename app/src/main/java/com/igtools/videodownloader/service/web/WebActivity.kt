@@ -16,7 +16,7 @@ import com.igtools.videodownloader.utils.ShareUtils
 
 class WebActivity : BaseActivity<ActivityWebBinding>() {
 
-    lateinit var binding: ActivityWebBinding
+    
     val TAG="WebActivity"
     var url:String?=null
 
@@ -26,7 +26,7 @@ class WebActivity : BaseActivity<ActivityWebBinding>() {
 
     override fun initView() {
         webViewSetting()
-        binding.flBack.setOnClickListener {
+        mBinding.flBack.setOnClickListener {
             finish()
         }
     }
@@ -34,15 +34,15 @@ class WebActivity : BaseActivity<ActivityWebBinding>() {
     override fun initData() {
         url = intent.extras?.getString("url")
         url?.let {
-            binding.webview.loadUrl(it)
+            mBinding.webview.loadUrl(it)
 
         }
     }
     @SuppressLint("JavascriptInterface")
     private fun webViewSetting() {
 
-        binding.webview.addJavascriptInterface(this, "webview")
-        val settings = binding.webview.settings
+        mBinding.webview.addJavascriptInterface(this, "webview")
+        val settings = mBinding.webview.settings
         settings.javaScriptEnabled = true
 
         settings.setDomStorageEnabled(true)
@@ -56,26 +56,26 @@ class WebActivity : BaseActivity<ActivityWebBinding>() {
 //            ShareUtils.putData("user-agent",settings.userAgentString)
 //        }
 
-        binding.webview.webChromeClient = object : WebChromeClient() {
+        mBinding.webview.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 Log.v("HomeFragment", newProgress.toString())
-                binding.progress.progress = newProgress
+                mBinding.progress.progress = newProgress
                 if (newProgress == 100) {
 
-                    binding.progress.visibility = View.INVISIBLE
+                    mBinding.progress.visibility = View.INVISIBLE
                 } else {
-                    binding.progress.visibility = View.VISIBLE
+                    mBinding.progress.visibility = View.VISIBLE
                 }
             }
 
         }
 
 
-        binding.webview.webViewClient = object : WebViewClient() {
+        mBinding.webview.webViewClient = object : WebViewClient() {
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                binding.webview.visibility = View.VISIBLE
+                mBinding.webview.visibility = View.VISIBLE
 
                 val cookieManager = CookieManager.getInstance()
                 val cookie = cookieManager.getCookie(url)
@@ -101,8 +101,8 @@ class WebActivity : BaseActivity<ActivityWebBinding>() {
                     Log.v(TAG, statusCode.toString())
 //                    System.out.println("onReceivedHttpError code = " + statusCode);
                     if (statusCode == -2) {
-                        binding.webview.visibility = View.GONE
-                        //binding.imgEmpty.visibility = View.VISIBLE
+                        mBinding.webview.visibility = View.GONE
+                        //mBinding.imgEmpty.visibility = View.VISIBLE
                     }
                 }
             }

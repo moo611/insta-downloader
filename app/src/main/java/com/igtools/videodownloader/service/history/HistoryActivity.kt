@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     lateinit var adapter: HistoryAdapter
-    lateinit var binding: ActivityHistoryBinding
+    
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
 
@@ -39,10 +39,10 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     override fun initView() {
         val adRequest = AdRequest.Builder().build();
-        binding.adView.loadAd(adRequest)
+        mBinding.adView.loadAd(adRequest)
         adapter = HistoryAdapter(this)
-        binding.rv.adapter = adapter
-        binding.rv.layoutManager = LinearLayoutManager(this)
+        mBinding.rv.adapter = adapter
+        mBinding.rv.layoutManager = LinearLayoutManager(this)
         adapter.onItemClickListener = object : HistoryAdapter.OnItemClickListener {
             override fun onClick(position: Int) {
                 val content = records[position].content
@@ -57,7 +57,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
         }
 
-        binding.imgBack.setOnClickListener {
+        mBinding.imgBack.setOnClickListener {
             finish()
         }
     }

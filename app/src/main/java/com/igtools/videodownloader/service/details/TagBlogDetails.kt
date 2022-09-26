@@ -45,8 +45,7 @@ import java.io.InputStream
 class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
     val TAG = "TagBlogDetails"
-
-    lateinit var binding:ActivityTagBlogDetailsBinding
+    
     lateinit var progressDialog: ProgressDialog
     lateinit var progressDialog2: ProgressDialog
     var mediaInfo = MediaModel()
@@ -61,7 +60,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
     override fun initView() {
         adapter = MultiTypeAdapter(this, mediaInfo.resources)
-        binding.banner
+        mBinding.banner
             .addBannerLifecycleObserver(this)
             .setIndicator(CircleIndicator(this))
             .setAdapter(adapter)
@@ -76,7 +75,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
         progressDialog2.setCancelable(false)
 
 
-        binding.btnDownload.setOnClickListener {
+        mBinding.btnDownload.setOnClickListener {
             lifecycleScope.launch {
                 val oldRecord = RecordDB.getInstance().recordDao().findById(code!!)
                 if (oldRecord != null) {
@@ -114,17 +113,17 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
         }
 
-        binding.imgBack.setOnClickListener {
+        mBinding.imgBack.setOnClickListener {
             onBackPressed()
         }
     }
 
     override fun initData() {
         if (intent.extras!!.getBoolean("flag")) {
-            binding.btnDownload.visibility = View.VISIBLE
+            mBinding.btnDownload.visibility = View.VISIBLE
             getDataFromServer()
         } else {
-            binding.btnDownload.visibility = View.INVISIBLE
+            mBinding.btnDownload.visibility = View.INVISIBLE
             getDataFromLocal()
         }
     }
@@ -288,28 +287,28 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
     private fun updateUI() {
 
         if (mediaInfo.mediaType == 8) {
-            binding.imgPlay.visibility = View.INVISIBLE
-            binding.banner.visibility = View.VISIBLE
-            binding.picture.visibility = View.INVISIBLE
+            mBinding.imgPlay.visibility = View.INVISIBLE
+            mBinding.banner.visibility = View.VISIBLE
+            mBinding.picture.visibility = View.INVISIBLE
             adapter.setDatas(mediaInfo.resources)
 
         } else if (mediaInfo.mediaType == 1){
-            binding.picture.visibility = View.VISIBLE
-            binding.banner.visibility = View.INVISIBLE
-            binding.imgPlay.visibility = View.INVISIBLE
-            Glide.with(this).load(mediaInfo.thumbnailUrl).placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1))).into(binding.picture)
+            mBinding.picture.visibility = View.VISIBLE
+            mBinding.banner.visibility = View.INVISIBLE
+            mBinding.imgPlay.visibility = View.INVISIBLE
+            Glide.with(this).load(mediaInfo.thumbnailUrl).placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1))).into(mBinding.picture)
         }else if (mediaInfo.mediaType == 2){
-            binding.picture.visibility = View.VISIBLE
-            binding.banner.visibility = View.INVISIBLE
-            binding.imgPlay.visibility = View.VISIBLE
-            Glide.with(this).load(mediaInfo.thumbnailUrl).placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1))).into(binding.picture)
+            mBinding.picture.visibility = View.VISIBLE
+            mBinding.banner.visibility = View.INVISIBLE
+            mBinding.imgPlay.visibility = View.VISIBLE
+            Glide.with(this).load(mediaInfo.thumbnailUrl).placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1))).into(mBinding.picture)
         }
 
         Glide.with(this).load(mediaInfo.profilePicUrl)
             .placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1)))
-            .circleCrop().into(binding.avatar)
-        binding.username.text = mediaInfo.username
-        binding.tvTitle.text = mediaInfo.captionText
+            .circleCrop().into(mBinding.avatar)
+        mBinding.username.text = mediaInfo.username
+        mBinding.tvTitle.text = mediaInfo.captionText
 
     }
 

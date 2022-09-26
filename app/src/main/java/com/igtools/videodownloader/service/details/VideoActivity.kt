@@ -17,7 +17,7 @@ import com.igtools.videodownloader.databinding.ActivityVideoBinding
 
 class VideoActivity : BaseActivity<ActivityVideoBinding>() {
 
-    lateinit var binding: ActivityVideoBinding
+    
     var url: String? = null
     var thumbnailUrl: String? = null
 
@@ -28,7 +28,7 @@ class VideoActivity : BaseActivity<ActivityVideoBinding>() {
 
     override fun initView() {
 
-        binding.imgBack.setOnClickListener {
+        mBinding.imgBack.setOnClickListener {
             finish()
         }
     }
@@ -36,9 +36,9 @@ class VideoActivity : BaseActivity<ActivityVideoBinding>() {
     override fun initData() {
         url = intent.extras?.getString("url")
         thumbnailUrl = intent.extras?.getString("thumbnailUrl")
-        binding.player.setUp(url, true, null)
-        binding.player.backButton.visibility = View.GONE
-        binding.player.startPlayLogic()
+        mBinding.player.setUp(url, true, null)
+        mBinding.player.backButton.visibility = View.GONE
+        mBinding.player.startPlayLogic()
         //增加封面
         val imageView = ImageView(this)
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
@@ -49,20 +49,20 @@ class VideoActivity : BaseActivity<ActivityVideoBinding>() {
                 )
             )
         ).thumbnail(/*sizeMultiplier=*/ 0.25f).into(imageView)
-        binding.player.thumbImageView = imageView
+        mBinding.player.thumbImageView = imageView
     }
 
     override fun onResume() {
         super.onResume()
 
-        binding.player.onVideoResume()
+        mBinding.player.onVideoResume()
     }
 
 
     override fun onPause() {
         super.onPause()
 
-        binding.player.onVideoPause()
+        mBinding.player.onVideoPause()
 
     }
 
