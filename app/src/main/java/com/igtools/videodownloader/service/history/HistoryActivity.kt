@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.activities
+package com.igtools.videodownloader.service.history
 
 import android.content.Intent
 import android.graphics.Color
@@ -10,43 +10,34 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.fagaia.farm.base.BaseActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.gson.Gson
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.adapter.HistoryAdapter
 import com.igtools.videodownloader.databinding.ActivityHistoryBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.room.RecordDB
+import com.igtools.videodownloader.service.details.BlogDetailsActivity
 import kotlinx.coroutines.launch
 
 
-class HistoryActivity : AppCompatActivity() {
+class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     lateinit var adapter: HistoryAdapter
     lateinit var binding: ActivityHistoryBinding
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
 
-    var gson = Gson()
-    val TAG = "DownloadActivity"
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        //沉浸式状态栏
-        if (Build.VERSION.SDK_INT >= 23) {
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            window.statusBarColor = Color.TRANSPARENT
-        }
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_history)
 
-        initViews()
-        getData()
+    val TAG = "DownloadActivity"
+
+
+    override fun getLayoutId(): Int {
+        return R.layout.activity_history
     }
 
-
-    private fun initViews() {
-
+    override fun initView() {
         val adRequest = AdRequest.Builder().build();
         binding.adView.loadAd(adRequest)
         adapter = HistoryAdapter(this)
@@ -69,10 +60,9 @@ class HistoryActivity : AppCompatActivity() {
         binding.imgBack.setOnClickListener {
             finish()
         }
-
     }
 
-    private fun getData() {
+    override fun initData() {
         records.clear()
         medias.clear()
 
@@ -89,7 +79,6 @@ class HistoryActivity : AppCompatActivity() {
             adapter.setDatas(medias)
 
         }
-
     }
 
 }

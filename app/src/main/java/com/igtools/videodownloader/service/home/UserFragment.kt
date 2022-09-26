@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.fragments
+package com.igtools.videodownloader.service.home
 
 import android.app.ProgressDialog
 import android.content.Intent
@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.fagaia.farm.base.BaseFragment
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -22,8 +23,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.activities.WebActivity
-import com.igtools.videodownloader.adapter.BlogAdapter2
+import com.igtools.videodownloader.service.web.WebActivity
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.databinding.FragmentUserBinding
@@ -37,11 +37,11 @@ import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.launch
 
 
-class UserFragment : Fragment() {
+class UserFragment : BaseFragment<FragmentUserBinding>() {
 
     val TAG = "UserFragment"
     val LOGIN_REQ=1000
-    val gson = Gson()
+
 
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: BlogAdapter2
@@ -54,21 +54,11 @@ class UserFragment : Fragment() {
     var userId = ""
     var mInterstitialAd: InterstitialAd? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_user, container, false)
-
-        initAds()
-        initViews()
-        setListeners()
-        return binding.root
+    override fun getLayoutId(): Int {
+        return R.layout.fragment_user
     }
 
-    private fun initViews() {
-
+    override fun initView() {
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
@@ -93,29 +83,6 @@ class UserFragment : Fragment() {
         }
         bottomDialog.setContent(bottomView)
 
-
-    }
-
-
-    private fun initAds() {
-        val adRequest = AdRequest.Builder().build();
-        //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/2974806950", adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(p0: InterstitialAd) {
-                    super.onAdLoaded(p0)
-                    mInterstitialAd = p0
-                }
-
-                override fun onAdFailedToLoad(p0: LoadAdError) {
-                    super.onAdFailedToLoad(p0)
-                    mInterstitialAd = null;
-                }
-            })
-
-    }
-
-    private fun setListeners() {
         binding.btnSearch.setOnClickListener {
             binding.etUsername.clearFocus()
             KeyboardUtils.closeKeybord(binding.etUsername, context)
@@ -172,8 +139,31 @@ class UserFragment : Fragment() {
         binding.imgClear.setOnClickListener {
             binding.etUsername.setText("")
         }
+    }
+
+    override fun initData() {
 
     }
+
+
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build();
+        //inter
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/2974806950", adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(p0: InterstitialAd) {
+                    super.onAdLoaded(p0)
+                    mInterstitialAd = p0
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    super.onAdFailedToLoad(p0)
+                    mInterstitialAd = null;
+                }
+            })
+
+    }
+
 
     private fun clearData(){
         userId = ""

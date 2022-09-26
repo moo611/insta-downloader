@@ -18,26 +18,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IgDownloader">
         <activity
-            android:name="com.igtools.videodownloader.activities.WebActivity"
+            android:name="com.igtools.videodownloader.service.web.WebActivity"
             android:exported="false" />
         <activity
-            android:name="com.igtools.videodownloader.activities.TagBlogDetails"
+            android:name="com.igtools.videodownloader.service.details.TagBlogDetails"
             android:exported="false" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8609866682652024~3832884639" />
 
         <activity
-            android:name="com.igtools.videodownloader.activities.VideoActivity"
+            android:name="com.igtools.videodownloader.service.details.VideoActivity"
             android:exported="false" />
         <activity
-            android:name="com.igtools.videodownloader.activities.HistoryActivity"
+            android:name="com.igtools.videodownloader.service.history.HistoryActivity"
             android:exported="false" />
         <activity
             android:name="com.igtools.videodownloader.activities.SignupActivity"
             android:exported="false" />
         <activity
-            android:name="com.igtools.videodownloader.activities.BlogDetailsActivity"
+            android:name="com.igtools.videodownloader.service.details.BlogDetailsActivity"
             android:exported="false" />
         <activity
             android:name="com.igtools.videodownloader.activities.LoginActivity"

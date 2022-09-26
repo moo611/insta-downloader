@@ -1,8 +1,7 @@
-package com.igtools.videodownloader.fragments
+package com.igtools.videodownloader.service.home
 
 import android.app.ProgressDialog
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -25,6 +24,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.fagaia.farm.base.BaseFragment
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
@@ -33,8 +33,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.activities.BlogDetailsActivity
-import com.igtools.videodownloader.activities.WebActivity
+import com.igtools.videodownloader.service.details.BlogDetailsActivity
+import com.igtools.videodownloader.service.web.WebActivity
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.databinding.FragmentShortCodeBinding
@@ -47,12 +47,9 @@ import com.igtools.videodownloader.utils.*
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.*
-import okhttp3.ResponseBody
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 
 
 /**
@@ -60,57 +57,24 @@ import java.io.InputStream
  * @Date: 2022/7/21
  */
 
-class ShortCodeFragment : Fragment() {
+class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     lateinit var progressDialog: ProgressDialog
-    lateinit var binding: FragmentShortCodeBinding
+    lateinit var circularProgressDrawable: CircularProgressDrawable
     lateinit var glideListener: RequestListener<Drawable>
     lateinit var bottomDialog: BottomDialog
 
     var TAG = "ShortCodeFragment"
-
-    val gson = Gson()
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
-    lateinit var circularProgressDrawable: CircularProgressDrawable
 
     private val LOGIN_REQ = 1000
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_short_code, container, false)
-        initAds()
-        initViews()
-        setListeners()
-
-        return binding.root;
+    override fun getLayoutId(): Int {
+        return R.layout.fragment_short_code
     }
 
-    private fun initAds() {
-        val adRequest = AdRequest.Builder().build();
-        //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/8844989426", adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(p0: InterstitialAd) {
-                    super.onAdLoaded(p0)
-                    mInterstitialAd = p0
-                }
-
-                override fun onAdFailedToLoad(p0: LoadAdError) {
-                    super.onAdFailedToLoad(p0)
-                    mInterstitialAd = null;
-                }
-            })
-        //banner
-        binding.adView.loadAd(adRequest)
-    }
-
-
-    private fun initViews() {
-
+    override fun initView() {
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
@@ -135,14 +99,119 @@ class ShortCodeFragment : Fragment() {
         }
         bottomDialog.setContent(bottomView)
 
+
+        mBinding.btnDownload.setOnClickListener {
+            autoStart()
+        }
+
+        mBinding.container.setOnClickListener {
+            val content = gson.toJson(curMediaInfo)
+            startActivity(
+                Intent(
+                    requireContext(),
+                    BlogDetailsActivity::class.java
+                ).putExtra("content", content).putExtra("flag", false)
+            )
+
+        }
+
+        mBinding.etShortcode.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+                if (mBinding.etShortcode.text.isNotEmpty()) {
+                    mBinding.imgClear.visibility = View.VISIBLE
+                } else {
+                    mBinding.imgClear.visibility = View.INVISIBLE
+                }
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+
+        })
+
+        mBinding.imgClear.setOnClickListener {
+            mBinding.etShortcode.setText("")
+        }
+
+        mBinding.adView.adListener = object : AdListener() {
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                // Code to be executed when an ad request fails.
+                Log.e(TAG, adError.message)
+            }
+
+            override fun onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+                mBinding.adView.visibility = View.VISIBLE
+            }
+
+
+        }
+
+        glideListener = object : RequestListener<Drawable> {
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Drawable>?,
+                isFirstResource: Boolean
+            ): Boolean {
+
+                mBinding.progressbar.visibility = View.INVISIBLE
+                return false;
+            }
+
+            override fun onResourceReady(
+                resource: Drawable?,
+                model: Any?,
+                target: Target<Drawable>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean
+            ): Boolean {
+
+                mBinding.progressbar.visibility = View.INVISIBLE
+                return false;
+
+            }
+
+        }
+    }
+
+    override fun initData() {
+
+    }
+
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build();
+        //inter
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/8844989426", adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(p0: InterstitialAd) {
+                    super.onAdLoaded(p0)
+                    mInterstitialAd = p0
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    super.onAdFailedToLoad(p0)
+                    mInterstitialAd = null;
+                }
+            })
+        //banner
+        mBinding.adView.loadAd(adRequest)
     }
 
 
     private fun autoStart() {
         Log.v(TAG, ShareUtils.getData("cookie") + "")
-        binding.etShortcode.clearFocus()
-        KeyboardUtils.closeKeybord(binding.etShortcode, context)
-        val url = binding.etShortcode.text.toString()
+        mBinding.etShortcode.clearFocus()
+        KeyboardUtils.closeKeybord(mBinding.etShortcode, context)
+        val url = mBinding.etShortcode.text.toString()
 
         val isValid = URLUtil.isValidUrl(url)
         if (!isValid) {
@@ -168,91 +237,6 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun setListeners() {
-
-        binding.btnDownload.setOnClickListener {
-            autoStart()
-        }
-
-        binding.container.setOnClickListener {
-            val content = gson.toJson(curMediaInfo)
-            startActivity(
-                Intent(
-                    requireContext(),
-                    BlogDetailsActivity::class.java
-                ).putExtra("content", content).putExtra("flag", false)
-            )
-
-        }
-
-        binding.etShortcode.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-
-                if (binding.etShortcode.text.isNotEmpty()) {
-                    binding.imgClear.visibility = View.VISIBLE
-                } else {
-                    binding.imgClear.visibility = View.INVISIBLE
-                }
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-
-            }
-
-        })
-
-        binding.imgClear.setOnClickListener {
-            binding.etShortcode.setText("")
-        }
-
-        binding.adView.adListener = object : AdListener() {
-
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                // Code to be executed when an ad request fails.
-                Log.e(TAG, adError.message)
-            }
-
-            override fun onAdLoaded() {
-                // Code to be executed when an ad finishes loading.
-                binding.adView.visibility = View.VISIBLE
-            }
-
-
-        }
-
-        glideListener = object : RequestListener<Drawable> {
-            override fun onLoadFailed(
-                e: GlideException?,
-                model: Any?,
-                target: Target<Drawable>?,
-                isFirstResource: Boolean
-            ): Boolean {
-
-                binding.progressbar.visibility = View.INVISIBLE
-                return false;
-            }
-
-            override fun onResourceReady(
-                resource: Drawable?,
-                model: Any?,
-                target: Target<Drawable>?,
-                dataSource: DataSource?,
-                isFirstResource: Boolean
-            ): Boolean {
-
-                binding.progressbar.visibility = View.INVISIBLE
-                return false;
-
-            }
-
-        }
-
-    }
 
     /**
      * 获取video,image,igtv,reel
@@ -262,7 +246,7 @@ class ShortCodeFragment : Fragment() {
     private fun getMediaData() {
 
         val shortCode = getShortCode()
-        if (shortCode == null){
+        if (shortCode == null) {
             Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
             return
         }
@@ -338,7 +322,7 @@ class ShortCodeFragment : Fragment() {
      */
     private fun getStoryData() {
         val pk = getShortCode()
-        if (pk == null){
+        if (pk == null) {
             Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
             return
         }
@@ -399,29 +383,19 @@ class ShortCodeFragment : Fragment() {
 
     }
 
-    private fun handleError() {
-        val cookie = ShareUtils.getData("cookie")
-        if (cookie == null) {
-            bottomDialog.show()
-        } else {
-            Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
-                .show()
-        }
-    }
-
 
     private fun updateUI() {
 
-        binding.container.visibility = View.VISIBLE
-        binding.progressbar.visibility = View.VISIBLE
-        binding.username.text = curMediaInfo?.captionText
+        mBinding.container.visibility = View.VISIBLE
+        mBinding.progressbar.visibility = View.VISIBLE
+        mBinding.username.text = curMediaInfo?.captionText
         Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
             .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
             .listener(glideListener)
-            .into(binding.picture)
+            .into(mBinding.picture)
         Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
             .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
-            .into(binding.avatar)
+            .into(mBinding.avatar)
     }
 
     private fun saveRecord(id: String) {
@@ -504,14 +478,14 @@ class ShortCodeFragment : Fragment() {
             }
             mediaModel.pk = item["pk"].asString
 
-            if (mediaModel.mediaType == 2){
+            if (mediaModel.mediaType == 2) {
                 val video_versions = item["video_versions"].asJsonArray
-                if (video_versions.size()>0){
+                if (video_versions.size() > 0) {
                     mediaModel.videoUrl = video_versions[0].asJsonObject["url"].asString
                 }
             }
 
-            if (jsonObject.has("caption")){
+            if (jsonObject.has("caption")) {
                 mediaModel.captionText = jsonObject["caption"].asJsonObject["text"].asString
             }
 
@@ -533,7 +507,7 @@ class ShortCodeFragment : Fragment() {
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
-            saveFile(responseBody.body(), file, 1)
+            FileUtils.saveFile(requireContext(), responseBody.body(), file, 1)
 
         } else if (media?.mediaType == 2) {
             //video
@@ -542,47 +516,21 @@ class ShortCodeFragment : Fragment() {
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
-                saveFile(responseBody.body(), file, 2)
+                FileUtils.saveFile(requireContext(), responseBody.body(), file, 2)
 
             }
 
         }
     }
 
-    /**
-     * 保存文件到本地
-     */
-    private fun saveFile(body: ResponseBody?, file: File, type: Int) {
-        if (body == null) {
-            return
-        }
-        var input: InputStream? = null
-        try {
-            input = body.byteStream()
+    private fun getLocalData(){
 
-            val fos = FileOutputStream(file)
-            fos.use { output ->
-                val buffer = ByteArray(4 * 1024) // or other buffer size
-                var read: Int
-                while (input.read(buffer).also { read = it } != -1) {
-                    output.write(buffer, 0, read)
-                }
-                output.flush()
-            }
-            //存到相册
-            if (type == 1) {
-                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                FileUtils.saveImageToAlbum(requireContext(), bitmap, file.name)
-            } else {
-                FileUtils.saveVideoToAlbum(requireContext(), file)
-            }
-            Log.v(TAG, file.absolutePath)
+        lifecycleScope.launch {
 
-        } catch (e: Exception) {
-            Log.e("saveFile", e.toString())
-        } finally {
-            input?.close()
+
+
         }
+
 
     }
 
@@ -591,7 +539,7 @@ class ShortCodeFragment : Fragment() {
     fun onKeywordReceive(intentEvent: IntentEvent) {
 
         val keyword = intentEvent.str
-        binding.etShortcode.setText(keyword)
+        mBinding.etShortcode.setText(keyword)
         if (ShareUtils.getData("isAuto") == null || ShareUtils.getData("isAuto").toBoolean()) {
             autoStart()
         }
@@ -608,7 +556,7 @@ class ShortCodeFragment : Fragment() {
 
     private fun getShortCode(): String? {
         val shortCode: String?
-        val url = binding.etShortcode.text.toString()
+        val url = mBinding.etShortcode.text.toString()
         shortCode = if (!url.contains("story")) {
             UrlUtils.extractMedia(url)
         } else {
@@ -626,4 +574,6 @@ class ShortCodeFragment : Fragment() {
         super.onStop()
         EventBus.getDefault().unregister(this);
     }
+
+
 }

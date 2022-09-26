@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.activities
+package com.igtools.videodownloader.service.details
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -10,34 +10,30 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
+import com.fagaia.farm.base.BaseActivity
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.ActivityVideoBinding
 
 
-class VideoActivity : AppCompatActivity() {
+class VideoActivity : BaseActivity<ActivityVideoBinding>() {
 
     lateinit var binding: ActivityVideoBinding
     var url: String? = null
     var thumbnailUrl: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        //沉浸式状态栏
-        if (Build.VERSION.SDK_INT >= 23) {
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            window.statusBarColor = Color.TRANSPARENT
-        }
-
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_video)
-
-        initViews()
-
+    override fun getLayoutId(): Int {
+        return R.layout.activity_video
     }
 
-    private fun initViews() {
+    override fun initView() {
 
+        binding.imgBack.setOnClickListener {
+            finish()
+        }
+    }
+
+    override fun initData() {
         url = intent.extras?.getString("url")
         thumbnailUrl = intent.extras?.getString("thumbnailUrl")
         binding.player.setUp(url, true, null)
@@ -54,10 +50,6 @@ class VideoActivity : AppCompatActivity() {
             )
         ).thumbnail(/*sizeMultiplier=*/ 0.25f).into(imageView)
         binding.player.thumbImageView = imageView
-
-        binding.imgBack.setOnClickListener {
-            finish()
-        }
     }
 
     override fun onResume() {
@@ -73,5 +65,7 @@ class VideoActivity : AppCompatActivity() {
         binding.player.onVideoPause()
 
     }
+
+
 
 }

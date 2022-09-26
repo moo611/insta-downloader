@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.activities
+package com.igtools.videodownloader.service.details
 
 import android.app.ProgressDialog
 import android.content.Intent
@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.fagaia.farm.base.BaseActivity
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -22,7 +23,6 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.adapter.MultiTypeAdapter
 import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.databinding.ActivityBlogDetailsBinding
 import com.igtools.videodownloader.models.MediaModel
@@ -37,43 +37,105 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.lang.Exception
-import java.util.*
 
-class BlogDetailsActivity : AppCompatActivity() {
+class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
-    val gson = Gson()
     val TAG = "BlogDetailsActivity"
-
-    lateinit var binding: ActivityBlogDetailsBinding
     lateinit var adapter: MultiTypeAdapter
     lateinit var progressDialog: ProgressDialog
     var isBack = false
     var mediaInfo = MediaModel()
-    var code:String?=null
+    var code: String? = null
     var mInterstitialAd: InterstitialAd? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        //沉浸式状态栏
-        if (Build.VERSION.SDK_INT >= 23) {
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            window.statusBarColor = Color.TRANSPARENT
-        }
+    override fun getLayoutId(): Int {
+        return R.layout.activity_blog_details
+    }
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_blog_details)
-        initAds()
-        initViews()
-        setListeners()
+    override fun initView() {
+        mBinding.btnDownload.isEnabled = false
+        adapter = MultiTypeAdapter(this, mediaInfo.resources)
+        mBinding.banner
+            .addBannerLifecycleObserver(this)
+            .setIndicator(CircleIndicator(this))
+            .setAdapter(adapter)
+            .isAutoLoop(false)
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage(getString(R.string.downloading))
+        progressDialog.setCancelable(false)
 
         if (intent.extras!!.getBoolean("flag")) {
-            binding.btnDownload.visibility = View.VISIBLE
+            mBinding.btnDownload.visibility = View.VISIBLE
         } else {
-            binding.btnDownload.visibility = View.INVISIBLE
+            mBinding.btnDownload.visibility = View.INVISIBLE
         }
-        getDataFromLocal()
 
+        mBinding.btnDownload.setOnClickListener {
+
+
+            lifecycleScope.launch {
+
+                val oldRecord = RecordDB.getInstance().recordDao().findById(code!!)
+                if (oldRecord != null) {
+                    Toast.makeText(
+                        this@BlogDetailsActivity,
+                        getString(R.string.exist),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+                progressDialog.show()
+                if (mediaInfo.mediaType == 8) {
+                    val all: List<Deferred<Unit>> = mediaInfo.resources.map {
+                        async {
+                            downloadMedia(it)
+                        }
+                    }
+
+                    all.awaitAll()
+                } else {
+                    downloadMedia(mediaInfo)
+                }
+
+                //Log.v(TAG,"finish")
+                val record =
+                    Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
+                RecordDB.getInstance().recordDao().insert(record)
+
+                progressDialog.dismiss()
+                isBack = false
+                mInterstitialAd?.show(this@BlogDetailsActivity)
+
+                Toast.makeText(
+                    this@BlogDetailsActivity,
+                    getString(R.string.download_finish),
+                    Toast.LENGTH_SHORT
+                ).show()
+
+            }
+
+        }
+
+        mBinding.picture.setOnClickListener {
+            if (mediaInfo.mediaType == 2) {
+                startActivity(
+                    Intent(this, VideoActivity::class.java)
+                        .putExtra("url", mediaInfo.videoUrl)
+                        .putExtra("thumbnailUrl", mediaInfo.thumbnailUrl)
+                )
+            }
+
+        }
+
+        mBinding.imgBack.setOnClickListener {
+            onBackPressed()
+        }
+
+    }
+
+    override fun initData() {
+        getDataFromLocal()
     }
 
 
@@ -117,83 +179,6 @@ class BlogDetailsActivity : AppCompatActivity() {
     }
 
 
-    private fun initViews() {
-
-        binding.btnDownload.isEnabled = false
-        adapter = MultiTypeAdapter(this, mediaInfo.resources)
-        binding.banner
-            .addBannerLifecycleObserver(this)
-            .setIndicator(CircleIndicator(this))
-            .setAdapter(adapter)
-            .isAutoLoop(false)
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.downloading))
-        progressDialog.setCancelable(false)
-    }
-
-
-    private fun setListeners() {
-
-        binding.btnDownload.setOnClickListener {
-
-
-            lifecycleScope.launch {
-
-                val oldRecord = RecordDB.getInstance().recordDao().findById(code!!)
-                if (oldRecord != null) {
-                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.exist), Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-                progressDialog.show()
-                if (mediaInfo.mediaType==8){
-                    val all: List<Deferred<Unit>> = mediaInfo.resources.map {
-                        async {
-                            downloadMedia(it)
-                        }
-                    }
-
-                    all.awaitAll()
-                }else{
-                    downloadMedia(mediaInfo)
-                }
-
-                //Log.v(TAG,"finish")
-                val record =
-                    Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
-                RecordDB.getInstance().recordDao().insert(record)
-
-                progressDialog.dismiss()
-                isBack = false
-                mInterstitialAd?.show(this@BlogDetailsActivity)
-
-                Toast.makeText(
-                    this@BlogDetailsActivity,
-                    getString(R.string.download_finish),
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            }
-
-        }
-
-        binding.picture.setOnClickListener {
-            if (mediaInfo.mediaType == 2) {
-                startActivity(
-                    Intent(this, VideoActivity::class.java)
-                        .putExtra("url", mediaInfo.videoUrl)
-                        .putExtra("thumbnailUrl", mediaInfo.thumbnailUrl)
-                )
-            }
-
-        }
-
-        binding.imgBack.setOnClickListener {
-            onBackPressed()
-        }
-
-    }
-
-
     private fun getDataFromLocal() {
         val content = intent.extras!!.getString("content")!!
         mediaInfo = gson.fromJson(content, MediaModel::class.java)
@@ -204,23 +189,23 @@ class BlogDetailsActivity : AppCompatActivity() {
                 show("album")
                 adapter.setDatas(mediaInfo.resources as List<ResourceModel?>?)
 
-                binding.btnDownload.isEnabled = true
-                //binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                binding.tvTitle.text = mediaInfo.captionText
+                mBinding.btnDownload.isEnabled = true
+                //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+                mBinding.tvTitle.text = mediaInfo.captionText
 
             }
         } else {
             show("picture")
             Glide.with(this@BlogDetailsActivity).load(mediaInfo.thumbnailUrl)
-                .into(binding.picture)
-            binding.btnDownload.isEnabled = true
-            //binding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-            binding.tvTitle.text = mediaInfo.captionText
+                .into(mBinding.picture)
+            mBinding.btnDownload.isEnabled = true
+            //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+            mBinding.tvTitle.text = mediaInfo.captionText
 
         }
 
-        binding.username.text = mediaInfo.username
-        Glide.with(this).load(mediaInfo.profilePicUrl).circleCrop().into(binding.avatar)
+        mBinding.username.text = mediaInfo.username
+        Glide.with(this).load(mediaInfo.profilePicUrl).circleCrop().into(mBinding.avatar)
 
     }
 
@@ -236,7 +221,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             try {
                 val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
                 withContext(Dispatchers.IO) {
-                    saveFile(responseBody.body(), file, 1)
+                    FileUtils.saveFile(this@BlogDetailsActivity, responseBody.body(), file, 1)
                 }
 
             } catch (e: Error) {
@@ -252,7 +237,7 @@ class BlogDetailsActivity : AppCompatActivity() {
             try {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
                 withContext(Dispatchers.IO) {
-                    saveFile(responseBody.body(), file, 2)
+                    FileUtils.saveFile(this@BlogDetailsActivity, responseBody.body(), file, 2)
                 }
 
             } catch (e: Error) {
@@ -263,55 +248,22 @@ class BlogDetailsActivity : AppCompatActivity() {
 
     }
 
-    private fun saveFile(body: ResponseBody?, file: File, type: Int) {
-        if (body == null) {
-            return
-        }
-        var input: InputStream? = null
-        try {
-            input = body.byteStream()
-
-            val fos = FileOutputStream(file)
-            fos.use { output ->
-                val buffer = ByteArray(4 * 1024) // or other buffer size
-                var read: Int
-                while (input.read(buffer).also { read = it } != -1) {
-                    output.write(buffer, 0, read)
-                }
-                output.flush()
-            }
-            if (type == 1) {
-                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                FileUtils.saveImageToAlbum(this, bitmap, file.name)
-            } else {
-                FileUtils.saveVideoToAlbum(this, file)
-            }
-            Log.v(TAG, file.absolutePath)
-
-        } catch (e: Exception) {
-            Log.e("saveFile", e.toString())
-        } finally {
-            input?.close()
-        }
-
-    }
-
     private fun show(flag: String) {
 
         if (flag == "picture") {
-            binding.picture.visibility = View.VISIBLE
-            binding.banner.visibility = View.INVISIBLE
+            mBinding.picture.visibility = View.VISIBLE
+            mBinding.banner.visibility = View.INVISIBLE
 
             if (mediaInfo.mediaType == 0 || mediaInfo.mediaType == 1) {
-                binding.imgPlay.visibility = View.INVISIBLE
+                mBinding.imgPlay.visibility = View.INVISIBLE
             } else if (mediaInfo.mediaType == 2) {
-                binding.imgPlay.visibility = View.VISIBLE
+                mBinding.imgPlay.visibility = View.VISIBLE
             }
 
         } else {
-            binding.imgPlay.visibility = View.INVISIBLE
-            binding.banner.visibility = View.VISIBLE
-            binding.picture.visibility = View.INVISIBLE
+            mBinding.imgPlay.visibility = View.INVISIBLE
+            mBinding.banner.visibility = View.VISIBLE
+            mBinding.picture.visibility = View.INVISIBLE
         }
 
     }
@@ -327,5 +279,6 @@ class BlogDetailsActivity : AppCompatActivity() {
 
 
     }
+
 
 }

@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.fragments
+package com.igtools.videodownloader.service.tag
 
 import android.app.ProgressDialog
 import android.content.Intent
@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.fagaia.farm.base.BaseFragment
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -22,8 +23,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.activities.WebActivity
-import com.igtools.videodownloader.adapter.BlogAdapter2
+import com.igtools.videodownloader.service.web.WebActivity
+import com.igtools.videodownloader.service.home.BlogAdapter2
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.databinding.FragmentTagBinding
@@ -40,7 +41,7 @@ import java.lang.Exception
  * @Author: desong
  * @Date: 2022/7/21
  */
-class TagFragment : Fragment() {
+class TagFragment : BaseFragment<FragmentTagBinding>() {
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: BlogAdapter2
     lateinit var binding: FragmentTagBinding
@@ -48,7 +49,7 @@ class TagFragment : Fragment() {
     lateinit var bottomDialog: BottomDialog
 
     var loadingMore = false
-    var gson = Gson()
+
     var mInterstitialAd: InterstitialAd? = null
 
     //tag 分页信息
@@ -59,20 +60,8 @@ class TagFragment : Fragment() {
 
     val TAG = "TagFragment"
     val LOGIN_REQ = 1000
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tag, container, false)
-        initAds()
-        initViews()
-        setListeners()
-        return binding.root
-    }
 
-
-    private fun initViews() {
+    override fun initView() {
 
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
@@ -102,28 +91,6 @@ class TagFragment : Fragment() {
             bottomDialog.dismiss()
         }
         bottomDialog.setContent(bottomView)
-
-    }
-
-    private fun initAds() {
-        val adRequest = AdRequest.Builder().build();
-        //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/2208520199", adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(p0: InterstitialAd) {
-                    super.onAdLoaded(p0)
-                    mInterstitialAd = p0
-                }
-
-                override fun onAdFailedToLoad(p0: LoadAdError) {
-                    super.onAdFailedToLoad(p0)
-                    mInterstitialAd = null;
-                }
-            })
-
-    }
-
-    private fun setListeners() {
 
         binding.btnSearch.setOnClickListener {
             binding.etTag.clearFocus()
@@ -183,8 +150,30 @@ class TagFragment : Fragment() {
             binding.etTag.setText("")
 
         }
+    }
+
+    override fun initData() {
 
     }
+
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build();
+        //inter
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/2208520199", adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(p0: InterstitialAd) {
+                    super.onAdLoaded(p0)
+                    mInterstitialAd = p0
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    super.onAdFailedToLoad(p0)
+                    mInterstitialAd = null;
+                }
+            })
+
+    }
+
 
     private fun clearData() {
         next_max_id = ""
@@ -399,6 +388,10 @@ class TagFragment : Fragment() {
 
         }
 
+    }
+
+    override fun getLayoutId(): Int {
+        return R.layout.fragment_tag
     }
 
 }

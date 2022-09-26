@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.fragments
+package com.igtools.videodownloader.service.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,35 +6,27 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import com.fagaia.farm.base.BaseFragment
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.adapter.ViewPagerAdapter
 import com.igtools.videodownloader.databinding.FragmentHomeBinding
 
 /**
  * @Author: desong
  * @Date: 2022/7/21
  */
-class HomeFragment : Fragment() {
+class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
-    lateinit var mAdapter:ViewPagerAdapter
+    lateinit var mAdapter: ViewPagerAdapter
     lateinit var binding:FragmentHomeBinding
     val TAG="HomeFragment"
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
 
-        initViews()
 
-        return binding.root
+    override fun getLayoutId(): Int {
+       return R.layout.fragment_home
     }
 
-
-    fun initViews(){
-
+    override fun initView() {
         val fragments:ArrayList<Fragment> = ArrayList()
         fragments.add(ShortCodeFragment())
         fragments.add(UserFragment())
@@ -45,7 +37,9 @@ class HomeFragment : Fragment() {
         binding.viewpager.adapter = mAdapter
 
         binding.tabLayout.setupWithViewPager(binding.viewpager)
+    }
 
+    override fun initData() {
 
     }
 

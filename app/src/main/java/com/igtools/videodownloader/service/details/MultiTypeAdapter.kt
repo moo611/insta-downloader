@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.adapter
+package com.igtools.videodownloader.service.details
 
 import android.content.Context
 import android.content.Intent
@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.activities.VideoActivity
 import com.igtools.videodownloader.models.ResourceModel
 import com.youth.banner.adapter.BannerAdapter
 import com.youth.banner.util.BannerUtils

@@ -4,15 +4,57 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.provider.MediaStore
+import android.util.Log
+import okhttp3.ResponseBody
 import java.io.*
 
 object FileUtils {
+
+    /**
+     * 保存文件到本地
+     */
+    fun saveFile(c:Context,body: ResponseBody?, file: File, type: Int) {
+        if (body == null) {
+            return
+        }
+        var input: InputStream? = null
+        try {
+            input = body.byteStream()
+
+            val fos = FileOutputStream(file)
+            fos.use { output ->
+                val buffer = ByteArray(4 * 1024) // or other buffer size
+                var read: Int
+                while (input.read(buffer).also { read = it } != -1) {
+                    output.write(buffer, 0, read)
+                }
+                output.flush()
+            }
+            //存到相册
+            if (type == 1) {
+                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                saveImageToAlbum(c, bitmap, file.name)
+            } else {
+                saveVideoToAlbum(c, file)
+            }
+            //Log.v(TAG, file.absolutePath)
+
+        } catch (e: Exception) {
+            Log.e("saveFile", e.toString())
+        } finally {
+            input?.close()
+        }
+
+    }
+
+
 
 
     fun saveImageToAlbum(c: Context, bitmap: Bitmap, fileName: String) {

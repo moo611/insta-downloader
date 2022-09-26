@@ -1,8 +1,8 @@
-package com.igtools.videodownloader.adapter
+package com.igtools.videodownloader.service.history
 
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
-import com.igtools.videodownloader.adapter.HistoryAdapter.HistoryHolder
+import com.igtools.videodownloader.service.history.HistoryAdapter.HistoryHolder
 import android.view.ViewGroup
 import android.view.LayoutInflater
 import com.igtools.videodownloader.R

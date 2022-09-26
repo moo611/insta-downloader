@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.adapter
+package com.igtools.videodownloader.service.home
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager

@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.activities
+package com.igtools.videodownloader.service.web
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -9,40 +9,35 @@ import android.view.View
 import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.fagaia.farm.base.BaseActivity
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.ActivityWebBinding
 import com.igtools.videodownloader.utils.ShareUtils
 
-class WebActivity : AppCompatActivity() {
+class WebActivity : BaseActivity<ActivityWebBinding>() {
 
     lateinit var binding: ActivityWebBinding
     val TAG="WebActivity"
     var url:String?=null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        //沉浸式状态栏
-        if (Build.VERSION.SDK_INT >= 23) {
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            window.statusBarColor = Color.TRANSPARENT
-        }
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_web)
+    override fun getLayoutId(): Int {
+        return R.layout.activity_web
+    }
 
+    override fun initView() {
         webViewSetting()
+        binding.flBack.setOnClickListener {
+            finish()
+        }
+    }
 
+    override fun initData() {
         url = intent.extras?.getString("url")
         url?.let {
             binding.webview.loadUrl(it)
 
         }
-
-        binding.flBack.setOnClickListener {
-            finish()
-        }
-
     }
-
     @SuppressLint("JavascriptInterface")
     private fun webViewSetting() {
 
@@ -113,4 +108,6 @@ class WebActivity : AppCompatActivity() {
             }
         }
     }
+
+
 }

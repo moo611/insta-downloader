@@ -18,11 +18,11 @@ import androidx.fragment.app.FragmentTransaction
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
-import com.igtools.videodownloader.activities.HistoryActivity
+import com.igtools.videodownloader.service.history.HistoryActivity
 import com.igtools.videodownloader.databinding.ActivityMainBinding
-import com.igtools.videodownloader.fragments.HomeFragment
-import com.igtools.videodownloader.fragments.SettingFragment
-import com.igtools.videodownloader.fragments.TagFragment
+import com.igtools.videodownloader.service.home.HomeFragment
+import com.igtools.videodownloader.service.setting.SettingFragment
+import com.igtools.videodownloader.service.tag.TagFragment
 import com.igtools.videodownloader.models.IntentEvent
 import com.igtools.videodownloader.utils.RegexUtils
 import org.greenrobot.eventbus.EventBus
