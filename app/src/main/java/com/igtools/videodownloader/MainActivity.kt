@@ -55,8 +55,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
 
         firebaseAnalytics = Firebase.analytics
 
-        val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
-        mBinding.appTitle.typeface = typeface
+        //val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
+        //mBinding.appTitle.typeface = typeface
 
         //添加imageviews
         imageViews.add(mBinding.imgHome)

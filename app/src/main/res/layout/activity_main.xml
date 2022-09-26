@@ -24,12 +24,11 @@
             android:layout_height="50dp">
 
             <TextView
-                android:textStyle="bold"
+                android:layout_marginLeft="16dp"
                 android:id="@+id/app_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
                 android:text="IgDownloader"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
