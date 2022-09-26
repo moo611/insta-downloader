@@ -42,5 +42,5 @@
     <string name="long_text2">Catatan: Saat mengunduh video dan cerita pribadi, akun masuk harus akun yang Anda dan orang tersebut ikuti satu sama lain. Unduhan Anda tidak akan meninggalkan jejak pada catatan akses akun pihak lain.</string>
     <string name="long_text3">Kami tidak mengumpulkan informasi pribadi Anda. instagram mungkin melarang akun Anda jadi jangan gunakan akun utama Anda</string>
     <string name="parse_error">Mengurai pengecualian</string>
-    <string name="recent_download">Recent Download</string>
+    <string name="recent_download">Terkini</string>
 </resources>

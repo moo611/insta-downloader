@@ -12,13 +12,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.models.MediaModel
+import com.igtools.videodownloader.service.history.HistoryAdapter
 import java.util.ArrayList
 
 class RecentAdapter(var c: Context) : RecyclerView.Adapter<RecentAdapter.RecentHolder>() {
 
 
     var medias: ArrayList<MediaModel> = ArrayList()
-
+    var onItemClickListener: HistoryAdapter.OnItemClickListener? = null
 
     class RecentHolder (v: View):RecyclerView.ViewHolder(v){
         val avatar:ImageView = v.findViewById(R.id.img_avatar)
@@ -38,6 +39,7 @@ class RecentAdapter(var c: Context) : RecyclerView.Adapter<RecentAdapter.RecentH
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
             .into(holder.avatar)
         holder.username.text = medias[position].username
+        holder.itemView.setOnClickListener { v: View? -> onItemClickListener!!.onClick(position) }
     }
 
     override fun getItemCount(): Int {

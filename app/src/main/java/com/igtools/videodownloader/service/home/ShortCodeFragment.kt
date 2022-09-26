@@ -44,6 +44,7 @@ import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.models.ResourceModel
 import com.igtools.videodownloader.room.RecordDB
+import com.igtools.videodownloader.service.history.HistoryAdapter
 import com.igtools.videodownloader.utils.*
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import kotlinx.android.synthetic.main.dialog_bottom.view.*
@@ -68,7 +69,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     var TAG = "ShortCodeFragment"
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
-
+    var records: ArrayList<Record> = ArrayList()
     private val LOGIN_REQ = 1000
 
     override fun getLayoutId(): Int {
@@ -187,7 +188,20 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     override fun initData() {
         recentAdapter = RecentAdapter(requireContext())
         mBinding.rv.adapter = recentAdapter
-        mBinding.rv.layoutManager = GridLayoutManager(requireContext(),4)
+        mBinding.rv.layoutManager = GridLayoutManager(requireContext(), 4)
+        recentAdapter.onItemClickListener = object : HistoryAdapter.OnItemClickListener {
+            override fun onClick(position: Int) {
+                val content = records[position].content
+
+                startActivity(
+                    Intent(
+                        requireContext(),
+                        BlogDetailsActivity::class.java
+                    ).putExtra("content", content).putExtra("flag", false)
+                )
+            }
+
+        }
         getRecentData()
     }
 
@@ -305,6 +319,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
                     mInterstitialAd?.show(requireActivity())
+
+                    getRecentData()
+
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
@@ -527,9 +544,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         }
     }
 
-    private fun getRecentData(){
-        val medias:ArrayList<MediaModel> = ArrayList()
-        var records: ArrayList<Record>
+    private fun getRecentData() {
+        val medias: ArrayList<MediaModel> = ArrayList()
+
         lifecycleScope.launch {
             records = RecordDB.getInstance().recordDao().recent() as ArrayList<Record>
             Log.v(TAG, records.size.toString())
@@ -540,9 +557,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
             }
             recentAdapter.setDatas(medias)
-            
+
         }
-        
+
     }
 
 
