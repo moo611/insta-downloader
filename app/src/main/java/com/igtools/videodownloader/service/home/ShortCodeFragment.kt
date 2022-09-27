@@ -31,6 +31,10 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.R
@@ -66,6 +70,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     lateinit var glideListener: RequestListener<Drawable>
     lateinit var bottomDialog: BottomDialog
     lateinit var recentAdapter: RecentAdapter
+    lateinit var firebaseAnalytics: FirebaseAnalytics
     var TAG = "ShortCodeFragment"
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
@@ -187,6 +192,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     }
 
     override fun initData() {
+        firebaseAnalytics = Firebase.analytics
         recentAdapter = RecentAdapter(requireContext())
         mBinding.rv.adapter = recentAdapter
         mBinding.rv.layoutManager = GridLayoutManager(requireContext(), 4)
@@ -282,6 +288,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 return@launch
             }
             progressDialog.show()
+
+            firebaseAnalytics.logEvent("total"){
+                param("flag", "1")
+            }
             try {
                 val map: HashMap<String, String> = HashMap()
                 val size = Urls.Cookies.size
@@ -303,6 +313,11 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 val jsonObject = res.body()
                 progressDialog.dismiss()
                 if (code == 200 && jsonObject != null) {
+
+                    firebaseAnalytics.logEvent("success"){
+                        param("flag", "2")
+                    }
+
                     curMediaInfo = parseMedia(jsonObject)
                     mInterstitialAd?.show(requireActivity())
                     updateUI()
