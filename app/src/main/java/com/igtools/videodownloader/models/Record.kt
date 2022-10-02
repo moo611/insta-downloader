@@ -6,13 +6,16 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "record")
 data class Record(
-    @PrimaryKey
-    var id: String,
+    @PrimaryKey(autoGenerate = true)
+    var id: Int?,
     @ColumnInfo(name = "content")
     var content: String?,
     @ColumnInfo(name = "created_time")
-    var createdTime: Long?
-
+    var createdTime: Long?,
+    @ColumnInfo(name="url")
+    var url:String?,
+    @ColumnInfo(name="code")
+    var code:String?
 )
 
 

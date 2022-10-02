@@ -9,10 +9,10 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#f0f0f0">
 
         <LinearLayout
-            android:background="#f0f0f0"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -59,14 +59,31 @@
                 android:text="@string/download"
                 android:textSize="16sp" />
 
-            <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/adView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/adcard"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_margin="10dp"
                 android:visibility="gone"
-                ads:adSize="MEDIUM_RECTANGLE"
-                ads:adUnitId="ca-app-pub-8609866682652024/6273963100" />
+                app:cardCornerRadius="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal">
+
+                    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/adView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        ads:adSize="MEDIUM_RECTANGLE"
+                        ads:adUnitId="ca-app-pub-8609866682652024/6273963100" />
+
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/container"
@@ -129,6 +146,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
+                android:visibility="gone"
                 app:cardCornerRadius="8dp">
 
                 <LinearLayout
@@ -137,13 +155,13 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
                         android:text="@string/recent_download"
                         android:textColor="@color/black"
-                        android:textSize="18sp" />
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv"

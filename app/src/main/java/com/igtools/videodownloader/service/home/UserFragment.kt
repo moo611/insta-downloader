@@ -35,14 +35,15 @@ import kotlinx.coroutines.launch
 class UserFragment : BaseFragment<FragmentUserBinding>() {
 
     val TAG = "UserFragment"
-    val LOGIN_REQ=1000
+    val LOGIN_REQ = 1000
 
 
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: MediaAdapter
     lateinit var progressDialog: ProgressDialog
-    
-    lateinit var bottomDialog:BottomDialog
+    lateinit var bottomDialog: BottomDialog
+
+    var profileUrl = ""
     var cursor = ""
     var loadingMore = false
     var isEnd = false
@@ -68,12 +69,17 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             }
         }
 
-        bottomDialog = BottomDialog(requireContext(),R.style.MyDialogTheme)
+        bottomDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
         val bottomView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_bottom, null)
         bottomView.btn_login.setOnClickListener {
 
             val url = "https://www.instagram.com/accounts/login"
-            startActivityForResult(Intent(requireContext(), WebActivity::class.java).putExtra("url", url),LOGIN_REQ)
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
             bottomDialog.dismiss()
         }
         bottomDialog.setContent(bottomView)
@@ -81,15 +87,19 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         mBinding.btnSearch.setOnClickListener {
             mBinding.etUsername.clearFocus()
             KeyboardUtils.closeKeybord(mBinding.etUsername, context)
-            if (mBinding.etUsername.text.toString().isEmpty()){
-                Toast.makeText(requireContext(),getString(R.string.empty_username),Toast.LENGTH_SHORT).show()
+            if (mBinding.etUsername.text.toString().isEmpty()) {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.empty_username),
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
             //refresh(mBinding.etUsername.text.toString())
             val cookie = ShareUtils.getData("cookie")
-            if (cookie == null){
+            if (cookie == null) {
                 bottomDialog.show()
-            }else{
+            } else {
                 getData()
             }
 
@@ -160,38 +170,45 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     }
 
 
-    private fun clearData(){
+    private fun clearData() {
         userId = ""
         cursor = ""
         isEnd = false
+        profileUrl = ""
     }
 
-    fun getData(){
+    fun getData() {
 
         clearData()
 
         val cookie = ShareUtils.getData("cookie")
-        Log.v(TAG,cookie+"")
+        Log.v(TAG, cookie + "")
         //Log.v(TAG,userAgent+"")
-        val map:HashMap<String,String> = HashMap()
+        val map: HashMap<String, String> = HashMap()
         map["Cookie"] = cookie!!
         map["User-Agent"] = Urls.USER_AGENT
         lifecycleScope.launch {
             try {
                 progressDialog.show()
-                val res = ApiClient.getClient2().getUserMedia(Urls.USER_INFO,map,mBinding.etUsername.text.toString())
+                val res = ApiClient.getClient2()
+                    .getUserMedia(Urls.USER_INFO, map, mBinding.etUsername.text.toString())
                 val code = res.code()
                 val jsonObject = res.body()
-                if (code==200 && jsonObject!=null){
+                if (code == 200 && jsonObject != null) {
                     val user = jsonObject["data"].asJsonObject["user"].asJsonObject
                     userId = user["id"].asString
-                    Log.v(TAG,"user_id:"+userId)
-                    val edge_owner_to_timeline_media = user["edge_owner_to_timeline_media"].asJsonObject
+                    if (user.has("profile_pic_url") && !user.get("profile_pic_url").isJsonNull) {
+                        profileUrl = user["profile_pic_url"].asString
+                    }
+
+                    Log.v(TAG, "user_id:" + userId)
+                    val edge_owner_to_timeline_media =
+                        user["edge_owner_to_timeline_media"].asJsonObject
                     val edges = edge_owner_to_timeline_media["edges"].asJsonArray
-                    if (edges.size()>0){
-                        val medias:ArrayList<MediaModel> = ArrayList()
-                        for (item in edges){
-                            val mediainfo= parse1(item.asJsonObject)
+                    if (edges.size() > 0) {
+                        val medias: ArrayList<MediaModel> = ArrayList()
+                        for (item in edges) {
+                            val mediainfo = parse1(item.asJsonObject)
                             medias.add(mediainfo)
                         }
                         adapter.refresh(medias)
@@ -202,14 +219,15 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
                     mInterstitialAd?.show(requireActivity())
-                }else{
-                    Log.e(TAG, res.errorBody()?.string()+"")
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e(TAG, res.errorBody()?.string() + "")
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                 }
 
                 progressDialog.dismiss()
 
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
                 Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
@@ -220,36 +238,42 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     }
 
 
-    private fun getDataMore(){
+    private fun getDataMore() {
 
-        if (loadingMore || isEnd){
+        if (loadingMore || isEnd) {
             return
         }
         loadingMore = true
         val cookie = ShareUtils.getData("cookie")
-        val map:HashMap<String,String> = HashMap()
+        val map: HashMap<String, String> = HashMap()
         map["Cookie"] = cookie!!
         map["User-Agent"] = Urls.USER_AGENT
         lifecycleScope.launch {
             try {
                 mBinding.progressBottom.visibility = View.VISIBLE
-                val variables:HashMap<String,Any> = HashMap()
+                val variables: HashMap<String, Any> = HashMap()
                 variables["id"] = userId
                 variables["first"] = 24
                 variables["after"] = cursor
                 //Log.v(TAG,"variables:"+variables)
-                val res = ApiClient.getClient2().getUserMediaMore(Urls.GRAPH_QL,map,Urls.QUERY_HASH_USER,gson.toJson(variables))
+                val res = ApiClient.getClient2().getUserMediaMore(
+                    Urls.GRAPH_QL,
+                    map,
+                    Urls.QUERY_HASH_USER,
+                    gson.toJson(variables)
+                )
                 val code = res.code()
                 val jsonObject = res.body()
-                if (code ==200 && jsonObject!=null){
+                if (code == 200 && jsonObject != null) {
                     val user = jsonObject["data"].asJsonObject["user"].asJsonObject
 
-                    val edge_owner_to_timeline_media = user["edge_owner_to_timeline_media"].asJsonObject
+                    val edge_owner_to_timeline_media =
+                        user["edge_owner_to_timeline_media"].asJsonObject
                     val edges = edge_owner_to_timeline_media["edges"].asJsonArray
-                    if (edges.size()>0){
-                        val medias:ArrayList<MediaModel> = ArrayList()
-                        for (item in edges){
-                            val mediainfo= parse1(item.asJsonObject)
+                    if (edges.size() > 0) {
+                        val medias: ArrayList<MediaModel> = ArrayList()
+                        for (item in edges) {
+                            val mediainfo = parse1(item.asJsonObject)
                             medias.add(mediainfo)
                         }
                         adapter.loadMore(medias)
@@ -257,14 +281,15 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
-                }else{
-                    Log.e(TAG,res.errorBody()?.string()+"")
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e(TAG, res.errorBody()?.string() + "")
+                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                        .show()
                 }
 
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
@@ -276,42 +301,46 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     }
 
 
-    private fun parse1(jsonObject: JsonObject):MediaModel{
+    private fun parse1(jsonObject: JsonObject): MediaModel {
         val mediaModel = MediaModel()
         val node = jsonObject["node"].asJsonObject
         mediaModel.code = node["shortcode"].asString
         val captions = node["edge_media_to_caption"].asJsonObject["edges"].asJsonArray
-        if (captions.size()>0){
+        if (captions.size() > 0) {
             mediaModel.captionText = captions[0].asJsonObject["node"].asJsonObject["text"].asString
         }
-        if (node.has("video_url")){
+        if (node.has("video_url")) {
             mediaModel.videoUrl = node["video_url"].asString
         }
 
         val parentType = node["__typename"].asString
-        if (parentType == "GraphImage"){
+        if (parentType == "GraphImage") {
             mediaModel.mediaType = 1
-        }else if (parentType == "GraphVideo"){
+        } else if (parentType == "GraphVideo") {
             mediaModel.mediaType = 2
-        }else{
+        } else {
             mediaModel.mediaType = 8
         }
 
         mediaModel.thumbnailUrl = node["thumbnail_src"].asString
-        if (node.has("edge_sidecar_to_children")){
+        mediaModel.username = mBinding.etUsername.text.toString()
+        mediaModel.profilePicUrl = profileUrl
+        if (node.has("edge_sidecar_to_children")) {
             val children = node["edge_sidecar_to_children"].asJsonObject["edges"].asJsonArray
-            if (children.size()>0){
-                for (child in children){
+            if (children.size() > 0) {
+                for (child in children) {
                     val resource = ResourceModel()
                     resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
-                    resource.thumbnailUrl = child.asJsonObject["node"].asJsonObject["display_url"].asString
-                    resource.videoUrl = child.asJsonObject["node"].asJsonObject.getNullable("video_url")?.asString
+                    resource.thumbnailUrl =
+                        child.asJsonObject["node"].asJsonObject["display_url"].asString
+                    resource.videoUrl =
+                        child.asJsonObject["node"].asJsonObject.getNullable("video_url")?.asString
                     val typeName = child.asJsonObject["node"].asJsonObject["__typename"].asString
-                    if (typeName == "GraphImage"){
+                    if (typeName == "GraphImage") {
                         resource.mediaType = 1
-                    }else if (typeName == "GraphVideo"){
+                    } else if (typeName == "GraphVideo") {
                         resource.mediaType = 2
-                    }else{
+                    } else {
                         resource.mediaType = 8
                     }
                     mediaModel.resources.add(resource)
@@ -324,13 +353,12 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     }
 
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode==LOGIN_REQ){
+        if (requestCode == LOGIN_REQ) {
 
-            if (resultCode==200){
+            if (resultCode == 200) {
                 getData()
             }
 

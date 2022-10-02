@@ -48,9 +48,11 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
     
     lateinit var progressDialog: ProgressDialog
     lateinit var progressDialog2: ProgressDialog
+    lateinit var adapter: MultiTypeAdapter
+
     var mediaInfo = MediaModel()
     var isBack = false
-    lateinit var adapter: MultiTypeAdapter
+
     var code:String?=null
     var mInterstitialAd: InterstitialAd? = null
 
@@ -80,7 +82,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             isBack = false
             mInterstitialAd?.show(this@TagBlogDetails)
             lifecycleScope.launch {
-                val oldRecord = RecordDB.getInstance().recordDao().findById(code!!)
+                val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (oldRecord != null) {
                     Toast.makeText(this@TagBlogDetails, getString(R.string.exist), Toast.LENGTH_SHORT).show()
                     return@launch
@@ -100,7 +102,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
                 //Log.v(TAG,"finish")
                 val record =
-                    Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
+                    Record(null, Gson().toJson(mediaInfo), System.currentTimeMillis(),null,code)
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog2.dismiss()
@@ -121,6 +123,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
     override fun initData() {
         if (intent.extras!!.getBoolean("flag")) {
             mBinding.btnDownload.visibility = View.VISIBLE
+
             getDataFromServer()
         } else {
             mBinding.btnDownload.visibility = View.INVISIBLE
@@ -184,7 +187,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
         lifecycleScope.launch {
             //检查是否已存在
-            val record = RecordDB.getInstance().recordDao().findById(code!!)
+            val record = RecordDB.getInstance().recordDao().findByCode(code!!)
 
             if (record != null) {
                 mediaInfo = gson.fromJson(record.content, MediaModel::class.java)

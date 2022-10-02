@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.models.Record
 
-@Database(entities = [Record::class], version = 4, exportSchema = true)
+@Database(entities = [Record::class], version = 6, exportSchema = true)
 abstract class RecordDB : RoomDatabase() {
 
     abstract fun recordDao(): RecordDao

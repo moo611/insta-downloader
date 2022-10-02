@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center"
     android:padding="10dp"
     android:orientation="vertical"
     android:layout_height="wrap_content">
 
     <com.igtools.videodownloader.widgets.RoundImageView
+        app:radius="20dp"
         android:id="@+id/img_avatar"
         android:layout_width="40dp"
         android:layout_height="40dp"/>

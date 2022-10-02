@@ -75,7 +75,11 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
             mBinding.llLogout.visibility = View.INVISIBLE
             Toast.makeText(requireContext(),getString(R.string.log_out),Toast.LENGTH_SHORT).show()
         }
-
+        var isChecked = true
+        if (ShareUtils.getData("isAuto") != null) {
+            isChecked = ShareUtils.getData("isAuto").toBoolean()
+        }
+        mBinding.mySwitch.isChecked = isChecked
         mBinding.mySwitch.setOnCheckedChangeListener { _, b -> ShareUtils.putData("isAuto",b.toString()) }
 
     }

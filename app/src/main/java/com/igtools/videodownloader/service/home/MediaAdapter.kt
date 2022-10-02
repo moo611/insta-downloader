@@ -21,6 +21,7 @@ class MediaAdapter(var c: Context) : RecyclerView.Adapter<MediaAdapter.BlogViewH
     var medias: ArrayList<MediaModel> = ArrayList()
     val gson = Gson()
     var fromTag = false
+
     inner class BlogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var imgThumbnail: ImageView = itemView.findViewById(R.id.img_thumbnail)
         var imgCollections: ImageView = itemView.findViewById(R.id.img_collections)
@@ -53,16 +54,20 @@ class MediaAdapter(var c: Context) : RecyclerView.Adapter<MediaAdapter.BlogViewH
         holder.itemView.setOnClickListener {
 
             val mediaModel = gson.toJson(medias[position])
-            if (fromTag){
+            if (fromTag) {
                 //tag的结果没有resources，因此需要调接口重新获取子集
                 c.startActivity(
                     Intent(c, TagBlogDetails::class.java)
-                        .putExtra("code", medias[position].code).putExtra("flag", true)
+                        .putExtra("code", medias[position].code)
+                        .putExtra("flag", true)
+
                 )
-            }else{
+            } else {
                 c.startActivity(
                     Intent(c, BlogDetailsActivity::class.java)
-                        .putExtra("content", mediaModel).putExtra("flag", true)
+                        .putExtra("content", mediaModel)
+                        .putExtra("flag", true)
+
                 )
             }
 

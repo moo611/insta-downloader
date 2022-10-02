@@ -43,6 +43,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     val TAG = "BlogDetailsActivity"
     lateinit var adapter: MultiTypeAdapter
     lateinit var progressDialog: ProgressDialog
+
     var isBack = false
     var mediaInfo = MediaModel()
     var code: String? = null
@@ -78,7 +79,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
             lifecycleScope.launch {
 
-                val oldRecord = RecordDB.getInstance().recordDao().findById(code!!)
+                val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (oldRecord != null) {
                     Toast.makeText(
                         this@BlogDetailsActivity,
@@ -102,7 +103,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
                 //Log.v(TAG,"finish")
                 val record =
-                    Record(mediaInfo.code, Gson().toJson(mediaInfo), System.currentTimeMillis())
+                    Record(null,Gson().toJson(mediaInfo), System.currentTimeMillis(),null,code)
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog.dismiss()
@@ -135,6 +136,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     }
 
     override fun initData() {
+
         getDataFromLocal()
     }
 

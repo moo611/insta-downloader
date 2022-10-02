@@ -21,7 +21,13 @@ interface RecordDao {
     @Delete
     suspend fun delete(record: Record?)
 
-    @Query("SELECT * FROM Record WHERE id = :code")
-    suspend fun findById(code: String): Record?
+//    @Query("SELECT * FROM Record WHERE id = :code")
+//    suspend fun findById(code: String): Record?
+
+    @Query("SELECT * FROM Record WHERE url = :url")
+    suspend fun findByUrl(url: String): Record?
+
+    @Query("SELECT * FROM Record WHERE code = :code")
+    suspend fun findByCode(code: String): Record?
 
 }

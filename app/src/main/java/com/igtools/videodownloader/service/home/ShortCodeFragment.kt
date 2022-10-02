@@ -157,7 +157,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
             override fun onAdLoaded() {
                 // Code to be executed when an ad finishes loading.
-                mBinding.adView.visibility = View.VISIBLE
+                mBinding.adcard.visibility = View.VISIBLE
             }
 
 
@@ -270,14 +270,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     private fun getMediaData() {
 
-        val shortCode = getShortCode()
-        if (shortCode == null) {
-            Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
-            return
-        }
         lifecycleScope.launch {
             //检查是否已存在
-            val record = RecordDB.getInstance().recordDao().findById(shortCode)
+            val url = mBinding.etShortcode.text.toString()
+            val record = RecordDB.getInstance().recordDao().findByUrl(url)
 
             if (record != null) {
                 curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
@@ -305,7 +301,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 map["User-Agent"] = Urls.USER_AGENT
 
                 val map2: HashMap<String, String> = HashMap()
-                map2["shortcode"] = shortCode
+                val shortCode = getShortCode()
+                map2["shortcode"] = shortCode!!
 
                 val res = ApiClient.getClient()
                     .getMediaData(Urls.GRAPH_QL, map, Urls.QUERY_HASH, gson.toJson(map2))
@@ -321,7 +318,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     curMediaInfo = parseMedia(jsonObject)
                     mInterstitialAd?.show(requireActivity())
                     updateUI()
-                    saveRecord(shortCode)
+                    saveRecord()
 
                     if (curMediaInfo?.mediaType == 8) {
                         val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
@@ -348,8 +345,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                //Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
-                bottomDialog.show()
+
             }
         }
     }
@@ -359,14 +355,11 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
      * 获取story
      */
     private fun getStoryData() {
-        val pk = getShortCode()
-        if (pk == null) {
-            Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
-            return
-        }
+
         lifecycleScope.launch {
             //检查是否已存在
-            val record = RecordDB.getInstance().recordDao().findById(pk)
+            val myUrl = mBinding.etShortcode.text.toString()
+            val record = RecordDB.getInstance().recordDao().findByUrl(myUrl)
             if (record != null) {
                 curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
                 updateUI()
@@ -381,7 +374,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 val cookie = ShareUtils.getData("cookie")
                 map["Cookie"] = cookie!!
                 map["User-Agent"] = Urls.USER_AGENT
-
+                val pk = getShortCode()
                 val url = Urls.PRIVATE_API + "/media/" + pk + "/info"
                 val res = ApiClient.getClient()
                     .getStoryData(url, map)
@@ -392,7 +385,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     curMediaInfo = parseStory(jsonObject)
                     mInterstitialAd?.show(requireActivity())
                     updateUI()
-                    saveRecord(pk)
+                    saveRecord()
                     download(curMediaInfo)
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
@@ -436,9 +429,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             .into(mBinding.avatar)
     }
 
-    private fun saveRecord(id: String) {
+    private fun saveRecord() {
         lifecycleScope.launch {
-            val record = Record(id, gson.toJson(curMediaInfo), System.currentTimeMillis())
+            val url = mBinding.etShortcode.text.toString()
+            val record = Record(null, gson.toJson(curMediaInfo), System.currentTimeMillis(),url,null)
             RecordDB.getInstance().recordDao().insert(record)
         }
 
@@ -567,14 +561,16 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         lifecycleScope.launch {
             records = RecordDB.getInstance().recordDao().recent() as ArrayList<Record>
             Log.v(TAG, records.size.toString())
-            for (record in records) {
+            if (records.size>0){
+                mBinding.container2.visibility = View.VISIBLE
+                for (record in records) {
 
-                val mediaModel = gson.fromJson(record.content, MediaModel::class.java)
-                medias.add(mediaModel)
+                    val mediaModel = gson.fromJson(record.content, MediaModel::class.java)
+                    medias.add(mediaModel)
 
+                }
+                recentAdapter.setDatas(medias)
             }
-            recentAdapter.setDatas(medias)
-
         }
 
     }
