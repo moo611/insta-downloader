@@ -209,6 +209,12 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             }
 
         }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
         getRecentData()
     }
 
@@ -249,6 +255,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             val cookie = ShareUtils.getData("cookie")
             if (cookie == null) {
                 bottomDialog.show()
+
+                firebaseAnalytics.logEvent("dialog_show"){
+                    param("flag", "1")
+                }
             } else {
                 getStoryData()
             }
@@ -265,7 +275,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     /**
      * 获取video,image,igtv,reel
-     * 登录情况下
+     *
      */
 
     private fun getMediaData() {
@@ -337,9 +347,16 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     getRecentData()
 
                 } else {
-                    Log.e(TAG, res.errorBody()?.string() + "")
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
-                        .show()
+
+//                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+//                        .show()
+                    if (!requireActivity().isFinishing){
+                        bottomDialog.show()
+                        firebaseAnalytics.logEvent("dialog_show"){
+                            param("flag", "1")
+                        }
+                    }
+
                 }
 
             } catch (e: Exception) {
@@ -389,7 +406,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     download(curMediaInfo)
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
-
+                    getRecentData()
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(
@@ -399,6 +416,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     )
                         .show()
                 }
+
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
@@ -557,7 +575,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     private fun getRecentData() {
         val medias: ArrayList<MediaModel> = ArrayList()
-
+        val igstory = MediaModel()
+        igstory.captionText = "StorySaver"
+        medias.add(igstory)
         lifecycleScope.launch {
             records = RecordDB.getInstance().recordDao().recent() as ArrayList<Record>
             Log.v(TAG, records.size.toString())
@@ -591,7 +611,13 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == LOGIN_REQ && resultCode == 200) {
+
+            firebaseAnalytics.logEvent("user_login"){
+                param("flag", "2")
+            }
+
             autoStart()
+
         }
     }
 
@@ -614,6 +640,18 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this);
+    }
+
+    private fun extractToken(cookie: String): String? {
+
+        val strings = cookie.split(";")
+        for (str  in strings){
+            val str2 =  str.trim()
+            if (str2.startsWith("csrftoken=")){
+                return str2.substring(10,str2.length)
+            }
+        }
+        return null
     }
 
 

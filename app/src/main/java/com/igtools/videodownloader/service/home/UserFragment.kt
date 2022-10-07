@@ -16,6 +16,10 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.service.web.WebActivity
@@ -37,7 +41,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     val TAG = "UserFragment"
     val LOGIN_REQ = 1000
 
-
+    lateinit var firebaseAnalytics: FirebaseAnalytics
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: MediaAdapter
     lateinit var progressDialog: ProgressDialog
@@ -99,6 +103,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             val cookie = ShareUtils.getData("cookie")
             if (cookie == null) {
                 bottomDialog.show()
+                firebaseAnalytics.logEvent("dialog_show"){
+                    param("flag", "1")
+                }
             } else {
                 getData()
             }
@@ -147,6 +154,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     }
 
     override fun initData() {
+        firebaseAnalytics = Firebase.analytics
         initAds()
     }
 
@@ -360,6 +368,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
             if (resultCode == 200) {
                 getData()
+                firebaseAnalytics.logEvent("user_login"){
+                    param("flag", "2")
+                }
             }
 
         }

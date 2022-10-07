@@ -16,6 +16,10 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonArray
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.service.web.WebActivity
@@ -39,14 +43,12 @@ import java.lang.Exception
 class TagFragment : BaseFragment<FragmentTagBinding>() {
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: MediaAdapter
-    
+    lateinit var firebaseAnalytics: FirebaseAnalytics
     lateinit var progressDialog: ProgressDialog
     lateinit var bottomDialog: BottomDialog
 
     var loadingMore = false
-
     var mInterstitialAd: InterstitialAd? = null
-
     //tag 分页信息
     var next_media_ids: ArrayList<String> = ArrayList()
     var next_max_id = ""
@@ -98,6 +100,9 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
             val cookie = ShareUtils.getData("cookie")
             if (cookie == null) {
                 bottomDialog.show()
+                firebaseAnalytics.logEvent("dialog_show"){
+                    param("flag", "1")
+                }
             } else {
                 refresh(mBinding.etTag.text.toString())
             }
@@ -148,7 +153,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
     }
 
     override fun initData() {
-
+        firebaseAnalytics = Firebase.analytics
     }
 
     private fun initAds() {
@@ -379,7 +384,9 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
 
             if (resultCode == 200) {
                 refresh(mBinding.etTag.text.toString())
-
+                firebaseAnalytics.logEvent("user_login"){
+                    param("flag", "2")
+                }
             }
 
         }

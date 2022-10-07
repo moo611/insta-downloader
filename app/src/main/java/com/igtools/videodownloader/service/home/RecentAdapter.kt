@@ -1,7 +1,10 @@
 package com.igtools.videodownloader.service.home
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,14 +35,28 @@ class RecentAdapter(var c: Context) : RecyclerView.Adapter<RecentAdapter.RecentH
     }
 
     override fun onBindViewHolder(holder: RecentHolder, position: Int) {
+        if (position == 0){
+            holder.avatar.setImageResource(R.mipmap.story)
+            holder.username.text = medias[position].captionText
+            holder.itemView.setOnClickListener {
+                val packageName = "com.igtools.storysaver"
+                try {
+                    c.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
+                } catch (e: ActivityNotFoundException) {
+                    c.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
+                }
+            }
+        }else{
 
-        Glide.with(c)
-            .load(medias[position].profilePicUrl)
-            .circleCrop()
-            .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
-            .into(holder.avatar)
-        holder.username.text = medias[position].username
-        holder.itemView.setOnClickListener { v: View? -> onItemClickListener!!.onClick(position) }
+            Glide.with(c)
+                .load(medias[position].profilePicUrl)
+                .circleCrop()
+                .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
+                .into(holder.avatar)
+            holder.username.text = medias[position].username
+            holder.itemView.setOnClickListener { v: View? -> onItemClickListener!!.onClick(position-1) }
+        }
+
     }
 
     override fun getItemCount(): Int {
