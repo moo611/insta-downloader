@@ -256,7 +256,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             if (cookie == null) {
                 bottomDialog.show()
 
-                firebaseAnalytics.logEvent("dialog_show"){
+                firebaseAnalytics.logEvent("dialog_show") {
                     param("flag", "1")
                 }
             } else {
@@ -295,7 +295,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             }
             progressDialog.show()
 
-            firebaseAnalytics.logEvent("total"){
+            firebaseAnalytics.logEvent("total") {
                 param("flag", "1")
             }
             try {
@@ -321,7 +321,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 progressDialog.dismiss()
                 if (code == 200 && jsonObject != null) {
 
-                    firebaseAnalytics.logEvent("success"){
+                    firebaseAnalytics.logEvent("success") {
                         param("flag", "2")
                     }
 
@@ -350,9 +350,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
 //                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
 //                        .show()
-                    if (!requireActivity().isFinishing){
+                    if (!requireActivity().isFinishing) {
                         bottomDialog.show()
-                        firebaseAnalytics.logEvent("dialog_show"){
+                        firebaseAnalytics.logEvent("dialog_show") {
                             param("flag", "1")
                         }
                     }
@@ -450,7 +450,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     private fun saveRecord() {
         lifecycleScope.launch {
             val url = mBinding.etShortcode.text.toString()
-            val record = Record(null, gson.toJson(curMediaInfo), System.currentTimeMillis(),url,null)
+            val record =
+                Record(null, gson.toJson(curMediaInfo), System.currentTimeMillis(), url, null)
             RecordDB.getInstance().recordDao().insert(record)
         }
 
@@ -535,9 +536,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 }
             }
 
-            if (jsonObject.has("caption")) {
-                mediaModel.captionText = jsonObject["caption"].asJsonObject["text"].asString
-            }
+            mediaModel.captionText =
+                jsonObject.getNullable("caption")?.asJsonObject?.get("text")?.asString
 
         }
 
@@ -581,7 +581,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         lifecycleScope.launch {
             records = RecordDB.getInstance().recordDao().recent() as ArrayList<Record>
             Log.v(TAG, records.size.toString())
-            if (records.size>0){
+            if (records.size > 0) {
                 mBinding.container2.visibility = View.VISIBLE
                 for (record in records) {
 
@@ -612,7 +612,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == LOGIN_REQ && resultCode == 200) {
 
-            firebaseAnalytics.logEvent("user_login"){
+            firebaseAnalytics.logEvent("user_login") {
                 param("flag", "2")
             }
 
@@ -645,10 +645,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     private fun extractToken(cookie: String): String? {
 
         val strings = cookie.split(";")
-        for (str  in strings){
-            val str2 =  str.trim()
-            if (str2.startsWith("csrftoken=")){
-                return str2.substring(10,str2.length)
+        for (str in strings) {
+            val str2 = str.trim()
+            if (str2.startsWith("csrftoken=")) {
+                return str2.substring(10, str2.length)
             }
         }
         return null
