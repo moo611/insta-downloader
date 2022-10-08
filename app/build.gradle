@@ -52,7 +52,7 @@ android {
             signingConfig signingConfigs.myconfig
         }
         debug{
-            signingConfig signingConfigs.myconfig
+            //signingConfig signingConfigs.myconfig
         }
     }
     compileOptions {

@@ -332,7 +332,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
     }
 
     private fun parseData(sections: JsonArray, medias: ArrayList<MediaModel>) {
-
+        Log.v(TAG,sections.toString())
 
         for (section in sections) {
             Log.v(TAG, "--------section:" + sections.indexOf(section))
@@ -341,8 +341,8 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
                 Log.v(TAG, "--------item:" + items.indexOf(item))
                 val mediaModel = MediaModel()
                 val media = item.asJsonObject["media"]
-                mediaModel.pk = media.asJsonObject["pk"].asString
-                mediaModel.captionText = media.asJsonObject["caption"]?.asJsonObject?.get("text")?.asString
+                mediaModel.pk = media.asJsonObject["pk"].asLong.toString()
+                mediaModel.captionText = media.asJsonObject.getNullable("caption")?.asJsonObject?.get("text")?.asString
                 mediaModel.code = media.asJsonObject["code"].asString
                 mediaModel.mediaType = media.asJsonObject["media_type"].asInt
 
