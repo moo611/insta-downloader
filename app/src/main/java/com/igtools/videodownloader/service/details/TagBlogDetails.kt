@@ -320,7 +320,6 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
         if (media?.mediaType == 1) {
             //image
             val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-                .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
             FileUtils.saveFile(this@TagBlogDetails,responseBody.body(), file, 1)
@@ -328,7 +327,6 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
         } else if (media?.mediaType == 2) {
             //video
             val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
-                .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)

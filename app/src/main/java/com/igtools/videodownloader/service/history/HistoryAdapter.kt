@@ -29,7 +29,12 @@ class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
     }
 
     override fun onBindViewHolder(holder: HistoryHolder, position: Int) {
-        Glide.with(c).load(medias[position].thumbnailUrl)
+        val url:String = if (medias[position].resources.size>0){
+            medias[position].resources[0].thumbnailUrl
+        }else{
+            medias[position].thumbnailUrl
+        }
+        Glide.with(c).load(url)
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
             .into(holder.thumbnail)
         holder.caption.text = medias[position].captionText

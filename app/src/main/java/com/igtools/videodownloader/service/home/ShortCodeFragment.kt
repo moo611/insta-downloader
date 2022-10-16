@@ -554,15 +554,13 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         if (media?.mediaType == 1) {
             //image
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-                .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
+            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
             FileUtils.saveFile(requireContext(), responseBody.body(), file, 1)
 
         } else if (media?.mediaType == 2) {
             //video
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
-                .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)

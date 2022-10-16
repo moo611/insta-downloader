@@ -28,6 +28,15 @@ interface UrlService {
 
 
     @GET
+    suspend fun getMediaData2(
+        @Url url: String,
+        @HeaderMap headers: HashMap<String, String>,
+        @Query("query_hash") query_hash: String,
+        @Query("variables") variables: String
+    ): Response<ResponseBody>
+
+
+    @GET
     suspend fun getStoryData(@Url url: String,@HeaderMap headers: HashMap<String, String>): Response<JsonObject>
 
 
