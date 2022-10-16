@@ -15,7 +15,9 @@ data class Record(
     @ColumnInfo(name="url")
     var url:String?,
     @ColumnInfo(name="code")
-    var code:String?
+    var code:String?,
+    @ColumnInfo(name="paths")
+    var paths:String?
 )
 
 

@@ -45,15 +45,15 @@ import java.io.InputStream
 class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
     val TAG = "TagBlogDetails"
-    
+
     lateinit var progressDialog: ProgressDialog
     lateinit var progressDialog2: ProgressDialog
     lateinit var adapter: MultiTypeAdapter
 
     var mediaInfo = MediaModel()
     var isBack = false
-
-    var code:String?=null
+    var paths = StringBuffer()
+    var code: String? = null
     var mInterstitialAd: InterstitialAd? = null
 
     override fun getLayoutId(): Int {
@@ -84,11 +84,15 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             lifecycleScope.launch {
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (oldRecord != null) {
-                    Toast.makeText(this@TagBlogDetails, getString(R.string.exist), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@TagBlogDetails,
+                        getString(R.string.exist),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@launch
                 }
                 progressDialog2.show()
-                if (mediaInfo.mediaType==8){
+                if (mediaInfo.mediaType == 8) {
                     val all: List<Deferred<Unit>> = mediaInfo.resources.map {
                         async {
                             download(it)
@@ -96,13 +100,20 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
                     }
 
                     all.awaitAll()
-                }else{
+                } else {
                     download(mediaInfo)
                 }
 
                 //Log.v(TAG,"finish")
                 val record =
-                    Record(null, Gson().toJson(mediaInfo), System.currentTimeMillis(),null,code)
+                    Record(
+                        null,
+                        Gson().toJson(mediaInfo),
+                        System.currentTimeMillis(),
+                        null,
+                        code,
+                        paths.toString()
+                    )
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog2.dismiss()
@@ -132,7 +143,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
     }
 
 
-    private fun initAds(){
+    private fun initAds() {
         val adRequest = AdRequest.Builder().build();
 
         InterstitialAd.load(this, "ca-app-pub-8609866682652024/5709188020", adRequest,
@@ -171,13 +182,13 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
         }
     }
 
-    private fun getDataFromLocal(){
+    private fun getDataFromLocal() {
         val content = intent.extras!!.getString("content")
-        mediaInfo = gson.fromJson(content,MediaModel::class.java)
+        mediaInfo = gson.fromJson(content, MediaModel::class.java)
         code = mediaInfo.code
     }
 
-    private fun getDataFromServer(){
+    private fun getDataFromServer() {
         code = intent.extras!!.getString("code")
         getMedia()
 
@@ -220,14 +231,22 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
-                    Toast.makeText(this@TagBlogDetails, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        this@TagBlogDetails,
+                        getString(R.string.not_found),
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 }
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                Toast.makeText(this@TagBlogDetails, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@TagBlogDetails,
+                    getString(R.string.parse_error),
+                    Toast.LENGTH_SHORT
+                ).show()
 
             }
         }
@@ -295,16 +314,20 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             mBinding.picture.visibility = View.INVISIBLE
             adapter.setDatas(mediaInfo.resources)
 
-        } else if (mediaInfo.mediaType == 1){
+        } else if (mediaInfo.mediaType == 1) {
             mBinding.picture.visibility = View.VISIBLE
             mBinding.banner.visibility = View.INVISIBLE
             mBinding.imgPlay.visibility = View.INVISIBLE
-            Glide.with(this).load(mediaInfo.thumbnailUrl).placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1))).into(mBinding.picture)
-        }else if (mediaInfo.mediaType == 2){
+            Glide.with(this).load(mediaInfo.thumbnailUrl)
+                .placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1)))
+                .into(mBinding.picture)
+        } else if (mediaInfo.mediaType == 2) {
             mBinding.picture.visibility = View.VISIBLE
             mBinding.banner.visibility = View.INVISIBLE
             mBinding.imgPlay.visibility = View.VISIBLE
-            Glide.with(this).load(mediaInfo.thumbnailUrl).placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1))).into(mBinding.picture)
+            Glide.with(this).load(mediaInfo.thumbnailUrl)
+                .placeholder(ColorDrawable(ContextCompat.getColor(this, R.color.gray_1)))
+                .into(mBinding.picture)
         }
 
         Glide.with(this).load(mediaInfo.profilePicUrl)
@@ -315,22 +338,29 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
     }
 
-    private suspend fun download(media: ResourceModel?) = withContext(Dispatchers.IO) {
+    private suspend fun download(media: ResourceModel?) {
 
         if (media?.mediaType == 1) {
             //image
             val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
-            FileUtils.saveFile(this@TagBlogDetails,responseBody.body(), file, 1)
+            paths.append(file.absolutePath).append(",")
+            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+            withContext(Dispatchers.IO) {
+                FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 1)
+            }
+
 
         } else if (media?.mediaType == 2) {
             //video
             val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
+            paths.append(file.absolutePath).append(",")
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
-                FileUtils.saveFile(this@TagBlogDetails,responseBody.body(), file, 2)
+                withContext(Dispatchers.IO) {
+                    FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 2)
+                }
 
             }
 

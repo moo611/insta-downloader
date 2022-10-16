@@ -5,7 +5,9 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
@@ -19,17 +21,21 @@ import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.service.details.BlogDetailsActivity
+import com.igtools.videodownloader.service.web.WebActivity
+import com.igtools.videodownloader.utils.FileUtils
+import com.igtools.videodownloader.widgets.dialog.BottomDialog
+import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.launch
+import java.io.File
 
 
 class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     lateinit var adapter: HistoryAdapter
-    
+    lateinit var bottomDialog: BottomDialog
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
-
-
+    var lastSelected = -1
     val TAG = "DownloadActivity"
 
 
@@ -38,6 +44,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     override fun initView() {
+        initDialog()
         val adRequest = AdRequest.Builder().build();
         mBinding.adView.loadAd(adRequest)
         adapter = HistoryAdapter(this)
@@ -51,14 +58,53 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                     Intent(
                         this@HistoryActivity,
                         BlogDetailsActivity::class.java
-                    ).putExtra("content", content).putExtra("flag",false)
+                    ).putExtra("content", content).putExtra("flag", false)
                 )
+            }
+
+        }
+
+        adapter.onMenuClickListener = object : HistoryAdapter.OnMenuClickListener {
+            override fun onClick(position: Int) {
+
+                lastSelected = position
+                if (!bottomDialog.isShowing) {
+                    bottomDialog.show()
+                }
+
             }
 
         }
 
         mBinding.imgBack.setOnClickListener {
             finish()
+        }
+    }
+
+    fun initDialog() {
+
+        bottomDialog = BottomDialog(this, R.style.MyDialogTheme)
+        val bottomView = LayoutInflater.from(this).inflate(R.layout.dialog_menu, null)
+
+        val llRepost: LinearLayout = bottomView.findViewById(R.id.ll_repost)
+        val llShare: LinearLayout = bottomView.findViewById(R.id.ll_share)
+        val llDelete: LinearLayout = bottomView.findViewById(R.id.ll_delete)
+        bottomDialog.setContent(bottomView)
+
+        llRepost.setOnClickListener {
+            if (lastSelected != -1) {
+
+            }
+        }
+        llShare.setOnClickListener {
+            if (lastSelected != -1) {
+                shareFile()
+            }
+        }
+        llDelete.setOnClickListener {
+            if (lastSelected != -1) {
+                deleteFile()
+            }
         }
     }
 
@@ -79,6 +125,32 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
             adapter.setDatas(medias)
 
         }
+    }
+
+    fun shareFile() {
+
+        bottomDialog.dismiss()
+
+        records[lastSelected].paths?.let {
+            val newpaths = it.substring(0,it.length-1)
+            val paths = newpaths.split(",")
+            if (paths.size>1){
+                FileUtils.shareAll(this,paths)
+            }else if (paths.size==1){
+
+                if(paths[0].endsWith(".jpg")){
+                    FileUtils.share(this,File(paths[0]))
+                }else{
+                    FileUtils.shareVideo(this, File(paths[0]))
+                }
+            }
+
+        }
+
+    }
+
+    fun deleteFile() {
+
     }
 
 }

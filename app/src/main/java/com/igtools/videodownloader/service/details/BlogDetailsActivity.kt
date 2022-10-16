@@ -48,7 +48,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     var mediaInfo = MediaModel()
     var code: String? = null
     var mInterstitialAd: InterstitialAd? = null
-
+    var paths = StringBuffer()
 
     override fun getLayoutId(): Int {
         return R.layout.activity_blog_details
@@ -103,7 +103,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
                 //Log.v(TAG,"finish")
                 val record =
-                    Record(null,Gson().toJson(mediaInfo), System.currentTimeMillis(),null,code)
+                    Record(null,Gson().toJson(mediaInfo), System.currentTimeMillis(),null,code,paths.toString())
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog.dismiss()
@@ -219,9 +219,9 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-
+            paths.append(file.absolutePath).append(",")
             try {
-                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl!!)
+                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
                 withContext(Dispatchers.IO) {
                     FileUtils.saveFile(this@BlogDetailsActivity, responseBody.body(), file, 1)
                 }
@@ -236,6 +236,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
                 .absolutePath
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
+            paths.append(file.absolutePath).append(",")
             try {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
                 withContext(Dispatchers.IO) {

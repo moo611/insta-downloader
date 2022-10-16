@@ -75,6 +75,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
     var records: ArrayList<Record> = ArrayList()
+    var paths = StringBuffer()
     private val LOGIN_REQ = 1000
 
     override fun getLayoutId(): Int {
@@ -279,7 +280,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
      */
 
     private fun getMediaData() {
-
+        paths = StringBuffer()
         lifecycleScope.launch {
             //检查是否已存在
             val url = mBinding.etShortcode.text.toString()
@@ -328,7 +329,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     curMediaInfo = parseMedia(jsonObject)
                     mInterstitialAd?.show(requireActivity())
                     updateUI()
-                    saveRecord()
 
                     if (curMediaInfo?.mediaType == 8) {
                         val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
@@ -343,7 +343,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     }
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
-
+                    saveRecord()
                     getRecentData()
 
                 } else {
@@ -372,7 +372,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
      * 获取story
      */
     private fun getStoryData() {
-
+        paths = StringBuffer()
         lifecycleScope.launch {
             //检查是否已存在
             val myUrl = mBinding.etShortcode.text.toString()
@@ -402,8 +402,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     curMediaInfo = parseStory(jsonObject)
                     mInterstitialAd?.show(requireActivity())
                     updateUI()
-                    saveRecord()
                     download(curMediaInfo)
+                    saveRecord()
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
                     getRecentData()
@@ -447,14 +447,19 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             .into(mBinding.avatar)
     }
 
-    private fun saveRecord() {
-        lifecycleScope.launch {
-            val url = mBinding.etShortcode.text.toString()
-            val record =
-                Record(null, gson.toJson(curMediaInfo), System.currentTimeMillis(), url, null)
-            RecordDB.getInstance().recordDao().insert(record)
-        }
-
+    suspend fun saveRecord() {
+        Log.v(TAG, "paths:" + paths)
+        val url = mBinding.etShortcode.text.toString()
+        val record =
+            Record(
+                null,
+                gson.toJson(curMediaInfo),
+                System.currentTimeMillis(),
+                url,
+                null,
+                paths.toString()
+            )
+        RecordDB.getInstance().recordDao().insert(record)
     }
 
 
@@ -549,22 +554,28 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     /**
      * 下载单个图片或视频
      */
-    private suspend fun download(media: ResourceModel?) = withContext(Dispatchers.IO) {
+    private suspend fun download(media: ResourceModel?) {
 
         if (media?.mediaType == 1) {
             //image
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
+            paths.append(file.absolutePath).append(",")
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
-            FileUtils.saveFile(requireContext(), responseBody.body(), file, 1)
+            withContext(Dispatchers.IO) {
+                FileUtils.saveFile(requireContext(), responseBody.body(), file, 1)
+            }
 
         } else if (media?.mediaType == 2) {
             //video
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
             val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
+            paths.append(file.absolutePath).append(",")
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
-                FileUtils.saveFile(requireContext(), responseBody.body(), file, 2)
+                withContext(Dispatchers.IO) {
+                    FileUtils.saveFile(requireContext(), responseBody.body(), file, 2)
+                }
 
             }
 

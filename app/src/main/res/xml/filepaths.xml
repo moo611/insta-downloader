@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--    外部存储空间根目录，等同于 Environment.getExternalStorageDirectory() 所获取的目录路径；-->
+    <external-path
+        name="external_files"
+        path="." />
+</resources>

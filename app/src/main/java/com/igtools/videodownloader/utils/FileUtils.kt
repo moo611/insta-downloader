@@ -12,15 +12,19 @@ import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.FileProvider
+import com.igtools.videodownloader.BaseApplication
 import okhttp3.ResponseBody
 import java.io.*
+
 
 object FileUtils {
 
     /**
      * 保存文件到本地
      */
-    fun saveFile(c:Context,body: ResponseBody?, file: File, type: Int) {
+    fun saveFile(c: Context, body: ResponseBody?, file: File, type: Int) {
         if (body == null) {
             return
         }
@@ -55,8 +59,6 @@ object FileUtils {
     }
 
 
-
-
     fun saveImageToAlbum(c: Context, bitmap: Bitmap, fileName: String) {
 
         if (Build.VERSION.SDK_INT >= 29) {
@@ -66,7 +68,10 @@ object FileUtils {
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                 put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES+"/igtools-downloader")
+                put(
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    Environment.DIRECTORY_PICTURES + "/" + BaseApplication.folderName
+                )
                 put(MediaStore.Video.Media.IS_PENDING, 1)
             }
 
@@ -109,7 +114,10 @@ object FileUtils {
         val valuesVideos = ContentValues()
 
         uriSavedVideo = if (Build.VERSION.SDK_INT >= 29) {
-            valuesVideos.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
+            valuesVideos.put(
+                MediaStore.Video.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_MOVIES + "/" + BaseApplication.folderName
+            )
             valuesVideos.put(MediaStore.Video.Media.TITLE, videoFile.name)
             valuesVideos.put(MediaStore.Video.Media.DISPLAY_NAME, videoFile.name)
             valuesVideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
@@ -152,7 +160,7 @@ object FileUtils {
             }
             out.close()
             `in`.close()
-            pfd!!.close()
+            pfd.close()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -167,7 +175,7 @@ object FileUtils {
 
 
     /** * 将图片存到本地  */
-    fun saveBitmap(bm: Bitmap, f:File,quality:Int):Boolean{
+    fun saveBitmap(bm: Bitmap, f: File, quality: Int): Boolean {
         try {
             val out = FileOutputStream(f)
             bm.compress(Bitmap.CompressFormat.JPEG, quality, out)
@@ -182,33 +190,77 @@ object FileUtils {
         return false
     }
 
-    fun share(c:Context,file:File){
-        checkFileUriExposure()
+    fun share(c: Context, file: File) {
+
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
-        val uri = Uri.fromFile(file)
+        val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            FileProvider.getUriForFile(
+                c, "com.igtools.videodownloader.fileprovider",
+                file
+            );
+        } else {
+            Uri.fromFile(file);
+        }
         sendIntent.type = "image/*"
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri)
         c.startActivity(Intent.createChooser(sendIntent, "share to"))
 
     }
 
-    fun share(c:Context,text:String){
-        checkFileUriExposure()
+    fun shareVideo(c: Context, file: File) {
+
+        val sendIntent = Intent()
+        sendIntent.action = Intent.ACTION_SEND
+
+        val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            FileProvider.getUriForFile(
+                c, "com.igtools.videodownloader.fileprovider",
+                file
+            );
+        } else {
+            Uri.fromFile(file);
+        }
+
+        sendIntent.type = "video/mp4"
+        sendIntent.putExtra(Intent.EXTRA_STREAM, uri)
+        c.startActivity(Intent.createChooser(sendIntent, "share to"))
+
+    }
+
+    fun share(c: Context, text: String) {
+
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
         sendIntent.type = "text/plain"
-        sendIntent.putExtra(Intent.EXTRA_TEXT,text)
+        sendIntent.putExtra(Intent.EXTRA_TEXT, text)
         c.startActivity(Intent.createChooser(sendIntent, "share to"))
     }
 
-    /**
-     * 分享前必须执行本代码，主要用于兼容SDK18以上的系统
-     */
-    private fun checkFileUriExposure() {
-        val builder = StrictMode.VmPolicy.Builder()
-        StrictMode.setVmPolicy(builder.build())
-        builder.detectFileUriExposure()
+    fun shareAll(c: Context, paths: List<String>) {
+
+        val files = ArrayList<Uri>()
+        for (path in paths /* List of the files you want to send */) {
+            val file = File(path)
+
+            val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                FileProvider.getUriForFile(
+                    c, "com.igtools.videodownloader.fileprovider",
+                    file
+                );
+            } else {
+                Uri.fromFile(file);
+            }
+            files.add(uri)
+
+        }
+        val intent = Intent()
+        intent.action = Intent.ACTION_SEND_MULTIPLE
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Here are some files.")
+        intent.type = "*/*" /* This example is sharing jpeg images. */
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files)
+        c.startActivity(Intent.createChooser(intent, "share to"))
     }
+
 
 }

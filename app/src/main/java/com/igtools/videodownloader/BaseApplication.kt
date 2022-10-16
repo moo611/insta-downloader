@@ -9,7 +9,7 @@ class BaseApplication : Application() {
 
     companion object {
         lateinit var mContext: Context
-
+        val folderName = "igtools-downloader"
         //var baseUrl = "http://34.221.49.20:3000"
         var serverIp = "http://54.190.47.148"
         var port1 = "3000"

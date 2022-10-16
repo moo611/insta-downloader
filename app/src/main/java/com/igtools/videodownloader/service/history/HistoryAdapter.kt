@@ -23,6 +23,7 @@ class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
 
     var medias: List<MediaModel> = ArrayList()
     var onItemClickListener: OnItemClickListener? = null
+    var onMenuClickListener: OnMenuClickListener?=null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryHolder {
         val v = LayoutInflater.from(c).inflate(R.layout.item_history, parent, false)
         return HistoryHolder(v)
@@ -45,6 +46,10 @@ class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
             .into(holder.avatar)
         holder.username.text = medias[position].username
+        holder.menu.setOnClickListener {
+            onMenuClickListener?.onClick(position)
+
+        }
     }
 
     override fun getItemCount(): Int {
@@ -61,11 +66,15 @@ class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
         var caption: TextView = itemView.findViewById(R.id.tv_caption)
         var avatar: ImageView = itemView.findViewById(R.id.img_avatar)
         var username: TextView = itemView.findViewById(R.id.tv_username)
-
+        var menu:ImageView = itemView.findViewById(R.id.menu)
     }
 
 
     interface OnItemClickListener {
+        fun onClick(position: Int)
+    }
+
+    interface OnMenuClickListener{
         fun onClick(position: Int)
     }
 }
