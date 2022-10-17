@@ -287,8 +287,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             val record = RecordDB.getInstance().recordDao().findByUrl(url)
 
             if (record != null) {
-                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
-                updateUI()
+//                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
+                getRecentData()
                 Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
                     .show()
 
@@ -327,8 +327,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     }
 
                     curMediaInfo = parseMedia(jsonObject)
+                    showCurrent()
                     mInterstitialAd?.show(requireActivity())
-                    updateUI()
 
                     if (curMediaInfo?.mediaType == 8) {
                         val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
@@ -378,8 +378,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             val myUrl = mBinding.etShortcode.text.toString()
             val record = RecordDB.getInstance().recordDao().findByUrl(myUrl)
             if (record != null) {
-                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
-                updateUI()
+                //curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
+                getRecentData()
                 Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
                     .show()
 
@@ -400,8 +400,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 progressDialog.dismiss()
                 if (code == 200 && jsonObject != null) {
                     curMediaInfo = parseStory(jsonObject)
+                    showCurrent()
                     mInterstitialAd?.show(requireActivity())
-                    updateUI()
+
                     download(curMediaInfo)
                     saveRecord()
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
@@ -432,9 +433,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     }
 
-
-    private fun updateUI() {
-
+    /**
+     * 刚搜索到先展示
+     */
+    private fun showCurrent(){
         mBinding.container.visibility = View.VISIBLE
         mBinding.progressbar.visibility = View.VISIBLE
         mBinding.username.text = curMediaInfo?.captionText
@@ -446,6 +448,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
             .into(mBinding.avatar)
     }
+
 
     suspend fun saveRecord() {
         Log.v(TAG, "paths:" + paths)
@@ -599,6 +602,19 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
                 }
                 recentAdapter.setDatas(medias)
+
+                curMediaInfo = gson.fromJson(records[0].content,MediaModel::class.java)
+                mBinding.container.visibility = View.VISIBLE
+                mBinding.progressbar.visibility = View.VISIBLE
+                mBinding.username.text = curMediaInfo?.captionText
+                Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
+                    .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
+                    .listener(glideListener)
+                    .into(mBinding.picture)
+                Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
+                    .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
+                    .into(mBinding.avatar)
+
             }
         }
 

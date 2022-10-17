@@ -49,11 +49,11 @@ class RecentAdapter(var c: Context) : RecyclerView.Adapter<RecentAdapter.RecentH
         }else{
 
             Glide.with(c)
-                .load(medias[position].profilePicUrl)
+                .load(medias[position].thumbnailUrl)
                 .circleCrop()
                 .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
                 .into(holder.avatar)
-            holder.username.text = medias[position].username
+            holder.username.text = medias[position].captionText
             holder.itemView.setOnClickListener { v: View? -> onItemClickListener!!.onClick(position-1) }
         }
 
