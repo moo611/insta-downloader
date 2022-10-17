@@ -1,30 +1,23 @@
 package com.igtools.videodownloader.service.history
 
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
-import android.os.Bundle
+import android.content.IntentSender
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.fagaia.farm.base.BaseActivity
 import com.google.android.gms.ads.AdRequest
-import com.google.gson.Gson
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.ActivityHistoryBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.service.details.BlogDetailsActivity
-import com.igtools.videodownloader.service.web.WebActivity
 import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
-import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -37,8 +30,13 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     var medias: ArrayList<MediaModel> = ArrayList()
     var lastSelected = -1
     val TAG = "DownloadActivity"
+    private val resolutionForResult = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { activityResult ->
 
-
+        // do whatever you want with activity result...
+        deleteFile()
+    }
     override fun getLayoutId(): Int {
         return R.layout.activity_history
     }
@@ -132,15 +130,15 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         bottomDialog.dismiss()
 
         records[lastSelected].paths?.let {
-            val newpaths = it.substring(0,it.length-1)
+            val newpaths = it.substring(0, it.length - 1)
             val paths = newpaths.split(",")
-            if (paths.size>1){
-                FileUtils.shareAll(this,paths)
-            }else if (paths.size==1){
+            if (paths.size > 1) {
+                FileUtils.shareAll(this, paths)
+            } else if (paths.size == 1) {
 
-                if(paths[0].endsWith(".jpg")){
-                    FileUtils.share(this,File(paths[0]))
-                }else{
+                if (paths[0].endsWith(".jpg")) {
+                    FileUtils.share(this, File(paths[0]))
+                } else {
                     FileUtils.shareVideo(this, File(paths[0]))
                 }
             }
@@ -150,7 +148,76 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     fun deleteFile() {
+        bottomDialog.dismiss()
+        records[lastSelected].paths?.let {
 
+            val newpaths = it.substring(0, it.length - 1)
+            val paths = newpaths.split(",")
+            if (paths.size > 1) {
+
+                for (path in paths){
+
+                    if (path.endsWith(".jpg")){
+                        deleteImage(path)
+                    }else if (path.endsWith(".mp4")){
+                        deleteVideo(path)
+                    }
+
+                }
+
+            } else if (paths.size == 1) {
+
+                if (paths[0].endsWith(".jpg")) {
+
+                    deleteImage(paths[0])
+                } else if (paths[0].endsWith(".mp4")){
+                    deleteVideo(paths[0])
+                }
+
+            }
+            //删除记录
+            val record = records[lastSelected]
+
+            lifecycleScope.launch {
+                RecordDB.getInstance().recordDao().delete(record)
+                records.removeAt(lastSelected)
+                medias.removeAt(lastSelected)
+                adapter.setDatas(medias)
+            }
+
+        }
+    }
+
+    fun deleteImage(path:String){
+        FileUtils.deleteImageUri(
+            contentResolver,
+            path,
+            object : FileUtils.FileDeleteListener {
+                override fun onSuccess() {
+                    //Toast.makeText(this@HistoryActivity,"",Toast.LENGTH_SHORT)
+
+                }
+
+                override fun onFailed(intentSender: IntentSender?) {
+
+                }
+            })
+    }
+
+    fun deleteVideo(path:String){
+        FileUtils.deleteVideoUri(
+            contentResolver,
+            path,
+            object : FileUtils.FileDeleteListener {
+                override fun onSuccess() {
+                    //Toast.makeText(this@HistoryActivity,"",Toast.LENGTH_SHORT)
+
+                }
+
+                override fun onFailed(intentSender: IntentSender?) {
+
+                }
+            })
     }
 
 }

@@ -1,18 +1,17 @@
 package com.igtools.videodownloader.utils
 
-import android.content.ContentValues
-import android.content.Context
-import android.content.Intent
+import android.app.RecoverableSecurityException
+import android.content.*
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.ParcelFileDescriptor
-import android.os.StrictMode
 import android.provider.MediaStore
+
 import android.util.Log
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.FileProvider
 import com.igtools.videodownloader.BaseApplication
 import okhttp3.ResponseBody
@@ -20,6 +19,7 @@ import java.io.*
 
 
 object FileUtils {
+    val TAG = "FileUtils"
 
     /**
      * 保存文件到本地
@@ -44,7 +44,7 @@ object FileUtils {
             //存到相册
             if (type == 1) {
                 val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                saveImageToAlbum(c, bitmap, file.name)
+                saveImageToAlbum(c, bitmap, file)
             } else {
                 saveVideoToAlbum(c, file)
             }
@@ -59,14 +59,14 @@ object FileUtils {
     }
 
 
-    fun saveImageToAlbum(c: Context, bitmap: Bitmap, fileName: String) {
+    fun saveImageToAlbum(c: Context, bitmap: Bitmap, file: File) {
 
         if (Build.VERSION.SDK_INT >= 29) {
 
             var fos: OutputStream? = null
             var imageUri: Uri? = null
             val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.MediaColumns.DISPLAY_NAME, file.name)
                 put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
                 put(
                     MediaStore.MediaColumns.RELATIVE_PATH,
@@ -87,19 +87,19 @@ object FileUtils {
             fos?.use { bitmap.compress(Bitmap.CompressFormat.JPEG, 70, it) }
 
             contentValues.clear()
-            contentValues.put(MediaStore.Video.Media.IS_PENDING, 0)
+            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
             imageUri?.let { contentResolver.update(it, contentValues, null, null) }
 
         } else {
 
             val insertImage: String =
-                MediaStore.Images.Media.insertImage(c.contentResolver, bitmap, fileName, null)
+                MediaStore.Images.Media.insertImage(c.contentResolver, bitmap, file.name, null)
 
             // 发送广播，通知刷新图库的显示
             c.sendBroadcast(
                 Intent(
                     Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
-                    Uri.parse("file://$fileName")
+                    Uri.parse("file://$file.name")
                 )
             )
         }
@@ -262,5 +262,108 @@ object FileUtils {
         c.startActivity(Intent.createChooser(intent, "share to"))
     }
 
+
+    /**
+     * 删除文件
+     * @return
+     */
+    fun deleteImageUri(
+        contentResolver: ContentResolver,
+        imgPath: String,
+        fileDeleteListener: FileDeleteListener
+    ) {
+        val file = File(imgPath)
+        val cursor: Cursor = contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Images.Media._ID),
+            MediaStore.MediaColumns.DISPLAY_NAME + "=?",
+            arrayOf(file.name),
+            null
+        ) ?: return
+
+        try {
+            if (cursor.moveToFirst()) {
+                val id: Long = cursor.getLong(0)
+                val contentUri: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                val uri: Uri = ContentUris.withAppendedId(contentUri, id)
+
+                val count: Int = contentResolver.delete(uri, null, null)
+
+                if (count > 0) {
+                    fileDeleteListener.onSuccess()
+                } else {
+                    fileDeleteListener.onFailed(null)
+                }
+            } else {
+                val isSuccess = File(imgPath).delete()
+                if (isSuccess) {
+                    fileDeleteListener.onSuccess()
+                } else {
+                    fileDeleteListener.onFailed(null)
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, e.message + "")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && e is RecoverableSecurityException) {
+
+                fileDeleteListener.onFailed(e.userAction.actionIntent.intentSender)
+
+            }
+        } finally {
+            cursor.close()
+        }
+    }
+
+
+    fun deleteVideoUri(
+        contentResolver: ContentResolver,
+        videoPath: String,
+        fileDeleteListener: FileDeleteListener
+    ) {
+        val file = File(videoPath)
+        val cursor: Cursor = contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Video.Media._ID),
+            MediaStore.MediaColumns.DISPLAY_NAME + "=?",
+            arrayOf(file.name),
+            null
+        ) ?: return
+        try {
+            if (cursor.moveToFirst()) {
+                val id: Long = cursor.getLong(0)
+                val contentUri: Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                val uri: Uri = ContentUris.withAppendedId(contentUri, id)
+
+                val count: Int = contentResolver.delete(uri, null, null)
+
+                if (count > 0) {
+                    fileDeleteListener.onSuccess()
+                } else {
+                    fileDeleteListener.onFailed(null)
+                }
+            } else {
+                val isSuccess = File(videoPath).delete()
+                if (isSuccess) {
+                    fileDeleteListener.onSuccess()
+                } else {
+                    fileDeleteListener.onFailed(null)
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, e.message + "")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && e is RecoverableSecurityException) {
+
+                fileDeleteListener.onFailed(e.userAction.actionIntent.intentSender)
+
+            }
+        } finally {
+            cursor.close()
+        }
+    }
+
+    interface FileDeleteListener {
+        fun onSuccess()
+        fun onFailed(intentSender: IntentSender?)
+    }
 
 }
