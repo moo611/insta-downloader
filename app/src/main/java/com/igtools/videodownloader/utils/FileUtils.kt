@@ -114,14 +114,16 @@ object FileUtils {
 
         } else {
 
-            val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, file.name)
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
-                put(MediaStore.MediaColumns.DATA,file.absolutePath)
-            }
+            val insertImage: String =
+                MediaStore.Images.Media.insertImage(c.contentResolver, bitmap, file.name, null)
 
-            val resolver = c.contentResolver
-            resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues)
+            // 发送广播，通知刷新图库的显示
+            c.sendBroadcast(
+                Intent(
+                    Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                    Uri.parse("file://$file.name")
+                )
+            )
         }
 
     }
