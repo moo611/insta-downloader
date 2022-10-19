@@ -563,7 +563,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     medias.add(mediaModel)
 
                 }
-                recentAdapter.setDatas(medias)
 
                 curMediaInfo = gson.fromJson(records[0].content, MediaModel::class.java)
                 mBinding.container.visibility = View.VISIBLE
@@ -590,6 +589,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     .into(mBinding.avatar)
 
             }
+
+            recentAdapter.setDatas(medias)
         }
 
     }
