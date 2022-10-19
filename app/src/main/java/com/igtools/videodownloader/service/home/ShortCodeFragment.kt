@@ -3,28 +3,18 @@ package com.igtools.videodownloader.service.home
 import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
-import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.fagaia.farm.base.BaseFragment
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
@@ -35,9 +25,9 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.R
+import com.igtools.videodownloader.api.okhttp.OnDownloadListener
 import com.igtools.videodownloader.service.details.BlogDetailsActivity
 import com.igtools.videodownloader.service.web.WebActivity
 import com.igtools.videodownloader.api.okhttp.Urls
@@ -66,8 +56,8 @@ import java.io.File
 class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     lateinit var progressDialog: ProgressDialog
-    lateinit var circularProgressDrawable: CircularProgressDrawable
-    lateinit var glideListener: RequestListener<Drawable>
+
+    //lateinit var glideListener: RequestListener<Drawable>
     lateinit var bottomDialog: BottomDialog
     lateinit var recentAdapter: RecentAdapter
     lateinit var firebaseAnalytics: FirebaseAnalytics
@@ -87,11 +77,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
-
-        circularProgressDrawable = CircularProgressDrawable(requireContext())
-        circularProgressDrawable.strokeWidth = 5f
-        circularProgressDrawable.centerRadius = 30f
-        circularProgressDrawable.start()
 
         bottomDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
         val bottomView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_bottom, null)
@@ -164,32 +149,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
         }
 
-        glideListener = object : RequestListener<Drawable> {
-            override fun onLoadFailed(
-                e: GlideException?,
-                model: Any?,
-                target: Target<Drawable>?,
-                isFirstResource: Boolean
-            ): Boolean {
 
-                mBinding.progressbar.visibility = View.INVISIBLE
-                return false;
-            }
-
-            override fun onResourceReady(
-                resource: Drawable?,
-                model: Any?,
-                target: Target<Drawable>?,
-                dataSource: DataSource?,
-                isFirstResource: Boolean
-            ): Boolean {
-
-                mBinding.progressbar.visibility = View.INVISIBLE
-                return false;
-
-            }
-
-        }
     }
 
     override fun initData() {
@@ -329,7 +289,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     curMediaInfo = parseMedia(jsonObject)
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
-
+                    mBinding.progressbar.visibility = View.VISIBLE
                     if (curMediaInfo?.mediaType == 8) {
                         val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
                             async {
@@ -341,6 +301,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     } else {
                         download(curMediaInfo)
                     }
+                    mBinding.progressbar.visibility = View.INVISIBLE
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
                     saveRecord()
@@ -402,11 +363,12 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     curMediaInfo = parseStory(jsonObject)
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
-
+                    mBinding.progressbar.visibility =View.VISIBLE
                     download(curMediaInfo)
                     saveRecord()
                     Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
+                    mBinding.progressbar.visibility = View.INVISIBLE
                     getRecentData()
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
@@ -436,13 +398,12 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     /**
      * 刚搜索到先展示
      */
-    private fun showCurrent(){
+    private fun showCurrent() {
         mBinding.container.visibility = View.VISIBLE
         mBinding.progressbar.visibility = View.VISIBLE
         mBinding.username.text = curMediaInfo?.captionText
         Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
             .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
-            .listener(glideListener)
             .into(mBinding.picture)
         Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
             .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
@@ -564,9 +525,11 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
             val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
             paths.append(file.absolutePath).append(",")
+//            val headers:HashMap<String,String> = HashMap()
+//            headers["Accept-Encoding"]="identity"
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
             withContext(Dispatchers.IO) {
-                FileUtils.saveFile(requireContext(), responseBody.body(), file, 1)
+                FileUtils.saveFile(requireContext(), responseBody.body(), file, 1, null)
             }
 
         } else if (media?.mediaType == 2) {
@@ -577,7 +540,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
                 withContext(Dispatchers.IO) {
-                    FileUtils.saveFile(requireContext(), responseBody.body(), file, 2)
+                    FileUtils.saveFile(requireContext(), responseBody.body(), file, 2, null)
                 }
 
             }
@@ -603,16 +566,28 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 }
                 recentAdapter.setDatas(medias)
 
-                curMediaInfo = gson.fromJson(records[0].content,MediaModel::class.java)
+                curMediaInfo = gson.fromJson(records[0].content, MediaModel::class.java)
                 mBinding.container.visibility = View.VISIBLE
-                mBinding.progressbar.visibility = View.VISIBLE
                 mBinding.username.text = curMediaInfo?.captionText
                 Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
-                    .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
-                    .listener(glideListener)
+                    .placeholder(
+                        ColorDrawable(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.gray_1
+                            )
+                        )
+                    )
                     .into(mBinding.picture)
                 Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
-                    .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
+                    .placeholder(
+                        ColorDrawable(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.gray_1
+                            )
+                        )
+                    )
                     .into(mBinding.avatar)
 
             }

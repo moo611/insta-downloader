@@ -1,18 +1,12 @@
 package com.igtools.videodownloader.service.details
 
 import android.app.ProgressDialog
-import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.fagaia.farm.base.BaseActivity
@@ -37,10 +31,7 @@ import com.igtools.videodownloader.utils.ShareUtils
 import com.igtools.videodownloader.utils.getNullable
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
-import okhttp3.ResponseBody
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 
 class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
@@ -347,7 +338,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             paths.append(file.absolutePath).append(",")
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
             withContext(Dispatchers.IO) {
-                FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 1)
+                FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 1,null)
             }
 
 
@@ -359,7 +350,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
                 withContext(Dispatchers.IO) {
-                    FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 2)
+                    FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 2,null)
                 }
 
             }

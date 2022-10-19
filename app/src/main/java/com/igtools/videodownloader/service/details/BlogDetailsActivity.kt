@@ -2,16 +2,10 @@ package com.igtools.videodownloader.service.details
 
 import android.app.ProgressDialog
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.os.Build
-import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.fagaia.farm.base.BaseActivity
@@ -32,11 +26,7 @@ import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.FileUtils
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
-import okhttp3.ResponseBody
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.lang.Exception
 
 class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
@@ -223,7 +213,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             try {
                 val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
                 withContext(Dispatchers.IO) {
-                    FileUtils.saveFile(this@BlogDetailsActivity, responseBody.body(), file, 1)
+                    FileUtils.saveFile(this@BlogDetailsActivity, responseBody.body(), file, 1,null)
                 }
 
             } catch (e: Error) {
@@ -240,7 +230,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             try {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
                 withContext(Dispatchers.IO) {
-                    FileUtils.saveFile(this@BlogDetailsActivity, responseBody.body(), file, 2)
+                    FileUtils.saveFile(this@BlogDetailsActivity, responseBody.body(), file, 2,null)
                 }
 
             } catch (e: Error) {

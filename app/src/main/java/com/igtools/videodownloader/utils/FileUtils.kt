@@ -14,6 +14,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.igtools.videodownloader.BaseApplication
+import com.igtools.videodownloader.api.okhttp.OnDownloadListener
 import okhttp3.ResponseBody
 import java.io.*
 
@@ -24,20 +25,41 @@ object FileUtils {
     /**
      * 保存文件到本地
      */
-    fun saveFile(c: Context, body: ResponseBody?, file: File, type: Int) {
+    fun saveFile(
+        c: Context,
+        body: ResponseBody?,
+        file: File,
+        type: Int,
+        downloadListener: OnDownloadListener?
+    ) {
         if (body == null) {
             return
         }
+        //var currentLength: Long = 0
+
         var input: InputStream? = null
         try {
+            //var totalLength: Long = body.contentLength()
+            //Log.v(TAG,"total len:$totalLength")
             input = body.byteStream()
 
             val fos = FileOutputStream(file)
+
             fos.use { output ->
                 val buffer = ByteArray(4 * 1024) // or other buffer size
                 var read: Int
                 while (input.read(buffer).also { read = it } != -1) {
+                    //currentLength += read
+                    //Log.v(TAG,"current len:$currentLength")
                     output.write(buffer, 0, read)
+
+                    //计算当前下载百分比，并经由回调传出
+                    //downloadListener?.onDownloading(((100 * currentLength / totalLength).toInt()));
+                    //当百分比为100时下载结束，调用结束回调，并传出下载后的本地路径
+//                    if ((100 * currentLength / totalLength).toInt() == 100) {
+//                        downloadListener?.onDownloadSuccess(file.absolutePath); //下载完成
+//                    }
+
                 }
                 output.flush()
             }
