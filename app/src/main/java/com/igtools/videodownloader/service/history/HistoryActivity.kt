@@ -2,10 +2,13 @@ package com.igtools.videodownloader.service.history
 
 import android.content.Intent
 import android.content.IntentSender
+import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.fagaia.farm.base.BaseActivity
@@ -26,6 +29,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     lateinit var adapter: HistoryAdapter
     lateinit var bottomDialog: BottomDialog
+    lateinit var bottomDialog2: BottomDialog
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
     var lastSelected = -1
@@ -37,6 +41,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         // do whatever you want with activity result...
         deleteFile()
     }
+
     override fun getLayoutId(): Int {
         return R.layout.activity_history
     }
@@ -90,7 +95,26 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         bottomDialog.setContent(bottomView)
 
         llRepost.setOnClickListener {
-            if (lastSelected != -1) {
+            if (lastSelected != -1 && records[lastSelected].paths != null) {
+                val size = records[lastSelected].paths!!.length
+                val newpaths = records[lastSelected].paths!!.substring(0, size - 1)
+                val paths = newpaths.split(",")
+                val path = paths[0]
+                val file = File(path)
+                val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    FileProvider.getUriForFile(
+                        this, "com.igtools.videodownloader.fileprovider",
+                        file
+                    );
+                } else {
+                    Uri.fromFile(file);
+                }
+
+                if (path.endsWith(".jpg")) {
+                    shareFileToInstagram(uri, false)
+                } else if (path.endsWith(".mp4")) {
+                    shareFileToInstagram(uri, true)
+                }
 
             }
         }
@@ -104,6 +128,8 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                 deleteFile()
             }
         }
+
+
     }
 
     override fun initData() {
@@ -155,11 +181,11 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
             val paths = newpaths.split(",")
             if (paths.size > 1) {
 
-                for (path in paths){
+                for (path in paths) {
 
-                    if (path.endsWith(".jpg")){
+                    if (path.endsWith(".jpg")) {
                         deleteImage(path)
-                    }else if (path.endsWith(".mp4")){
+                    } else if (path.endsWith(".mp4")) {
                         deleteVideo(path)
                     }
 
@@ -170,7 +196,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                 if (paths[0].endsWith(".jpg")) {
 
                     deleteImage(paths[0])
-                } else if (paths[0].endsWith(".mp4")){
+                } else if (paths[0].endsWith(".mp4")) {
                     deleteVideo(paths[0])
                 }
 
@@ -188,7 +214,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         }
     }
 
-    fun deleteImage(path:String){
+    fun deleteImage(path: String) {
         FileUtils.deleteImageUri(
             contentResolver,
             path,
@@ -204,7 +230,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
             })
     }
 
-    fun deleteVideo(path:String){
+    fun deleteVideo(path: String) {
         FileUtils.deleteVideoUri(
             contentResolver,
             path,
@@ -219,5 +245,27 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                 }
             })
     }
+
+
+    private fun shareFileToInstagram(uri: Uri?, isVideo: Boolean) {
+        if (uri == null) {
+            return
+        }
+        val feedIntent = Intent(Intent.ACTION_SEND)
+        feedIntent.type = if (isVideo) "video/*" else "image/*"
+        feedIntent.putExtra(Intent.EXTRA_STREAM, uri)
+        feedIntent.setPackage("com.instagram.android")
+        val storiesIntent = Intent("com.instagram.share.ADD_TO_STORY")
+        storiesIntent.setDataAndType(uri, if (isVideo) "mp4" else "jpg")
+        storiesIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        storiesIntent.setPackage("com.instagram.android")
+        grantUriPermission(
+            "com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+        val chooserIntent = Intent.createChooser(feedIntent, "share to")
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(storiesIntent))
+        startActivity(chooserIntent)
+    }
+
 
 }

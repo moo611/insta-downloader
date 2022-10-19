@@ -94,7 +94,7 @@ object FileUtils {
                     MediaStore.MediaColumns.RELATIVE_PATH,
                     Environment.DIRECTORY_PICTURES + "/" + BaseApplication.folderName
                 )
-                put(MediaStore.Video.Media.IS_PENDING, 1)
+                put(MediaStore.Images.Media.IS_PENDING, 1)
             }
 
             //use application context to get contentResolver
@@ -114,16 +114,14 @@ object FileUtils {
 
         } else {
 
-            val insertImage: String =
-                MediaStore.Images.Media.insertImage(c.contentResolver, bitmap, file.name, null)
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, file.name)
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
+                put(MediaStore.MediaColumns.DATA,file.absolutePath)
+            }
 
-            // 发送广播，通知刷新图库的显示
-            c.sendBroadcast(
-                Intent(
-                    Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
-                    Uri.parse("file://$file.name")
-                )
-            )
+            val resolver = c.contentResolver
+            resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues)
         }
 
     }

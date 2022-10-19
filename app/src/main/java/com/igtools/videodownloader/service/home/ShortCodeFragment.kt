@@ -400,7 +400,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
      */
     private fun showCurrent() {
         mBinding.container.visibility = View.VISIBLE
-        mBinding.progressbar.visibility = View.VISIBLE
         mBinding.username.text = curMediaInfo?.captionText
         Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
             .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))

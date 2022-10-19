@@ -79,11 +79,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
 
         }
         mBinding.llTag.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "123")
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "hashtag")
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
             showFragment(1)
             selectPage(1)
