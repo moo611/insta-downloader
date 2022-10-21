@@ -207,7 +207,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
         val isValid = URLUtil.isValidUrl(url)
         if (!isValid) {
-            Toast.makeText(context, getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -302,14 +302,14 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                         download(curMediaInfo)
                     }
                     mBinding.progressbar.visibility = View.INVISIBLE
-                    Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
                     saveRecord()
                     getRecentData()
 
                 } else {
 
-//                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+//                    Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
 //                        .show()
                     if (!requireActivity().isFinishing) {
                         bottomDialog.show()
@@ -366,7 +366,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     mBinding.progressbar.visibility =View.VISIBLE
                     download(curMediaInfo)
                     saveRecord()
-                    Toast.makeText(context, getString(R.string.download_finish), Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), getString(R.string.download_finish), Toast.LENGTH_SHORT)
                         .show()
                     mBinding.progressbar.visibility = View.INVISIBLE
                     getRecentData()

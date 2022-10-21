@@ -229,7 +229,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     mInterstitialAd?.show(requireActivity())
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
                         .show()
                 }
 
@@ -238,7 +238,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -291,7 +291,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     cursor = pageInfo["end_cursor"].asString
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
                         .show()
                 }
 
@@ -301,7 +301,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 Log.e(TAG, e.message + "")
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT).show()
             }
 
         }

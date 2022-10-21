@@ -2,6 +2,7 @@ package com.igtools.videodownloader.service.history
 
 import android.content.Intent
 import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -20,6 +21,7 @@ import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.service.details.BlogDetailsActivity
 import com.igtools.videodownloader.utils.FileUtils
+import com.igtools.videodownloader.utils.PermissionUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import kotlinx.coroutines.launch
 import java.io.File
@@ -34,13 +36,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     var medias: ArrayList<MediaModel> = ArrayList()
     var lastSelected = -1
     val TAG = "DownloadActivity"
-    private val resolutionForResult = registerForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { activityResult ->
 
-        // do whatever you want with activity result...
-        deleteFile()
-    }
 
     override fun getLayoutId(): Int {
         return R.layout.activity_history
@@ -201,27 +197,33 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                 }
 
             }
-            //删除记录
-            val record = records[lastSelected]
 
-            lifecycleScope.launch {
-                RecordDB.getInstance().recordDao().delete(record)
-                records.removeAt(lastSelected)
-                medias.removeAt(lastSelected)
-                adapter.setDatas(medias)
-            }
 
         }
     }
 
     fun deleteImage(path: String) {
+
+        if(!PermissionUtils.checkPermissionsForReadAndRight(this)){
+            PermissionUtils.requirePermissionsReadAndWrite(this,1024)
+            return
+        }
+
         FileUtils.deleteImageUri(
             contentResolver,
             path,
             object : FileUtils.FileDeleteListener {
                 override fun onSuccess() {
                     //Toast.makeText(this@HistoryActivity,"",Toast.LENGTH_SHORT)
+                    //删除记录
+                    val record = records[lastSelected]
 
+                    lifecycleScope.launch {
+                        RecordDB.getInstance().recordDao().delete(record)
+                        records.removeAt(lastSelected)
+                        medias.removeAt(lastSelected)
+                        adapter.setDatas(medias)
+                    }
                 }
 
                 override fun onFailed(intentSender: IntentSender?) {
@@ -231,13 +233,26 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     fun deleteVideo(path: String) {
+        if(!PermissionUtils.checkPermissionsForReadAndRight(this)){
+            PermissionUtils.requirePermissionsReadAndWrite(this,1024)
+            return
+        }
+
         FileUtils.deleteVideoUri(
             contentResolver,
             path,
             object : FileUtils.FileDeleteListener {
                 override fun onSuccess() {
                     //Toast.makeText(this@HistoryActivity,"",Toast.LENGTH_SHORT)
+                    //删除记录
+                    val record = records[lastSelected]
 
+                    lifecycleScope.launch {
+                        RecordDB.getInstance().recordDao().delete(record)
+                        records.removeAt(lastSelected)
+                        medias.removeAt(lastSelected)
+                        adapter.setDatas(medias)
+                    }
                 }
 
                 override fun onFailed(intentSender: IntentSender?) {
@@ -268,4 +283,21 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode==1024){
+            for (result in grantResults){
+                if (result!= PackageManager.PERMISSION_GRANTED){
+                    return
+                }
+            }
+            Log.v(TAG,"all permission granted")
+        }
+
+    }
 }

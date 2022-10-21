@@ -19,7 +19,7 @@ class RoundImageView: AppCompatImageView {
     private var rightTopRadius: Int
     private var leftTopRadius: Int
     private var radius: Int =0
-
+    val path = Path()
     constructor(context: Context): this(context, null)
     constructor(context: Context, attributeSet: AttributeSet?): this(context, attributeSet, 0)
     constructor(context: Context, attributeSet: AttributeSet?, defStyleAttr: Int)
@@ -71,7 +71,7 @@ class RoundImageView: AppCompatImageView {
         val maxBottom = Math.max(leftBottomRadius, rightBottomRadius)
         val minHeight = maxTop + maxBottom
         if (width > minWidth && height > minHeight) {
-            val path = Path()
+
             //四个角：右上，右下，左下，左上
             path.moveTo(leftTopRadius.toFloat(), 0F)
 

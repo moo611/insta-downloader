@@ -229,7 +229,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
 
                     }
                 } else {
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
                         .show()
 
                 }
@@ -239,7 +239,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
                 Log.v(TAG, e.message + "")
 
                 progressDialog.dismiss()
-                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
 
             }
 
@@ -302,7 +302,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
                     }
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
-                    Toast.makeText(context, getString(R.string.not_found), Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
                         .show()
                 }
 
@@ -312,7 +312,7 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
                 Log.v(TAG, e.message + "")
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(context, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
             }
 
         }

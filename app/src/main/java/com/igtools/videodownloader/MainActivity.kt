@@ -136,9 +136,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
 
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val item = clipboard.primaryClip?.getItemAt(0)
-                Log.v(TAG, "item:$item")
+//                Log.v(TAG, "item:$item")
                 if (item?.text?.toString() != null && item.text.toString().isNotEmpty()) {
-                    Log.v(TAG, "text:" + item.text.toString())
+//                    Log.v(TAG, "text:" + item.text.toString())
                     EventBus.getDefault().post(IntentEvent(item.text.toString()))
                 }
             }
