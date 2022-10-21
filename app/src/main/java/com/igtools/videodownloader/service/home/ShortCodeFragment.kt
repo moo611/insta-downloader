@@ -265,6 +265,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 val random = (0 until size).random()
                 map["Cookie"] = Urls.Cookies[random]
                 val cookie = ShareUtils.getData("cookie")
+                Log.v(TAG,cookie+"")
                 if (cookie != null && cookie.contains("sessionid")) {
                     map["Cookie"] = cookie
                 }
