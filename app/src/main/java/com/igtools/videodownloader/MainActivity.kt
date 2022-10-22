@@ -24,6 +24,7 @@ import com.igtools.videodownloader.service.setting.SettingFragment
 import com.igtools.videodownloader.service.tag.TagFragment
 import com.igtools.videodownloader.models.IntentEvent
 import com.igtools.videodownloader.utils.RegexUtils
+import com.igtools.videodownloader.utils.ShareUtils
 import org.greenrobot.eventbus.EventBus
 
 
@@ -101,7 +102,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
     }
 
     override fun initData() {
-        handleText(intent)
 
         val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
         val configSettings = remoteConfigSettings {
@@ -113,13 +113,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val str = remoteConfig.getString("cookies")
+                    ShareUtils.putData("configs",str)
                     val cookies = gson.fromJson(str,Array<MyCookie>::class.java)
                     MyConfig.cookies = cookies.toList()
-                    Log.v(TAG, MyConfig.cookies.toString())
+                    //Log.v(TAG, MyConfig.cookies.toString())
                 }
 
             }
 
+        handleCopy()
     }
 
     
@@ -127,11 +129,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
         super.onNewIntent(intent)
         Log.v(TAG, "on new intent")
         //Toast.makeText(this,"new intent",Toast.LENGTH_SHORT).show()
-        handleText(intent)
+        handleIntent(intent)
 
     }
 
-    fun handleText(newintent: Intent?) {
+    fun handleCopy() {
+        mBinding.imgDownload.post {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val item = clipboard.primaryClip?.getItemAt(0)
+            Log.v(TAG, "item:$item")
+            if (item?.text?.toString() != null && item.text.toString().isNotEmpty()) {
+                Log.v(TAG, "text:" + item.text.toString())
+                EventBus.getDefault().post(IntentEvent(item.text.toString()))
+            }
+        }
+
+    }
+
+    fun handleIntent(newintent: Intent?) {
         //这里要加延时，否则会获取不到intent或者clipboarditem
         mBinding.imgDownload.post {
             Log.v(TAG, newintent?.action + newintent?.type + "")
@@ -148,17 +163,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
 
                     }
                 }
-            } else {
-
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val item = clipboard.primaryClip?.getItemAt(0)
-//                Log.v(TAG, "item:$item")
-                if (item?.text?.toString() != null && item.text.toString().isNotEmpty()) {
-//                    Log.v(TAG, "text:" + item.text.toString())
-                    EventBus.getDefault().post(IntentEvent(item.text.toString()))
-                }
             }
-
         }
     }
     

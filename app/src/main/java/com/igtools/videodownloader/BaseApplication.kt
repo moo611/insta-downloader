@@ -3,10 +3,14 @@ package com.igtools.videodownloader
 import android.app.Application
 import android.content.Context
 import com.google.android.gms.ads.MobileAds
+import com.google.gson.Gson
+import com.igtools.videodownloader.api.retrofit.MyConfig
+import com.igtools.videodownloader.api.retrofit.MyCookie
+import com.igtools.videodownloader.utils.ShareUtils
 
 class BaseApplication : Application() {
     val TAG = "BaseApplication"
-
+    val gson= Gson()
     companion object {
         lateinit var mContext: Context
         val folderName = "igtools-downloader"
@@ -23,6 +27,11 @@ class BaseApplication : Application() {
         mContext = applicationContext
 
         MobileAds.initialize(this)
+
+        ShareUtils.getData("configs")?.let {
+            val cookies = gson.fromJson(it,Array<MyCookie>::class.java)
+            MyConfig.cookies = cookies.toList()
+        }
     }
 
 
