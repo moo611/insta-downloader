@@ -170,6 +170,12 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     fun deleteFile() {
+
+        if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
+            PermissionUtils.requirePermissionsReadAndWrite(this, 1024)
+            return
+        }
+
         bottomDialog.dismiss()
 
         records[lastSelected].paths?.let {
@@ -214,11 +220,6 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     fun deleteImage(path: String) {
 
-        if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
-            PermissionUtils.requirePermissionsReadAndWrite(this, 1024)
-            return
-        }
-
         FileUtils.deleteImageUri(
             contentResolver,
             path,
@@ -235,10 +236,6 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     fun deleteVideo(path: String) {
-        if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
-            PermissionUtils.requirePermissionsReadAndWrite(this, 1024)
-            return
-        }
 
         FileUtils.deleteVideoUri(
             contentResolver,
