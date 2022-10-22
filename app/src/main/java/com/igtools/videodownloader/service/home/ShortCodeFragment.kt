@@ -32,6 +32,7 @@ import com.igtools.videodownloader.service.details.BlogDetailsActivity
 import com.igtools.videodownloader.service.web.WebActivity
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
+import com.igtools.videodownloader.api.retrofit.MyConfig
 import com.igtools.videodownloader.databinding.FragmentShortCodeBinding
 import com.igtools.videodownloader.models.IntentEvent
 import com.igtools.videodownloader.models.MediaModel
@@ -261,9 +262,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             }
             try {
                 val map: HashMap<String, String> = HashMap()
-                val size = Urls.Cookies.size
+                val size = MyConfig.cookies.size
                 val random = (0 until size).random()
-                map["Cookie"] = Urls.Cookies[random]
+                map["Cookie"] = MyConfig.cookies[random].value
                 val cookie = ShareUtils.getData("cookie")
                 Log.v(TAG,cookie+"")
                 if (cookie != null && cookie.contains("sessionid")) {

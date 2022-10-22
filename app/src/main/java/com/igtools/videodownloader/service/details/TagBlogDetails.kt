@@ -199,13 +199,11 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-                val random = (0..2).random()
-                map["Cookie"] = Urls.Cookies[random]
+
                 val cookie = ShareUtils.getData("cookie")
                 if (cookie != null && cookie.contains("sessionid")) {
                     map["Cookie"] = cookie
                 }
-
                 map["User-Agent"] = Urls.USER_AGENT
 
                 val map2: HashMap<String, String> = HashMap()
