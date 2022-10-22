@@ -246,15 +246,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
             object : FileUtils.FileDeleteListener {
                 override fun onSuccess() {
                     //Toast.makeText(this@HistoryActivity,"",Toast.LENGTH_SHORT)
-                    //删除记录
-                    val record = records[lastSelected]
 
-                    lifecycleScope.launch {
-                        RecordDB.getInstance().recordDao().delete(record)
-                        records.removeAt(lastSelected)
-                        medias.removeAt(lastSelected)
-                        adapter.setDatas(medias)
-                    }
                 }
 
                 override fun onFailed(intentSender: IntentSender?) {
