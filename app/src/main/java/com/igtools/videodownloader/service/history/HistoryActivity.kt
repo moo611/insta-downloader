@@ -171,6 +171,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     fun deleteFile() {
         bottomDialog.dismiss()
+
         records[lastSelected].paths?.let {
 
             val newpaths = it.substring(0, it.length - 1)
@@ -198,14 +199,23 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
             }
 
-
         }
+
+        //删除记录
+        val record = records[lastSelected]
+        lifecycleScope.launch {
+            RecordDB.getInstance().recordDao().delete(record)
+            records.removeAt(lastSelected)
+            medias.removeAt(lastSelected)
+            adapter.setDatas(medias)
+        }
+
     }
 
     fun deleteImage(path: String) {
 
-        if(!PermissionUtils.checkPermissionsForReadAndRight(this)){
-            PermissionUtils.requirePermissionsReadAndWrite(this,1024)
+        if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
+            PermissionUtils.requirePermissionsReadAndWrite(this, 1024)
             return
         }
 
@@ -215,15 +225,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
             object : FileUtils.FileDeleteListener {
                 override fun onSuccess() {
                     //Toast.makeText(this@HistoryActivity,"",Toast.LENGTH_SHORT)
-                    //删除记录
-                    val record = records[lastSelected]
 
-                    lifecycleScope.launch {
-                        RecordDB.getInstance().recordDao().delete(record)
-                        records.removeAt(lastSelected)
-                        medias.removeAt(lastSelected)
-                        adapter.setDatas(medias)
-                    }
                 }
 
                 override fun onFailed(intentSender: IntentSender?) {
@@ -233,8 +235,8 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     fun deleteVideo(path: String) {
-        if(!PermissionUtils.checkPermissionsForReadAndRight(this)){
-            PermissionUtils.requirePermissionsReadAndWrite(this,1024)
+        if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
+            PermissionUtils.requirePermissionsReadAndWrite(this, 1024)
             return
         }
 
@@ -290,13 +292,13 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode==1024){
-            for (result in grantResults){
-                if (result!= PackageManager.PERMISSION_GRANTED){
+        if (requestCode == 1024) {
+            for (result in grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
                     return
                 }
             }
-            Log.v(TAG,"all permission granted")
+            Log.v(TAG, "all permission granted")
         }
 
     }
