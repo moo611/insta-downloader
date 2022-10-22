@@ -105,7 +105,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
 
         val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
         val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 3600
+            minimumFetchIntervalInSeconds = 3600*12
         }
         remoteConfig.setConfigSettingsAsync(configSettings)
 
