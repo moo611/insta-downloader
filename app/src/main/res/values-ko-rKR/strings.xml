@@ -43,5 +43,6 @@
     <string name="long_text3">우리는 귀하의 개인 정보를 수집하지 않습니다. 인스타그램은 귀하의 계정을 금지할 수 있으므로 기본 계정을 사용하지 마십시오</string>
     <string name="parse_error">구문 분석 예외</string>
     <string name="recent_download">최근</string>
-
+    <string name="facebook_app_id">1129445801291076</string>
+    <string name="facebook_client_token">909dba105c7cc41b2b2f50ac66b425a6</string>
 </resources>

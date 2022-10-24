@@ -42,4 +42,7 @@
     <string name="long_text3">我們不會收集您的個人信息。instagram可能會封掉您的賬號，因此不要用您的主要賬號</string>
     <string name="parse_error">解析異常</string>
     <string name="recent_download">最近</string>
+
+    <string name="facebook_app_id">1129445801291076</string>
+    <string name="facebook_client_token">909dba105c7cc41b2b2f50ac66b425a6</string>
 </resources>

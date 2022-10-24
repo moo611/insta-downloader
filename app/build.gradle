@@ -16,8 +16,8 @@ android {
         applicationId "com.igtools.videodownloader"
         minSdk 21
         targetSdk 31
-        versionCode 12
-        versionName "1.0.7"
+        versionCode 13
+        versionName "1.0.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -117,4 +117,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:21.1.0'
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+
+    //facebook
+    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
 }
