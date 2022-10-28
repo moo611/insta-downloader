@@ -123,14 +123,16 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
     }
 
     override fun initData() {
-        if (intent.extras!!.getBoolean("flag")) {
-            mBinding.btnDownload.visibility = View.VISIBLE
-
-            getDataFromServer()
-        } else {
-            mBinding.btnDownload.visibility = View.INVISIBLE
-            getDataFromLocal()
+        intent.extras?.getBoolean("flag")?.let {
+            if (it) {
+                mBinding.btnDownload.visibility = View.VISIBLE
+                getDataFromServer()
+            } else {
+                mBinding.btnDownload.visibility = View.INVISIBLE
+                getDataFromLocal()
+            }
         }
+
     }
 
 
@@ -336,7 +338,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             paths.append(file.absolutePath).append(",")
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
             withContext(Dispatchers.IO) {
-                FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 1,null)
+                FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 1, null)
             }
 
 
@@ -348,7 +350,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
                 withContext(Dispatchers.IO) {
-                    FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 2,null)
+                    FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 2, null)
                 }
 
             }

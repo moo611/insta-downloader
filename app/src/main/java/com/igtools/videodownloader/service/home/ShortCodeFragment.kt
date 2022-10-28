@@ -2,6 +2,7 @@ package com.igtools.videodownloader.service.home
 
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.drawable.ColorDrawable
 import android.os.Environment
 import android.text.Editable
@@ -68,7 +69,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     var records: ArrayList<Record> = ArrayList()
     var paths = StringBuffer()
     private val LOGIN_REQ = 1000
-
+    private val PERMISSION_REQ=1024
     override fun getLayoutId(): Int {
         return R.layout.fragment_short_code
     }
@@ -201,8 +202,15 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
 
     private fun autoStart() {
-        Log.v(TAG, ShareUtils.getData("cookie") + "")
+
+        if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())){
+            PermissionUtils.requirePermissionsReadAndWrite(requireActivity(),PERMISSION_REQ)
+            return
+        }
+
         mBinding.etShortcode.clearFocus()
+        //8.1不加这句不行，还会弹出
+        mBinding.flParent.requestFocus()
         KeyboardUtils.closeKeybord(mBinding.etShortcode, context)
         val url = mBinding.etShortcode.text.toString()
 
@@ -623,6 +631,22 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         }
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQ){
+            for (grant in grantResults){
+                if (grant!= PackageManager.PERMISSION_GRANTED){
+                    break
+                }
+            }
+            Toast.makeText(requireContext(),"Permission granted",Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun getShortCode(): String? {
         val shortCode: String?
         val url = mBinding.etShortcode.text.toString()
@@ -642,18 +666,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this);
-    }
-
-    private fun extractToken(cookie: String): String? {
-
-        val strings = cookie.split(";")
-        for (str in strings) {
-            val str2 = str.trim()
-            if (str2.startsWith("csrftoken=")) {
-                return str2.substring(10, str2.length)
-            }
-        }
-        return null
     }
 
 

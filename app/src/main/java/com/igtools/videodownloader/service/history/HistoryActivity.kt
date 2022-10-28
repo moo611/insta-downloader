@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -93,6 +94,9 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         llRepost.setOnClickListener {
             if (lastSelected != -1 && records[lastSelected].paths != null) {
                 val size = records[lastSelected].paths!!.length
+                if (size==0){
+                    return@setOnClickListener
+                }
                 val newpaths = records[lastSelected].paths!!.substring(0, size - 1)
                 val paths = newpaths.split(",")
                 val path = paths[0]
@@ -152,16 +156,18 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         bottomDialog.dismiss()
 
         records[lastSelected].paths?.let {
-            val newpaths = it.substring(0, it.length - 1)
-            val paths = newpaths.split(",")
-            if (paths.size > 1) {
-                FileUtils.shareAll(this, paths)
-            } else if (paths.size == 1) {
+            if (it.isNotEmpty()){
+                val newpaths = it.substring(0, it.length - 1)
+                val paths = newpaths.split(",")
+                if (paths.size > 1) {
+                    FileUtils.shareAll(this, paths)
+                } else if (paths.size == 1) {
 
-                if (paths[0].endsWith(".jpg")) {
-                    FileUtils.share(this, File(paths[0]))
-                } else {
-                    FileUtils.shareVideo(this, File(paths[0]))
+                    if (paths[0].endsWith(".jpg")) {
+                        FileUtils.share(this, File(paths[0]))
+                    } else {
+                        FileUtils.shareVideo(this, File(paths[0]))
+                    }
                 }
             }
 
@@ -179,30 +185,31 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         bottomDialog.dismiss()
 
         records[lastSelected].paths?.let {
+            if (it.isNotEmpty()){
+                val newpaths = it.substring(0, it.length - 1)
+                val paths = newpaths.split(",")
+                if (paths.size > 1) {
 
-            val newpaths = it.substring(0, it.length - 1)
-            val paths = newpaths.split(",")
-            if (paths.size > 1) {
+                    for (path in paths) {
 
-                for (path in paths) {
+                        if (path.endsWith(".jpg")) {
+                            deleteImage(path)
+                        } else if (path.endsWith(".mp4")) {
+                            deleteVideo(path)
+                        }
 
-                    if (path.endsWith(".jpg")) {
-                        deleteImage(path)
-                    } else if (path.endsWith(".mp4")) {
-                        deleteVideo(path)
+                    }
+
+                } else if (paths.size == 1) {
+
+                    if (paths[0].endsWith(".jpg")) {
+
+                        deleteImage(paths[0])
+                    } else if (paths[0].endsWith(".mp4")) {
+                        deleteVideo(paths[0])
                     }
 
                 }
-
-            } else if (paths.size == 1) {
-
-                if (paths[0].endsWith(".jpg")) {
-
-                    deleteImage(paths[0])
-                } else if (paths[0].endsWith(".mp4")) {
-                    deleteVideo(paths[0])
-                }
-
             }
 
         }
