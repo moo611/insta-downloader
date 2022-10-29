@@ -46,4 +46,6 @@
 
     <string name="facebook_app_id">1129445801291076</string>
     <string name="facebook_client_token">909dba105c7cc41b2b2f50ac66b425a6</string>
+    <string name="repost">Posting ulang</string>
+    <string name="delete">Menghapus</string>
 </resources>

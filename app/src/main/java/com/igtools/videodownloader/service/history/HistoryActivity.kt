@@ -32,7 +32,6 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     lateinit var adapter: HistoryAdapter
     lateinit var bottomDialog: BottomDialog
-    lateinit var bottomDialog2: BottomDialog
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
     var lastSelected = -1
