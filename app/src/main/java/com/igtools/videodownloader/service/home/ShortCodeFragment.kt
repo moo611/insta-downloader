@@ -3,6 +3,7 @@ package com.igtools.videodownloader.service.home
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.os.Environment
 import android.text.Editable
@@ -69,7 +70,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     var records: ArrayList<Record> = ArrayList()
     var paths = StringBuffer()
     private val LOGIN_REQ = 1000
-    private val PERMISSION_REQ=1024
+    private val PERMISSION_REQ = 1024
     override fun getLayoutId(): Int {
         return R.layout.fragment_short_code
     }
@@ -203,8 +204,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     private fun autoStart() {
 
-        if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())){
-            PermissionUtils.requirePermissionsReadAndWrite(requireActivity(),PERMISSION_REQ)
+        if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())) {
+            PermissionUtils.requirePermissionsReadAndWrite(requireActivity(), PERMISSION_REQ)
             return
         }
 
@@ -216,7 +217,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
         val isValid = URLUtil.isValidUrl(url)
         if (!isValid) {
-            Toast.makeText(requireContext(), getString(R.string.invalid_url), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.invalid_url), Toast.LENGTH_SHORT)
+                .show()
             return
         }
 
@@ -312,7 +314,11 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                         download(curMediaInfo)
                     }
                     mBinding.progressbar.visibility = View.INVISIBLE
-                    Toast.makeText(requireContext(), getString(R.string.download_finish), Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.download_finish),
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                     saveRecord()
                     getRecentData()
@@ -373,10 +379,14 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     curMediaInfo = parseStory(jsonObject)
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
-                    mBinding.progressbar.visibility =View.VISIBLE
+                    mBinding.progressbar.visibility = View.VISIBLE
                     download(curMediaInfo)
                     saveRecord()
-                    Toast.makeText(requireContext(), getString(R.string.download_finish), Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.download_finish),
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                     mBinding.progressbar.visibility = View.INVISIBLE
                     getRecentData()
@@ -531,25 +541,23 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
         if (media?.mediaType == 1) {
             //image
-            val dir = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-            val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-            paths.append(file.absolutePath).append(",")
-//            val headers:HashMap<String,String> = HashMap()
-//            headers["Accept-Encoding"]="identity"
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
             withContext(Dispatchers.IO) {
-                FileUtils.saveFile(requireContext(), responseBody.body(), file, 1, null)
+                val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
+                val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
+                paths.append(path).append(",")
             }
 
         } else if (media?.mediaType == 2) {
             //video
-            val dir = context?.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
-            val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-            paths.append(file.absolutePath).append(",")
             if (media.videoUrl != null) {
                 val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
                 withContext(Dispatchers.IO) {
-                    FileUtils.saveFile(requireContext(), responseBody.body(), file, 2, null)
+                    val path = FileUtils.saveVideoToAlbum(
+                        requireContext(),
+                        responseBody.body()!!.byteStream()
+                    )
+                    paths.append(path).append(",")
                 }
 
             }
@@ -637,13 +645,13 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQ){
-            for (grant in grantResults){
-                if (grant!= PackageManager.PERMISSION_GRANTED){
+        if (requestCode == PERMISSION_REQ) {
+            for (grant in grantResults) {
+                if (grant != PackageManager.PERMISSION_GRANTED) {
                     break
                 }
             }
-            Toast.makeText(requireContext(),"Permission granted",Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Permission granted", Toast.LENGTH_SHORT).show()
         }
     }
 

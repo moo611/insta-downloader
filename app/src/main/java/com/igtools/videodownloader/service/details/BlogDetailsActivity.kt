@@ -2,6 +2,7 @@ package com.igtools.videodownloader.service.details
 
 import android.app.ProgressDialog
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Environment
 import android.util.Log
 import android.view.View
@@ -93,7 +94,14 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
                 //Log.v(TAG,"finish")
                 val record =
-                    Record(null,Gson().toJson(mediaInfo), System.currentTimeMillis(),null,code,paths.toString())
+                    Record(
+                        null,
+                        Gson().toJson(mediaInfo),
+                        System.currentTimeMillis(),
+                        null,
+                        code,
+                        paths.toString()
+                    )
                 RecordDB.getInstance().recordDao().insert(record)
 
                 progressDialog.dismiss()
@@ -204,37 +212,27 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     private suspend fun downloadMedia(media: ResourceModel?) {
 
-        if (media?.mediaType == 1 || media?.mediaType == 0) {
+        if (media?.mediaType == 1) {
             //image
-            val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-                .absolutePath
-            val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-            paths.append(file.absolutePath).append(",")
-            try {
-                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
-                withContext(Dispatchers.IO) {
-                    FileUtils.saveFile(this@BlogDetailsActivity, responseBody.body(), file, 1,null)
-                }
 
-            } catch (e: Error) {
-                //errFlag = true
+            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+            withContext(Dispatchers.IO) {
+                val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
+                val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
+                paths.append(path).append(",")
             }
-
 
         } else if (media?.mediaType == 2) {
             //video
-            val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
-                .absolutePath
-            val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-            paths.append(file.absolutePath).append(",")
-            try {
-                val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
+            media.videoUrl?.let {
+                val responseBody = ApiClient.getClient().downloadUrl(it)
                 withContext(Dispatchers.IO) {
-                    FileUtils.saveFile(this@BlogDetailsActivity, responseBody.body(), file, 2,null)
+                    val path = FileUtils.saveVideoToAlbum(
+                        this@BlogDetailsActivity,
+                        responseBody.body()!!.byteStream()
+                    )
+                    paths.append(path).append(",")
                 }
-
-            } catch (e: Error) {
-                // errFlag = true
             }
 
         }

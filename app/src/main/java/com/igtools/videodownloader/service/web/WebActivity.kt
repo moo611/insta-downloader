@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.fagaia.farm.base.BaseActivity
 import com.igtools.videodownloader.R
+import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.databinding.ActivityWebBinding
 import com.igtools.videodownloader.utils.ShareUtils
 
@@ -51,7 +52,7 @@ class WebActivity : BaseActivity<ActivityWebBinding>() {
         settings.setAppCachePath(appCachePath)
         settings.setAllowFileAccess(true)
         settings.setAppCacheEnabled(true)
-
+        settings.userAgentString = Urls.USER_AGENT
 //        if (ShareUtils.getData("user-agent")==null){
 //            ShareUtils.putData("user-agent",settings.userAgentString)
 //        }

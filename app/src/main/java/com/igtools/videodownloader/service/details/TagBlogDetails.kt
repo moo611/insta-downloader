@@ -1,6 +1,7 @@
 package com.igtools.videodownloader.service.details
 
 import android.app.ProgressDialog
+import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.os.Environment
 import android.util.Log
@@ -333,28 +334,23 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
         if (media?.mediaType == 1) {
             //image
-            val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-            val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-            paths.append(file.absolutePath).append(",")
             val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
             withContext(Dispatchers.IO) {
-                FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 1, null)
+                val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
+                val path = FileUtils.saveImageToAlbum(this@TagBlogDetails, bitmap)
+                paths.append(path).append(",")
             }
-
 
         } else if (media?.mediaType == 2) {
             //video
-            val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
-            val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-            paths.append(file.absolutePath).append(",")
-            if (media.videoUrl != null) {
-                val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
+
+            media.videoUrl?.let {
+                val responseBody = ApiClient.getClient().downloadUrl(it)
                 withContext(Dispatchers.IO) {
-                    FileUtils.saveFile(this@TagBlogDetails, responseBody.body(), file, 2, null)
+                    val path = FileUtils.saveVideoToAlbum(this@TagBlogDetails, responseBody.body()!!.byteStream())
+                    paths.append(path).append(",")
                 }
-
             }
-
         }
     }
 

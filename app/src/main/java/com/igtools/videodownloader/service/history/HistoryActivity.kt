@@ -93,7 +93,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         llRepost.setOnClickListener {
             if (lastSelected != -1 && records[lastSelected].paths != null) {
                 val size = records[lastSelected].paths!!.length
-                if (size==0){
+                if (size == 0) {
                     return@setOnClickListener
                 }
                 val newpaths = records[lastSelected].paths!!.substring(0, size - 1)
@@ -155,7 +155,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         bottomDialog.dismiss()
 
         records[lastSelected].paths?.let {
-            if (it.isNotEmpty()){
+            if (it.isNotEmpty()) {
                 val newpaths = it.substring(0, it.length - 1)
                 val paths = newpaths.split(",")
                 if (paths.size > 1) {
@@ -184,7 +184,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         bottomDialog.dismiss()
 
         records[lastSelected].paths?.let {
-            if (it.isNotEmpty()){
+            if (it.isNotEmpty()) {
                 val newpaths = it.substring(0, it.length - 1)
                 val paths = newpaths.split(",")
                 if (paths.size > 1) {
@@ -229,16 +229,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         FileUtils.deleteImageUri(
             contentResolver,
             path,
-            object : FileUtils.FileDeleteListener {
-                override fun onSuccess() {
-                    //Toast.makeText(this@HistoryActivity,"",Toast.LENGTH_SHORT)
-
-                }
-
-                override fun onFailed(intentSender: IntentSender?) {
-
-                }
-            })
+        )
     }
 
     fun deleteVideo(path: String) {
@@ -246,16 +237,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         FileUtils.deleteVideoUri(
             contentResolver,
             path,
-            object : FileUtils.FileDeleteListener {
-                override fun onSuccess() {
-                    //Toast.makeText(this@HistoryActivity,"",Toast.LENGTH_SHORT)
-
-                }
-
-                override fun onFailed(intentSender: IntentSender?) {
-
-                }
-            })
+        )
     }
 
 

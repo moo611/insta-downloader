@@ -2,6 +2,7 @@ package com.igtools.videodownloader.api.okhttp;
 
 public class Urls {
 
+    public static String INSTAGRAM = "https://www.instagram.com/";
 
     public static String USER_INFO = "https://i.instagram.com/api/v1/users/web_profile_info/";
 
