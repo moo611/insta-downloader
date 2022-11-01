@@ -46,11 +46,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
     }
 
     override fun initView() {
-        //Android 点击 Home 键后再点击 APP 图标，APP 显示退出之前的界面
-        if (!isTaskRoot) {
-            finish();
-            return;
-        }
+
 
         firebaseAnalytics = Firebase.analytics
 

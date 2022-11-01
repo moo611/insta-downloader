@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
-        android:name="com.igtools.videodownloader.BaseApplication"
+        android:name=".BaseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/icon"
         android:label="@string/app_name"
@@ -17,36 +17,12 @@
         android:roundIcon="@mipmap/icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.IgDownloader">
-        <activity
-            android:name="com.igtools.videodownloader.service.web.WebActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.igtools.videodownloader.service.details.TagBlogDetails"
-            android:exported="false" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-8609866682652024~3028018510" />
 
         <activity
-            android:name="com.igtools.videodownloader.service.details.VideoActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.igtools.videodownloader.service.history.HistoryActivity"
-            android:exported="false" />
-
-        <activity
-            android:name="com.igtools.videodownloader.service.details.BlogDetailsActivity"
-            android:exported="false" />
-
-        <activity
-            android:name="com.igtools.videodownloader.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -54,6 +30,39 @@
 
                 <data android:mimeType="text/plain" />
             </intent-filter>
+
+        </activity>
+        <activity
+            android:name=".FirstActivity"
+            android:exported="false" />
+        <activity
+            android:name=".service.web.WebActivity"
+            android:exported="false" />
+        <activity
+            android:name=".service.details.TagBlogDetails"
+            android:exported="false" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-8609866682652024~3028018510" />
+
+        <activity
+            android:name=".service.details.VideoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".service.history.HistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".service.details.BlogDetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -72,8 +81,6 @@
         <meta-data
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />
-
-
     </application>
 
 </manifest>

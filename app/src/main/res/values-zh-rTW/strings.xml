@@ -47,4 +47,5 @@
     <string name="facebook_client_token">909dba105c7cc41b2b2f50ac66b425a6</string>
     <string name="repost">轉發</string>
     <string name="delete">刪除</string>
+    <string name="start_right_now">立即開始</string>
 </resources>

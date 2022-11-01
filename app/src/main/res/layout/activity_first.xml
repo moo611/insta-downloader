@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:padding="10dp"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".modules.login.LoginActivity">
+
+        <ImageView
+            android:layout_marginTop="100dp"
+            android:src="@mipmap/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+        <TextView
+            android:visibility="gone"
+            android:layout_marginTop="100dp"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:text="@string/long_text1"
+            android:id="@+id/tv1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:visibility="gone"
+            android:textSize="14sp"
+            android:text="@string/long_text2"
+            android:id="@+id/tv2"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:text="@string/app_name"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btn_start"
+            android:layout_marginTop="100dp"
+            android:text="@string/start_right_now"
+            android:layout_width="300dp"
+            android:layout_height="60dp"/>
+
+        <TextView
+            android:visibility="gone"
+            android:textColor="@color/red"
+            android:textSize="14sp"
+            android:text="@string/long_text3"
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+</layout>

@@ -70,7 +70,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     var records: ArrayList<Record> = ArrayList()
     var paths = StringBuffer()
     private val LOGIN_REQ = 1000
-    private val PERMISSION_REQ = 1024
+
     override fun getLayoutId(): Int {
         return R.layout.fragment_short_code
     }
@@ -203,11 +203,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
 
     private fun autoStart() {
-
-        if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())) {
-            PermissionUtils.requirePermissionsReadAndWrite(requireActivity(), PERMISSION_REQ)
-            return
-        }
 
         mBinding.etShortcode.clearFocus()
         //8.1不加这句不行，还会弹出
@@ -636,22 +631,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
             autoStart()
 
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQ) {
-            for (grant in grantResults) {
-                if (grant != PackageManager.PERMISSION_GRANTED) {
-                    break
-                }
-            }
-            Toast.makeText(requireContext(), "Permission granted", Toast.LENGTH_SHORT).show()
         }
     }
 
