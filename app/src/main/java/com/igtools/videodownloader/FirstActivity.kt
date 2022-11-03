@@ -31,34 +31,40 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
 
         mBinding.btnStart.setOnClickListener {
 
-            if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
-                PermissionUtils.requirePermissionsReadAndWrite(this, PERMISSION_REQ)
-                return@setOnClickListener
-            }
-
-            progressDialog.show()
-            val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-            val configSettings = remoteConfigSettings {
-                minimumFetchIntervalInSeconds = 3600 * 12
-            }
-            remoteConfig.setConfigSettingsAsync(configSettings)
-
-            remoteConfig.fetchAndActivate()
-                .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
-                        progressDialog.dismiss()
-                        val str = remoteConfig.getString("cookies")
-                        ShareUtils.putData("configs", str)
-                        val cookies = gson.fromJson(str, Array<MyCookie>::class.java)
-                        MyConfig.cookies = cookies.toList()
-                        //Log.v(TAG, MyConfig.cookies.toString())
-                        val b = false
-                        ShareUtils.putData("isFirst",b.toString())
-                        startActivity(Intent(this, MainActivity::class.java))
-                    }
-                }
+            startNow()
 
         }
+    }
+
+    private fun startNow() {
+
+        if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
+            PermissionUtils.requirePermissionsReadAndWrite(this, PERMISSION_REQ)
+            return
+        }
+
+        progressDialog.show()
+        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
+        val configSettings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = 3600 * 12
+        }
+        remoteConfig.setConfigSettingsAsync(configSettings)
+
+        remoteConfig.fetchAndActivate()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    progressDialog.dismiss()
+                    val str = remoteConfig.getString("cookies")
+                    ShareUtils.putData("configs", str)
+                    val cookies = gson.fromJson(str, Array<MyCookie>::class.java)
+                    MyConfig.cookies = cookies.toList()
+                    //Log.v(TAG, MyConfig.cookies.toString())
+                    val b = false
+                    ShareUtils.putData("isFirst",b.toString())
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                }
+            }
     }
 
     override fun initData() {
@@ -75,10 +81,11 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
         if (requestCode == PERMISSION_REQ) {
             for (grant in grantResults) {
                 if (grant != PackageManager.PERMISSION_GRANTED) {
-                    break
+                    return
                 }
             }
-            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
+            startNow()
         }
     }
 }

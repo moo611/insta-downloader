@@ -20,9 +20,9 @@ object ApiClient {
     fun getClient(): UrlService {
 
         val builder: OkHttpClient.Builder = OkHttpClient.Builder()
-        builder.connectTimeout(60, TimeUnit.SECONDS)
-        builder.writeTimeout(60, TimeUnit.SECONDS)
-        builder.readTimeout(60, TimeUnit.SECONDS)
+        builder.connectTimeout(5, TimeUnit.MINUTES)
+        builder.writeTimeout(5, TimeUnit.MINUTES)
+        builder.readTimeout(5, TimeUnit.MINUTES)
 
         val client = builder.build()
         val baseUrl = BaseApplication.serverIp+":"+BaseApplication.port1
@@ -37,9 +37,9 @@ object ApiClient {
     fun getClient2(): UserService {
 
         val builder: OkHttpClient.Builder = OkHttpClient.Builder()
-        builder.connectTimeout(60, TimeUnit.SECONDS)
-        builder.writeTimeout(60, TimeUnit.SECONDS)
-        builder.readTimeout(60, TimeUnit.SECONDS)
+        builder.connectTimeout(5, TimeUnit.MINUTES)
+        builder.writeTimeout(5, TimeUnit.MINUTES)
+        builder.readTimeout(5, TimeUnit.MINUTES)
 
         val client = builder.build()
         //BaseApplication.baseUrl = Urls.BASE_URL_PY
@@ -54,9 +54,9 @@ object ApiClient {
     fun getClient3(): TagService {
 
         val builder: OkHttpClient.Builder = OkHttpClient.Builder()
-        builder.connectTimeout(60, TimeUnit.SECONDS)
-        builder.writeTimeout(60, TimeUnit.SECONDS)
-        builder.readTimeout(60, TimeUnit.SECONDS)
+        builder.connectTimeout(5, TimeUnit.MINUTES)
+        builder.writeTimeout(5, TimeUnit.MINUTES)
+        builder.readTimeout(5, TimeUnit.MINUTES)
 
         val client = builder.build()
         //BaseApplication.baseUrl = Urls.BASE_URL_PY
