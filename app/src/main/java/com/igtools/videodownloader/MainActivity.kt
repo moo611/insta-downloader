@@ -169,6 +169,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
      * 切换fragment性能优化,使每个fragment只实例化一次
      */
     private fun showFragment(page: Int) {
+        supportFragmentManager.executePendingTransactions()
         val ft: FragmentTransaction = supportFragmentManager.beginTransaction()
 
         // 想要显示一个fragment,先隐藏所有fragment，防止重叠

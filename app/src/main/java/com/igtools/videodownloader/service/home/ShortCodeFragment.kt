@@ -11,6 +11,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.webkit.CookieManager
 import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -271,29 +272,28 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 val random = (0 until size).random()
                 map["Cookie"] = MyConfig.cookies[random].value
                 val cookie = ShareUtils.getData("cookie")
-                Log.v(TAG,cookie+"")
+                Log.v(TAG, cookie + "")
                 if (cookie != null && cookie.contains("sessionid")) {
                     map["Cookie"] = cookie
                 }
 
                 map["User-Agent"] = Urls.USER_AGENT
 
-                val map2: HashMap<String, String> = HashMap()
                 val shortCode = getShortCode()
-                map2["shortcode"] = shortCode!!
+                val media_id = UrlUtils.getInstagramPostId(shortCode!!)
+                Log.v(TAG, media_id.toString())
 
-                val res = ApiClient.getClient()
-                    .getMediaData(Urls.GRAPH_QL, map, Urls.QUERY_HASH, gson.toJson(map2))
-                val code = res.code()
-                val jsonObject = res.body()
+                val url2 = "https://www.instagram.com/api/v1/media/$media_id/info"
+                val res = ApiClient.getClient().getMedia(map, url2)
                 progressDialog.dismiss()
-                if (code == 200 && jsonObject != null) {
-
+                val jsonObject = res.body()
+                //Log.v(TAG, jsonObject.toString())
+                if (res.code() == 200 && jsonObject != null) {
                     firebaseAnalytics.logEvent("success") {
                         param("flag", "2")
                     }
 
-                    curMediaInfo = parseMedia(jsonObject)
+                    curMediaInfo = parseMedia2(jsonObject)
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
                     mBinding.progressbar.visibility = View.VISIBLE
@@ -320,15 +320,12 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
                 } else {
 
-//                    Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
-//                        .show()
                     if (!requireActivity().isFinishing) {
                         bottomDialog.show()
                         firebaseAnalytics.logEvent("dialog_show") {
                             param("flag", "1")
                         }
                     }
-
                 }
 
             } catch (e: Exception) {
@@ -486,6 +483,61 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     }
                     mediaModel.resources.add(resource)
                 }
+            }
+        }
+
+        return mediaModel
+
+    }
+
+
+    private fun parseMedia2(jsonObject: JsonObject): MediaModel {
+        val mediaModel = MediaModel()
+        val item = jsonObject["items"].asJsonArray[0].asJsonObject
+
+        mediaModel.mediaType = item["media_type"].asInt
+        mediaModel.code = item["code"].asString
+        mediaModel.pk = item["pk"].asString
+        mediaModel.captionText =
+            item.getNullable("caption")?.asJsonObject?.getNullable("text")?.asString
+
+        if (item.has("video_versions")) {
+            val video_versions = item["video_versions"].asJsonArray
+            if (video_versions.size() > 0) {
+                mediaModel.videoUrl = video_versions[0].asJsonObject["url"].asString
+            }
+        }
+
+        val image_versions2 = item["image_versions2"].asJsonObject
+        val candidates = image_versions2["candidates"].asJsonArray
+        if (candidates.size() > 0) {
+            mediaModel.thumbnailUrl = candidates[0].asJsonObject["url"].asString
+        }
+
+        val user = item["user"].asJsonObject
+        mediaModel.profilePicUrl = user["profile_pic_url"].asString
+        mediaModel.username = user["username"].asString
+
+        if (item.has("carousel_media")) {
+            val children = item["carousel_media"].asJsonArray
+            for (child in children) {
+                val resource = ResourceModel()
+
+                resource.pk = child.asJsonObject["pk"].asString
+                val image_versions2_child = child.asJsonObject["image_versions2"].asJsonObject
+                val candidates_child = image_versions2_child["candidates"].asJsonArray
+                if (candidates.size() > 0) {
+                    resource.thumbnailUrl = candidates_child[0].asJsonObject["url"].asString
+                }
+                if (child.asJsonObject.has("video_versions")) {
+                    val video_versions_child = child.asJsonObject["video_versions"].asJsonArray
+                    if (video_versions_child.size() > 0) {
+                        resource.videoUrl = video_versions_child[0].asJsonObject["url"].asString
+                    }
+                }
+
+                resource.mediaType = child.asJsonObject["media_type"].asInt
+                mediaModel.resources.add(resource)
             }
         }
 

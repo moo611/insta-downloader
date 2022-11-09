@@ -11,8 +11,11 @@ interface UrlService {
     suspend fun downloadUrl(@Url url: String): Response<ResponseBody>
 
 
-    @GET("/api/mediainfo")
-    suspend fun getMedia(@Query("url") url: String): Response<JsonObject>
+    @GET
+    suspend fun getMedia(
+        @HeaderMap headers: HashMap<String, String>,
+        @Url url: String
+    ): Response<JsonObject>
 
     @GET("/api/mediastory")
     suspend fun getStory(@Query("url") code: String): Response<JsonObject>

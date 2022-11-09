@@ -1,7 +1,6 @@
 package com.igtools.videodownloader.utils
 
 import java.net.URL
-import kotlin.math.pow
 
 object UrlUtils {
 
@@ -24,18 +23,17 @@ object UrlUtils {
         return null
     }
 
-    fun code2pk(code:String):Long{
-        val base = alphabet.length
-        val strlen = code.length
-        var num = 0L
-        var idx =0
+    fun getInstagramPostId(code: String): String {
 
-        for (char in code){
-           val power =  strlen-(idx+1)
-            num += alphabet.indexOf(char) * (base.toDouble().pow(power.toDouble())).toInt()
-            idx += 1
+        var mychar:Char;
+        var id:Long = 0;
+        val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+        for (element in code) {
+            mychar = element;
+            id = (id * 64) + alphabet.indexOf(mychar);
         }
-        return num
+        return id.toString();
+
     }
 
 }

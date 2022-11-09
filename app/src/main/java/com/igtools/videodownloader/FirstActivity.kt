@@ -85,7 +85,7 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
                 }
             }
 //            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
-            startNow()
+//            startNow()
         }
     }
 }
