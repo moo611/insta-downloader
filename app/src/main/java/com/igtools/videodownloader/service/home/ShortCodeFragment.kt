@@ -503,16 +503,16 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
         if (item.has("video_versions")) {
             val video_versions = item["video_versions"].asJsonArray
-            if (video_versions.size() > 0) {
-                mediaModel.videoUrl = video_versions[0].asJsonObject["url"].asString
-            }
+            mediaModel.videoUrl = video_versions[0].asJsonObject["url"].asString
+
+        }
+        if (item.has("image_versions2")) {
+            val image_versions2 = item["image_versions2"].asJsonObject
+            val candidates = image_versions2["candidates"].asJsonArray
+            mediaModel.thumbnailUrl = candidates[0].asJsonObject["url"].asString
+
         }
 
-        val image_versions2 = item["image_versions2"].asJsonObject
-        val candidates = image_versions2["candidates"].asJsonArray
-        if (candidates.size() > 0) {
-            mediaModel.thumbnailUrl = candidates[0].asJsonObject["url"].asString
-        }
 
         val user = item["user"].asJsonObject
         mediaModel.profilePicUrl = user["profile_pic_url"].asString
@@ -526,14 +526,15 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 resource.pk = child.asJsonObject["pk"].asString
                 val image_versions2_child = child.asJsonObject["image_versions2"].asJsonObject
                 val candidates_child = image_versions2_child["candidates"].asJsonArray
-                if (candidates.size() > 0) {
-                    resource.thumbnailUrl = candidates_child[0].asJsonObject["url"].asString
+                resource.thumbnailUrl = candidates_child[0].asJsonObject["url"].asString
+                if (children.indexOf(child) == 0) {
+                    mediaModel.thumbnailUrl = resource.thumbnailUrl
                 }
+
                 if (child.asJsonObject.has("video_versions")) {
                     val video_versions_child = child.asJsonObject["video_versions"].asJsonArray
-                    if (video_versions_child.size() > 0) {
-                        resource.videoUrl = video_versions_child[0].asJsonObject["url"].asString
-                    }
+                    resource.videoUrl = video_versions_child[0].asJsonObject["url"].asString
+
                 }
 
                 resource.mediaType = child.asJsonObject["media_type"].asInt
@@ -558,10 +559,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             mediaModel.profilePicUrl = user["profile_pic_url"].asString
             val image_versions2 = item["image_versions2"].asJsonObject
             val candidates = image_versions2["candidates"].asJsonArray
-            if (candidates.size() > 0) {
-                val size = candidates.size()
-                mediaModel.thumbnailUrl = candidates[size - 1].asJsonObject["url"].asString
-            }
+
+            val size = candidates.size()
+            mediaModel.thumbnailUrl = candidates[size - 1].asJsonObject["url"].asString
+
             mediaModel.pk = item["pk"].asString
 
             if (mediaModel.mediaType == 2) {
