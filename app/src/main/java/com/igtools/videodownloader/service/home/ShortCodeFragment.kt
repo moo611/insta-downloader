@@ -4,17 +4,14 @@ import android.app.ProgressDialog
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
-import android.os.Environment
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.webkit.CookieManager
 import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -29,31 +26,27 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.api.okhttp.OnDownloadListener
-import com.igtools.videodownloader.service.details.BlogDetailsActivity
-import com.igtools.videodownloader.service.web.WebActivity
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
-import com.igtools.videodownloader.api.retrofit.MyConfig
 import com.igtools.videodownloader.databinding.FragmentShortCodeBinding
 import com.igtools.videodownloader.models.IntentEvent
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.models.ResourceModel
 import com.igtools.videodownloader.room.RecordDB
+import com.igtools.videodownloader.service.details.BlogDetailsActivity
 import com.igtools.videodownloader.service.history.HistoryAdapter
+import com.igtools.videodownloader.service.web.WebActivity
 import com.igtools.videodownloader.utils.*
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
-import java.io.File
 import java.net.URLEncoder
 
 
@@ -226,33 +219,101 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             return
         }
 
-
         if (url.contains("stories")) {
-            val cookie = ShareUtils.getData("cookie")
-            if (cookie == null) {
-                bottomDialog.show()
 
-                firebaseAnalytics.logEvent("dialog_show") {
-                    param("flag", "1")
-                }
+            if (BaseApplication.cookie == null) {
+                bottomDialog.show()
             } else {
                 getStoryData()
             }
 
         } else {
-
-            getMediaData()
+            if (BaseApplication.cookie == null) {
+                getMediaData()
+            } else {
+                getMediaDataByCookie()
+            }
 
         }
 
 
     }
 
+    private fun getMediaDataByCookie() {
 
-    /**
-     * 获取video,image,igtv,reel
-     *
-     */
+        paths = StringBuffer()
+        lifecycleScope.launch {
+            //检查是否已存在
+            val url = mBinding.etShortcode.text.toString()
+            val record = RecordDB.getInstance().recordDao().findByUrl(url)
+
+            if (record != null) {
+//                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
+                getRecentData()
+                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
+                    .show()
+
+                return@launch
+            }
+            progressDialog.show()
+
+            try {
+                val map: HashMap<String, String> = HashMap()
+                map["Cookie"] = BaseApplication.cookie!!
+                map["User-Agent"] = Urls.USER_AGENT
+
+                val shortCode = getShortCode()
+                val media_id = UrlUtils.getInstagramPostId(shortCode!!)
+                Log.v(TAG, media_id.toString())
+
+                val url2 = "https://www.instagram.com/api/v1/media/$media_id/info"
+                val res = ApiClient.getClient().getMedia(map, url2)
+                progressDialog.dismiss()
+                val jsonObject = res.body()
+                //Log.v(TAG, jsonObject.toString())
+                if (res.code() == 200 && jsonObject != null) {
+
+                    curMediaInfo = parseMedia2(jsonObject)
+                    showCurrent()
+                    mInterstitialAd?.show(requireActivity())
+                    mBinding.progressbar.visibility = View.VISIBLE
+                    if (curMediaInfo?.mediaType == 8) {
+                        val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
+                            async {
+                                download(it)
+                            }
+                        }
+
+                        all.awaitAll()
+                    } else {
+                        download(curMediaInfo)
+                    }
+                    mBinding.progressbar.visibility = View.INVISIBLE
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.download_finish),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    saveRecord()
+                    getRecentData()
+
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.failed), Toast.LENGTH_SHORT)
+                        .show()
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                Toast.makeText(requireContext(), getString(R.string.failed), Toast.LENGTH_SHORT)
+                    .show()
+                progressDialog.dismiss()
+
+            }
+        }
+
+    }
+
 
     private fun getMediaData() {
         paths = StringBuffer()
@@ -271,9 +332,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             }
             progressDialog.show()
 
-            firebaseAnalytics.logEvent("total") {
-                param("flag", "1")
-            }
             try {
                 val urlEncoded = handleUrl(url)
                 val api =
@@ -284,9 +342,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 val jsonObject = res.body()
                 //Log.v(TAG, jsonObject.toString())
                 if (res.code() == 200 && jsonObject != null) {
-                    firebaseAnalytics.logEvent("success") {
-                        param("flag", "2")
-                    }
 
                     curMediaInfo = parseMedia(jsonObject)
                     showCurrent()
@@ -317,14 +372,14 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
                     if (!requireActivity().isFinishing) {
                         bottomDialog.show()
-                        firebaseAnalytics.logEvent("dialog_show") {
-                            param("flag", "1")
-                        }
+
                     }
                 }
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
+                Toast.makeText(requireContext(), getString(R.string.failed), Toast.LENGTH_SHORT)
+                    .show()
                 progressDialog.dismiss()
 
             }
@@ -361,7 +416,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-                val cookie = ShareUtils.getData("cookie")
+                val cookie = BaseApplication.cookie
                 map["Cookie"] = cookie!!
                 map["User-Agent"] = Urls.USER_AGENT
                 val pk = getShortCode()
@@ -597,7 +652,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             withContext(Dispatchers.IO) {
                 val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
                 val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
-                if (path!=null){
+                if (path != null) {
                     paths.append(path).append(",")
                 }
 
@@ -686,10 +741,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == LOGIN_REQ && resultCode == 200) {
-
-            firebaseAnalytics.logEvent("user_login") {
-                param("flag", "2")
-            }
 
             autoStart()
 

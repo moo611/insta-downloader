@@ -19,6 +19,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
@@ -202,11 +203,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
-
-                val cookie = ShareUtils.getData("cookie")
-                if (cookie != null && cookie.contains("sessionid")) {
-                    map["Cookie"] = cookie
-                }
+                map["Cookie"] = BaseApplication.cookie!!
                 map["User-Agent"] = Urls.USER_AGENT
 
                 val map2: HashMap<String, String> = HashMap()

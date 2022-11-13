@@ -20,6 +20,7 @@ class BaseApplication : Application() {
         var port2 = "4000"
         var port3 = "5000"
         var APIKEY= ""
+        var cookie:String?=null
     }
 
     override fun onCreate() {
@@ -31,6 +32,9 @@ class BaseApplication : Application() {
 
         ShareUtils.getData("apikey")?.let {
             APIKEY = it
+        }
+        ShareUtils.getData("cookie").let {
+            cookie = it
         }
     }
 

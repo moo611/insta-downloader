@@ -10,6 +10,7 @@ import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.fagaia.farm.base.BaseActivity
+import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.databinding.ActivityWebBinding
@@ -84,6 +85,7 @@ class WebActivity : BaseActivity<ActivityWebBinding>() {
                 Log.v(TAG,cookie+"")
                 if (cookie!=null && cookie.contains("sessionid")){
                     ShareUtils.putData("cookie",cookie)
+                    BaseApplication.cookie = cookie
                     setResult(200)
                     finish()
                 }

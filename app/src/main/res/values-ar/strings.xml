@@ -50,4 +50,5 @@
     <string name="delete">حذف</string>
     <string name="start_right_now">ابدأ الآن</string>
     <string name="paste">معجون</string>
+    <string name="failed">فشل إحضار البيانات</string>
 </resources>

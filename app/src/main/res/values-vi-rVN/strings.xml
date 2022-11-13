@@ -38,8 +38,8 @@
     <string name="empty_username">Vui lòng nhập tên người dùng</string>
     <string name="empty_tag">Vui lòng nhập thẻ bắt đầu bằng #</string>
     <string name="log_out">đăng xuất</string>
-    <string name="long_text1">Bạn không cần phải đăng nhập để tải các bài đăng trên instagram công khai. Theo yêu cầu của instagram, bạn cần đăng nhập để tải xuống các bài đăng và câu chuyện riêng tư.</string>
-    <string name="long_text2">Lưu ý: Khi tải video và truyện riêng tư, tài khoản đăng nhập phải là tài khoản mà bạn và người đó theo dõi nhau, việc bạn tải xuống sẽ không để lại dấu vết trên hồ sơ truy cập tài khoản của bên kia.</string>
+    <string name="long_text1">Đăng nhập để có trải nghiệm tốt hơn</string>
+    <string name="long_text2">Bằng cách đăng nhập, bạn có thể: (1) có tốc độ tải xuống nhanh hơn (2) tải xuống câu chuyện và bài đăng riêng tư (3) tìm kiếm nguồn cấp dữ liệu của người dùng</string>
     <string name="long_text3">Chúng tôi không thu thập thông tin cá nhân của bạn. Tải xuống quá thường xuyên có thể dẫn đến tài khoản instagram của bạn bị cấm</string>
     <string name="parse_error">Phân tích cú pháp ngoại lệ</string>
     <string name="recent_download">Gần đây</string>
@@ -51,4 +51,5 @@
     <string name="delete">Xóa bỏ</string>
     <string name="start_right_now">Bắt đầu ngay bây giờ</string>
     <string name="paste">dán</string>
+    <string name="failed">Lấy dữ liệu không thành công</string>
 </resources>

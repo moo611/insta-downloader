@@ -36,8 +36,8 @@
     <string name="empty_username">Please enter username</string>
     <string name="empty_tag">Please enter hashtag</string>
     <string name="log_out">Log Out</string>
-    <string name="long_text1">You don\'t need to log in to download public instagram posts. According to instagram requirements, you need to be logged in to download private posts and stories.</string>
-    <string name="long_text2">Note: When downloading private videos and stories, the login account must be the account that you and the person follow each other. Your download will not leave traces on the other party\'s account access records.</string>
+    <string name="long_text1">Login to have better experience</string>
+    <string name="long_text2">By login you can:(1) get faster download speed (2) download story and private post (3) search for user\'s feeds</string>
     <string name="long_text3">We do not collect your personal information. Downloading too frequently may result in your instagram account being banned</string>
     <string name="parse_error">Parse exception</string>
     <string name="recent_download">Recent</string>
@@ -48,5 +48,6 @@
     <string name="delete">Delete</string>
     <string name="start_right_now">Start Right Now</string>
     <string name="paste">paste</string>
+    <string name="failed">Get data failed</string>
 
 </resources>

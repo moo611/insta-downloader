@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.fagaia.farm.base.BaseFragment
+import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.BuildConfig
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.FragmentSettingBinding
@@ -30,7 +31,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
     override fun onResume() {
         super.onResume()
 
-        val cookie = ShareUtils.getData("cookie")
+        val cookie = BaseApplication.cookie
         if (cookie == null) {
             mBinding.llLogout.visibility = View.INVISIBLE
         } else {
@@ -69,6 +70,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
         }
         mBinding.llLogout.setOnClickListener {
             ShareUtils.getEdit().remove("cookie").apply()
+            BaseApplication.cookie = null
             clearCookies(requireContext())
             mBinding.llLogout.visibility = View.INVISIBLE
             Toast.makeText(requireContext(), getString(R.string.log_out), Toast.LENGTH_SHORT).show()

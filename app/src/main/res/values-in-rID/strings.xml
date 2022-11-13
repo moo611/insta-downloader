@@ -38,8 +38,8 @@
     <string name="empty_username">silakan masukkan nama pengguna</string>
     <string name="empty_tag">Silakan masukkan hastag</string>
     <string name="log_out">keluar</string>
-    <string name="long_text1">Anda tidak perlu masuk untuk mengunduh posting instagram publik. Menurut persyaratan instagram, Anda harus masuk untuk mengunduh posting dan cerita pribadi.</string>
-    <string name="long_text2">Catatan: Saat mengunduh video dan cerita pribadi, akun masuk harus akun yang Anda dan orang tersebut ikuti satu sama lain. Unduhan Anda tidak akan meninggalkan jejak pada catatan akses akun pihak lain.</string>
+    <string name="long_text1">Masuk untuk mendapatkan pengalaman yang lebih baik</string>
+    <string name="long_text2">Dengan login, Anda dapat: (1) mendapatkan kecepatan unduh yang lebih cepat (2) mengunduh cerita dan pos pribadi (3) mencari umpan pengguna</string>
     <string name="long_text3">Kami tidak mengumpulkan informasi pribadi Anda. Mengunduh terlalu sering dapat menyebabkan akun instagram Anda diblokir</string>
     <string name="parse_error">Mengurai pengecualian</string>
     <string name="recent_download">Terkini</string>
@@ -50,4 +50,5 @@
     <string name="delete">Menghapus</string>
     <string name="start_right_now">Mulai sekarang</string>
     <string name="paste">Tempel</string>
+    <string name="failed">Mendapatkan data gagal</string>
 </resources>

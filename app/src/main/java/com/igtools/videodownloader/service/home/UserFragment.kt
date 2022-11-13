@@ -21,6 +21,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
+import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.service.web.WebActivity
 import com.igtools.videodownloader.api.okhttp.Urls
@@ -100,7 +101,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 return@setOnClickListener
             }
             //refresh(mBinding.etUsername.text.toString())
-            val cookie = ShareUtils.getData("cookie")
+            val cookie = BaseApplication.cookie
             if (cookie == null) {
                 bottomDialog.show()
                 firebaseAnalytics.logEvent("dialog_show"){
@@ -189,7 +190,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
         clearData()
 
-        val cookie = ShareUtils.getData("cookie")
+        val cookie = BaseApplication.cookie
         Log.v(TAG, cookie + "")
         //Log.v(TAG,userAgent+"")
         val map: HashMap<String, String> = HashMap()
@@ -252,7 +253,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             return
         }
         loadingMore = true
-        val cookie = ShareUtils.getData("cookie")
+        val cookie = BaseApplication.cookie
         val map: HashMap<String, String> = HashMap()
         map["Cookie"] = cookie!!
         map["User-Agent"] = Urls.USER_AGENT
