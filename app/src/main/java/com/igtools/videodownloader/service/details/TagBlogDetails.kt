@@ -338,7 +338,10 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             withContext(Dispatchers.IO) {
                 val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
                 val path = FileUtils.saveImageToAlbum(this@TagBlogDetails, bitmap)
-                paths.append(path).append(",")
+                if (path!=null){
+                    paths.append(path).append(",")
+                }
+
             }
 
         } else if (media?.mediaType == 2) {

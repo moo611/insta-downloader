@@ -597,7 +597,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             withContext(Dispatchers.IO) {
                 val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
                 val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
-                paths.append(path).append(",")
+                if (path!=null){
+                    paths.append(path).append(",")
+                }
+
             }
 
         } else if (media?.mediaType == 2) {
@@ -720,7 +723,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             clipboard.primaryClip?.getItemAt(0)?.let {
                 if (!TextUtils.isEmpty(it.text.toString())) {
                     mBinding.etShortcode.setText(it.text.toString())
-                    autoStart()
+
                 }
             }
 

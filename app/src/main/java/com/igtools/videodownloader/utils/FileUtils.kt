@@ -22,8 +22,8 @@ import java.io.*
 object FileUtils {
     val TAG = "FileUtils"
     val folderName = "igtools.videodownloader"
-    fun saveImageToAlbum(c: Context, bitmap: Bitmap): String {
-        val filePath: String
+    fun saveImageToAlbum(c: Context, bitmap: Bitmap): String? {
+        var filePath: String? = null
         var imageUri: Uri?
         var fos: OutputStream?
         if (Build.VERSION.SDK_INT >= 29) {
@@ -54,8 +54,12 @@ object FileUtils {
 
             contentValues.clear()
             contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
-            imageUri?.let { contentResolver.update(it, contentValues, null, null) }
-            filePath = file.absolutePath
+            imageUri?.let {
+                contentResolver.update(it, contentValues, null, null)
+                filePath = getFilePathFromContentUri(it, contentResolver)
+
+            }
+            return filePath
         } else {
 
             val dir =
@@ -123,10 +127,10 @@ object FileUtils {
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
             }
-            filePath = file.absolutePath
+            filePath = getFilePathFromContentUri(uri!!,resolver)
             valuesVideos.clear()
             valuesVideos.put(MediaStore.Video.Media.IS_PENDING, 0)
-            c.contentResolver.update(uri!!, valuesVideos, null, null)
+            c.contentResolver.update(uri, valuesVideos, null, null)
 
         } else {
             val dir =
@@ -293,6 +297,23 @@ object FileUtils {
             cursor.close()
         }
     }
+
+
+    fun getFilePathFromContentUri(
+        selectedVideoUri: Uri,
+        contentResolver: ContentResolver
+    ): String {
+        val filePath: String
+        val filePathColumn = arrayOf<String>(MediaStore.MediaColumns.DATA)
+        val cursor: Cursor =
+            contentResolver.query(selectedVideoUri, filePathColumn, null, null, null)!!
+        cursor.moveToFirst()
+        val columnIndex: Int = cursor.getColumnIndex(filePathColumn[0])
+        filePath = cursor.getString(columnIndex)
+        cursor.close()
+        return filePath
+    }
+
 
     interface FileDeleteListener {
         fun onSuccess()
