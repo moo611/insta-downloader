@@ -23,24 +23,6 @@
 
 
         <TextView
-            android:visibility="gone"
-            android:layout_marginTop="100dp"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:text="@string/long_text1"
-            android:id="@+id/tv1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:visibility="gone"
-            android:textSize="14sp"
-            android:text="@string/long_text2"
-            android:id="@+id/tv2"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <TextView
             android:textColor="@color/black"
             android:textSize="16sp"
             android:text="@string/app_name"
@@ -55,14 +37,6 @@
             android:layout_width="300dp"
             android:layout_height="60dp"/>
 
-        <TextView
-            android:visibility="gone"
-            android:textColor="@color/red"
-            android:textSize="14sp"
-            android:text="@string/long_text3"
-            android:layout_marginTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
 
     </LinearLayout>
 </layout>
