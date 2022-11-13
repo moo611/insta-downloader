@@ -47,5 +47,6 @@
     <string name="repost">Repost</string>
     <string name="delete">Delete</string>
     <string name="start_right_now">Start Right Now</string>
+    <string name="paste">paste</string>
 
 </resources>

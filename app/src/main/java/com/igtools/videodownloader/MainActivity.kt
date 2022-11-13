@@ -32,9 +32,9 @@ import org.greenrobot.eventbus.EventBus
  * @Author: desong
  * @Date: 2022/7/21
  */
-class MainActivity : BaseActivity<ActivityMainBinding>(){
+class MainActivity : BaseActivity<ActivityMainBinding>() {
     val TAG = "MainActivityTest"
-    
+
     var imageViews: MutableList<ImageView> = ArrayList()
     var fragments: MutableList<Fragment> = ArrayList()
     var lastPos = 0
@@ -101,44 +101,29 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
 
         val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
         val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 3600*12
+            minimumFetchIntervalInSeconds = 3600 * 12
         }
         remoteConfig.setConfigSettingsAsync(configSettings)
 
         remoteConfig.fetchAndActivate()
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val str = remoteConfig.getString("cookies")
-                    ShareUtils.putData("configs",str)
-                    val cookies = gson.fromJson(str,Array<MyCookie>::class.java)
-                    MyConfig.cookies = cookies.toList()
-                    //Log.v(TAG, MyConfig.cookies.toString())
+                    val str = remoteConfig.getString("apikey")
+                    ShareUtils.putData("apikey", str)
+                    BaseApplication.APIKEY = str
+
                 }
 
             }
 
-        handleCopy()
     }
 
-    
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         Log.v(TAG, "on new intent")
         //Toast.makeText(this,"new intent",Toast.LENGTH_SHORT).show()
         handleIntent(intent)
-
-    }
-
-    fun handleCopy() {
-        mBinding.imgDownload.post {
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val item = clipboard.primaryClip?.getItemAt(0)
-            Log.v(TAG, "item:$item")
-            if (item?.text?.toString() != null && item.text.toString().isNotEmpty()) {
-                Log.v(TAG, "text:" + item.text.toString())
-                EventBus.getDefault().post(IntentEvent(item.text.toString()))
-            }
-        }
 
     }
 
@@ -162,8 +147,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
             }
         }
     }
-    
-    
+
 
     /**
      * 切换fragment性能优化,使每个fragment只实例化一次
@@ -207,7 +191,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
 
 
     }
-
 
 
 }

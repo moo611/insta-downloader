@@ -19,6 +19,7 @@ class BaseApplication : Application() {
         var port1 = "3000"
         var port2 = "4000"
         var port3 = "5000"
+        var APIKEY= ""
     }
 
     override fun onCreate() {
@@ -28,9 +29,8 @@ class BaseApplication : Application() {
 
         MobileAds.initialize(this)
 
-        ShareUtils.getData("configs")?.let {
-            val cookies = gson.fromJson(it,Array<MyCookie>::class.java)
-            MyConfig.cookies = cookies.toList()
+        ShareUtils.getData("apikey")?.let {
+            APIKEY = it
         }
     }
 

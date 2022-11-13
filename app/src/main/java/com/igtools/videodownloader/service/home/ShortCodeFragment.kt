@@ -1,12 +1,15 @@
 package com.igtools.videodownloader.service.home
 
 import android.app.ProgressDialog
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.os.Environment
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
@@ -29,6 +32,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
+import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.api.okhttp.OnDownloadListener
 import com.igtools.videodownloader.service.details.BlogDetailsActivity
@@ -50,6 +54,7 @@ import kotlinx.coroutines.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
+import java.net.URLEncoder
 
 
 /**
@@ -61,7 +66,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     lateinit var progressDialog: ProgressDialog
 
-    //lateinit var glideListener: RequestListener<Drawable>
     lateinit var bottomDialog: BottomDialog
     lateinit var recentAdapter: RecentAdapter
     lateinit var firebaseAnalytics: FirebaseAnalytics
@@ -200,6 +204,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             })
         //banner
         mBinding.adView.loadAd(adRequest)
+
+        mBinding.btnPaste.setOnClickListener {
+            handleCopy()
+        }
     }
 
 
@@ -267,24 +275,11 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 param("flag", "1")
             }
             try {
-                val map: HashMap<String, String> = HashMap()
-                val size = MyConfig.cookies.size
-                val random = (0 until size).random()
-                map["Cookie"] = MyConfig.cookies[random].value
-                val cookie = ShareUtils.getData("cookie")
-                Log.v(TAG, cookie + "")
-                if (cookie != null && cookie.contains("sessionid")) {
-                    map["Cookie"] = cookie
-                }
+                val urlEncoded = handleUrl(url)
+                val api =
+                    "https://app.scrapingbee.com/api/v1/?api_key=${BaseApplication.APIKEY}&url=$urlEncoded&render_js=false"
 
-                map["User-Agent"] = Urls.USER_AGENT
-
-                val shortCode = getShortCode()
-                val media_id = UrlUtils.getInstagramPostId(shortCode!!)
-                Log.v(TAG, media_id.toString())
-
-                val url2 = "https://www.instagram.com/api/v1/media/$media_id/info"
-                val res = ApiClient.getClient().getMedia(map, url2)
+                val res = ApiClient.getClient().getMediaNew(api)
                 progressDialog.dismiss()
                 val jsonObject = res.body()
                 //Log.v(TAG, jsonObject.toString())
@@ -293,7 +288,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                         param("flag", "2")
                     }
 
-                    curMediaInfo = parseMedia2(jsonObject)
+                    curMediaInfo = parseMedia(jsonObject)
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
                     mBinding.progressbar.visibility = View.VISIBLE
@@ -334,6 +329,15 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
             }
         }
+    }
+
+    private fun handleUrl(url: String): String {
+        val urlEncoded: String
+
+        val strs = url.split("?")
+        val str = strs[0] + "?__a=1&__d=dis"
+        urlEncoded = URLEncoder.encode(str, "utf-8")
+        return urlEncoded
     }
 
 
@@ -440,7 +444,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     private fun parseMedia(jsonObject: JsonObject): MediaModel {
         val mediaModel = MediaModel()
-        val shortcode_media = jsonObject["data"].asJsonObject["shortcode_media"].asJsonObject
+        val shortcode_media = jsonObject["graphql"].asJsonObject["shortcode_media"].asJsonObject
         val __typename = shortcode_media["__typename"].asString
         if (__typename == "GraphImage") {
             mediaModel.mediaType = 1
@@ -667,7 +671,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
         val keyword = intentEvent.str
         mBinding.etShortcode.setText(keyword)
-        if (ShareUtils.getData("isAuto") == null || ShareUtils.getData("isAuto").toBoolean()) {
+
+        val autodownload = ShareUtils.getDataBool("autodownload")
+        if (autodownload) {
             autoStart()
         }
 
@@ -706,6 +712,20 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this);
+    }
+
+    fun handleCopy() {
+        mBinding.btnPaste.post {
+            val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.primaryClip?.getItemAt(0)?.let {
+                if (!TextUtils.isEmpty(it.text.toString())) {
+                    mBinding.etShortcode.setText(it.text.toString())
+                    autoStart()
+                }
+            }
+
+        }
+
     }
 
 

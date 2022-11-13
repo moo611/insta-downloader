@@ -20,6 +20,9 @@ interface UrlService {
     @GET("/api/mediastory")
     suspend fun getStory(@Query("url") code: String): Response<JsonObject>
 
+    @GET
+    suspend fun getMediaNew(@Url url: String): Response<JsonObject>
+
 
     @GET
     suspend fun getMediaData(
@@ -40,7 +43,10 @@ interface UrlService {
 
 
     @GET
-    suspend fun getStoryData(@Url url: String,@HeaderMap headers: HashMap<String, String>): Response<JsonObject>
+    suspend fun getStoryData(
+        @Url url: String,
+        @HeaderMap headers: HashMap<String, String>
+    ): Response<JsonObject>
 
 
 }

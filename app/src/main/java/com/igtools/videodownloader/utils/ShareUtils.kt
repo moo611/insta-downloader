@@ -16,9 +16,17 @@ object ShareUtils {
 
         return sp.getString(key,null)
     }
+    fun getDataBool(key:String):Boolean{
+
+        return sp.getBoolean(key,true)
+    }
 
     fun putData(key: String,value:String){
         sp.edit().putString(key, value).apply()
+    }
+
+    fun putDataBool(key: String,value:Boolean){
+        sp.edit().putBoolean(key, value).apply()
     }
 
 }

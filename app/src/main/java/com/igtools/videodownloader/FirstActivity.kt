@@ -54,13 +54,11 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     progressDialog.dismiss()
-                    val str = remoteConfig.getString("cookies")
-                    ShareUtils.putData("configs", str)
-                    val cookies = gson.fromJson(str, Array<MyCookie>::class.java)
-                    MyConfig.cookies = cookies.toList()
-                    //Log.v(TAG, MyConfig.cookies.toString())
-                    val b = false
-                    ShareUtils.putData("isFirst",b.toString())
+                    val str = remoteConfig.getString("apikey")
+                    ShareUtils.putData("apikey", str)
+                    BaseApplication.APIKEY = str
+
+                    ShareUtils.putDataBool("firstLogin", false)
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 }

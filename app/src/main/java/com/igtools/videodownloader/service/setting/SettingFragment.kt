@@ -20,26 +20,24 @@ import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.utils.ShareUtils
 
 
-
 /**
  * @Author: desong
  * @Date: 2022/7/21
  */
 class SettingFragment : BaseFragment<FragmentSettingBinding>() {
 
-    
+
     override fun onResume() {
         super.onResume()
 
         val cookie = ShareUtils.getData("cookie")
-        if (cookie == null){
+        if (cookie == null) {
             mBinding.llLogout.visibility = View.INVISIBLE
-        }else{
+        } else {
             mBinding.llLogout.visibility = View.VISIBLE
         }
 
     }
-
 
 
     @SuppressWarnings("deprecation")
@@ -73,14 +71,17 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
             ShareUtils.getEdit().remove("cookie").apply()
             clearCookies(requireContext())
             mBinding.llLogout.visibility = View.INVISIBLE
-            Toast.makeText(requireContext(),getString(R.string.log_out),Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.log_out), Toast.LENGTH_SHORT).show()
         }
-        var isChecked = true
-        if (ShareUtils.getData("isAuto") != null) {
-            isChecked = ShareUtils.getData("isAuto").toBoolean()
-        }
+        val isChecked = ShareUtils.getDataBool("autodownload")
+
         mBinding.mySwitch.isChecked = isChecked
-        mBinding.mySwitch.setOnCheckedChangeListener { _, b -> ShareUtils.putData("isAuto",b.toString()) }
+        mBinding.mySwitch.setOnCheckedChangeListener { _, b ->
+            ShareUtils.putDataBool(
+                "autodownload",
+                b
+            )
+        }
 
     }
 

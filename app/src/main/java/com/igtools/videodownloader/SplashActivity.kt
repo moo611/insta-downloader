@@ -27,10 +27,11 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>() {
             return;
         }
 
-        if (ShareUtils.getData("isFirst") != null && !ShareUtils.getData("isFirst").toBoolean()) {
-            startActivity(Intent(this, MainActivity::class.java))
-        } else {
+        val firstLogin = ShareUtils.getDataBool("firstLogin")
+        if (firstLogin){
             startActivity(Intent(this, FirstActivity::class.java))
+        }else{
+            startActivity(Intent(this, MainActivity::class.java))
         }
         finish()
     }

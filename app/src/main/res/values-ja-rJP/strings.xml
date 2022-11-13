@@ -48,4 +48,5 @@
     <string name="repost">再投稿</string>
     <string name="delete">消去</string>
     <string name="start_right_now">今すぐ始めましょう</string>
+    <string name="paste">ペースト</string>
 </resources>
