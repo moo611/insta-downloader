@@ -1,22 +1,19 @@
 package com.igtools.videodownloader.utils
 
-import android.app.RecoverableSecurityException
 import android.content.*
 import android.database.Cursor
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
-
 import android.util.Log
 import androidx.core.content.FileProvider
-import com.igtools.videodownloader.BaseApplication
-import com.igtools.videodownloader.api.okhttp.OnDownloadListener
-import okhttp3.ResponseBody
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 
 object FileUtils {
