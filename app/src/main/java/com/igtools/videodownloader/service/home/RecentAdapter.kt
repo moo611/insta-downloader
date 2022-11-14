@@ -35,18 +35,6 @@ class RecentAdapter(var c: Context) : RecyclerView.Adapter<RecentAdapter.RecentH
     }
 
     override fun onBindViewHolder(holder: RecentHolder, position: Int) {
-        if (position == 0){
-            holder.avatar.setImageResource(R.mipmap.story)
-            holder.username.text = medias[position].captionText
-            holder.itemView.setOnClickListener {
-                val packageName = "com.igtools.storysaver"
-                try {
-                    c.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
-                } catch (e: ActivityNotFoundException) {
-                    c.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
-                }
-            }
-        }else{
 
             Glide.with(c)
                 .load(medias[position].thumbnailUrl)
@@ -54,8 +42,7 @@ class RecentAdapter(var c: Context) : RecyclerView.Adapter<RecentAdapter.RecentH
                 .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
                 .into(holder.avatar)
             holder.username.text = medias[position].captionText
-            holder.itemView.setOnClickListener { v: View? -> onItemClickListener!!.onClick(position-1) }
-        }
+            holder.itemView.setOnClickListener { v: View? -> onItemClickListener!!.onClick(position) }
 
     }
 

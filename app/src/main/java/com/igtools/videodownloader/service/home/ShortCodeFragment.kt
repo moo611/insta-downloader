@@ -677,9 +677,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     private fun getRecentData() {
         val medias: ArrayList<MediaModel> = ArrayList()
-        val igstory = MediaModel()
-        igstory.captionText = "StorySaver"
-        medias.add(igstory)
+//        val igstory = MediaModel()
+//        igstory.captionText = "StorySaver"
+//        medias.add(igstory)
         lifecycleScope.launch {
             records = RecordDB.getInstance().recordDao().recent() as ArrayList<Record>
             Log.v(TAG, records.size.toString())
