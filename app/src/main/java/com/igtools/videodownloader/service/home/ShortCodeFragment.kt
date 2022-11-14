@@ -377,6 +377,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 }
 
             } catch (e: Exception) {
+                mBinding.progressbar.visibility = View.INVISIBLE
                 Log.e(TAG, e.message + "")
                 Toast.makeText(requireContext(), getString(R.string.failed), Toast.LENGTH_SHORT)
                     .show()

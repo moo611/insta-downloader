@@ -63,7 +63,7 @@ object FileUtils {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
             val subDir = File(dir, folderName)
             if (!subDir.exists()) {
-                subDir.mkdir()
+                subDir.mkdirs()
             }
             val file = File(subDir, System.currentTimeMillis().toString() + ".jpg")
             fos = FileOutputStream(file)
@@ -134,7 +134,7 @@ object FileUtils {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
             val subDir = File(dir, folderName)
             if (!subDir.exists()) {
-                subDir.mkdir()
+                subDir.mkdirs()
             }
             val file = File(subDir, System.currentTimeMillis().toString() + ".mp4")
 
