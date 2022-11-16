@@ -25,11 +25,11 @@ object FileUtils {
         var fos: OutputStream?
         if (Build.VERSION.SDK_INT >= 29) {
 
-            val dir = c.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-            val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
-
+//            val dir = c.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+//            val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
+            val fileName = System.currentTimeMillis().toString() + ".jpg"
             val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, file.name)
+                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                 put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
                 put(
                     MediaStore.MediaColumns.RELATIVE_PATH,
@@ -85,17 +85,17 @@ object FileUtils {
         val filePath: String
         if (Build.VERSION.SDK_INT >= 29) {
 
-            val dir = c.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
-            val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
-
+//            val dir = c.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
+//            val file = File(dir, System.currentTimeMillis().toString() + ".mp4")
+            val fileName = System.currentTimeMillis().toString() + ".mp4"
             val resolver = c.contentResolver
             val valuesVideos = ContentValues()
             valuesVideos.put(
                 MediaStore.Video.Media.RELATIVE_PATH,
                 Environment.DIRECTORY_MOVIES + "/" + folderName
             )
-            valuesVideos.put(MediaStore.Video.Media.TITLE, file.name)
-            valuesVideos.put(MediaStore.Video.Media.DISPLAY_NAME, file.name)
+            valuesVideos.put(MediaStore.Video.Media.TITLE, fileName)
+            valuesVideos.put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
             valuesVideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
             valuesVideos.put(
                 MediaStore.Video.Media.DATE_ADDED,

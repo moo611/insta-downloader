@@ -305,8 +305,11 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
-                Toast.makeText(requireContext(), getString(R.string.failed), Toast.LENGTH_SHORT)
-                    .show()
+                context?.let {
+                    Toast.makeText(it, getString(R.string.failed), Toast.LENGTH_SHORT)
+                        .show()
+                }
+
                 progressDialog.dismiss()
 
             }
@@ -379,8 +382,11 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             } catch (e: Exception) {
                 mBinding.progressbar.visibility = View.INVISIBLE
                 Log.e(TAG, e.message + "")
-                Toast.makeText(requireContext(), getString(R.string.failed), Toast.LENGTH_SHORT)
-                    .show()
+                context.let {
+                    Toast.makeText(it, getString(R.string.failed), Toast.LENGTH_SHORT)
+                        .show()
+                }
+
                 progressDialog.dismiss()
 
             }
@@ -456,12 +462,14 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.parse_error),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
+                context?.let {
+                    Toast.makeText(
+                        it,
+                        getString(R.string.parse_error),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
             }
         }
 
@@ -773,10 +781,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         mBinding.btnPaste.post {
             val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clipboard.primaryClip?.getItemAt(0)?.let {
-                if (!TextUtils.isEmpty(it.text.toString())) {
-                    mBinding.etShortcode.setText(it.text.toString())
-
-                }
+                //fix null pointer
+                mBinding.etShortcode.setText(it.text)
             }
 
         }

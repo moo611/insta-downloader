@@ -73,6 +73,9 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
         mBinding.btnDownload.setOnClickListener {
             isBack = false
+            if (code == null){
+                return@setOnClickListener
+            }
             mInterstitialAd?.show(this@TagBlogDetails)
             lifecycleScope.launch {
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
