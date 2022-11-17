@@ -38,7 +38,7 @@ android {
         myconfig {// 线上环境
             keyAlias 'key0'
             keyPassword '123456'
-            storeFile file('igvideo')
+            storeFile file('igvideo.jks')
             storePassword '123456'
         }
 

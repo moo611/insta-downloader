@@ -1,19 +1,16 @@
 package com.igtools.videodownloader.service.history
 
 import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.fagaia.farm.base.BaseActivity
+import com.igtools.videodownloader.base.BaseActivity
 import com.google.android.gms.ads.AdRequest
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.ActivityHistoryBinding

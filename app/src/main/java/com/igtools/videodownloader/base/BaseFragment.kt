@@ -1,4 +1,4 @@
-package com.fagaia.farm.base
+package com.igtools.videodownloader.base
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,7 +8,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 
 
 /**

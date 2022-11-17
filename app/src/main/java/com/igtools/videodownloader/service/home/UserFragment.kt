@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.fagaia.farm.base.BaseFragment
+import com.igtools.videodownloader.base.BaseFragment
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -30,7 +30,6 @@ import com.igtools.videodownloader.databinding.FragmentUserBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.ResourceModel
 import com.igtools.videodownloader.utils.KeyboardUtils
-import com.igtools.videodownloader.utils.ShareUtils
 import com.igtools.videodownloader.utils.getNullable
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import kotlinx.android.synthetic.main.dialog_bottom.view.*

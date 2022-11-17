@@ -1,12 +1,7 @@
 package com.igtools.videodownloader.service.home
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import com.fagaia.farm.base.BaseFragment
+import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.FragmentHomeBinding
 

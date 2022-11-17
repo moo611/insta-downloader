@@ -1,22 +1,18 @@
 package com.igtools.videodownloader
 
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import com.fagaia.farm.base.BaseActivity
+import com.igtools.videodownloader.base.BaseActivity
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import com.igtools.videodownloader.api.retrofit.MyConfig
-import com.igtools.videodownloader.api.retrofit.MyCookie
 import com.igtools.videodownloader.service.history.HistoryActivity
 import com.igtools.videodownloader.databinding.ActivityMainBinding
 import com.igtools.videodownloader.service.home.HomeFragment

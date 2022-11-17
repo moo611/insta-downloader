@@ -3,16 +3,11 @@ package com.igtools.videodownloader
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.widget.Toast
-import com.fagaia.farm.base.BaseActivity
+import com.igtools.videodownloader.base.BaseActivity
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import com.igtools.videodownloader.api.retrofit.MyConfig
-import com.igtools.videodownloader.api.retrofit.MyCookie
 import com.igtools.videodownloader.databinding.ActivityFirstBinding
 import com.igtools.videodownloader.utils.PermissionUtils
 import com.igtools.videodownloader.utils.ShareUtils

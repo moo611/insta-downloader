@@ -1,15 +1,11 @@
 package com.igtools.videodownloader.service.web
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.os.Build
-import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.webkit.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
-import com.fagaia.farm.base.BaseActivity
+import com.igtools.videodownloader.base.BaseActivity
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.api.okhttp.Urls

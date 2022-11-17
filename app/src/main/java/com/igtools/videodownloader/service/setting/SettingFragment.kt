@@ -2,17 +2,12 @@ package com.igtools.videodownloader.service.setting
 
 import android.content.Context
 import android.os.Build
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.CookieSyncManager
 
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
-import com.fagaia.farm.base.BaseFragment
+import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.BuildConfig
 import com.igtools.videodownloader.R

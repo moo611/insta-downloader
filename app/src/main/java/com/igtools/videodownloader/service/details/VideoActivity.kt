@@ -1,16 +1,11 @@
 package com.igtools.videodownloader.service.details
 
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
-import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
-import com.fagaia.farm.base.BaseActivity
+import com.igtools.videodownloader.base.BaseActivity
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.ActivityVideoBinding
 

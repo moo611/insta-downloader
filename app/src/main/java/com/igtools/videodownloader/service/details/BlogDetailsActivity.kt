@@ -3,13 +3,12 @@ package com.igtools.videodownloader.service.details
 import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.fagaia.farm.base.BaseActivity
+import com.igtools.videodownloader.base.BaseActivity
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -30,7 +29,6 @@ import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.FileUtils
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
-import java.io.File
 
 class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 

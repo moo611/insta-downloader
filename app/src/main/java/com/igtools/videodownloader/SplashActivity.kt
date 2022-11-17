@@ -2,9 +2,7 @@ package com.igtools.videodownloader
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import com.fagaia.farm.base.BaseActivity
+import com.igtools.videodownloader.base.BaseActivity
 import com.igtools.videodownloader.databinding.ActivitySplashBinding
 import com.igtools.videodownloader.utils.ShareUtils
 
