@@ -53,7 +53,8 @@ object FileUtils {
             contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
             imageUri?.let {
                 contentResolver.update(it, contentValues, null, null)
-                filePath = getFilePathFromContentUri(it, contentResolver)
+                val uriPathHelper = URIPathHelper()
+                filePath = uriPathHelper.getPath(c, it)
 
             }
             return filePath
@@ -81,8 +82,8 @@ object FileUtils {
     }
 
 
-    fun saveVideoToAlbum(c: Context, input: InputStream): String {
-        val filePath: String
+    fun saveVideoToAlbum(c: Context, input: InputStream): String? {
+        var filePath: String? = null
         if (Build.VERSION.SDK_INT >= 29) {
 
 //            val dir = c.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
@@ -124,10 +125,13 @@ object FileUtils {
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
             }
-            filePath = getFilePathFromContentUri(uri!!,resolver)
-            valuesVideos.clear()
-            valuesVideos.put(MediaStore.Video.Media.IS_PENDING, 0)
-            c.contentResolver.update(uri, valuesVideos, null, null)
+            val uriPathHelper = URIPathHelper()
+            uri?.let {
+                filePath = uriPathHelper.getPath(c, it)
+                valuesVideos.clear()
+                valuesVideos.put(MediaStore.Video.Media.IS_PENDING, 0)
+                c.contentResolver.update(uri, valuesVideos, null, null)
+            }
 
         } else {
             val dir =
@@ -296,20 +300,20 @@ object FileUtils {
     }
 
 
-    fun getFilePathFromContentUri(
-        selectedVideoUri: Uri,
-        contentResolver: ContentResolver
-    ): String {
-        val filePath: String
-        val filePathColumn = arrayOf<String>(MediaStore.MediaColumns.DATA)
-        val cursor: Cursor =
-            contentResolver.query(selectedVideoUri, filePathColumn, null, null, null)!!
-        cursor.moveToFirst()
-        val columnIndex: Int = cursor.getColumnIndex(filePathColumn[0])
-        filePath = cursor.getString(columnIndex)
-        cursor.close()
-        return filePath
-    }
+//    fun getFilePathFromContentUri(
+//        selectedVideoUri: Uri,
+//        contentResolver: ContentResolver
+//    ): String {
+//        val filePath: String
+//        val filePathColumn = arrayOf<String>(MediaStore.MediaColumns.DATA)
+//        val cursor: Cursor =
+//            contentResolver.query(selectedVideoUri, filePathColumn, null, null, null)!!
+//        cursor.moveToFirst()
+//        val columnIndex: Int = cursor.getColumnIndex(filePathColumn[0])
+//        filePath = cursor.getString(columnIndex)
+//        cursor.close()
+//        return filePath
+//    }
 
 
     interface FileDeleteListener {
