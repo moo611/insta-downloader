@@ -16,6 +16,9 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.api.retrofit.ApiClient
@@ -215,30 +218,39 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         if (media?.mediaType == 1) {
             //image
 
-            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
-            withContext(Dispatchers.IO) {
-                val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
-                val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
-                if (path!=null){
-                    paths.append(path).append(",")
-                }
-
-            }
-
-        } else if (media?.mediaType == 2) {
-            //video
-            media.videoUrl?.let {
-                val responseBody = ApiClient.getClient().downloadUrl(it)
+            try {
+                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
                 withContext(Dispatchers.IO) {
-                    val path = FileUtils.saveVideoToAlbum(
-                        this@BlogDetailsActivity,
-                        responseBody.body()!!.byteStream()
-                    )
+                    val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
+                    val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
                     if (path!=null){
                         paths.append(path).append(",")
                     }
 
                 }
+            }catch (e:Exception){
+                Toast.makeText(this, "time out", Toast.LENGTH_SHORT).show()
+                sendToFirebase(e)
+            }
+
+        } else if (media?.mediaType == 2) {
+            //video
+            media.videoUrl?.let {
+                try {
+                    val responseBody = ApiClient.getClient().downloadUrl(it)
+                    withContext(Dispatchers.IO) {
+                        val path = FileUtils.saveVideoToAlbum(
+                            this@BlogDetailsActivity,
+                            responseBody.body()!!.byteStream()
+                        )
+                        paths.append(path).append(",")
+
+                    }
+                }catch (e:Exception){
+                    Toast.makeText(this, "time out", Toast.LENGTH_SHORT).show()
+                    sendToFirebase(e)
+                }
+
             }
 
         }
@@ -274,6 +286,16 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             mInterstitialAd?.show(this)
         }
 
+
+    }
+
+    private fun sendToFirebase(e:Exception){
+        val analytics = Firebase.analytics
+        if (e.message!=null){
+            analytics.logEvent("app_my_exception"){
+                param("my_exception", e.message!!)
+            }
+        }
 
     }
 

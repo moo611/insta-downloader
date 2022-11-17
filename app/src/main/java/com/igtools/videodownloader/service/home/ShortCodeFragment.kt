@@ -26,6 +26,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.BaseApplication
@@ -382,7 +383,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             } catch (e: Exception) {
                 mBinding.progressbar.visibility = View.INVISIBLE
                 Log.e(TAG, e.message + "")
-                context.let {
+                context?.let {
                     Toast.makeText(it, getString(R.string.failed), Toast.LENGTH_SHORT)
                         .show()
                 }
@@ -657,27 +658,43 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
         if (media?.mediaType == 1) {
             //image
-            val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
-            withContext(Dispatchers.IO) {
-                val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
-                val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
-                if (path != null) {
-                    paths.append(path).append(",")
-                }
+            try {
+                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+                withContext(Dispatchers.IO) {
+                    val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
+                    val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
+                    if (path != null) {
+                        paths.append(path).append(",")
+                    }
 
+                }
+            } catch (e: Exception) {
+                context?.let {
+                    Toast.makeText(it, "time out", Toast.LENGTH_SHORT).show()
+                    sendToFirebase(e)
+                }
             }
+
 
         } else if (media?.mediaType == 2) {
             //video
             if (media.videoUrl != null) {
-                val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
-                withContext(Dispatchers.IO) {
-                    val path = FileUtils.saveVideoToAlbum(
-                        requireContext(),
-                        responseBody.body()!!.byteStream()
-                    )
-                    paths.append(path).append(",")
+                try {
+                    val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
+                    withContext(Dispatchers.IO) {
+                        val path = FileUtils.saveVideoToAlbum(
+                            requireContext(),
+                            responseBody.body()!!.byteStream()
+                        )
+                        paths.append(path).append(",")
+                    }
+                } catch (e: Exception) {
+                    context?.let {
+                        Toast.makeText(it, "time out", Toast.LENGTH_SHORT).show()
+                        sendToFirebase(e)
+                    }
                 }
+
 
             }
 
@@ -789,5 +806,13 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     }
 
+    private fun sendToFirebase(e:Exception){
+        val analytics = Firebase.analytics
+        if (e.message!=null){
+            analytics.logEvent("app_my_exception"){
+                param("my_exception", e.message!!)
+            }
+        }
 
+    }
 }
