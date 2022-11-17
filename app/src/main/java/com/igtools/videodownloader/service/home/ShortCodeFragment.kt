@@ -339,7 +339,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             try {
                 val urlEncoded = handleUrl(url)
                 val api =
-                    "https://app.scrapingbee.com/api/v1/?api_key=${BaseApplication.APIKEY}&url=$urlEncoded&render_js=false"
+                    "https://app.scrapingbee.com/api/v1/?api_key=${BaseApplication.APIKEY}&url=$urlEncoded&render_js=false&premium_proxy=true&country_code=us"
 
                 val res = ApiClient.getClient().getMediaNew(api)
                 progressDialog.dismiss()
