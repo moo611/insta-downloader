@@ -104,7 +104,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         remoteConfig.fetchAndActivate()
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val str = remoteConfig.getString("apikey")
+                    val str = remoteConfig.getString("apikey2")
                     ShareUtils.putData("apikey", str)
                     BaseApplication.APIKEY = str
 

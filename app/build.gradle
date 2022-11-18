@@ -16,8 +16,8 @@ android {
         applicationId "com.igtools.videodownloader"
         minSdk 21
         targetSdk 31
-        versionCode 27
-        versionName "1.1.6"
+        versionCode 28
+        versionName "1.1.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

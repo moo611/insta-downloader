@@ -49,7 +49,7 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     progressDialog.dismiss()
-                    val str = remoteConfig.getString("apikey")
+                    val str = remoteConfig.getString("apikey2")
                     ShareUtils.putData("apikey", str)
                     BaseApplication.APIKEY = str
 
