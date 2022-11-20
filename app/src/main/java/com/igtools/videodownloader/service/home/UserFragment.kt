@@ -106,6 +106,10 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 return@setOnClickListener
             }
 
+            firebaseAnalytics.logEvent("search_by_user") {
+                param("search_by_user", 1)
+            }
+
             getDataNoCookie()
 
         }
@@ -161,7 +165,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
         val title = privateView.findViewById<TextView>(R.id.title)
         title.text = getString(R.string.long_text2)
-        privateView.btn_login.setOnClickListener {
+        val tvLogin = privateView.findViewById<TextView>(R.id.tv_login)
+        val tvCancel = privateView.findViewById<TextView>(R.id.tv_cancel)
+        tvLogin.setOnClickListener {
 
             val url = "https://www.instagram.com/accounts/login"
             startActivityForResult(
@@ -170,6 +176,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     url
                 ), LOGIN_REQ
             )
+            privateDialog.dismiss()
+        }
+        tvCancel.setOnClickListener {
             privateDialog.dismiss()
         }
         privateDialog.setUpView(privateView)
@@ -351,6 +360,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         if (loadingMore || isEnd) {
             return
         }
+        if (adapter.medias.size>300){
+            return
+        }
         loadingMore = true
         val cookie = BaseApplication.cookie
         val map: HashMap<String, String> = HashMap()
@@ -413,6 +425,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     private fun getDataMoreNoCookie() {
 
         if (loadingMore || isEnd) {
+            return
+        }
+        if (adapter.medias.size>300){
             return
         }
         loadingMore = true
@@ -536,10 +551,6 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             if (resultCode == 200) {
                 lifecycleScope.launch {
                     getData()
-                }
-
-                firebaseAnalytics.logEvent("user_login") {
-                    param("flag", "2")
                 }
             }
 

@@ -48,7 +48,9 @@
     <string name="repost">再投稿</string>
     <string name="delete">消去</string>
     <string name="start_right_now">今すぐ始めましょう</string>
-    <string name="paste">ペースト</string>
+
     <string name="failed">データの取得に失敗しました</string>
     <string name="network">ネットワーク エラー</string>
+    <string name="cancel">キャンセル</string>
+    <string name="paste">貼り付け</string>
 </resources>

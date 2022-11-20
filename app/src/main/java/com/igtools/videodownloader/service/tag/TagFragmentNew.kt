@@ -14,6 +14,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.BaseApplication
@@ -71,6 +72,9 @@ class TagFragmentNew : BaseFragment<FragmentTagBinding>() {
                 Toast.makeText(requireContext(), getString(R.string.empty_tag), Toast.LENGTH_SHORT)
                     .show()
                 return@setOnClickListener
+            }
+            firebaseAnalytics.logEvent("search_by_tag") {
+                param("search_by_tag", 1)
             }
             refreshNoCookie()
         }
@@ -188,7 +192,7 @@ class TagFragmentNew : BaseFragment<FragmentTagBinding>() {
 
                     Toast.makeText(
                         requireContext(),
-                        getString(R.string.not_found),
+                        getString(R.string.failed),
                         Toast.LENGTH_SHORT
                     )
                         .show()
@@ -197,7 +201,7 @@ class TagFragmentNew : BaseFragment<FragmentTagBinding>() {
                 progressDialog.dismiss()
             } catch (e: Exception) {
                 context?.let {
-                    Toast.makeText(it, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT).show()
                 }
 
                 progressDialog.dismiss()
@@ -212,6 +216,9 @@ class TagFragmentNew : BaseFragment<FragmentTagBinding>() {
     private fun loadMoreNoCookie() {
 
         if (loadingMore || isEnd) {
+            return
+        }
+        if (adapter.medias.size>300){
             return
         }
         loadingMore = true
@@ -254,7 +261,7 @@ class TagFragmentNew : BaseFragment<FragmentTagBinding>() {
 
                     Toast.makeText(
                         requireContext(),
-                        getString(R.string.not_found),
+                        getString(R.string.failed),
                         Toast.LENGTH_SHORT
                     )
                         .show()
@@ -263,7 +270,7 @@ class TagFragmentNew : BaseFragment<FragmentTagBinding>() {
                 mBinding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
                 context?.let {
-                    Toast.makeText(it, getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT).show()
                 }
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
@@ -329,7 +336,7 @@ class TagFragmentNew : BaseFragment<FragmentTagBinding>() {
 
 
     override fun getLayoutId(): Int {
-        return R.layout.fragment_tag
+        return R.layout.fragment_tag_new
     }
 
 }

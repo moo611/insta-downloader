@@ -146,30 +146,13 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     private fun initDialog() {
 
-        privateDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
-        val privateView =
-            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
-        val title = privateView.findViewById<TextView>(R.id.title)
-        title.text = getString(R.string.long_text2)
-        privateView.btn_login.setOnClickListener {
-
-            val url = "https://www.instagram.com/accounts/login"
-            startActivityForResult(
-                Intent(requireContext(), WebActivity::class.java).putExtra(
-                    "url",
-                    url
-                ), LOGIN_REQ
-            )
-            privateDialog.dismiss()
-        }
-        privateDialog.setUpView(privateView)
-
-
         storyDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
         val storyView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
         val title2 = storyView.findViewById<TextView>(R.id.title)
-        title2.text = getString(R.string.long_text2)
-        storyView.btn_login.setOnClickListener {
+        title2.text = getString(R.string.long_text1)
+        val tvLogin = storyView.findViewById<TextView>(R.id.tv_login)
+        val tvCancel = storyView.findViewById<TextView>(R.id.tv_cancel)
+        tvLogin.setOnClickListener {
 
             val url = "https://www.instagram.com/accounts/login"
             startActivityForResult(
@@ -180,8 +163,33 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             )
             storyDialog.dismiss()
         }
+        tvCancel.setOnClickListener {
+            storyDialog.dismiss()
+        }
         storyDialog.setUpView(storyView)
 
+        privateDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
+        val privateView =
+            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
+        val title = privateView.findViewById<TextView>(R.id.title)
+        title.text = getString(R.string.long_text2)
+        val tvLogin2 = privateView.findViewById<TextView>(R.id.tv_login)
+        val tvCancel2 = privateView.findViewById<TextView>(R.id.tv_cancel)
+        tvLogin2.setOnClickListener {
+
+            val url = "https://www.instagram.com/accounts/login"
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
+            privateDialog.dismiss()
+        }
+        tvCancel2.setOnClickListener {
+            privateDialog.dismiss()
+        }
+        privateDialog.setUpView(privateView)
 
     }
 

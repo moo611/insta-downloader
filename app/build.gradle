@@ -16,8 +16,8 @@ android {
         applicationId "com.igtools.videodownloader"
         minSdk 21
         targetSdk 31
-        versionCode 28
-        versionName "1.1.7"
+        versionCode 29
+        versionName "1.1.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -109,7 +109,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-config-ktx'
-
+    implementation 'com.google.firebase:firebase-inappmessaging-display-ktx'
     //eventbus
     implementation("org.greenrobot:eventbus:3.3.1")
 

@@ -47,7 +47,9 @@
     <string name="repost">पोस्ट</string>
     <string name="delete">मिटाना</string>
     <string name="start_right_now">अभी शुरू करें</string>
-    <string name="paste">पेस्ट</string>
+
     <string name="failed">डेटा प्राप्त करना विफल</string>
     <string name="network">नेटवर्क त्रुटि</string>
+    <string name="paste">पेस्ट करें</string>
+    <string name="cancel">रद्द करना</string>
 </resources>

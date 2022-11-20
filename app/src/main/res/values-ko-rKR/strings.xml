@@ -48,7 +48,9 @@
     <string name="repost">다시 게시</string>
     <string name="delete">삭제</string>
     <string name="start_right_now">지금 시작하세요</string>
-    <string name="paste">반죽</string>
+
     <string name="failed">데이터 가져오기 실패</string>
     <string name="network">네트워크 오류</string>
+    <string name="cancel">취소</string>
+    <string name="paste">붙여넣기</string>
 </resources>

@@ -57,25 +57,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <TextView
+                    android:textColor="@color/app_color"
+                    android:background="@drawable/bg_round_stroke"
                     android:id="@+id/btn_paste"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:layout_height="50dp"
+                    android:layout_height="40dp"
                     android:layout_margin="20dp"
                     android:gravity="center"
                     android:text="@string/paste"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
-                <Button
+                <TextView
+                    android:textColor="@color/white"
+                    android:background="@drawable/bg_round_fill"
                     android:id="@+id/btn_download"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:layout_height="50dp"
+                    android:layout_height="40dp"
                     android:layout_margin="20dp"
                     android:gravity="center"
                     android:text="@string/download"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
@@ -167,7 +171,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/container2"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="240dp"
                 android:layout_margin="10dp"
                 android:visibility="visible"
                 app:cardCornerRadius="8dp">
