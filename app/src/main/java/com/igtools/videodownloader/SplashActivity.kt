@@ -25,8 +25,8 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>() {
             return;
         }
 
-        val firstLogin = ShareUtils.getDataBool("firstLogin")
-        if (firstLogin){
+
+        if (BaseApplication.firstLogin){
             startActivity(Intent(this, FirstActivity::class.java))
         }else{
             startActivity(Intent(this, MainActivity::class.java))

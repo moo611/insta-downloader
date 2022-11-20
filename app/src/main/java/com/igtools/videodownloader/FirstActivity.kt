@@ -54,6 +54,7 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
                     BaseApplication.APIKEY = str
 
                     ShareUtils.putDataBool("firstLogin", false)
+                    BaseApplication.firstLogin = false
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 }

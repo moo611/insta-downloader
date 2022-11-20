@@ -70,7 +70,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
             mBinding.llLogout.visibility = View.INVISIBLE
             Toast.makeText(requireContext(), getString(R.string.log_out), Toast.LENGTH_SHORT).show()
         }
-        val isChecked = ShareUtils.getDataBool("autodownload")
+        val isChecked = BaseApplication.autodownload
 
         mBinding.mySwitch.isChecked = isChecked
         mBinding.mySwitch.setOnCheckedChangeListener { _, b ->
@@ -78,6 +78,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
                 "autodownload",
                 b
             )
+            BaseApplication.autodownload = b
         }
 
     }

@@ -785,8 +785,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         val keyword = intentEvent.str
         mBinding.etShortcode.setText(keyword)
 
-        val autodownload = ShareUtils.getDataBool("autodownload")
-        if (autodownload) {
+        if (BaseApplication.autodownload) {
             autoStart()
         }
 
