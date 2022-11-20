@@ -36,8 +36,8 @@
     <string name="empty_username">Please enter username</string>
     <string name="empty_tag">Please enter hashtag</string>
     <string name="log_out">Log Out</string>
-    <string name="long_text1">Login to have better experience</string>
-    <string name="long_text2">By login you can:(1) get faster download speed (2) download story and private post (3) search for user\'s feeds</string>
+    <string name="long_text1">Login required to see story</string>
+    <string name="long_text2">Login required to see private post, the login account must be the account that you and the person follow each other</string>
     <string name="long_text3">We do not collect your personal information. Downloading too frequently may result in your instagram account being banned</string>
     <string name="parse_error">Parse exception</string>
     <string name="recent_download">Recent</string>
@@ -49,5 +49,5 @@
     <string name="start_right_now">Start Right Now</string>
     <string name="paste">paste</string>
     <string name="failed">Get data failed</string>
-
+    <string name="network">Network Error</string>
 </resources>

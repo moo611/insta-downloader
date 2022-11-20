@@ -37,8 +37,8 @@
     <string name="empty_username">ユーザー名を入力してください</string>
     <string name="empty_tag">ハッシュタグを入力してください</string>
     <string name="log_out">ログアウト</string>
-    <string name="long_text1">ログインしてより良い体験をしてください</string>
-    <string name="long_text2">ログインすると、(1) ダウンロード速度が速くなります (2) ストーリーとプライベート投稿をダウンロードできます (3) ユーザーのフィードを検索できます</string>
+    <string name="long_text1">ストーリーを見るにはログインが必要です</string>
+    <string name="long_text2">非公開の投稿を表示するにはログインが必要です。ログイン アカウントは、あなたと相手が相互にフォローしているアカウントである必要があります</string>
     <string name="long_text3">私たちはあなたの個人情報を収集しません。あまりにも頻繁にダウンロードすると、Instagram アカウントが禁止される可能性があります</string>
     <string name="parse_error">解析例外</string>
     <string name="recent_download">最近</string>
@@ -50,4 +50,5 @@
     <string name="start_right_now">今すぐ始めましょう</string>
     <string name="paste">ペースト</string>
     <string name="failed">データの取得に失敗しました</string>
+    <string name="network">ネットワーク エラー</string>
 </resources>

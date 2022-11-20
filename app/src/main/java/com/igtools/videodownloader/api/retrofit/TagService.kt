@@ -2,6 +2,7 @@ package com.igtools.videodownloader.api.retrofit
 
 import com.google.gson.JsonObject
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -21,6 +22,9 @@ interface TagService {
     @GET
     suspend fun getTagData(@Url url:String,@HeaderMap map:HashMap<String,String>,@Query("tag_name")tag:String): Response<JsonObject>
 
+
+    @GET
+    suspend fun getTagNew(@Url url:String): Response<JsonObject>
 
     @POST
     @FormUrlEncoded

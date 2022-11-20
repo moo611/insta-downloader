@@ -2,6 +2,7 @@ package com.igtools.videodownloader
 
 import android.content.Intent
 import android.util.Log
+import android.view.View
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -19,6 +20,7 @@ import com.igtools.videodownloader.service.home.HomeFragment
 import com.igtools.videodownloader.service.setting.SettingFragment
 import com.igtools.videodownloader.service.tag.TagFragment
 import com.igtools.videodownloader.models.IntentEvent
+import com.igtools.videodownloader.service.tag.TagFragmentNew
 import com.igtools.videodownloader.utils.RegexUtils
 import com.igtools.videodownloader.utils.ShareUtils
 import org.greenrobot.eventbus.EventBus
@@ -43,6 +45,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun initView() {
 
+        if (BaseApplication.tagUpdate){
+            mBinding.viewCircle.visibility = View.VISIBLE
+        }else{
+            mBinding.viewCircle.visibility = View.INVISIBLE
+        }
 
         firebaseAnalytics = Firebase.analytics
 
@@ -56,7 +63,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
 
         fragments.add(HomeFragment())
-        fragments.add(TagFragment())
+        fragments.add(TagFragmentNew())
         fragments.add(SettingFragment())
 
         showFragment(lastPos)
@@ -70,7 +77,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         }
         mBinding.llTag.setOnClickListener {
-
+            if (BaseApplication.tagUpdate){
+                BaseApplication.tagUpdate = false
+                ShareUtils.putDataBool("tag-update",false)
+                mBinding.viewCircle.visibility = View.INVISIBLE
+            }
             showFragment(1)
             selectPage(1)
             lastPos = 1

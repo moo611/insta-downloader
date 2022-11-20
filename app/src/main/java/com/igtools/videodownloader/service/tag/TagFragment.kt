@@ -64,7 +64,6 @@ class TagFragment : BaseFragment<FragmentTagBinding>() {
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
         adapter = MediaAdapter(requireContext())
-        adapter.fromTag = true
         layoutManager = GridLayoutManager(context, 3)
         mBinding.rv.adapter = adapter
         mBinding.rv.layoutManager = layoutManager

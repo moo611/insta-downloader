@@ -7,6 +7,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,6 +22,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.service.web.WebActivity
@@ -32,15 +34,19 @@ import com.igtools.videodownloader.models.ResourceModel
 import com.igtools.videodownloader.utils.KeyboardUtils
 import com.igtools.videodownloader.utils.getNullable
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
+import com.igtools.videodownloader.widgets.dialog.MyDialog
 import kotlinx.android.synthetic.main.dialog_bottom.view.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URLEncoder
 
 
 class UserFragment : BaseFragment<FragmentUserBinding>() {
-
+    lateinit var privateDialog: MyDialog
     val TAG = "UserFragment"
     val LOGIN_REQ = 1000
-
+    val COUNT = 50
     lateinit var firebaseAnalytics: FirebaseAnalytics
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: MediaAdapter
@@ -53,7 +59,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     var isEnd = false
     var userId = ""
     var mInterstitialAd: InterstitialAd? = null
-
+    var mode = "public"
     override fun getLayoutId(): Int {
         return R.layout.fragment_user
     }
@@ -62,7 +68,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
-
+        initDialog()
         adapter = MediaAdapter(requireContext())
         layoutManager = GridLayoutManager(context, 3)
         mBinding.rv.adapter = adapter
@@ -99,16 +105,8 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 ).show()
                 return@setOnClickListener
             }
-            //refresh(mBinding.etUsername.text.toString())
-            val cookie = BaseApplication.cookie
-            if (cookie == null) {
-                bottomDialog.show()
-                firebaseAnalytics.logEvent("dialog_show"){
-                    param("flag", "1")
-                }
-            } else {
-                getData()
-            }
+
+            getDataNoCookie()
 
         }
 
@@ -140,8 +138,11 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 super.onScrolled(recyclerView, dx, dy)
                 if (!mBinding.rv.canScrollVertically(1) && dy > 0) {
                     //滑动到底部
-
-                    getDataMore()
+                    if (mode=="public"){
+                        getDataMoreNoCookie()
+                    }else{
+                        getDataMore()
+                    }
 
                 }
 
@@ -151,6 +152,27 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         mBinding.imgClear.setOnClickListener {
             mBinding.etUsername.setText("")
         }
+    }
+
+    private fun initDialog() {
+
+        privateDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
+        val privateView =
+            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
+        val title = privateView.findViewById<TextView>(R.id.title)
+        title.text = getString(R.string.long_text2)
+        privateView.btn_login.setOnClickListener {
+
+            val url = "https://www.instagram.com/accounts/login"
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
+            privateDialog.dismiss()
+        }
+        privateDialog.setUpView(privateView)
     }
 
     override fun initData() {
@@ -183,21 +205,19 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         cursor = ""
         isEnd = false
         profileUrl = ""
+        mode = "public"
     }
 
-    fun getData() {
-
-        clearData()
-
-        val cookie = BaseApplication.cookie
-        Log.v(TAG, cookie + "")
-        //Log.v(TAG,userAgent+"")
-        val map: HashMap<String, String> = HashMap()
-        map["Cookie"] = cookie!!
-        map["User-Agent"] = Urls.USER_AGENT
-        lifecycleScope.launch {
-            try {
+    suspend fun getData() = withContext(Dispatchers.Main){
+            mode = "private"
+            if (!progressDialog.isShowing){
                 progressDialog.show()
+            }
+            try {
+                val cookie = BaseApplication.cookie
+                val map: HashMap<String, String> = HashMap()
+                map["Cookie"] = cookie!!
+                map["User-Agent"] = Urls.USER_AGENT
                 val res = ApiClient.getClient2()
                     .getUserMedia(Urls.USER_INFO, map, mBinding.etUsername.text.toString())
                 val code = res.code()
@@ -229,7 +249,11 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     mInterstitialAd?.show(requireActivity())
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
-                    Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.failed),
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 }
 
@@ -238,13 +262,89 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                Toast.makeText(requireContext(), getString(R.string.parse_error), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.network),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+
+
+    }
+
+    fun getDataNoCookie() {
+        clearData()
+        lifecycleScope.launch {
+            try {
+                progressDialog.show()
+                val username = mBinding.etUsername.text.toString()
+                val url1 = "https://www.instagram.com/$username/?__a=1&__d=dis"
+                val urlEncoded1 = URLEncoder.encode(url1,"utf-8")
+                val api1 = "http://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded1"
+                val res1 = ApiClient.getClient2().getUserId(api1)
+
+                val code = res1.code()
+
+                if (code == 200 && res1.body()!=null) {
+                    val jsonObject = res1.body()!!
+
+                    val user = jsonObject["graphql"].asJsonObject["user"].asJsonObject
+
+                    val isPrivate = user["is_private"].asBoolean
+                    if (isPrivate){
+
+                        if (BaseApplication.cookie == null){
+                            privateDialog.show()
+                            progressDialog.dismiss()
+                        }else{
+                            getData()
+                        }
+
+                    }else{
+                        userId = user["id"].asString
+                        val edge_owner_to_timeline_media =
+                            user["edge_owner_to_timeline_media"].asJsonObject
+                        val edges = edge_owner_to_timeline_media["edges"].asJsonArray
+                        if (edges.size() > 0) {
+                            val medias: ArrayList<MediaModel> = ArrayList()
+                            for (item in edges) {
+                                val mediainfo = parse1(item.asJsonObject)
+                                medias.add(mediainfo)
+                            }
+                            adapter.refresh(medias)
+                        }
+                        val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
+                        isEnd = !pageInfo["has_next_page"].asBoolean
+                        cursor = pageInfo["end_cursor"].asString
+                        progressDialog.dismiss()
+                        mInterstitialAd?.show(requireActivity())
+                    }
+
+                } else {
+
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.failed),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+
+
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                progressDialog.dismiss()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.network),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
         }
 
     }
-
 
     private fun getDataMore() {
 
@@ -261,7 +361,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 mBinding.progressBottom.visibility = View.VISIBLE
                 val variables: HashMap<String, Any> = HashMap()
                 variables["id"] = userId
-                variables["first"] = 24
+                variables["first"] = COUNT
                 variables["after"] = cursor
                 //Log.v(TAG,"variables:"+variables)
                 val res = ApiClient.getClient2().getUserMediaMore(
@@ -291,7 +391,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     cursor = pageInfo["end_cursor"].asString
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
-                    Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), getString(R.string.failed), Toast.LENGTH_SHORT)
                         .show()
                 }
 
@@ -301,13 +401,80 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 Log.e(TAG, e.message + "")
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(requireContext(), getString(R.string.not_found), Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.network), Toast.LENGTH_SHORT).show()
             }
 
         }
 
     }
 
+
+
+    private fun getDataMoreNoCookie() {
+
+        if (loadingMore || isEnd) {
+            return
+        }
+        loadingMore = true
+
+        lifecycleScope.launch {
+            try {
+                mBinding.progressBottom.visibility = View.VISIBLE
+                val variables: HashMap<String, Any> = HashMap()
+                variables["id"] = userId
+                variables["first"] = COUNT
+                variables["after"] = cursor
+
+                val str = Urls.GRAPH_QL + "?query_hash=${Urls.QUERY_HASH_USER}&variables=${
+                    gson.toJson(variables)
+                }"
+                val urlEncoded = URLEncoder.encode(str, "utf-8")
+                val api = "http://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded"
+
+                //Log.v(TAG,"variables:"+variables)
+                val res = ApiClient.getClient2().getUserMediaNoCookie(api)
+                val code = res.code()
+                val jsonObject = res.body()
+                if (code == 200 && jsonObject != null) {
+                    val user = jsonObject["data"].asJsonObject["user"].asJsonObject
+
+                    val edge_owner_to_timeline_media =
+                        user["edge_owner_to_timeline_media"].asJsonObject
+                    val edges = edge_owner_to_timeline_media["edges"].asJsonArray
+                    if (edges.size() > 0) {
+                        val medias: ArrayList<MediaModel> = ArrayList()
+                        for (item in edges) {
+                            val mediainfo = parse1(item.asJsonObject)
+                            medias.add(mediainfo)
+                        }
+                        adapter.loadMore(medias)
+                    }
+                    val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
+                    isEnd = !pageInfo["has_next_page"].asBoolean
+                    cursor = pageInfo["end_cursor"].asString
+                } else {
+                    Log.e(TAG, res.errorBody()?.string() + "")
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.failed),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+
+                loadingMore = false
+                mBinding.progressBottom.visibility = View.INVISIBLE
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                loadingMore = false
+                mBinding.progressBottom.visibility = View.INVISIBLE
+                Toast.makeText(requireContext(), getString(R.string.network), Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+        }
+
+    }
 
     private fun parse1(jsonObject: JsonObject): MediaModel {
         val mediaModel = MediaModel()
@@ -367,8 +534,11 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         if (requestCode == LOGIN_REQ) {
 
             if (resultCode == 200) {
-                getData()
-                firebaseAnalytics.logEvent("user_login"){
+                lifecycleScope.launch {
+                    getData()
+                }
+
+                firebaseAnalytics.logEvent("user_login") {
                     param("flag", "2")
                 }
             }

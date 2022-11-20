@@ -14,6 +14,8 @@ public class Urls {
 
     public static String QUERY_HASH_USER = "69cba40317214236af40e7efa697781d";
 
+    public static String QUERY_HASH_TAG = "f92f56d47dc7a55b606908374b43a314";
+
     public static String PRIVATE_API = "https://i.instagram.com/api/v1";
 
     public static String TAG_INFO = "https://i.instagram.com/api/v1/tags/web_info/";

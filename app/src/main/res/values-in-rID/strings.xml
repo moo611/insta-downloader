@@ -38,8 +38,8 @@
     <string name="empty_username">silakan masukkan nama pengguna</string>
     <string name="empty_tag">Silakan masukkan hastag</string>
     <string name="log_out">keluar</string>
-    <string name="long_text1">Masuk untuk mendapatkan pengalaman yang lebih baik</string>
-    <string name="long_text2">Dengan login, Anda dapat: (1) mendapatkan kecepatan unduh yang lebih cepat (2) mengunduh cerita dan pos pribadi (3) mencari umpan pengguna</string>
+    <string name="long_text1">Login diperlukan untuk melihat cerita</string>
+    <string name="long_text2">Login diperlukan untuk melihat postingan pribadi, akun login harus akun yang Anda dan orang tersebut ikuti satu sama lain</string>
     <string name="long_text3">Kami tidak mengumpulkan informasi pribadi Anda. Mengunduh terlalu sering dapat menyebabkan akun instagram Anda diblokir</string>
     <string name="parse_error">Mengurai pengecualian</string>
     <string name="recent_download">Terkini</string>
@@ -51,4 +51,5 @@
     <string name="start_right_now">Mulai sekarang</string>
     <string name="paste">Tempel</string>
     <string name="failed">Mendapatkan data gagal</string>
+    <string name="network">Kesalahan Jaringan</string>
 </resources>

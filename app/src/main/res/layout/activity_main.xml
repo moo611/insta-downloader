@@ -91,21 +91,29 @@
 
             </LinearLayout>
 
-            <LinearLayout
+            <FrameLayout
                 android:id="@+id/ll_tag"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
                 android:orientation="vertical">
 
                 <ImageView
+                    android:layout_gravity="center"
                     android:id="@+id/img_tag"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@mipmap/tag" />
+                <View
+                    android:id="@+id/view_circle"
+                    android:visibility="invisible"
+                    android:background="@drawable/bg_red"
+                    android:layout_marginLeft="20dp"
+                    android:layout_gravity="center"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"/>
 
-            </LinearLayout>
+            </FrameLayout>
 
             <LinearLayout
                 android:id="@+id/ll_mine"

@@ -21,6 +21,9 @@ class BaseApplication : Application() {
         var port3 = "5000"
         var APIKEY= ""
         var cookie:String?=null
+        //ui
+        var tagUpdate = true
+        var userUpdate = true
     }
 
     override fun onCreate() {
@@ -35,6 +38,12 @@ class BaseApplication : Application() {
         }
         ShareUtils.getData("cookie").let {
             cookie = it
+        }
+        ShareUtils.getDataBool("tag-update").let {
+            tagUpdate = it
+        }
+        ShareUtils.getDataBool("user-update").let {
+            userUpdate = it
         }
     }
 

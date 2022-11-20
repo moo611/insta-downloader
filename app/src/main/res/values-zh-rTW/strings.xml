@@ -37,8 +37,8 @@
     <string name="empty_username">請輸入用戶名</string>
     <string name="empty_tag">請輸入標籤</string>
     <string name="log_out">登出</string>
-    <string name="long_text1">登錄以獲得更好的體驗</string>
-    <string name="long_text2">通過登錄您可以：(1) 獲得更快的下載速度 (2) 下載故事和私人帖子 (3) 搜索用戶的提要</string>
+    <string name="long_text1">需要登錄才能看到故事</string>
+    <string name="long_text2">私信需要登錄，登錄賬號必須是你和對方關注的賬號</string>
     <string name="long_text3">我們不會收集您的個人信息。下載太頻繁可能會導致您的 Instagram 帳戶被禁止</string>
     <string name="parse_error">解析異常</string>
     <string name="recent_download">最近</string>
@@ -49,4 +49,5 @@
     <string name="delete">刪除</string>
     <string name="start_right_now">粘貼</string>
     <string name="failed">獲取數據失敗</string>
+    <string name="network">網絡錯誤</string>
 </resources>

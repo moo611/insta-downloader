@@ -8,7 +8,7 @@ import androidx.fragment.app.FragmentPagerAdapter
  * @Author: desong
  * @Date: 2022/7/21
  */
-class ViewPagerAdapter(fm: FragmentManager?, var titles: ArrayList<String>, var fragments: ArrayList<Fragment>) :
+class ViewPagerAdapter(fm: FragmentManager?, var fragments: ArrayList<Fragment>) :
     FragmentPagerAdapter(
         fm!!
     ) {
@@ -21,7 +21,5 @@ class ViewPagerAdapter(fm: FragmentManager?, var titles: ArrayList<String>, var 
         return fragments.size
     }
 
-    override fun getPageTitle(position: Int): CharSequence? {
-        return titles[position]
-    }
+
 }

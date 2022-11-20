@@ -38,8 +38,8 @@
     <string name="empty_username">пожалуйста, введите имя пользователя</string>
     <string name="empty_tag">Пожалуйста, введите хэштег</string>
     <string name="log_out">выйти</string>
-    <string name="long_text1">Войдите, чтобы иметь лучший опыт</string>
-    <string name="long_text2">Войдя в систему, вы можете: (1) увеличить скорость загрузки (2) загрузить историю и частную публикацию (3) искать каналы пользователей</string>
+    <string name="long_text1">Войдите, чтобы увидеть историю</string>
+    <string name="long_text2">Для просмотра личной публикации требуется вход в систему, учетная запись для входа должна быть учетной записью, на которую вы и человек подписаны друг на друга</string>
     <string name="long_text3">Мы не собираем вашу личную информацию. Слишком частая загрузка может привести к блокировке вашего аккаунта в Instagram.</string>
     <string name="parse_error">Разобрать исключение</string>
     <string name="recent_download">Недавний</string>
@@ -51,4 +51,5 @@
     <string name="start_right_now">Начни прямо сейчас</string>
     <string name="paste">вставить</string>
     <string name="failed">Не удалось получить данные</string>
+    <string name="network">Ошибка сети</string>
 </resources>

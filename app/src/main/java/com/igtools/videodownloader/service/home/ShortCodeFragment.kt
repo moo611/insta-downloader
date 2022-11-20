@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.webkit.URLUtil
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -43,6 +44,8 @@ import com.igtools.videodownloader.service.history.HistoryAdapter
 import com.igtools.videodownloader.service.web.WebActivity
 import com.igtools.videodownloader.utils.*
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
+import com.igtools.videodownloader.widgets.dialog.CustomDialog
+import com.igtools.videodownloader.widgets.dialog.MyDialog
 import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.*
 import org.greenrobot.eventbus.EventBus
@@ -58,8 +61,9 @@ import java.net.URLEncoder
 class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     lateinit var progressDialog: ProgressDialog
+    lateinit var privateDialog: MyDialog
+    lateinit var storyDialog: MyDialog
 
-    lateinit var bottomDialog: BottomDialog
     lateinit var recentAdapter: RecentAdapter
     lateinit var firebaseAnalytics: FirebaseAnalytics
     var TAG = "ShortCodeFragment"
@@ -79,20 +83,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
 
-        bottomDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
-        val bottomView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_bottom, null)
-        bottomView.btn_login.setOnClickListener {
-
-            val url = "https://www.instagram.com/accounts/login"
-            startActivityForResult(
-                Intent(requireContext(), WebActivity::class.java).putExtra(
-                    "url",
-                    url
-                ), LOGIN_REQ
-            )
-            bottomDialog.dismiss()
-        }
-        bottomDialog.setContent(bottomView)
+        initDialog()
 
 
         mBinding.btnDownload.setOnClickListener {
@@ -149,6 +140,47 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
 
         }
+
+
+    }
+
+    private fun initDialog() {
+
+        privateDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
+        val privateView =
+            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
+        val title = privateView.findViewById<TextView>(R.id.title)
+        title.text = getString(R.string.long_text2)
+        privateView.btn_login.setOnClickListener {
+
+            val url = "https://www.instagram.com/accounts/login"
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
+            privateDialog.dismiss()
+        }
+        privateDialog.setUpView(privateView)
+
+
+        storyDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
+        val storyView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
+        val title2 = storyView.findViewById<TextView>(R.id.title)
+        title2.text = getString(R.string.long_text2)
+        storyView.btn_login.setOnClickListener {
+
+            val url = "https://www.instagram.com/accounts/login"
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
+            storyDialog.dismiss()
+        }
+        storyDialog.setUpView(storyView)
 
 
     }
@@ -222,52 +254,35 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         if (url.contains("stories")) {
 
             if (BaseApplication.cookie == null) {
-                bottomDialog.show()
+                storyDialog.show()
             } else {
                 getStoryData()
             }
 
         } else {
-            if (BaseApplication.cookie == null) {
-                getMediaData()
-            } else {
-                getMediaDataByCookie()
-            }
-
+            getMediaData()
         }
 
 
     }
 
-    private fun getMediaDataByCookie() {
-
-        paths = StringBuffer()
+    suspend fun getMediaDataByCookie() = withContext(Dispatchers.Main) {
+        if (!progressDialog.isShowing){
+            progressDialog.show()
+        }
         lifecycleScope.launch {
             //检查是否已存在
-            val url = mBinding.etShortcode.text.toString()
-            val record = RecordDB.getInstance().recordDao().findByUrl(url)
-
-            if (record != null) {
-//                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
-                getRecentData()
-                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
-                    .show()
-
-                return@launch
-            }
-            progressDialog.show()
 
             try {
                 val map: HashMap<String, String> = HashMap()
                 map["Cookie"] = BaseApplication.cookie!!
                 map["User-Agent"] = Urls.USER_AGENT
 
-                val shortCode = getShortCode()
-                val media_id = UrlUtils.getInstagramPostId(shortCode!!)
-                Log.v(TAG, media_id.toString())
+                val map2: HashMap<String, String> = HashMap()
+                map2["shortcode"] = getShortCode()!!
 
-                val url2 = "https://www.instagram.com/api/v1/media/$media_id/info"
-                val res = ApiClient.getClient().getMedia(map, url2)
+                val res = ApiClient.getClient()
+                    .getMediaData(Urls.GRAPH_QL, map, Urls.QUERY_HASH, gson.toJson(map2))
                 progressDialog.dismiss()
                 val jsonObject = res.body()
                 //Log.v(TAG, jsonObject.toString())
@@ -299,14 +314,19 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     getRecentData()
 
                 } else {
-                    Toast.makeText(requireContext(), getString(R.string.failed), Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.not_found),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
                 }
 
             } catch (e: Exception) {
+                mBinding.progressbar.visibility = View.INVISIBLE
                 Log.e(TAG, e.message + "")
                 context?.let {
-                    Toast.makeText(it, getString(R.string.failed), Toast.LENGTH_SHORT)
+                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT)
                         .show()
                 }
 
@@ -340,7 +360,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 //val api = "https://app.scrapingbee.com/api/v1/?api_key=${BaseApplication.APIKEY}&url=$urlEncoded&render_js=false&premium_proxy=true&country_code=us"
                 val api = "http://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded"
                 val res = ApiClient.getClient().getMediaNew(api)
-                progressDialog.dismiss()
+
                 val jsonObject = res.body()
                 //Log.v(TAG, jsonObject.toString())
                 if (res.code() == 200 && jsonObject != null) {
@@ -369,20 +389,24 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                         .show()
                     saveRecord()
                     getRecentData()
-
+                    progressDialog.dismiss()
                 } else {
-
-                    if (!requireActivity().isFinishing) {
-                        bottomDialog.show()
-
+                    if (BaseApplication.cookie == null) {
+                        if (!requireActivity().isFinishing) {
+                            privateDialog.show()
+                        }
+                        progressDialog.dismiss()
+                    } else {
+                        getMediaDataByCookie()
                     }
+
                 }
 
             } catch (e: Exception) {
                 mBinding.progressbar.visibility = View.INVISIBLE
                 Log.e(TAG, e.message + "")
                 context?.let {
-                    Toast.makeText(it, getString(R.string.failed), Toast.LENGTH_SHORT)
+                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT)
                         .show()
                 }
 
@@ -451,7 +475,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(
                         requireContext(),
-                        getString(R.string.not_found),
+                        getString(R.string.failed),
                         Toast.LENGTH_SHORT
                     )
                         .show()
@@ -464,7 +488,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 context?.let {
                     Toast.makeText(
                         it,
-                        getString(R.string.parse_error),
+                        getString(R.string.network),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -560,52 +584,49 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     private fun parseMedia2(jsonObject: JsonObject): MediaModel {
         val mediaModel = MediaModel()
-        val item = jsonObject["items"].asJsonArray[0].asJsonObject
-
-        mediaModel.mediaType = item["media_type"].asInt
-        mediaModel.code = item["code"].asString
-        mediaModel.pk = item["pk"].asString
-        mediaModel.captionText =
-            item.getNullable("caption")?.asJsonObject?.getNullable("text")?.asString
-
-        if (item.has("video_versions")) {
-            val video_versions = item["video_versions"].asJsonArray
-            mediaModel.videoUrl = video_versions[0].asJsonObject["url"].asString
-
-        }
-        if (item.has("image_versions2")) {
-            val image_versions2 = item["image_versions2"].asJsonObject
-            val candidates = image_versions2["candidates"].asJsonArray
-            mediaModel.thumbnailUrl = candidates[0].asJsonObject["url"].asString
-
+        val shortcode_media = jsonObject["data"].asJsonObject["shortcode_media"].asJsonObject
+        val __typename = shortcode_media["__typename"].asString
+        if (__typename == "GraphImage") {
+            mediaModel.mediaType = 1
+        } else if (__typename == "GraphVideo") {
+            mediaModel.mediaType = 2
+        } else {
+            mediaModel.mediaType = 8
         }
 
-
-        val user = item["user"].asJsonObject
-        mediaModel.profilePicUrl = user["profile_pic_url"].asString
-        mediaModel.username = user["username"].asString
-
-        if (item.has("carousel_media")) {
-            val children = item["carousel_media"].asJsonArray
-            for (child in children) {
-                val resource = ResourceModel()
-
-                resource.pk = child.asJsonObject["pk"].asString
-                val image_versions2_child = child.asJsonObject["image_versions2"].asJsonObject
-                val candidates_child = image_versions2_child["candidates"].asJsonArray
-                resource.thumbnailUrl = candidates_child[0].asJsonObject["url"].asString
-                if (children.indexOf(child) == 0) {
-                    mediaModel.thumbnailUrl = resource.thumbnailUrl
+        mediaModel.code = shortcode_media["shortcode"].asString
+        mediaModel.pk = shortcode_media["id"].asString
+        val edge_media_to_caption = shortcode_media["edge_media_to_caption"].asJsonObject
+        val edges = edge_media_to_caption["edges"].asJsonArray
+        if (edges.size() > 0) {
+            mediaModel.captionText = edges[0].asJsonObject["node"].asJsonObject["text"].asString
+        }
+        mediaModel.videoUrl = shortcode_media.getNullable("video_url")?.asString
+        mediaModel.thumbnailUrl = shortcode_media["display_url"].asString
+        val owner = shortcode_media["owner"].asJsonObject
+        mediaModel.profilePicUrl = owner["profile_pic_url"].asString
+        mediaModel.username = owner["username"].asString
+        if (shortcode_media.has("edge_sidecar_to_children")) {
+            val edge_sidecar_to_children = shortcode_media["edge_sidecar_to_children"].asJsonObject
+            val children = edge_sidecar_to_children["edges"].asJsonArray
+            if (children.size() > 0) {
+                for (child in children) {
+                    val resource = ResourceModel()
+                    resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
+                    resource.thumbnailUrl =
+                        child.asJsonObject["node"].asJsonObject["display_url"].asString
+                    resource.videoUrl =
+                        child.asJsonObject["node"].asJsonObject.getNullable("video_url")?.asString
+                    val typeName = child.asJsonObject["node"].asJsonObject["__typename"].asString
+                    if (typeName == "GraphImage") {
+                        resource.mediaType = 1
+                    } else if (typeName == "GraphVideo") {
+                        resource.mediaType = 2
+                    } else {
+                        resource.mediaType = 8
+                    }
+                    mediaModel.resources.add(resource)
                 }
-
-                if (child.asJsonObject.has("video_versions")) {
-                    val video_versions_child = child.asJsonObject["video_versions"].asJsonArray
-                    resource.videoUrl = video_versions_child[0].asJsonObject["url"].asString
-
-                }
-
-                resource.mediaType = child.asJsonObject["media_type"].asInt
-                mediaModel.resources.add(resource)
             }
         }
 
@@ -765,8 +786,15 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == LOGIN_REQ && resultCode == 200) {
+            val url = mBinding.etShortcode.text.toString()
+            if (url.contains("stories")) {
+                getStoryData()
+            } else {
+                lifecycleScope.launch {
+                    getMediaDataByCookie()
+                }
 
-            autoStart()
+            }
 
         }
     }
@@ -804,10 +832,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     }
 
-    private fun sendToFirebase(e:Exception){
+    private fun sendToFirebase(e: Exception) {
         val analytics = Firebase.analytics
-        if (e.message!=null){
-            analytics.logEvent("app_my_exception"){
+        if (e.message != null) {
+            analytics.logEvent("app_my_exception") {
                 param("my_exception", e.message!!)
             }
         }

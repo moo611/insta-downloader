@@ -1,6 +1,7 @@
 package com.igtools.videodownloader.api.retrofit
 
 import com.google.gson.JsonObject
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -26,15 +27,23 @@ interface UserService {
     @GET
     suspend fun getUserMedia(
         @Url url: String,
-        @HeaderMap headers:HashMap<String,String>,
+        @HeaderMap headers: HashMap<String, String>,
         @Query("username") username: String
     ): Response<JsonObject>
 
 
     @GET
+    suspend fun getUserMediaNoCookie(
+        @Url url: String
+    ): Response<JsonObject>
+
+    @GET
+    suspend fun getUserId(@Url url: String):Response<JsonObject>
+
+    @GET
     suspend fun getUserMediaMore(
         @Url url: String,
-        @HeaderMap headers:HashMap<String,String>,
+        @HeaderMap headers: HashMap<String, String>,
         @Query("query_hash") query_hash: String,
         @Query("variables") variables: String
     ): Response<JsonObject>
