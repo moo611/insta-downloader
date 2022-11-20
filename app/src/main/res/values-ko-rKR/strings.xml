@@ -53,4 +53,6 @@
     <string name="network">네트워크 오류</string>
     <string name="cancel">취소</string>
     <string name="paste">붙여넣기</string>
+    <string name="search_by_user">사용자 게시물 검색(로그인 불필요)</string>
+    <string name="search_by_tag">태그로 게시물 검색(로그인 필요 없음)</string>
 </resources>

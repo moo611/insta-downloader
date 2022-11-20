@@ -41,6 +41,14 @@
                 android:visibility="invisible" />
         </FrameLayout>
 
+        <TextView
+            android:paddingLeft="20dp"
+            android:gravity="center_vertical"
+            android:text="@string/search_by_tag"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"/>
 
         <TextView
             android:textColor="@color/white"

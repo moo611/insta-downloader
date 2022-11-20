@@ -53,4 +53,6 @@
     <string name="network">ネットワーク エラー</string>
     <string name="cancel">キャンセル</string>
     <string name="paste">貼り付け</string>
+    <string name="search_by_user">ユーザーの投稿を検索 (ログイン不要)</string>
+    <string name="search_by_tag">タグで投稿を検索 (ログイン不要)</string>
 </resources>

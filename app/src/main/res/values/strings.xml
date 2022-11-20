@@ -51,4 +51,6 @@
     <string name="network">Network Error</string>
     <string name="cancel">Cancel</string>
     <string name="paste">Paste</string>
+    <string name="search_by_user">Search user\'s posts(no login required)</string>
+    <string name="search_by_tag">Search posts under a tag(no login required)</string>
 </resources>

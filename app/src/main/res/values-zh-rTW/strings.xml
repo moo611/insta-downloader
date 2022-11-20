@@ -54,5 +54,7 @@
     <string name="paste">粘貼</string>
 
     <string name="cancel">取消</string>
+    <string name="search_by_user">搜索用戶的帖子（無需登錄）</string>
+    <string name="search_by_tag">搜索標籤下的帖子（無需登錄）</string>
 
 </resources>

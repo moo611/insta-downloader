@@ -56,4 +56,6 @@
 
     <string name="paste">Dán</string>
     <string name="cancel">Hủy</string>
+    <string name="search_by_user">Tìm kiếm bài viết của người dùng (không cần đăng nhập)</string>
+    <string name="search_by_tag">Tìm bài viết dưới thẻ (không cần đăng nhập)</string>
 </resources>

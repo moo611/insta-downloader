@@ -55,5 +55,7 @@
 
     <string name="paste">Tempel</string>
     <string name="cancel">Batalkan</string>
+    <string name="search_by_user">Telusuri postingan pengguna(tidak perlu login)</string>
+    <string name="search_by_tag">Cari posting di bawah tag (tidak perlu login)</string>
 
 </resources>

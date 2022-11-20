@@ -52,4 +52,6 @@
     <string name="network">नेटवर्क त्रुटि</string>
     <string name="paste">पेस्ट करें</string>
     <string name="cancel">रद्द करना</string>
+    <string name="search_by_user"> उपयोगकर्ता के पोस्ट खोजें (कोई लॉगिन आवश्यक नहीं) </string>
+    <string name="search_by_tag">टैग के अंतर्गत पोस्ट खोजें (कोई लॉगिन आवश्यक नहीं)</string>
 </resources>
