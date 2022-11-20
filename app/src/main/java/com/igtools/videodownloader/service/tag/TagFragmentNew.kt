@@ -22,7 +22,7 @@ import com.igtools.videodownloader.R
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.base.BaseFragment
-import com.igtools.videodownloader.databinding.FragmentTagBinding
+import com.igtools.videodownloader.databinding.FragmentTagNewBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.ResourceModel
 import com.igtools.videodownloader.service.home.MediaAdapter
@@ -35,7 +35,7 @@ import java.net.URLEncoder
  * @Author: desong
  * @Date: 2022/7/21
  */
-class TagFragmentNew : BaseFragment<FragmentTagBinding>() {
+class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: MediaAdapter
     lateinit var firebaseAnalytics: FirebaseAnalytics
