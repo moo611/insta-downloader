@@ -331,7 +331,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     }
 
                 } else {
-
+                    progressDialog.dismiss()
                     Toast.makeText(
                         requireContext(),
                         getString(R.string.failed),

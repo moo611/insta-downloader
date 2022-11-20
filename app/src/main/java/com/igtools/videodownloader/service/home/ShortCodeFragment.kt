@@ -769,6 +769,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     )
                     .into(mBinding.avatar)
 
+            }else{
+                mBinding.container2.visibility = View.GONE
             }
 
             recentAdapter.setDatas(medias)

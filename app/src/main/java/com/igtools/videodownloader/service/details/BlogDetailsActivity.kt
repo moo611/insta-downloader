@@ -278,12 +278,12 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     override fun onBackPressed() {
         super.onBackPressed()
         isBack = true
-        if (mInterstitialAd == null) {
-            finish()
-        } else {
-            mInterstitialAd?.show(this)
-        }
-
+//        if (mInterstitialAd == null) {
+//            finish()
+//        } else {
+//            mInterstitialAd?.show(this)
+//        }
+        finish()
 
     }
 
