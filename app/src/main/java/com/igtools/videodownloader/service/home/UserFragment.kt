@@ -51,7 +51,6 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     lateinit var layoutManager: GridLayoutManager
     lateinit var adapter: MediaAdapter
     lateinit var progressDialog: ProgressDialog
-    lateinit var bottomDialog: BottomDialog
 
     var profileUrl = ""
     var cursor = ""
@@ -78,21 +77,6 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 return 1
             }
         }
-
-        bottomDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
-        val bottomView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_bottom, null)
-        bottomView.btn_login.setOnClickListener {
-
-            val url = "https://www.instagram.com/accounts/login"
-            startActivityForResult(
-                Intent(requireContext(), WebActivity::class.java).putExtra(
-                    "url",
-                    url
-                ), LOGIN_REQ
-            )
-            bottomDialog.dismiss()
-        }
-        bottomDialog.setContent(bottomView)
 
         mBinding.btnSearch.setOnClickListener {
             mBinding.etUsername.clearFocus()

@@ -372,7 +372,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 val jsonObject = res.body()
                 //Log.v(TAG, jsonObject.toString())
                 if (res.code() == 200 && jsonObject != null) {
-
+                    progressDialog.dismiss()
                     curMediaInfo = parseMedia(jsonObject)
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
@@ -397,7 +397,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                         .show()
                     saveRecord()
                     getRecentData()
-                    progressDialog.dismiss()
+
                 } else {
                     if (BaseApplication.cookie == null) {
                         if (!requireActivity().isFinishing) {
