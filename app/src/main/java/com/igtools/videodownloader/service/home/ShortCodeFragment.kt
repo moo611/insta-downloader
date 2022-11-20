@@ -811,7 +811,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     private fun getShortCode(): String? {
         val shortCode: String?
         val url = mBinding.etShortcode.text.toString()
-        shortCode = if (!url.contains("story")) {
+        shortCode = if (!url.contains("stories")) {
             UrlUtils.extractMedia(url)
         } else {
             UrlUtils.extractStory(url)

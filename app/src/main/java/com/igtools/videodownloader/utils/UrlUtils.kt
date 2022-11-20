@@ -1,9 +1,10 @@
 package com.igtools.videodownloader.utils
 
+import android.util.Log
 import java.net.URL
 
 object UrlUtils {
-
+    val TAG="UrlUtils"
     val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 
     fun extractMedia(url:String):String?{
