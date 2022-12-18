@@ -12,52 +12,9 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context=".MainActivity">
-
-        <View
-
-            android:layout_width="match_parent"
-            android:layout_height="25dp" />
-
-        <RelativeLayout
-
-            android:layout_width="match_parent"
-            android:layout_height="50dp">
-
-            <TextView
-                android:layout_marginLeft="16dp"
-                android:id="@+id/app_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:text="IgDownloader"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
-
-            <ImageView
-                android:id="@+id/img_camera"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="80dp"
-                android:src="@mipmap/camera" />
-
-            <ImageView
-                android:id="@+id/img_download"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="20dp"
-                android:src="@mipmap/download" />
-
-        </RelativeLayout>
-
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#e3e3e3" />
-
+            android:layout_height="25dp"/>
         <FrameLayout
             android:id="@+id/content"
             android:layout_width="match_parent"
@@ -91,7 +48,8 @@
 
             </LinearLayout>
 
-            <FrameLayout
+            <LinearLayout
+                android:gravity="center"
                 android:id="@+id/ll_tag"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -104,16 +62,27 @@
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@mipmap/tag" />
-                <View
-                    android:id="@+id/view_circle"
-                    android:visibility="invisible"
-                    android:background="@drawable/bg_red"
-                    android:layout_marginLeft="20dp"
-                    android:layout_gravity="center"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"/>
 
-            </FrameLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:gravity="center"
+                android:id="@+id/ll_repost"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_gravity="center"
+                    android:id="@+id/img_repost"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/tab_repost" />
+
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ll_mine"

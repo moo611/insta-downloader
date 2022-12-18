@@ -15,13 +15,13 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="45dp"
             android:layout_marginTop="20dp">
 
             <EditText
                 android:id="@+id/et_username"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="45dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:background="@drawable/bg_edit"
@@ -32,7 +32,7 @@
                 android:paddingRight="40dp"
                 android:singleLine="true"
                 android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <ImageView
                 android:id="@+id/img_clear"
@@ -44,14 +44,6 @@
                 android:visibility="invisible" />
         </FrameLayout>
 
-        <TextView
-            android:paddingLeft="20dp"
-            android:gravity="center_vertical"
-            android:text="@string/search_by_user"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"/>
 
         <TextView
             android:background="@drawable/bg_round_fill"

@@ -64,12 +64,11 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     lateinit var privateDialog: MyDialog
     lateinit var storyDialog: MyDialog
 
-    lateinit var recentAdapter: RecentAdapter
     lateinit var firebaseAnalytics: FirebaseAnalytics
     var TAG = "ShortCodeFragment"
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
-    var records: ArrayList<Record> = ArrayList()
+
     var paths = StringBuffer()
     private val LOGIN_REQ = 1000
 
@@ -195,29 +194,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
     override fun initData() {
         firebaseAnalytics = Firebase.analytics
-        recentAdapter = RecentAdapter(requireContext())
-        mBinding.rv.adapter = recentAdapter
-        mBinding.rv.layoutManager = GridLayoutManager(requireContext(), 4)
-        recentAdapter.onItemClickListener = object : HistoryAdapter.OnItemClickListener {
-            override fun onClick(position: Int) {
-                val content = records[position].content
 
-                startActivity(
-                    Intent(
-                        requireContext(),
-                        BlogDetailsActivity::class.java
-                    ).putExtra("content", content).putExtra("flag", false)
-                )
-            }
-
-        }
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        getRecentData()
     }
 
     private fun initAds() {
@@ -287,7 +264,8 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                 map["User-Agent"] = Urls.USER_AGENT
 
                 val map2: HashMap<String, String> = HashMap()
-                map2["shortcode"] = getShortCode()!!
+                val shortCode = getShortCode() ?: return@launch
+                map2["shortcode"] = shortCode
 
                 val res = ApiClient.getClient()
                     .getMediaData(Urls.GRAPH_QL, map, Urls.QUERY_HASH, gson.toJson(map2))
@@ -319,7 +297,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     )
                         .show()
                     saveRecord()
-                    getRecentData()
 
                 } else {
                     Toast.makeText(
@@ -355,7 +332,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
             if (record != null) {
 //                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
-                getRecentData()
+
                 Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
                     .show()
 
@@ -396,7 +373,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     )
                         .show()
                     saveRecord()
-                    getRecentData()
 
                 } else {
                     if (BaseApplication.cookie == null) {
@@ -445,7 +421,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             val record = RecordDB.getInstance().recordDao().findByUrl(myUrl)
             if (record != null) {
                 //curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
-                getRecentData()
                 Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
                     .show()
 
@@ -478,7 +453,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     )
                         .show()
                     mBinding.progressbar.visibility = View.INVISIBLE
-                    getRecentData()
+
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(
@@ -726,56 +701,6 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             }
 
         }
-    }
-
-    private fun getRecentData() {
-        val medias: ArrayList<MediaModel> = ArrayList()
-//        val igstory = MediaModel()
-//        igstory.captionText = "StorySaver"
-//        medias.add(igstory)
-        lifecycleScope.launch {
-            records = RecordDB.getInstance().recordDao().recent() as ArrayList<Record>
-            Log.v(TAG, records.size.toString())
-            if (records.size > 0) {
-                mBinding.container2.visibility = View.VISIBLE
-                for (record in records) {
-
-                    val mediaModel = gson.fromJson(record.content, MediaModel::class.java)
-                    medias.add(mediaModel)
-
-                }
-
-                curMediaInfo = gson.fromJson(records[0].content, MediaModel::class.java)
-                mBinding.container.visibility = View.VISIBLE
-                mBinding.username.text = curMediaInfo?.captionText
-                Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
-                    .placeholder(
-                        ColorDrawable(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.gray_1
-                            )
-                        )
-                    )
-                    .into(mBinding.picture)
-                Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
-                    .placeholder(
-                        ColorDrawable(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.gray_1
-                            )
-                        )
-                    )
-                    .into(mBinding.avatar)
-
-            }else{
-                mBinding.container2.visibility = View.GONE
-            }
-
-            recentAdapter.setDatas(medias)
-        }
-
     }
 
 

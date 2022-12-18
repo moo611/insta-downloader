@@ -32,7 +32,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
     var lastSelected = -1
-    val TAG = "DownloadActivity"
+    val TAG = "HistoryActivity"
 
 
     override fun getLayoutId(): Int {

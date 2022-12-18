@@ -12,6 +12,24 @@
         android:orientation="vertical"
         tools:context=".service.setting.SettingFragment">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Setting"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+
+        </RelativeLayout>
+        <View
+            android:background="#e3e3e3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -113,6 +131,7 @@
             android:layout_height="1dp" />
 
         <LinearLayout
+            android:visibility="gone"
             android:id="@+id/ll_logout"
             android:layout_width="match_parent"
             android:layout_height="50dp"

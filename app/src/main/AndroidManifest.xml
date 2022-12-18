@@ -14,7 +14,6 @@
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_config"
         android:requestLegacyExternalStorage="true"
-        android:roundIcon="@mipmap/icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.IgDownloader">
 
@@ -33,7 +32,7 @@
 
         </activity>
         <activity
-            android:name=".FirstActivity"
+            android:name=".service.login.FirstActivity"
             android:exported="false" />
         <activity
             android:name=".service.web.WebActivity"
@@ -55,7 +54,7 @@
             android:name=".service.details.BlogDetailsActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".service.login.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

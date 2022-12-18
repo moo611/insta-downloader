@@ -38,7 +38,7 @@
     <string name="empty_tag">कृपया हैशटैग दर्ज करें</string>
     <string name="log_out">लॉग आउट</string>
     <string name="long_text1">कहानी देखने के लिए लॉगिन आवश्यक है</string>
-    <string name = "long_text2"> निजी पोस्ट देखने के लिए लॉगिन आवश्यक है, लॉगिन खाता वह खाता होना चाहिए जिसे आप और व्यक्ति एक दूसरे का अनुसरण करते हैं </string>
+    <string name="long_text2"> निजी पोस्ट देखने के लिए लॉगिन आवश्यक है, लॉगिन खाता वह खाता होना चाहिए जिसे आप और व्यक्ति एक दूसरे का अनुसरण करते हैं </string>
     <string name="long_text3">हम आपकी व्यक्तिगत जानकारी एकत्र नहीं करते हैं। बहुत बार डाउनलोड करने से आपका इंस्टाग्राम अकाउंट बैन हो सकता है</string>
     <string name="parse_error">पार्स अपवाद</string>
     <string name="recent_download">हालिया</string>

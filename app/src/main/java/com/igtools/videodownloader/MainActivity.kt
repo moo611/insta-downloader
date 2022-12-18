@@ -20,6 +20,7 @@ import com.igtools.videodownloader.service.home.HomeFragment
 import com.igtools.videodownloader.service.setting.SettingFragment
 import com.igtools.videodownloader.service.tag.TagFragment
 import com.igtools.videodownloader.models.IntentEvent
+import com.igtools.videodownloader.service.repost.RepostFragment
 import com.igtools.videodownloader.service.tag.TagFragmentNew
 import com.igtools.videodownloader.utils.RegexUtils
 import com.igtools.videodownloader.utils.ShareUtils
@@ -45,12 +46,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun initView() {
 
-        if (BaseApplication.tagUpdate){
-            mBinding.viewCircle.visibility = View.VISIBLE
-        }else{
-            mBinding.viewCircle.visibility = View.INVISIBLE
-        }
-
         firebaseAnalytics = Firebase.analytics
 
         //val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
@@ -59,11 +54,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         //添加imageviews
         imageViews.add(mBinding.imgHome)
         imageViews.add(mBinding.imgTag)
+        imageViews.add(mBinding.imgRepost)
         imageViews.add(mBinding.imgMine)
 
 
         fragments.add(HomeFragment())
         fragments.add(TagFragmentNew())
+        fragments.add(RepostFragment())
         fragments.add(SettingFragment())
 
         showFragment(lastPos)
@@ -77,31 +74,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         }
         mBinding.llTag.setOnClickListener {
-            if (BaseApplication.tagUpdate){
-                BaseApplication.tagUpdate = false
-                ShareUtils.putDataBool("tag-update",false)
-                mBinding.viewCircle.visibility = View.INVISIBLE
-            }
+
             showFragment(1)
             selectPage(1)
             lastPos = 1
 
         }
-        mBinding.llMine.setOnClickListener {
+        mBinding.llRepost.setOnClickListener {
             showFragment(2)
             selectPage(2)
             lastPos = 2
+        }
+        mBinding.llMine.setOnClickListener {
+            showFragment(3)
+            selectPage(3)
+            lastPos = 3
 
         }
 
-        mBinding.imgCamera.setOnClickListener {
-
-            val launchIntent = packageManager.getLaunchIntentForPackage("com.instagram.android")
-            launchIntent?.let { startActivity(it) }
-        }
-        mBinding.imgDownload.setOnClickListener {
-            startActivity(Intent(this, HistoryActivity::class.java))
-        }
     }
 
     override fun initData() {
@@ -136,7 +126,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     fun handleIntent(newintent: Intent?) {
         //这里要加延时，否则会获取不到intent或者clipboarditem
-        mBinding.imgDownload.post {
+        mBinding.content.post {
             Log.v(TAG, newintent?.action + newintent?.type + "")
             if (newintent?.action == Intent.ACTION_SEND) {
                 if ("text/plain" == newintent.type) {

@@ -38,25 +38,28 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
         linkView = LayoutInflater.from(requireContext()).inflate(R.layout.view_link, null)
         userView = LayoutInflater.from(requireContext()).inflate(R.layout.view_user, null)
-        val circle = userView.findViewById<View>(R.id.view_circle)
+//        val circle = userView.findViewById<View>(R.id.view_circle)
 
 
         mBinding.tabLayout.getTabAt(0)!!.customView = linkView
         mBinding.tabLayout.getTabAt(1)!!.customView = userView
 
-        if (BaseApplication.userUpdate) {
-            circle.visibility = View.VISIBLE
-        } else {
-            circle.visibility = View.INVISIBLE
+
+        mBinding.imgCamera.setOnClickListener {
+
+            val launchIntent = requireActivity().packageManager.getLaunchIntentForPackage("com.instagram.android")
+            launchIntent?.let { startActivity(it) }
         }
+
+
 
         mBinding.tabLayout.addOnTabSelectedListener(object :TabLayout.OnTabSelectedListener{
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                if (BaseApplication.userUpdate) {
-                    BaseApplication.userUpdate = false
-                    ShareUtils.putDataBool("user-update", false)
-                    circle.visibility = View.INVISIBLE
-                }
+//                if (BaseApplication.userUpdate) {
+//                    BaseApplication.userUpdate = false
+//                    ShareUtils.putDataBool("user-update", false)
+//                    circle.visibility = View.INVISIBLE
+//                }
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {

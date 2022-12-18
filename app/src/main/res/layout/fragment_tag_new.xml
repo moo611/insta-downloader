@@ -11,15 +11,33 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Tag"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+
+        </RelativeLayout>
+        <View
+            android:background="#e3e3e3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="45dp"
             android:layout_marginTop="20dp">
 
             <EditText
                 android:id="@+id/et_tag"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="45dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:background="@drawable/bg_edit"
@@ -29,7 +47,7 @@
                 android:paddingLeft="12dp"
                 android:paddingRight="40dp"
                 android:singleLine="true"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <ImageView
                 android:id="@+id/img_clear"
@@ -40,15 +58,6 @@
                 android:src="@drawable/close"
                 android:visibility="invisible" />
         </FrameLayout>
-
-        <TextView
-            android:paddingLeft="20dp"
-            android:gravity="center_vertical"
-            android:text="@string/search_by_tag"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"/>
 
         <TextView
             android:textColor="@color/white"
