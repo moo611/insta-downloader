@@ -58,4 +58,6 @@
     <string name="cancel">Hủy</string>
     <string name="search_by_user">Tìm kiếm bài viết của người dùng (không cần đăng nhập)</string>
     <string name="search_by_tag">Tìm bài viết dưới thẻ (không cần đăng nhập)</string>
+    <string name="feedback">lời phản hồi</string>
+    <string name="feedbackstr">Nếu bạn có bất kỳ câu hỏi hoặc phản hồi nào, vui lòng gửi email đến jindesong36@gmail.com</string>
 </resources>

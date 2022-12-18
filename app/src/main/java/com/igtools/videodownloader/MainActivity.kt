@@ -1,9 +1,14 @@
 package com.igtools.videodownloader
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
+import android.widget.RatingBar
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -24,6 +29,7 @@ import com.igtools.videodownloader.service.repost.RepostFragment
 import com.igtools.videodownloader.service.tag.TagFragmentNew
 import com.igtools.videodownloader.utils.RegexUtils
 import com.igtools.videodownloader.utils.ShareUtils
+import com.igtools.videodownloader.widgets.dialog.MyDialog
 import org.greenrobot.eventbus.EventBus
 
 
@@ -37,7 +43,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     var imageViews: MutableList<ImageView> = ArrayList()
     var fragments: MutableList<Fragment> = ArrayList()
     var lastPos = 0
-
+    lateinit var dialog: MyDialog
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     override fun getLayoutId(): Int {
@@ -50,7 +56,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         //val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
         //mBinding.appTitle.typeface = typeface
-
+        initDialog()
         //添加imageviews
         imageViews.add(mBinding.imgHome)
         imageViews.add(mBinding.imgTag)
@@ -92,6 +98,32 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         }
 
+    }
+
+    fun initDialog(){
+
+        dialog = MyDialog(this)
+        val v = LayoutInflater.from(this).inflate(R.layout.view_rating,null)
+
+        val rating = v.findViewById<RatingBar>(R.id.rating_bar)
+        rating.setOnRatingBarChangeListener { ratingBar, rating, fromUser ->
+            //go google play
+
+        }
+        val ok = v.findViewById<TextView>(R.id.tv_ok)
+        ok.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
+            } catch (e: ActivityNotFoundException) {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
+            }
+            dialog.dismiss()
+        }
+        val cancel = v.findViewById<TextView>(R.id.tv_cancel)
+        cancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.setUpView(v)
     }
 
     override fun initData() {
@@ -190,4 +222,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
 
+    override fun onBackPressed() {
+
+        if(BaseApplication.showRating){
+            dialog.show()
+            BaseApplication.showRating = false
+            ShareUtils.putDataBool("showrating",false)
+        }else{
+            finish()
+        }
+
+    }
 }

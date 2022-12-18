@@ -29,6 +29,7 @@ class BaseApplication : Application() {
         var userUpdate = true
         var autodownload = true
         var firstLogin = true
+        var showRating = true
         fun clear() {
             cookie = null
         }
@@ -58,6 +59,9 @@ class BaseApplication : Application() {
         }
         ShareUtils.getDataBool("autodownload").let {
             autodownload = it
+        }
+        ShareUtils.getDataBool("showrating").let {
+            showRating = it
         }
     }
 

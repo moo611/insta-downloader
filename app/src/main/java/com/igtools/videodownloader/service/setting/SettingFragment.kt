@@ -1,16 +1,17 @@
 package com.igtools.videodownloader.service.setting
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Build
 import android.view.View
 import android.webkit.CookieManager
 import android.webkit.CookieSyncManager
-
 import android.widget.Toast
-import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.BuildConfig
 import com.igtools.videodownloader.R
+import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.databinding.FragmentSettingBinding
 import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.utils.ShareUtils
@@ -22,6 +23,7 @@ import com.igtools.videodownloader.utils.ShareUtils
  */
 class SettingFragment : BaseFragment<FragmentSettingBinding>() {
 
+    lateinit var alertDialog: AlertDialog
 
     override fun onResume() {
         super.onResume()
@@ -81,6 +83,16 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
             BaseApplication.autodownload = b
         }
 
+        val builder = AlertDialog.Builder(context)
+
+        builder.setMessage(getString(R.string.feedbackstr))
+        builder.setPositiveButton("OK"
+        ) { dialog, which -> dialog?.dismiss() }
+        alertDialog = builder.create()
+
+        mBinding.llFeedback.setOnClickListener {
+            alertDialog.show()
+        }
     }
 
     override fun initData() {

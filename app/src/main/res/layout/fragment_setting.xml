@@ -95,6 +95,32 @@
             android:layout_width="match_parent"
             android:layout_height="1dp" />
 
+
+        <LinearLayout
+            android:id="@+id/ll_feedback"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:src="@mipmap/email" />
+
+            <TextView
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="@string/feedback" />
+        </LinearLayout>
+
+        <View
+            android:background="@color/gray_1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"

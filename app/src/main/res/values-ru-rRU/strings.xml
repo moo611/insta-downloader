@@ -56,5 +56,7 @@
     <string name="paste">Вставить</string>
     <string name="search_by_user">Поиск по сообщениям пользователей (вход в систему не требуется)</string>
     <string name="search_by_tag">Поиск сообщений по тегу (вход не требуется)</string>
+    <string name="feedback">отзыв</string>
+    <string name="feedbackstr">Если у вас есть какие-либо вопросы или отзывы, отправьте письмо по адресу jindesong36@gmail.com.</string>
 
 </resources>

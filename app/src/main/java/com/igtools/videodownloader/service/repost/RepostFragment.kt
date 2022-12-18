@@ -43,7 +43,8 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     override fun initView() {
         initDialog()
-
+        val adRequest = AdRequest.Builder().build();
+        mBinding.adView.loadAd(adRequest)
         adapter = HistoryAdapter(requireContext())
         mBinding.rv.adapter = adapter
         mBinding.rv.layoutManager = LinearLayoutManager(requireContext())

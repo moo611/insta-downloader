@@ -55,4 +55,6 @@
     <string name="paste">붙여넣기</string>
     <string name="search_by_user">사용자 게시물 검색(로그인 불필요)</string>
     <string name="search_by_tag">태그로 게시물 검색(로그인 필요 없음)</string>
+    <string name="feedback">피드백</string>
+    <string name="feedbackstr">질문이나 의견이 있으시면 jindesong36@gmail.com으로 메일을 보내주세요.</string>
 </resources>

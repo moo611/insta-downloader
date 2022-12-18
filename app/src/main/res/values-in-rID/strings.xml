@@ -57,5 +57,7 @@
     <string name="cancel">Batalkan</string>
     <string name="search_by_user">Telusuri postingan pengguna(tidak perlu login)</string>
     <string name="search_by_tag">Cari posting di bawah tag (tidak perlu login)</string>
+    <string name="feedback">umpan balik</string>
+    <string name="feedbackstr">Jika Anda memiliki pertanyaan atau umpan balik, silakan kirim email ke jindesong36@gmail.com</string>
 
 </resources>
