@@ -129,6 +129,16 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     }
 
     override fun initData() {
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getDatas()
+    }
+
+    fun getDatas(){
+
         records.clear()
         medias.clear()
 
@@ -145,6 +155,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             adapter.setDatas(medias)
 
         }
+
     }
 
     fun shareFile() {
