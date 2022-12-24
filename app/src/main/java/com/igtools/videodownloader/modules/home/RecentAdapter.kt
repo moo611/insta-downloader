@@ -1,10 +1,7 @@
-package com.igtools.videodownloader.service.home
+package com.igtools.videodownloader.modules.home
 
-import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.models.MediaModel
-import com.igtools.videodownloader.service.history.HistoryAdapter
+import com.igtools.videodownloader.modules.history.HistoryAdapter
 import java.util.ArrayList
 
 class RecentAdapter(var c: Context) : RecyclerView.Adapter<RecentAdapter.RecentHolder>() {

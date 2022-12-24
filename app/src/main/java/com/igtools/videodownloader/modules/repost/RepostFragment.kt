@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.history
+package com.igtools.videodownloader.modules.repost
 
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,14 +10,15 @@ import android.widget.LinearLayout
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.igtools.videodownloader.base.BaseActivity
 import com.google.android.gms.ads.AdRequest
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.databinding.ActivityHistoryBinding
+import com.igtools.videodownloader.base.BaseFragment
+import com.igtools.videodownloader.databinding.FragmentRepostBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.room.RecordDB
-import com.igtools.videodownloader.service.details.BlogDetailsActivity
+import com.igtools.videodownloader.modules.details.BlogDetailsActivity
+import com.igtools.videodownloader.modules.history.HistoryAdapter
 import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.utils.PermissionUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
@@ -25,34 +26,31 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 
-class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
-
+class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     lateinit var adapter: HistoryAdapter
     lateinit var bottomDialog: BottomDialog
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
     var lastSelected = -1
-    val TAG = "HistoryActivity"
-
-
+    val TAG = "RepostFragment"
     override fun getLayoutId(): Int {
-        return R.layout.activity_history
+        return R.layout.fragment_repost
     }
 
     override fun initView() {
         initDialog()
         val adRequest = AdRequest.Builder().build();
         mBinding.adView.loadAd(adRequest)
-        adapter = HistoryAdapter(this)
+        adapter = HistoryAdapter(requireContext())
         mBinding.rv.adapter = adapter
-        mBinding.rv.layoutManager = LinearLayoutManager(this)
+        mBinding.rv.layoutManager = LinearLayoutManager(requireContext())
         adapter.onItemClickListener = object : HistoryAdapter.OnItemClickListener {
             override fun onClick(position: Int) {
                 val content = records[position].content
 
                 startActivity(
                     Intent(
-                        this@HistoryActivity,
+                        requireContext(),
                         BlogDetailsActivity::class.java
                     ).putExtra("content", content).putExtra("flag", false)
                 )
@@ -72,15 +70,13 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
         }
 
-        mBinding.imgBack.setOnClickListener {
-            finish()
-        }
+
     }
 
     fun initDialog() {
 
-        bottomDialog = BottomDialog(this, R.style.MyDialogTheme)
-        val bottomView = LayoutInflater.from(this).inflate(R.layout.dialog_menu, null)
+        bottomDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
+        val bottomView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_menu, null)
 
         val llRepost: LinearLayout = bottomView.findViewById(R.id.ll_repost)
         val llShare: LinearLayout = bottomView.findViewById(R.id.ll_share)
@@ -99,7 +95,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                 val file = File(path)
                 val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     FileProvider.getUriForFile(
-                        this, "com.igtools.videodownloader.fileprovider",
+                        requireContext(), "com.igtools.videodownloader.fileprovider",
                         file
                     );
                 } else {
@@ -129,6 +125,16 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     }
 
     override fun initData() {
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getDatas()
+    }
+
+    fun getDatas(){
+
         records.clear()
         medias.clear()
 
@@ -145,6 +151,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
             adapter.setDatas(medias)
 
         }
+
     }
 
     fun shareFile() {
@@ -156,13 +163,13 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                 val newpaths = it.substring(0, it.length - 1)
                 val paths = newpaths.split(",")
                 if (paths.size > 1) {
-                    FileUtils.shareAll(this, paths)
+                    FileUtils.shareAll(requireContext(), paths)
                 } else if (paths.size == 1) {
 
                     if (paths[0].endsWith(".jpg")) {
-                        FileUtils.share(this, File(paths[0]))
+                        FileUtils.share(requireContext(), File(paths[0]))
                     } else {
-                        FileUtils.shareVideo(this, File(paths[0]))
+                        FileUtils.shareVideo(requireContext(), File(paths[0]))
                     }
                 }
             }
@@ -173,8 +180,8 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     fun deleteFile() {
 
-        if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
-            PermissionUtils.requirePermissionsReadAndWrite(this, 1024)
+        if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())) {
+            PermissionUtils.requirePermissionsReadAndWrite(requireActivity(), 1024)
             return
         }
 
@@ -224,7 +231,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     fun deleteImage(path: String) {
 
         FileUtils.deleteImageUri(
-            contentResolver,
+            requireActivity().contentResolver,
             path,
         )
     }
@@ -232,7 +239,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
     fun deleteVideo(path: String) {
 
         FileUtils.deleteVideoUri(
-            contentResolver,
+            requireActivity().contentResolver,
             path,
         )
     }
@@ -250,7 +257,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         storiesIntent.setDataAndType(uri, if (isVideo) "mp4" else "jpg")
         storiesIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         storiesIntent.setPackage("com.instagram.android")
-        grantUriPermission(
+        requireContext().grantUriPermission(
             "com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
         val chooserIntent = Intent.createChooser(feedIntent, "share to")

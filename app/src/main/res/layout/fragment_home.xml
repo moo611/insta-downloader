@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".service.home.HomeFragment">
+        tools:context=".modules.home.HomeFragment">
 
         <RelativeLayout
             android:layout_width="match_parent"

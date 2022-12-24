@@ -32,29 +32,29 @@
 
         </activity>
         <activity
-            android:name=".service.login.FirstActivity"
+            android:name=".modules.login.FirstActivity"
             android:exported="false" />
         <activity
-            android:name=".service.web.WebActivity"
+            android:name=".modules.web.WebActivity"
             android:exported="false" />
         <activity
-            android:name=".service.details.TagBlogDetails"
+            android:name=".modules.details.TagBlogDetails"
             android:exported="false" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8609866682652024~3028018510" />
 
         <activity
-            android:name=".service.details.VideoActivity"
+            android:name=".modules.details.VideoActivity"
             android:exported="false" />
         <activity
-            android:name=".service.history.HistoryActivity"
+            android:name=".modules.history.HistoryActivity"
             android:exported="false" />
         <activity
-            android:name=".service.details.BlogDetailsActivity"
+            android:name=".modules.details.BlogDetailsActivity"
             android:exported="false" />
         <activity
-            android:name=".service.login.SplashActivity"
+            android:name=".modules.login.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.home
+package com.igtools.videodownloader.modules.home
 
 import android.app.ProgressDialog
 import android.content.Intent
@@ -22,20 +22,16 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.service.web.WebActivity
+import com.igtools.videodownloader.modules.web.WebActivity
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.databinding.FragmentUserBinding
 import com.igtools.videodownloader.models.MediaModel
-import com.igtools.videodownloader.models.ResourceModel
 import com.igtools.videodownloader.utils.KeyboardUtils
 import com.igtools.videodownloader.utils.getNullable
-import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import com.igtools.videodownloader.widgets.dialog.MyDialog
-import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -503,7 +499,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             val children = node["edge_sidecar_to_children"].asJsonObject["edges"].asJsonArray
             if (children.size() > 0) {
                 for (child in children) {
-                    val resource = ResourceModel()
+                    val resource = MediaModel()
                     resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
                     resource.thumbnailUrl =
                         child.asJsonObject["node"].asJsonObject["display_url"].asString

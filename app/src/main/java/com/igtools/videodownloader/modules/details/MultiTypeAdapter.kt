@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.details
+package com.igtools.videodownloader.modules.details
 
 import android.content.Context
 import android.content.Intent
@@ -10,15 +10,15 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.models.ResourceModel
+import com.igtools.videodownloader.models.MediaModel
 import com.youth.banner.adapter.BannerAdapter
 import com.youth.banner.util.BannerUtils
 
 /**
  * 自定义布局,多个不同UI切换
  */
-class MultiTypeAdapter(private val context: Context, mDatas: List<ResourceModel>) :
-    BannerAdapter<ResourceModel, RecyclerView.ViewHolder>(mDatas) {
+class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel>) :
+    BannerAdapter<MediaModel, RecyclerView.ViewHolder>(mDatas) {
     var TAG = "MultiTypeAdapter"
     override fun onCreateHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
@@ -31,7 +31,7 @@ class MultiTypeAdapter(private val context: Context, mDatas: List<ResourceModel>
 
     override fun onBindView(
         holder: RecyclerView.ViewHolder?,
-        data: ResourceModel?,
+        data: MediaModel?,
         position: Int,
         size: Int
     ) {

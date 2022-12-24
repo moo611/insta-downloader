@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.details
+package com.igtools.videodownloader.modules.details
 
 import android.app.ProgressDialog
 import android.graphics.BitmapFactory
@@ -28,7 +28,6 @@ import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.databinding.ActivityTagBlogDetailsBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
-import com.igtools.videodownloader.models.ResourceModel
 import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.utils.getNullable
@@ -275,7 +274,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
             val children = edge_sidecar_to_children["edges"].asJsonArray
             if (children.size() > 0) {
                 for (child in children) {
-                    val resource = ResourceModel()
+                    val resource = MediaModel()
                     resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
                     resource.thumbnailUrl =
                         child.asJsonObject["node"].asJsonObject["display_url"].asString
@@ -330,9 +329,9 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
     }
 
-    private suspend fun download(media: ResourceModel?) {
+    private suspend fun download(media: MediaModel) {
 
-        if (media?.mediaType == 1) {
+        if (media.mediaType == 1) {
             //image
                 try {
                     val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
@@ -350,7 +349,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
                 }
 
 
-        } else if (media?.mediaType == 2) {
+        } else if (media.mediaType == 2) {
             //video
 
             media.videoUrl?.let {

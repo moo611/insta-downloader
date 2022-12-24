@@ -1,14 +1,12 @@
-package com.igtools.videodownloader.service.home
+package com.igtools.videodownloader.modules.home
 
 import android.view.LayoutInflater
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
-import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.FragmentHomeBinding
-import com.igtools.videodownloader.utils.ShareUtils
 
 /**
  * @Author: desong

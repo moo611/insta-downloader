@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.details
+package com.igtools.videodownloader.modules.details
 
 import android.app.ProgressDialog
 import android.content.Intent
@@ -24,7 +24,6 @@ import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.databinding.ActivityBlogDetailsBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
-import com.igtools.videodownloader.models.ResourceModel
 import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.FileUtils
 import com.youth.banner.indicator.CircleIndicator
@@ -188,7 +187,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
             if (mediaInfo.resources.size > 0) {
                 show("album")
-                adapter.setDatas(mediaInfo.resources as List<ResourceModel?>?)
+                adapter.setDatas(mediaInfo.resources as List<MediaModel?>?)
 
                 mBinding.btnDownload.isEnabled = true
                 //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
@@ -211,9 +210,9 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     }
 
 
-    private suspend fun downloadMedia(media: ResourceModel?) {
+    private suspend fun downloadMedia(media: MediaModel) {
 
-        if (media?.mediaType == 1) {
+        if (media.mediaType == 1) {
             //image
 
             try {
@@ -231,7 +230,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 sendToFirebase(e)
             }
 
-        } else if (media?.mediaType == 2) {
+        } else if (media.mediaType == 2) {
             //video
             media.videoUrl?.let {
                 try {

@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.tag
+package com.igtools.videodownloader.modules.tag
 
 import android.app.ProgressDialog
 import android.text.Editable
@@ -24,8 +24,7 @@ import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.databinding.FragmentTagNewBinding
 import com.igtools.videodownloader.models.MediaModel
-import com.igtools.videodownloader.models.ResourceModel
-import com.igtools.videodownloader.service.home.MediaAdapter
+import com.igtools.videodownloader.modules.home.MediaAdapter
 import com.igtools.videodownloader.utils.KeyboardUtils
 import com.igtools.videodownloader.utils.getNullable
 import kotlinx.coroutines.launch
@@ -311,7 +310,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
             val children = node["edge_sidecar_to_children"].asJsonObject["edges"].asJsonArray
             if (children.size() > 0) {
                 for (child in children) {
-                    val resource = ResourceModel()
+                    val resource = MediaModel()
                     resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
                     resource.thumbnailUrl =
                         child.asJsonObject["node"].asJsonObject["display_url"].asString

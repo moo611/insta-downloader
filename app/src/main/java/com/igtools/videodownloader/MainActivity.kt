@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
@@ -19,14 +18,12 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import com.igtools.videodownloader.service.history.HistoryActivity
 import com.igtools.videodownloader.databinding.ActivityMainBinding
-import com.igtools.videodownloader.service.home.HomeFragment
-import com.igtools.videodownloader.service.setting.SettingFragment
-import com.igtools.videodownloader.service.tag.TagFragment
+import com.igtools.videodownloader.modules.home.HomeFragment
+import com.igtools.videodownloader.modules.setting.SettingFragment
 import com.igtools.videodownloader.models.IntentEvent
-import com.igtools.videodownloader.service.repost.RepostFragment
-import com.igtools.videodownloader.service.tag.TagFragmentNew
+import com.igtools.videodownloader.modules.repost.RepostFragment
+import com.igtools.videodownloader.modules.tag.TagFragmentNew
 import com.igtools.videodownloader.utils.RegexUtils
 import com.igtools.videodownloader.utils.ShareUtils
 import com.igtools.videodownloader.widgets.dialog.MyDialog

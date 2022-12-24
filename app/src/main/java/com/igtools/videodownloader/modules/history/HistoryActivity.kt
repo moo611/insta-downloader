@@ -1,28 +1,23 @@
-package com.igtools.videodownloader.service.repost
+package com.igtools.videodownloader.modules.history
 
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.igtools.videodownloader.base.BaseActivity
 import com.google.android.gms.ads.AdRequest
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.base.BaseFragment
-import com.igtools.videodownloader.databinding.FragmentRepostBinding
+import com.igtools.videodownloader.databinding.ActivityHistoryBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.room.RecordDB
-import com.igtools.videodownloader.service.details.BlogDetailsActivity
-import com.igtools.videodownloader.service.history.HistoryAdapter
+import com.igtools.videodownloader.modules.details.BlogDetailsActivity
 import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.utils.PermissionUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
@@ -30,31 +25,34 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 
-class RepostFragment : BaseFragment<FragmentRepostBinding>() {
+class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
+
     lateinit var adapter: HistoryAdapter
     lateinit var bottomDialog: BottomDialog
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
     var lastSelected = -1
-    val TAG = "RepostFragment"
+    val TAG = "HistoryActivity"
+
+
     override fun getLayoutId(): Int {
-        return R.layout.fragment_repost
+        return R.layout.activity_history
     }
 
     override fun initView() {
         initDialog()
         val adRequest = AdRequest.Builder().build();
         mBinding.adView.loadAd(adRequest)
-        adapter = HistoryAdapter(requireContext())
+        adapter = HistoryAdapter(this)
         mBinding.rv.adapter = adapter
-        mBinding.rv.layoutManager = LinearLayoutManager(requireContext())
+        mBinding.rv.layoutManager = LinearLayoutManager(this)
         adapter.onItemClickListener = object : HistoryAdapter.OnItemClickListener {
             override fun onClick(position: Int) {
                 val content = records[position].content
 
                 startActivity(
                     Intent(
-                        requireContext(),
+                        this@HistoryActivity,
                         BlogDetailsActivity::class.java
                     ).putExtra("content", content).putExtra("flag", false)
                 )
@@ -74,13 +72,15 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
         }
 
-
+        mBinding.imgBack.setOnClickListener {
+            finish()
+        }
     }
 
     fun initDialog() {
 
-        bottomDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
-        val bottomView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_menu, null)
+        bottomDialog = BottomDialog(this, R.style.MyDialogTheme)
+        val bottomView = LayoutInflater.from(this).inflate(R.layout.dialog_menu, null)
 
         val llRepost: LinearLayout = bottomView.findViewById(R.id.ll_repost)
         val llShare: LinearLayout = bottomView.findViewById(R.id.ll_share)
@@ -99,7 +99,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 val file = File(path)
                 val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     FileProvider.getUriForFile(
-                        requireContext(), "com.igtools.videodownloader.fileprovider",
+                        this, "com.igtools.videodownloader.fileprovider",
                         file
                     );
                 } else {
@@ -129,16 +129,6 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     }
 
     override fun initData() {
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-        getDatas()
-    }
-
-    fun getDatas(){
-
         records.clear()
         medias.clear()
 
@@ -155,7 +145,6 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             adapter.setDatas(medias)
 
         }
-
     }
 
     fun shareFile() {
@@ -167,13 +156,13 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 val newpaths = it.substring(0, it.length - 1)
                 val paths = newpaths.split(",")
                 if (paths.size > 1) {
-                    FileUtils.shareAll(requireContext(), paths)
+                    FileUtils.shareAll(this, paths)
                 } else if (paths.size == 1) {
 
                     if (paths[0].endsWith(".jpg")) {
-                        FileUtils.share(requireContext(), File(paths[0]))
+                        FileUtils.share(this, File(paths[0]))
                     } else {
-                        FileUtils.shareVideo(requireContext(), File(paths[0]))
+                        FileUtils.shareVideo(this, File(paths[0]))
                     }
                 }
             }
@@ -184,8 +173,8 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     fun deleteFile() {
 
-        if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())) {
-            PermissionUtils.requirePermissionsReadAndWrite(requireActivity(), 1024)
+        if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
+            PermissionUtils.requirePermissionsReadAndWrite(this, 1024)
             return
         }
 
@@ -235,7 +224,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     fun deleteImage(path: String) {
 
         FileUtils.deleteImageUri(
-            requireActivity().contentResolver,
+            contentResolver,
             path,
         )
     }
@@ -243,7 +232,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     fun deleteVideo(path: String) {
 
         FileUtils.deleteVideoUri(
-            requireActivity().contentResolver,
+            contentResolver,
             path,
         )
     }
@@ -261,7 +250,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         storiesIntent.setDataAndType(uri, if (isVideo) "mp4" else "jpg")
         storiesIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         storiesIntent.setPackage("com.instagram.android")
-        requireContext().grantUriPermission(
+        grantUriPermission(
             "com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
         val chooserIntent = Intent.createChooser(feedIntent, "share to")

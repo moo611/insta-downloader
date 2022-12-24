@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.details
+package com.igtools.videodownloader.modules.details
 
 import android.graphics.drawable.ColorDrawable
 import android.view.View

@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.home
+package com.igtools.videodownloader.modules.home
 
 import android.app.ProgressDialog
 import android.content.ClipboardManager
@@ -16,7 +16,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
 import com.igtools.videodownloader.base.BaseFragment
 import com.google.android.gms.ads.AdListener
@@ -37,16 +36,11 @@ import com.igtools.videodownloader.databinding.FragmentShortCodeBinding
 import com.igtools.videodownloader.models.IntentEvent
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
-import com.igtools.videodownloader.models.ResourceModel
 import com.igtools.videodownloader.room.RecordDB
-import com.igtools.videodownloader.service.details.BlogDetailsActivity
-import com.igtools.videodownloader.service.history.HistoryAdapter
-import com.igtools.videodownloader.service.web.WebActivity
+import com.igtools.videodownloader.modules.details.BlogDetailsActivity
+import com.igtools.videodownloader.modules.web.WebActivity
 import com.igtools.videodownloader.utils.*
-import com.igtools.videodownloader.widgets.dialog.BottomDialog
-import com.igtools.videodownloader.widgets.dialog.CustomDialog
 import com.igtools.videodownloader.widgets.dialog.MyDialog
-import kotlinx.android.synthetic.main.dialog_bottom.view.*
 import kotlinx.coroutines.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -287,7 +281,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
                         all.awaitAll()
                     } else {
-                        download(curMediaInfo)
+                        download(curMediaInfo!!)
                     }
                     mBinding.progressbar.visibility = View.INVISIBLE
                     Toast.makeText(
@@ -363,7 +357,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
                         all.awaitAll()
                     } else {
-                        download(curMediaInfo)
+                        download(curMediaInfo!!)
                     }
                     mBinding.progressbar.visibility = View.INVISIBLE
                     Toast.makeText(
@@ -444,7 +438,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
                     mBinding.progressbar.visibility = View.VISIBLE
-                    download(curMediaInfo)
+                    download(curMediaInfo!!)
                     saveRecord()
                     Toast.makeText(
                         requireContext(),
@@ -541,7 +535,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             val children = edge_sidecar_to_children["edges"].asJsonArray
             if (children.size() > 0) {
                 for (child in children) {
-                    val resource = ResourceModel()
+                    val resource = MediaModel()
                     resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
                     resource.thumbnailUrl =
                         child.asJsonObject["node"].asJsonObject["display_url"].asString
@@ -594,7 +588,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             val children = edge_sidecar_to_children["edges"].asJsonArray
             if (children.size() > 0) {
                 for (child in children) {
-                    val resource = ResourceModel()
+                    val resource = MediaModel()
                     resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
                     resource.thumbnailUrl =
                         child.asJsonObject["node"].asJsonObject["display_url"].asString
@@ -656,9 +650,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     /**
      * 下载单个图片或视频
      */
-    private suspend fun download(media: ResourceModel?) {
+    private suspend fun download(media: MediaModel) {
 
-        if (media?.mediaType == 1) {
+        if (media.mediaType == 1) {
             //image
             try {
                 val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
@@ -678,7 +672,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             }
 
 
-        } else if (media?.mediaType == 2) {
+        } else if (media.mediaType == 2) {
             //video
             if (media.videoUrl != null) {
                 try {

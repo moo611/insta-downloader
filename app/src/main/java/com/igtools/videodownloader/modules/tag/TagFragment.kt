@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.tag
+package com.igtools.videodownloader.modules.tag
 
 import android.app.ProgressDialog
 import android.content.Intent
@@ -23,8 +23,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonArray
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.service.web.WebActivity
-import com.igtools.videodownloader.service.home.MediaAdapter
+import com.igtools.videodownloader.modules.web.WebActivity
+import com.igtools.videodownloader.modules.home.MediaAdapter
 import com.igtools.videodownloader.api.okhttp.Urls
 import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.databinding.FragmentTagBinding

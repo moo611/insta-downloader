@@ -1,8 +1,7 @@
-package com.igtools.videodownloader.service.setting
+package com.igtools.videodownloader.modules.setting
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Build
 import android.view.View
 import android.webkit.CookieManager

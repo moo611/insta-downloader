@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.login
+package com.igtools.videodownloader.modules.login
 
 import android.annotation.SuppressLint
 import android.content.Intent

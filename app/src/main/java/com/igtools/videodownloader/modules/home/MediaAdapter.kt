@@ -1,4 +1,4 @@
-package com.igtools.videodownloader.service.home
+package com.igtools.videodownloader.modules.home
 
 import android.content.Context
 import android.content.Intent
@@ -12,8 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.service.details.BlogDetailsActivity
-import com.igtools.videodownloader.service.details.TagBlogDetails
+import com.igtools.videodownloader.modules.details.BlogDetailsActivity
 import com.igtools.videodownloader.models.MediaModel
 
 class MediaAdapter(var c: Context) : RecyclerView.Adapter<MediaAdapter.BlogViewHolder>() {
