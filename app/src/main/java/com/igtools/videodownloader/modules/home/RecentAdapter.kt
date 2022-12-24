@@ -12,14 +12,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.models.MediaModel
-import com.igtools.videodownloader.modules.history.HistoryAdapter
+import com.igtools.videodownloader.modules.repost.RepostAdapter
 import java.util.ArrayList
 
 class RecentAdapter(var c: Context) : RecyclerView.Adapter<RecentAdapter.RecentHolder>() {
 
 
     var medias: ArrayList<MediaModel> = ArrayList()
-    var onItemClickListener: HistoryAdapter.OnItemClickListener? = null
+    var onItemClickListener: RepostAdapter.OnItemClickListener? = null
 
     class RecentHolder (v: View):RecyclerView.ViewHolder(v){
         val avatar:ImageView = v.findViewById(R.id.img_avatar)

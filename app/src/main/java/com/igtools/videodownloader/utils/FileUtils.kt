@@ -55,8 +55,9 @@ object FileUtils {
                 contentResolver.update(it, contentValues, null, null)
                 val uriPathHelper = URIPathHelper()
                 filePath = uriPathHelper.getPath(c, it)
-
+                Log.v(TAG,it.toString())
             }
+
             return filePath
         } else {
 

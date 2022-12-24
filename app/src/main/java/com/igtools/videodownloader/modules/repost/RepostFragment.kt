@@ -1,5 +1,6 @@
 package com.igtools.videodownloader.modules.repost
 
+import android.app.WallpaperManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -16,9 +17,8 @@ import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.databinding.FragmentRepostBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
-import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.modules.details.BlogDetailsActivity
-import com.igtools.videodownloader.modules.history.HistoryAdapter
+import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.utils.PermissionUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
@@ -27,7 +27,7 @@ import java.io.File
 
 
 class RepostFragment : BaseFragment<FragmentRepostBinding>() {
-    lateinit var adapter: HistoryAdapter
+    lateinit var adapter: RepostAdapter
     lateinit var bottomDialog: BottomDialog
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
@@ -41,10 +41,10 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         initDialog()
         val adRequest = AdRequest.Builder().build();
         mBinding.adView.loadAd(adRequest)
-        adapter = HistoryAdapter(requireContext())
+        adapter = RepostAdapter(requireContext())
         mBinding.rv.adapter = adapter
         mBinding.rv.layoutManager = LinearLayoutManager(requireContext())
-        adapter.onItemClickListener = object : HistoryAdapter.OnItemClickListener {
+        adapter.onItemClickListener = object : RepostAdapter.OnItemClickListener {
             override fun onClick(position: Int) {
                 val content = records[position].content
 
@@ -58,7 +58,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
         }
 
-        adapter.onMenuClickListener = object : HistoryAdapter.OnMenuClickListener {
+        adapter.onMenuClickListener = object : RepostAdapter.OnMenuClickListener {
             override fun onClick(position: Int) {
 
                 lastSelected = position
@@ -81,6 +81,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         val llRepost: LinearLayout = bottomView.findViewById(R.id.ll_repost)
         val llShare: LinearLayout = bottomView.findViewById(R.id.ll_share)
         val llDelete: LinearLayout = bottomView.findViewById(R.id.ll_delete)
+        val llWall: LinearLayout = bottomView.findViewById(R.id.ll_wall)
         bottomDialog.setContent(bottomView)
 
         llRepost.setOnClickListener {
@@ -121,16 +122,35 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             }
         }
 
+        llWall.setOnClickListener {
+            if (lastSelected != -1 && Build.VERSION.SDK_INT >= 24){
+
+                records[lastSelected].paths?.let {
+                    val newpaths = it.substring(0, it.length - 1)
+                    val paths = newpaths.split(",")
+                    val file = File(paths[0])
+                    val fileInputStream = file.inputStream()
+                    val myWallpaperManager =
+                        WallpaperManager.getInstance(requireContext())
+                    myWallpaperManager.setStream(fileInputStream, null, false, WallpaperManager.FLAG_LOCK);
+                }
+            }
+
+        }
 
     }
 
     override fun initData() {
-
+        getDatas()
     }
 
-    override fun onResume() {
-        super.onResume()
-        getDatas()
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+
+        if (isHidden){
+            getDatas()
+        }
     }
 
     fun getDatas(){

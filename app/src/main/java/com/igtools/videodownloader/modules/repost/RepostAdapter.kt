@@ -1,8 +1,8 @@
-package com.igtools.videodownloader.modules.history
+package com.igtools.videodownloader.modules.repost
 
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
-import com.igtools.videodownloader.modules.history.HistoryAdapter.HistoryHolder
+import com.igtools.videodownloader.modules.repost.RepostAdapter.RepostHolder
 import android.view.ViewGroup
 import android.view.LayoutInflater
 import com.igtools.videodownloader.R
@@ -19,21 +19,24 @@ import java.util.ArrayList
  * @Author: desong
  * @Date: 2022/8/4
  */
-class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
+class RepostAdapter(var c: Context) : RecyclerView.Adapter<RepostHolder>() {
 
     var medias: List<MediaModel> = ArrayList()
     var onItemClickListener: OnItemClickListener? = null
     var onMenuClickListener: OnMenuClickListener?=null
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryHolder {
-        val v = LayoutInflater.from(c).inflate(R.layout.item_history, parent, false)
-        return HistoryHolder(v)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RepostHolder {
+        val v = LayoutInflater.from(c).inflate(R.layout.item_repost, parent, false)
+        return RepostHolder(v)
     }
 
-    override fun onBindViewHolder(holder: HistoryHolder, position: Int) {
-        val url:String = if (medias[position].resources.size>0){
-            medias[position].resources[0].thumbnailUrl
+    override fun onBindViewHolder(holder: RepostHolder, position: Int) {
+        val url:String
+        if (medias[position].resources.size>0){
+            url = medias[position].resources[0].thumbnailUrl
+            holder.flag.visibility = View.VISIBLE
         }else{
-            medias[position].thumbnailUrl
+            url = medias[position].thumbnailUrl
+            holder.flag.visibility = View.GONE
         }
         Glide.with(c).load(url)
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
@@ -61,12 +64,13 @@ class HistoryAdapter(var c: Context) : RecyclerView.Adapter<HistoryHolder>() {
         notifyDataSetChanged()
     }
 
-    inner class HistoryHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class RepostHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var thumbnail: ImageView = itemView.findViewById(R.id.img_thumbnail)
         var caption: TextView = itemView.findViewById(R.id.tv_caption)
         var avatar: ImageView = itemView.findViewById(R.id.img_avatar)
         var username: TextView = itemView.findViewById(R.id.tv_username)
         var menu:ImageView = itemView.findViewById(R.id.menu)
+        var flag:ImageView = itemView.findViewById(R.id.img_flag)
     }
 
 

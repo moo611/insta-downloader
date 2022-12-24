@@ -53,8 +53,8 @@
     <string name="paste">Paste</string>
     <string name="search_by_user">Search user\'s posts(no login required)</string>
     <string name="search_by_tag">Search posts under a tag(no login required)</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="feedback">Feedback</string>
     <string name="feedbackstr">If you have any questions or feedbacks, please send email to jindesong36@gmail.com</string>
+    <string name="wallpaper">Wallpaper</string>
 </resources>
