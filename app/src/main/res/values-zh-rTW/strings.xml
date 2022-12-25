@@ -59,5 +59,7 @@
     <string name="feedback">反饋</string>
     <string name="feedbackstr">如果您有任何問題或反饋，請發送電子郵件至jindesong36@gmail.com</string>
     <string name="wallpaper">壁紙</string>
+    <string name="file_not_found">文件未找到.</string>
+    <string name="download_first">先下載到本地設備</string>
 
 </resources>

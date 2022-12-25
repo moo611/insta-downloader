@@ -34,9 +34,16 @@ class RepostAdapter(var c: Context) : RecyclerView.Adapter<RepostHolder>() {
         if (medias[position].resources.size>0){
             url = medias[position].resources[0].thumbnailUrl
             holder.flag.visibility = View.VISIBLE
+            holder.player.visibility = View.GONE
         }else{
             url = medias[position].thumbnailUrl
+
             holder.flag.visibility = View.GONE
+            if (medias[position].mediaType == 1){
+                holder.player.visibility = View.GONE
+            }else{
+                holder.player.visibility = View.VISIBLE
+            }
         }
         Glide.with(c).load(url)
             .placeholder(ColorDrawable(ContextCompat.getColor(c, R.color.gray_1)))
@@ -71,6 +78,7 @@ class RepostAdapter(var c: Context) : RecyclerView.Adapter<RepostHolder>() {
         var username: TextView = itemView.findViewById(R.id.tv_username)
         var menu:ImageView = itemView.findViewById(R.id.menu)
         var flag:ImageView = itemView.findViewById(R.id.img_flag)
+        val player:ImageView = itemView.findViewById(R.id.img_player)
     }
 
 

@@ -62,8 +62,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     var TAG = "ShortCodeFragment"
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
+    var curRecord: Record? = null
+    var paths: HashMap<String, String> = HashMap()
 
-    var paths = StringBuffer()
     private val LOGIN_REQ = 1000
 
     override fun getLayoutId(): Int {
@@ -83,14 +84,22 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             autoStart()
         }
 
+
         mBinding.container.setOnClickListener {
-            val content = gson.toJson(curMediaInfo)
-            startActivity(
-                Intent(
+            if (curMediaInfo != null && curRecord != null) {
+                startActivity(
+                    Intent(requireContext(), BlogDetailsActivity::class.java)
+                        .putExtra("content", gson.toJson(curMediaInfo))
+                        .putExtra("flag", false)
+                        .putExtra("record", gson.toJson(curRecord))
+                )
+            } else {
+                Toast.makeText(
                     requireContext(),
-                    BlogDetailsActivity::class.java
-                ).putExtra("content", content).putExtra("flag", false)
-            )
+                    getString(R.string.downloading),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
 
         }
 
@@ -246,7 +255,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     }
 
     suspend fun getMediaDataByCookie() = withContext(Dispatchers.Main) {
-        if (!progressDialog.isShowing){
+        if (!progressDialog.isShowing) {
             progressDialog.show()
         }
         lifecycleScope.launch {
@@ -318,14 +327,15 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
 
     private fun getMediaData() {
-        paths = StringBuffer()
+        paths.clear()
+        curMediaInfo = null
+        curRecord = null
         lifecycleScope.launch {
             //检查是否已存在
             val url = mBinding.etShortcode.text.toString()
             val record = RecordDB.getInstance().recordDao().findByUrl(url)
 
             if (record != null) {
-//                curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
 
                 Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
                     .show()
@@ -408,7 +418,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
      * 获取story
      */
     private fun getStoryData() {
-        paths = StringBuffer()
+        paths.clear()
+        curMediaInfo = null
+        curRecord = null
         lifecycleScope.launch {
             //检查是否已存在
             val myUrl = mBinding.etShortcode.text.toString()
@@ -491,18 +503,19 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
 
     suspend fun saveRecord() {
-        Log.v(TAG, "paths:" + paths)
+
         val url = mBinding.etShortcode.text.toString()
-        val record =
+        curRecord =
             Record(
                 null,
                 gson.toJson(curMediaInfo),
                 System.currentTimeMillis(),
                 url,
                 null,
-                paths.toString()
+                gson.toJson(paths)
             )
-        RecordDB.getInstance().recordDao().insert(record)
+        RecordDB.getInstance().recordDao().insert(curRecord)
+
     }
 
 
@@ -660,7 +673,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
                     val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
                     if (path != null) {
-                        paths.append(path).append(",")
+                        paths[media.thumbnailUrl] = path
                     }
 
                 }
@@ -682,7 +695,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                             requireContext(),
                             responseBody.body()!!.byteStream()
                         )
-                        paths.append(path).append(",")
+                        paths[media.videoUrl!!] = path!!
                     }
                 } catch (e: Exception) {
                     context?.let {

@@ -57,4 +57,6 @@
     <string name="feedback">प्रतिक्रिया</string>
     <string name="feedbackstr">यदि आपके कोई प्रश्न या फीडबैक हैं, तो कृपया jindesong36@gmail.com पर ईमेल भेजें</string>
     <string name="wallpaper">वॉलपेपर</string>
+    <string name="file_not_found">फ़ाइल प्राप्त नहीं हुई।</string>
+    <string name="download_first">पहले स्थानीय डिवाइस पर डाउनलोड करें</string>
 </resources>

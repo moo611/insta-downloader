@@ -58,4 +58,6 @@
     <string name="feedback">피드백</string>
     <string name="feedbackstr">질문이나 의견이 있으시면 jindesong36@gmail.com으로 메일을 보내주세요.</string>
     <string name="wallpaper">벽지</string>
+    <string name="file_not_found">파일을 찾을 수 없습니다.</string>
+    <string name="download_first">먼저 로컬 장치에 다운로드</string>
 </resources>

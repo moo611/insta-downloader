@@ -60,5 +60,7 @@
     <string name="feedback">umpan balik</string>
     <string name="feedbackstr">Jika Anda memiliki pertanyaan atau umpan balik, silakan kirim email ke jindesong36@gmail.com</string>
     <string name="wallpaper">kertas dinding</string>
+    <string name="file_not_found">Berkas tidak ditemukan.</string>
+    <string name="download_first">Unduh ke perangkat lokal terlebih dahulu</string>
 
 </resources>

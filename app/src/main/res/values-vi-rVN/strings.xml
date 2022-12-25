@@ -61,4 +61,6 @@
     <string name="feedback">lời phản hồi</string>
     <string name="feedbackstr">Nếu bạn có bất kỳ câu hỏi hoặc phản hồi nào, vui lòng gửi email đến jindesong36@gmail.com</string>
     <string name="wallpaper">hình nền</string>
+    <string name="file_not_found">Không tìm thấy tệp.</string>
+    <string name="download_first">Tải xuống thiết bị cục bộ trước</string>
 </resources>

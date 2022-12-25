@@ -58,4 +58,6 @@
     <string name="feedback">フィードバック</string>
     <string name="feedbackstr">ご質問やご意見がございましたら、jindesong36@gmail.com までメールをお送りください。</string>
     <string name="wallpaper">壁紙</string>
+    <string name="file_not_found">ファイルが見つかりません。</string>
+    <string name="download_first">最初にローカル デバイスにダウンロードする</string>
 </resources>

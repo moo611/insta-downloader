@@ -3,16 +3,19 @@ package com.igtools.videodownloader.modules.repost
 import android.app.WallpaperManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.ads.AdRequest
 import com.igtools.videodownloader.R
+import com.igtools.videodownloader.api.retrofit.ApiClient
 import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.databinding.FragmentRepostBinding
 import com.igtools.videodownloader.models.MediaModel
@@ -20,9 +23,12 @@ import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.modules.details.BlogDetailsActivity
 import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.FileUtils
+import com.igtools.videodownloader.utils.FileUtils2
 import com.igtools.videodownloader.utils.PermissionUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 
@@ -85,28 +91,37 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         bottomDialog.setContent(bottomView)
 
         llRepost.setOnClickListener {
-            if (lastSelected != -1 && records[lastSelected].paths != null) {
-                val size = records[lastSelected].paths!!.length
-                if (size == 0) {
-                    return@setOnClickListener
-                }
-                val newpaths = records[lastSelected].paths!!.substring(0, size - 1)
-                val paths = newpaths.split(",")
-                val path = paths[0]
-                val file = File(path)
-                val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    FileProvider.getUriForFile(
-                        requireContext(), "com.igtools.videodownloader.fileprovider",
-                        file
-                    );
-                } else {
-                    Uri.fromFile(file);
-                }
+            if (lastSelected != -1 && lastSelected < medias.size) {
 
-                if (path.endsWith(".jpg")) {
-                    shareFileToInstagram(uri, false)
-                } else if (path.endsWith(".mp4")) {
-                    shareFileToInstagram(uri, true)
+                val media = medias[lastSelected]
+
+                if (media.mediaType == 8) {
+
+                    val paths = records[lastSelected].paths
+                    val pathMap = gson.fromJson(paths, HashMap::class.java)
+                    val resource = media.resources[0]
+                    if (resource.mediaType == 1) {
+                        val filePath = pathMap[resource.thumbnailUrl] as? String
+                        repost(filePath, false)
+
+                    } else if (resource.mediaType == 2) {
+                        val filePath = pathMap[resource.videoUrl] as? String
+                        repost(filePath, true)
+
+                    }
+
+                } else {
+                    val paths = records[lastSelected].paths
+                    val pathMap = gson.fromJson(paths, HashMap::class.java)
+                    if (media.mediaType == 1) {
+                        val filePath = pathMap[media.thumbnailUrl] as? String
+                        repost(filePath, false)
+
+                    } else if (media.mediaType == 2) {
+                        val filePath = pathMap[media.videoUrl] as? String
+                        repost(filePath, true)
+
+                    }
                 }
 
             }
@@ -123,8 +138,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         }
 
         llWall.setOnClickListener {
-            if (lastSelected != -1 && Build.VERSION.SDK_INT >= 24){
-
+            if (lastSelected != -1 && Build.VERSION.SDK_INT >= 24) {
                 records[lastSelected].paths?.let {
                     val newpaths = it.substring(0, it.length - 1)
                     val paths = newpaths.split(",")
@@ -132,7 +146,12 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                     val fileInputStream = file.inputStream()
                     val myWallpaperManager =
                         WallpaperManager.getInstance(requireContext())
-                    myWallpaperManager.setStream(fileInputStream, null, false, WallpaperManager.FLAG_LOCK);
+                    myWallpaperManager.setStream(
+                        fileInputStream,
+                        null,
+                        false,
+                        WallpaperManager.FLAG_LOCK
+                    );
                 }
             }
 
@@ -148,12 +167,39 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
 
-        if (isHidden){
+        if (!isHidden) {
             getDatas()
         }
     }
 
-    fun getDatas(){
+    fun repost(filePath: String?, isVideo: Boolean) {
+
+        if (filePath != null) {
+            val file = File(filePath)
+            val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                FileProvider.getUriForFile(
+                    requireContext(), "com.igtools.videodownloader.fileprovider",
+                    file
+                );
+            } else {
+                Uri.fromFile(file);
+            }
+            shareFileToInstagram(uri, isVideo)
+            bottomDialog.dismiss()
+        } else {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.file_not_found),
+                Toast.LENGTH_SHORT
+            ).show()
+            bottomDialog.dismiss()
+        }
+
+
+    }
+
+
+    fun getDatas() {
 
         records.clear()
         medias.clear()

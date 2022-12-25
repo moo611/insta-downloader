@@ -3,9 +3,12 @@ package com.igtools.videodownloader.modules.details
 import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.igtools.videodownloader.base.BaseActivity
@@ -28,6 +31,7 @@ import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.FileUtils
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
+import java.io.File
 
 class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
@@ -37,10 +41,11 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     var isBack = false
     var mediaInfo = MediaModel()
+    var recordInfo: Record? = null
     var code: String? = null
     var mInterstitialAd: InterstitialAd? = null
-    var paths = StringBuffer()
-
+    var paths: HashMap<String, String> = HashMap()
+    var flag: Boolean = false
     override fun getLayoutId(): Int {
         return R.layout.activity_blog_details
     }
@@ -58,7 +63,8 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         progressDialog.setMessage(getString(R.string.downloading))
         progressDialog.setCancelable(false)
 
-        if (intent.extras!!.getBoolean("flag")) {
+        flag = intent.extras!!.getBoolean("flag")
+        if (flag) {
             mBinding.btnDownload.visibility = View.VISIBLE
         } else {
             mBinding.btnDownload.visibility = View.INVISIBLE
@@ -93,16 +99,16 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 }
 
                 //Log.v(TAG,"finish")
-                val record =
+                recordInfo =
                     Record(
                         null,
                         Gson().toJson(mediaInfo),
                         System.currentTimeMillis(),
                         null,
                         code,
-                        paths.toString()
+                        gson.toJson(paths)
                     )
-                RecordDB.getInstance().recordDao().insert(record)
+                RecordDB.getInstance().recordDao().insert(recordInfo)
 
                 progressDialog.dismiss()
 
@@ -131,6 +137,53 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             onBackPressed()
         }
 
+        mBinding.imgRepost.setOnClickListener {
+
+            if (flag && recordInfo == null) {
+
+                Toast.makeText(this, getString(R.string.download_first), Toast.LENGTH_SHORT).show()
+
+            } else {
+                //从本地获取
+                if (mediaInfo.mediaType == 8) {
+
+                    val selectIndex = mBinding.banner.currentItem
+                    Log.v(TAG, selectIndex.toString())
+                    val media = mediaInfo.resources[selectIndex]
+                    if (media.mediaType == 1) {
+                        val paths = recordInfo!!.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[media.thumbnailUrl] as? String
+
+                        repost(filePath, false)
+                    } else if (media.mediaType == 2) {
+                        val paths = recordInfo!!.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[media.videoUrl] as? String
+                        repost(filePath, true)
+                    }
+
+                } else {
+                    if (mediaInfo.mediaType == 1) {
+
+                        val paths = recordInfo!!.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
+
+                        repost(filePath, false)
+
+                    } else if (mediaInfo.mediaType == 2) {
+
+                        val paths = recordInfo!!.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[mediaInfo.videoUrl] as? String
+                        repost(filePath, true)
+                    }
+                }
+            }
+
+        }
+
     }
 
     override fun initData() {
@@ -138,6 +191,51 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         getDataFromLocal()
     }
 
+    fun repost(filePath: String?, isVideo: Boolean) {
+
+        if (filePath != null) {
+            val file = File(filePath)
+            val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                FileProvider.getUriForFile(
+                    this, "com.igtools.videodownloader.fileprovider",
+                    file
+                );
+            } else {
+                Uri.fromFile(file);
+            }
+            shareFileToInstagram(uri, isVideo)
+            //bottomDialog.dismiss()
+        } else {
+            Toast.makeText(
+                this,
+                getString(R.string.file_not_found),
+                Toast.LENGTH_SHORT
+            ).show()
+            //bottomDialog.dismiss()
+        }
+
+
+    }
+
+    private fun shareFileToInstagram(uri: Uri?, isVideo: Boolean) {
+        if (uri == null) {
+            return
+        }
+        val feedIntent = Intent(Intent.ACTION_SEND)
+        feedIntent.type = if (isVideo) "video/*" else "image/*"
+        feedIntent.putExtra(Intent.EXTRA_STREAM, uri)
+        feedIntent.setPackage("com.instagram.android")
+        val storiesIntent = Intent("com.instagram.share.ADD_TO_STORY")
+        storiesIntent.setDataAndType(uri, if (isVideo) "mp4" else "jpg")
+        storiesIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        storiesIntent.setPackage("com.instagram.android")
+        grantUriPermission(
+            "com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+        val chooserIntent = Intent.createChooser(feedIntent, "share to")
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(storiesIntent))
+        startActivity(chooserIntent)
+    }
 
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
@@ -207,6 +305,10 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         mBinding.username.text = mediaInfo.username
         Glide.with(this).load(mediaInfo.profilePicUrl).circleCrop().into(mBinding.avatar)
 
+        intent.extras?.getString("record")?.let {
+            recordInfo = gson.fromJson(it, Record::class.java)
+        }
+
     }
 
 
@@ -220,12 +322,12 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 withContext(Dispatchers.IO) {
                     val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
                     val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
-                    if (path!=null){
-                        paths.append(path).append(",")
+                    if (path != null) {
+                        paths[media.thumbnailUrl] = path
                     }
 
                 }
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 Toast.makeText(this, "time out", Toast.LENGTH_SHORT).show()
                 sendToFirebase(e)
             }
@@ -240,10 +342,10 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                             this@BlogDetailsActivity,
                             responseBody.body()!!.byteStream()
                         )
-                        paths.append(path).append(",")
+                        paths[it] = path!!
 
                     }
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     Toast.makeText(this, "time out", Toast.LENGTH_SHORT).show()
                     sendToFirebase(e)
                 }
@@ -286,10 +388,10 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
-    private fun sendToFirebase(e:Exception){
+    private fun sendToFirebase(e: Exception) {
         val analytics = Firebase.analytics
-        if (e.message!=null){
-            analytics.logEvent("app_my_exception"){
+        if (e.message != null) {
+            analytics.logEvent("app_my_exception") {
                 param("my_exception", e.message!!)
             }
         }

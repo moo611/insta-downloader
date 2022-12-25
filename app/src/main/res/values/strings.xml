@@ -57,4 +57,6 @@
     <string name="feedback">Feedback</string>
     <string name="feedbackstr">If you have any questions or feedbacks, please send email to jindesong36@gmail.com</string>
     <string name="wallpaper">Wallpaper</string>
+    <string name="file_not_found">File not found.</string>
+    <string name="download_first">Download to local device first</string>
 </resources>
