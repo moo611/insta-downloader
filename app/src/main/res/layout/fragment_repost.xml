@@ -26,12 +26,12 @@
 
             <ImageView
                 android:id="@+id/img_delete"
-                android:src="@mipmap/delete"
-                android:layout_marginRight="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_marginRight="16dp"
+                android:src="@mipmap/delete" />
 
         </RelativeLayout>
         <View
