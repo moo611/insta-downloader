@@ -60,4 +60,9 @@
     <string name="wallpaper">壁紙</string>
     <string name="file_not_found">ファイルが見つかりません。</string>
     <string name="download_first">最初にローカル デバイスにダウンロードする</string>
+
+    <string name="lockscreen">ロック画面</string>
+    <string name="both">ロック画面と壁紙の両方</string>
+    <string name="unsupport">サポートされていないファイル形式</string>
+    <string name="add_successfully">追加成功</string>
 </resources>

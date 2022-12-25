@@ -46,24 +46,24 @@
             <ImageView
                 android:layout_marginRight="20dp"
                 android:id="@+id/btn_download"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:src="@mipmap/download"
                 app:tint="@color/white" />
 
             <ImageView
                 android:layout_marginRight="20dp"
                 android:id="@+id/img_wall"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:src="@mipmap/wallpaper"
                 app:tint="@color/white" />
 
             <ImageView
                 android:layout_marginRight="20dp"
                 android:id="@+id/img_repost"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:src="@mipmap/refresh"
                 app:tint="@color/white" />
 

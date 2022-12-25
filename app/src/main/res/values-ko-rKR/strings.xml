@@ -60,4 +60,8 @@
     <string name="wallpaper">벽지</string>
     <string name="file_not_found">파일을 찾을 수 없습니다.</string>
     <string name="download_first">먼저 로컬 장치에 다운로드</string>
+    <string name="lockscreen">잠금 화면</string>
+    <string name="both">잠금 화면과 배경화면 모두</string>
+    <string name="unsupport">지원되지 않는 파일 형식</string>
+    <string name="add_successfully">성공적으로 추가</string>
 </resources>

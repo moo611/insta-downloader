@@ -1,12 +1,15 @@
 package com.igtools.videodownloader.modules.details
 
 import android.app.ProgressDialog
+import android.app.WallpaperManager
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -29,6 +32,7 @@ import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.FileUtils
+import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
 import java.io.File
@@ -38,7 +42,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     val TAG = "BlogDetailsActivity"
     lateinit var adapter: MultiTypeAdapter
     lateinit var progressDialog: ProgressDialog
-
+    lateinit var selectDialog: BottomDialog
     var isBack = false
     var mediaInfo = MediaModel()
     var recordInfo: Record? = null
@@ -52,6 +56,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     override fun initView() {
         initAds()
+        initDialog()
         mBinding.btnDownload.isEnabled = false
         adapter = MultiTypeAdapter(this, mediaInfo.resources)
         mBinding.banner
@@ -122,6 +127,53 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
         }
 
+        mBinding.imgWall.setOnClickListener {
+
+            if (recordInfo == null) {
+                Toast.makeText(this, getString(R.string.download_first), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (Build.VERSION.SDK_INT >= 24) {
+                selectDialog.show()
+            } else {
+                if (mediaInfo.mediaType == 8) {
+                    val selectIndex = mBinding.banner.currentItem
+                    if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
+                        val media = mediaInfo.resources[selectIndex]
+                        val paths = recordInfo!!.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[media.thumbnailUrl] as? String
+                        addWallPaperUnder24(filePath)
+
+                    } else {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.unsupport),
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                    }
+                } else {
+                    if (mediaInfo.mediaType == 1) {
+                        val paths = recordInfo!!.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
+                        addWallPaperUnder24(filePath)
+                    } else {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.unsupport),
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                    }
+                }
+
+            }
+
+        }
+
         mBinding.picture.setOnClickListener {
             if (mediaInfo.mediaType == 2) {
                 startActivity(
@@ -186,6 +238,132 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
+    private fun initDialog() {
+
+        selectDialog = BottomDialog(this, R.style.MyDialogTheme)
+        val selectView = LayoutInflater.from(this).inflate(R.layout.dialog_select, null)
+
+        val llBoth: LinearLayout = selectView.findViewById(R.id.ll_both)
+        val llLock: LinearLayout = selectView.findViewById(R.id.ll_lockscreen)
+        val llWallPaper: LinearLayout = selectView.findViewById(R.id.ll_wallpaper)
+
+        selectDialog.setContent(selectView)
+
+        llBoth.setOnClickListener {
+            if (mediaInfo.mediaType == 8) {
+                val selectIndex = mBinding.banner.currentItem
+                if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
+                    val media = mediaInfo.resources[selectIndex]
+                    val paths = recordInfo!!.paths
+                    val pathMap = gson.fromJson(paths, HashMap::class.java)
+                    val filePath = pathMap[media.thumbnailUrl] as? String
+                    addWallPaper(filePath, 0)
+
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.unsupport),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+            } else {
+                if (mediaInfo.mediaType == 1) {
+                    val paths = recordInfo!!.paths
+                    val pathMap = gson.fromJson(paths, HashMap::class.java)
+                    val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
+                    addWallPaper(filePath, 0)
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.unsupport),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+            }
+
+            selectDialog.dismiss()
+        }
+
+        llWallPaper.setOnClickListener {
+            if (mediaInfo.mediaType == 8) {
+                val selectIndex = mBinding.banner.currentItem
+                if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
+                    val media = mediaInfo.resources[selectIndex]
+                    val paths = recordInfo!!.paths
+                    val pathMap = gson.fromJson(paths, HashMap::class.java)
+                    val filePath = pathMap[media.thumbnailUrl] as? String
+                    addWallPaper(filePath, 1)
+
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.unsupport),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+            } else {
+                if (mediaInfo.mediaType == 1) {
+                    val paths = recordInfo!!.paths
+                    val pathMap = gson.fromJson(paths, HashMap::class.java)
+                    val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
+                    addWallPaper(filePath, 1)
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.unsupport),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+            }
+            selectDialog.dismiss()
+        }
+        llLock.setOnClickListener {
+
+            if (mediaInfo.mediaType == 8) {
+                val selectIndex = mBinding.banner.currentItem
+                if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
+                    val media = mediaInfo.resources[selectIndex]
+                    val paths = recordInfo!!.paths
+                    val pathMap = gson.fromJson(paths, HashMap::class.java)
+                    val filePath = pathMap[media.thumbnailUrl] as? String
+                    addWallPaper(filePath, 2)
+
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.unsupport),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+
+            } else {
+
+                if (mediaInfo.mediaType == 1) {
+                    val paths = recordInfo!!.paths
+                    val pathMap = gson.fromJson(paths, HashMap::class.java)
+                    val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
+                    addWallPaper(filePath, 2)
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.unsupport),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+
+            }
+
+            selectDialog.dismiss()
+        }
+
+    }
+
     override fun initData() {
 
         getDataFromLocal()
@@ -214,6 +392,90 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             //bottomDialog.dismiss()
         }
 
+
+    }
+
+    fun addWallPaper(filePath: String?, status: Int) {
+        if (Build.VERSION.SDK_INT >= 24) {
+            if (filePath != null) {
+                val file = File(filePath)
+                val myWallpaperManager = WallpaperManager.getInstance(this);
+                when (status) {
+                    0 -> {
+                        myWallpaperManager.setStream(
+                            file.inputStream(),
+                            null,
+                            true,
+                            WallpaperManager.FLAG_SYSTEM
+                        );
+                        myWallpaperManager.setStream(
+                            file.inputStream(),
+                            null,
+                            true,
+                            WallpaperManager.FLAG_LOCK
+                        );
+                        Toast.makeText(
+                            this,
+                            getString(R.string.add_successfully),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    1 -> {
+                        myWallpaperManager.setStream(
+                            file.inputStream(),
+                            null,
+                            true,
+                            WallpaperManager.FLAG_SYSTEM
+                        );
+                        Toast.makeText(
+                            this,
+                            getString(R.string.add_successfully),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {
+                        myWallpaperManager.setStream(
+                            file.inputStream(),
+                            null,
+                            true,
+                            WallpaperManager.FLAG_LOCK
+                        );
+                        Toast.makeText(
+                            this,
+                            getString(R.string.add_successfully),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+            } else {
+                Toast.makeText(
+                    this,
+                    getString(R.string.file_not_found),
+                    Toast.LENGTH_SHORT
+                ).show()
+
+            }
+        }
+
+    }
+
+    fun addWallPaperUnder24(filePath: String?) {
+
+        if (filePath != null) {
+            val intent = Intent("android.intent.action.ATTACH_DATA")
+            intent.addCategory("android.intent.category.DEFAULT")
+            val str = "image/*"
+            intent.setDataAndType(Uri.fromFile(File(filePath)), str)
+            intent.putExtra("mimeType", str)
+            startActivity(Intent.createChooser(intent, "Set As:"))
+        } else {
+            Toast.makeText(
+                this,
+                getString(R.string.file_not_found),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
 
     }
 

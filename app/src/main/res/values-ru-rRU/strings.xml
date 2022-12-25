@@ -61,5 +61,9 @@
     <string name="wallpaper">обои на стену</string>
     <string name="file_not_found">Файл не найден.</string>
     <string name="download_first">Сначала загрузите на локальное устройство</string>
+    <string name="lockscreen">Экран блокировки</string>
+    <string name="both">И экран блокировки, и обои</string>
+    <string name="unsupport">Неподдерживаемый тип файла</string>
+    <string name="add_successfully">Добавить успешно</string>
 
 </resources>

@@ -63,4 +63,9 @@
     <string name="file_not_found">Berkas tidak ditemukan.</string>
     <string name="download_first">Unduh ke perangkat lokal terlebih dahulu</string>
 
+    <string name="lockscreen">Layar kunci</string>
+    <string name="both">Layar kunci dan wallpaper</string>
+    <string name="unsupport">Jenis file tidak didukung</string>
+    <string name="add_successfully">Berhasil menambahkan</string>
+
 </resources>

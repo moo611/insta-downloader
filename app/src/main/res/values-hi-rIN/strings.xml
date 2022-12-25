@@ -59,4 +59,9 @@
     <string name="wallpaper">वॉलपेपर</string>
     <string name="file_not_found">फ़ाइल प्राप्त नहीं हुई।</string>
     <string name="download_first">पहले स्थानीय डिवाइस पर डाउनलोड करें</string>
+
+    <string name="lockscreen"> लॉक स्क्रीन </string>
+    <string name="both"> लॉक स्क्रीन और वॉलपेपर दोनों </string>
+    <string name="unsupport">असमर्थित फ़ाइल प्रकार</string>
+    <string name="add_successfully">सफलतापूर्वक जोड़ें</string>
 </resources>

@@ -63,4 +63,8 @@
     <string name="wallpaper">hình nền</string>
     <string name="file_not_found">Không tìm thấy tệp.</string>
     <string name="download_first">Tải xuống thiết bị cục bộ trước</string>
+    <string name="lockscreen">Khóa màn hình</string>
+    <string name="both">Cả màn hình khóa và hình nền</string>
+    <string name="unsupport">Loại tệp không được hỗ trợ</string>
+    <string name="add_successfully">Thêm thành công</string>
 </resources>

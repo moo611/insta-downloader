@@ -59,4 +59,9 @@
     <string name="wallpaper">Wallpaper</string>
     <string name="file_not_found">File not found.</string>
     <string name="download_first">Download to local device first</string>
+
+    <string name="lockscreen">Lock screen</string>
+    <string name="both">Both lock screen and wallpaper</string>
+    <string name="unsupport">Unsupported file type</string>
+    <string name="add_successfully">Add successfully</string>
 </resources>

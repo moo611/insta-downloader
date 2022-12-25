@@ -61,5 +61,9 @@
     <string name="wallpaper">壁紙</string>
     <string name="file_not_found">文件未找到.</string>
     <string name="download_first">先下載到本地設備</string>
+    <string name="lockscreen">鎖定屏幕</string>
+    <string name="both">鎖屏和壁紙</string>
+    <string name="unsupport">不支持的文件類型</string>
+    <string name="add_successfully">添加成功</string>
 
 </resources>
