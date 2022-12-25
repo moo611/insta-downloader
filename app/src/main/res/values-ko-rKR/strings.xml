@@ -64,4 +64,6 @@
     <string name="both">잠금 화면과 배경화면 모두</string>
     <string name="unsupport">지원되지 않는 파일 형식</string>
     <string name="add_successfully">성공적으로 추가</string>
+    <string name="delete_all_records">모든 레코드를 삭제하시겠습니까?</string>
+    <string name="no_recover">복구하면 복구할 수 없습니다.</string>
 </resources>

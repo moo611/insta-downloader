@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +24,7 @@ import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.utils.PermissionUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
+import com.igtools.videodownloader.widgets.dialog.MyDialog
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -31,6 +33,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     lateinit var adapter: RepostAdapter
     lateinit var bottomDialog: BottomDialog
     lateinit var selectDialog: BottomDialog
+    lateinit var deleteDialog: MyDialog
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
     var lastSelected = -1
@@ -72,11 +75,41 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
         }
 
+        mBinding.imgDelete.setOnClickListener {
+            deleteDialog.show()
+        }
 
     }
 
     fun initDialog() {
+        //deleteDialog
+        deleteDialog = MyDialog(requireContext(),R.style.MyDialogTheme)
+        val deleteView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_delete, null)
+        val tvCancel = deleteView.findViewById<TextView>(R.id.tv_cancel)
+        val tvDelete = deleteView.findViewById<TextView>(R.id.tv_delete)
+        deleteDialog.setUpView(deleteView)
+        tvCancel.setOnClickListener {
+            deleteDialog.dismiss()
+        }
+        tvDelete.setOnClickListener {
 
+            for (media in medias) {
+                val index = medias.indexOf(media)
+                deleteFile(media, records[index])
+            }
+
+            lifecycleScope.launch {
+                RecordDB.getInstance().recordDao().deleteAll()
+                medias.clear()
+                records.clear()
+                adapter.setDatas(medias)
+            }
+
+            deleteDialog.dismiss()
+        }
+
+
+        //bottomDialog
         bottomDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
         val bottomView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_menu, null)
 
@@ -129,7 +162,16 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         }
         llDelete.setOnClickListener {
             if (lastSelected != -1) {
-                deleteFile()
+                val record = records[lastSelected]
+                deleteFile(medias[lastSelected], record)
+
+                //删除记录
+                lifecycleScope.launch {
+                    RecordDB.getInstance().recordDao().delete(record)
+                    records.removeAt(lastSelected)
+                    medias.removeAt(lastSelected)
+                    adapter.setDatas(medias)
+                }
             }
         }
 
@@ -448,27 +490,45 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
         bottomDialog.dismiss()
 
-        records[lastSelected].paths?.let {
-            if (it.isNotEmpty()) {
-                val newpaths = it.substring(0, it.length - 1)
-                val paths = newpaths.split(",")
-                if (paths.size > 1) {
-                    FileUtils.shareAll(requireContext(), paths)
-                } else if (paths.size == 1) {
-
-                    if (paths[0].endsWith(".jpg")) {
-                        FileUtils.share(requireContext(), File(paths[0]))
-                    } else {
-                        FileUtils.shareVideo(requireContext(), File(paths[0]))
+        val paths = records[lastSelected].paths
+        val pathMap = gson.fromJson(paths, HashMap::class.java)
+        val media = medias[lastSelected]
+        if (media.mediaType == 8) {
+            val filePaths = ArrayList<String>()
+            for (resource in media.resources) {
+                if (resource.mediaType == 1) {
+                    val filePath = pathMap[resource.thumbnailUrl] as? String
+                    if (filePath != null) {
+                        filePaths.add(filePath)
+                    }
+                } else if (resource.mediaType == 2) {
+                    val filePath = pathMap[resource.videoUrl] as? String
+                    if (filePath != null) {
+                        filePaths.add(filePath)
                     }
                 }
             }
+            FileUtils.shareAll(requireContext(), filePaths)
 
+        } else {
+            if (media.mediaType == 1) {
+
+                val filePath = pathMap[media.thumbnailUrl] as? String
+                if (filePath != null) {
+                    FileUtils.share(requireContext(), File(filePath))
+                }
+
+            } else if (media.mediaType == 2) {
+                val filePath = pathMap[media.videoUrl] as? String
+                if (filePath != null) {
+                    FileUtils.shareVideo(requireContext(), File(filePath))
+                }
+            }
         }
 
     }
 
-    fun deleteFile() {
+    fun deleteFile(media: MediaModel, record: Record) {
 
         if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())) {
             PermissionUtils.requirePermissionsReadAndWrite(requireActivity(), 1024)
@@ -477,44 +537,46 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
         bottomDialog.dismiss()
 
-        records[lastSelected].paths?.let {
-            if (it.isNotEmpty()) {
-                val newpaths = it.substring(0, it.length - 1)
-                val paths = newpaths.split(",")
-                if (paths.size > 1) {
-
-                    for (path in paths) {
-
-                        if (path.endsWith(".jpg")) {
-                            deleteImage(path)
-                        } else if (path.endsWith(".mp4")) {
-                            deleteVideo(path)
-                        }
-
+        if (media.mediaType == 8) {
+            val paths = record.paths
+            val pathMap = gson.fromJson(paths, HashMap::class.java)
+            for (resource in media.resources) {
+                if (resource.mediaType == 1) {
+                    val filePath = pathMap[resource.thumbnailUrl] as? String
+                    if (filePath != null) {
+                        deleteImage(filePath)
                     }
-
-                } else if (paths.size == 1) {
-
-                    if (paths[0].endsWith(".jpg")) {
-
-                        deleteImage(paths[0])
-                    } else if (paths[0].endsWith(".mp4")) {
-                        deleteVideo(paths[0])
+                } else if (resource.mediaType == 2) {
+                    val filePath = pathMap[resource.videoUrl] as? String
+                    if (filePath != null) {
+                        deleteVideo(filePath)
                     }
+                }
 
+            }
+
+        } else {
+
+            if (media.mediaType == 1) {
+                val paths = record.paths
+                val pathMap = gson.fromJson(paths, HashMap::class.java)
+                val filePath = pathMap[media.thumbnailUrl] as? String
+                if (filePath != null) {
+                    deleteImage(filePath)
+                }
+
+            } else if (media.mediaType == 2) {
+
+                val paths = record.paths
+                val pathMap = gson.fromJson(paths, HashMap::class.java)
+                val filePath = pathMap[media.videoUrl] as? String
+                if (filePath != null) {
+                    deleteVideo(filePath)
                 }
             }
 
         }
 
-        //删除记录
-        val record = records[lastSelected]
-        lifecycleScope.launch {
-            RecordDB.getInstance().recordDao().delete(record)
-            records.removeAt(lastSelected)
-            medias.removeAt(lastSelected)
-            adapter.setDatas(medias)
-        }
 
     }
 

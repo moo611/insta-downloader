@@ -65,5 +65,7 @@
     <string name="both">鎖屏和壁紙</string>
     <string name="unsupport">不支持的文件類型</string>
     <string name="add_successfully">添加成功</string>
+    <string name="delete_all_records">刪除所有記錄？</string>
+    <string name="no_recover">完成後無法恢復</string>
 
 </resources>

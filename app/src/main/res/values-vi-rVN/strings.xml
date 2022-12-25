@@ -67,4 +67,6 @@
     <string name="both">Cả màn hình khóa và hình nền</string>
     <string name="unsupport">Loại tệp không được hỗ trợ</string>
     <string name="add_successfully">Thêm thành công</string>
+    <string name="delete_all_records">Xóa tất cả bản ghi?</string>
+    <string name="no_recover">không thể phục hồi nếu bạn đã làm xong.</string>
 </resources>

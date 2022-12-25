@@ -65,4 +65,6 @@
     <string name="both">ロック画面と壁紙の両方</string>
     <string name="unsupport">サポートされていないファイル形式</string>
     <string name="add_successfully">追加成功</string>
+    <string name="delete_all_records">すべてのレコードを削除しますか?</string>
+    <string name="no_recover">行った場合は復元できません。</string>
 </resources>

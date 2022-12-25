@@ -30,4 +30,8 @@ interface RecordDao {
     @Query("SELECT * FROM Record WHERE code = :code")
     suspend fun findByCode(code: String): Record?
 
+
+    @Query("DELETE FROM Record")
+    suspend fun deleteAll()
+
 }

@@ -67,5 +67,7 @@
     <string name="both">Layar kunci dan wallpaper</string>
     <string name="unsupport">Jenis file tidak didukung</string>
     <string name="add_successfully">Berhasil menambahkan</string>
+    <string name="delete_all_records">Hapus semua record?</string>
+    <string name="no_recover">tidak dapat dipulihkan jika Anda telah melakukannya.</string>
 
 </resources>

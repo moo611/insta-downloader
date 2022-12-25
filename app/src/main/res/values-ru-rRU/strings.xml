@@ -65,5 +65,7 @@
     <string name="both">И экран блокировки, и обои</string>
     <string name="unsupport">Неподдерживаемый тип файла</string>
     <string name="add_successfully">Добавить успешно</string>
+    <string name="delete_all_records">Удалить все записи?</string>
+    <string name="no_recover">нельзя восстановить, если вы это сделали.</string>
 
 </resources>
