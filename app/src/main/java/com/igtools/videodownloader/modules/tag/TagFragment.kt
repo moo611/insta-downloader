@@ -25,7 +25,7 @@ import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.modules.web.WebActivity
 import com.igtools.videodownloader.modules.home.MediaAdapter
-import com.igtools.videodownloader.api.retrofit.Urls
+import com.igtools.videodownloader.api.Urls
 import com.igtools.videodownloader.api.ApiClient
 import com.igtools.videodownloader.databinding.FragmentTagBinding
 import com.igtools.videodownloader.models.MediaModel

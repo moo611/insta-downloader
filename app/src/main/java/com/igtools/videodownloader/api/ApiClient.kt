@@ -2,10 +2,7 @@ package com.igtools.videodownloader.api
 
 import android.util.Log
 import com.igtools.videodownloader.BaseApplication
-import com.igtools.videodownloader.api.retrofit.TagService
-import com.igtools.videodownloader.api.retrofit.UrlService
-import com.igtools.videodownloader.api.retrofit.UserService
-import okhttp3.*
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
