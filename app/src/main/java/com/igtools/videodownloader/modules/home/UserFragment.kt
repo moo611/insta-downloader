@@ -25,8 +25,8 @@ import com.google.gson.JsonObject
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.modules.web.WebActivity
-import com.igtools.videodownloader.api.okhttp.Urls
-import com.igtools.videodownloader.api.retrofit.ApiClient
+import com.igtools.videodownloader.api.Urls
+import com.igtools.videodownloader.api.ApiClient
 import com.igtools.videodownloader.databinding.FragmentUserBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.utils.KeyboardUtils

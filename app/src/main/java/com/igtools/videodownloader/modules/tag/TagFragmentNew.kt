@@ -19,8 +19,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.api.okhttp.Urls
-import com.igtools.videodownloader.api.retrofit.ApiClient
+import com.igtools.videodownloader.api.retrofit.Urls
+import com.igtools.videodownloader.api.ApiClient
 import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.databinding.FragmentTagNewBinding
 import com.igtools.videodownloader.models.MediaModel

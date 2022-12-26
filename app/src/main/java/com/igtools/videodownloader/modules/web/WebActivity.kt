@@ -8,7 +8,7 @@ import android.webkit.*
 import com.igtools.videodownloader.base.BaseActivity
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.api.okhttp.Urls
+import com.igtools.videodownloader.api.Urls
 import com.igtools.videodownloader.databinding.ActivityWebBinding
 import com.igtools.videodownloader.utils.ShareUtils
 

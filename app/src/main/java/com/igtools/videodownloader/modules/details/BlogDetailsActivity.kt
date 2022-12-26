@@ -26,7 +26,7 @@ import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.api.retrofit.ApiClient
+import com.igtools.videodownloader.api.ApiClient
 import com.igtools.videodownloader.databinding.ActivityBlogDetailsBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record

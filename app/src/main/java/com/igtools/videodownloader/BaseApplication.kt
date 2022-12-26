@@ -4,8 +4,6 @@ import android.app.Application
 import android.content.Context
 import com.google.android.gms.ads.MobileAds
 import com.google.gson.Gson
-import com.igtools.videodownloader.api.retrofit.MyConfig
-import com.igtools.videodownloader.api.retrofit.MyCookie
 import com.igtools.videodownloader.utils.ShareUtils
 
 class BaseApplication : Application() {
