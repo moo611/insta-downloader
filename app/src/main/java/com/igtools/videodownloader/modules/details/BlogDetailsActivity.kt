@@ -104,7 +104,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                     downloadMedia(mediaInfo)
                 }
 
-                if (!downloadSuccess){
+                if (!downloadSuccess) {
                     Toast.makeText(
                         this@BlogDetailsActivity,
                         getString(R.string.download_failed),
@@ -407,6 +407,8 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     }
 
     fun addWallPaper(filePath: String?, status: Int) {
+
+        sendToFirebase2()
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
                 val file = File(filePath)
@@ -471,8 +473,16 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
-    fun addWallPaperUnder24(filePath: String?) {
+    private fun sendToFirebase2() {
+        val analytics = Firebase.analytics
+        analytics.logEvent("add_wallpaper") {
+            param("add_wallpaper", 1)
+        }
 
+    }
+
+    fun addWallPaperUnder24(filePath: String?) {
+        sendToFirebase2()
         if (filePath != null) {
             val intent = Intent("android.intent.action.ATTACH_DATA")
             intent.addCategory("android.intent.category.DEFAULT")

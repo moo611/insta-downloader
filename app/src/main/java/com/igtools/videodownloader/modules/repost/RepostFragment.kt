@@ -14,6 +14,9 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.ads.AdRequest
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.databinding.FragmentRepostBinding
@@ -355,6 +358,9 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     }
 
     fun addWallPaper(filePath: String?, status: Int) {
+
+        sendToFirebase2()
+
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
                 val file = File(filePath)
@@ -420,7 +426,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     }
 
     fun addWallPaperUnder24(filePath: String?) {
-
+        sendToFirebase2()
         if (filePath != null) {
             val intent = Intent("android.intent.action.ATTACH_DATA")
             intent.addCategory("android.intent.category.DEFAULT")
@@ -434,6 +440,14 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 getString(R.string.file_not_found),
                 Toast.LENGTH_SHORT
             ).show()
+        }
+
+    }
+
+    private fun sendToFirebase2() {
+        val analytics = Firebase.analytics
+        analytics.logEvent("add_wallpaper") {
+            param("add_wallpaper", 1)
         }
 
     }
