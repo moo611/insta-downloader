@@ -66,4 +66,5 @@
     <string name="add_successfully">Add successfully</string>
     <string name="delete_all_records">Delete all records?</string>
     <string name="no_recover">cannot be recovered if you have done.</string>
+    <string name="download_failed">Download failed.</string>
 </resources>

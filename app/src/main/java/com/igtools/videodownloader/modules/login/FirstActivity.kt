@@ -3,6 +3,10 @@ package com.igtools.videodownloader.modules.login
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.util.Log
+import android.widget.Toast
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.igtools.videodownloader.base.BaseActivity
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -16,6 +20,7 @@ import com.igtools.videodownloader.utils.PermissionUtils
 import com.igtools.videodownloader.utils.ShareUtils
 
 class FirstActivity : BaseActivity<ActivityFirstBinding>() {
+    val TAG = "FirstActivity"
     private val PERMISSION_REQ = 1024
     lateinit var progressDialog: ProgressDialog
     override fun getLayoutId(): Int {
@@ -61,6 +66,11 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 }
+            }.addOnFailureListener {
+                //Log.e(TAG, it.message + "")
+                sendToFirebase(it)
+                Toast.makeText(this, getString(R.string.login_failed), Toast.LENGTH_SHORT).show()
+                progressDialog.dismiss()
             }
     }
 
@@ -84,5 +94,15 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
 //            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
 //            startNow()
         }
+    }
+
+    private fun sendToFirebase(e: Exception) {
+        val analytics = Firebase.analytics
+        if (e.message != null) {
+            analytics.logEvent("login_failed") {
+                param("my_exception", e.message!!)
+            }
+        }
+
     }
 }

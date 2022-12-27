@@ -334,7 +334,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
         if (media.mediaType == 1) {
             //image
                 try {
-                    val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+                    val responseBody = ApiClient.getClient4().downloadUrl(media.thumbnailUrl)
                     withContext(Dispatchers.IO) {
                         val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
                         val path = FileUtils.saveImageToAlbum(this@TagBlogDetails, bitmap)
@@ -354,7 +354,7 @@ class TagBlogDetails : BaseActivity<ActivityTagBlogDetailsBinding>() {
 
             media.videoUrl?.let {
                 try {
-                    val responseBody = ApiClient.getClient().downloadUrl(it)
+                    val responseBody = ApiClient.getClient4().downloadUrl(it)
                     withContext(Dispatchers.IO) {
                         val path = FileUtils.saveVideoToAlbum(this@TagBlogDetails, responseBody.body()!!.byteStream())
                         paths.append(path).append(",")

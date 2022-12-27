@@ -66,4 +66,5 @@
     <string name="add_successfully">성공적으로 추가</string>
     <string name="delete_all_records">모든 레코드를 삭제하시겠습니까?</string>
     <string name="no_recover">복구하면 복구할 수 없습니다.</string>
+    <string name="download_failed">다운로드 실패</string>
 </resources>

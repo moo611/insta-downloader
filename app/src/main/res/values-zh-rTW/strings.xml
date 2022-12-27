@@ -67,5 +67,6 @@
     <string name="add_successfully">添加成功</string>
     <string name="delete_all_records">刪除所有記錄？</string>
     <string name="no_recover">完成後無法恢復</string>
+    <string name="download_failed">下載失敗.</string>
 
 </resources>

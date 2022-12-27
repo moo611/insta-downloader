@@ -50,6 +50,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     var mInterstitialAd: InterstitialAd? = null
     var paths: HashMap<String, String> = HashMap()
     var flag: Boolean = false
+    var downloadSuccess = true
     override fun getLayoutId(): Int {
         return R.layout.activity_blog_details
     }
@@ -78,7 +79,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         mBinding.btnDownload.setOnClickListener {
             isBack = false
             mInterstitialAd?.show(this@BlogDetailsActivity)
-
+            downloadSuccess = true
             lifecycleScope.launch {
 
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
@@ -101,6 +102,16 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                     all.awaitAll()
                 } else {
                     downloadMedia(mediaInfo)
+                }
+
+                if (!downloadSuccess){
+                    Toast.makeText(
+                        this@BlogDetailsActivity,
+                        getString(R.string.download_failed),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    progressDialog.dismiss()
+                    return@launch
                 }
 
                 //Log.v(TAG,"finish")
@@ -590,7 +601,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
                 }
             } catch (e: Exception) {
-                Toast.makeText(this, "time out", Toast.LENGTH_SHORT).show()
+                downloadSuccess = false
                 sendToFirebase(e)
             }
 
@@ -608,7 +619,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this, "time out", Toast.LENGTH_SHORT).show()
+                    downloadSuccess = false
                     sendToFirebase(e)
                 }
 

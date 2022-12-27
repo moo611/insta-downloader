@@ -64,7 +64,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
     var curMediaInfo: MediaModel? = null
     var curRecord: Record? = null
     var paths: HashMap<String, String> = HashMap()
-
+    var downloadSuccess = true
     private val LOGIN_REQ = 1000
 
     override fun getLayoutId(): Int {
@@ -292,6 +292,18 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     } else {
                         download(curMediaInfo!!)
                     }
+
+                    if (!downloadSuccess){
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.download_failed),
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        mBinding.progressbar.visibility = View.INVISIBLE
+                        return@launch
+                    }
+
                     mBinding.progressbar.visibility = View.INVISIBLE
                     Toast.makeText(
                         requireContext(),
@@ -330,6 +342,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         paths.clear()
         curMediaInfo = null
         curRecord = null
+        downloadSuccess = true
         lifecycleScope.launch {
             //检查是否已存在
             val url = mBinding.etShortcode.text.toString()
@@ -369,6 +382,18 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     } else {
                         download(curMediaInfo!!)
                     }
+
+                    if (!downloadSuccess){
+                        mBinding.progressbar.visibility = View.INVISIBLE
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.download_failed),
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        return@launch
+                    }
+
                     mBinding.progressbar.visibility = View.INVISIBLE
                     Toast.makeText(
                         requireContext(),
@@ -421,6 +446,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         paths.clear()
         curMediaInfo = null
         curRecord = null
+        downloadSuccess = true
         lifecycleScope.launch {
             //检查是否已存在
             val myUrl = mBinding.etShortcode.text.toString()
@@ -451,6 +477,18 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                     mInterstitialAd?.show(requireActivity())
                     mBinding.progressbar.visibility = View.VISIBLE
                     download(curMediaInfo!!)
+
+                    if (!downloadSuccess){
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.download_failed),
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        mBinding.progressbar.visibility = View.INVISIBLE
+                        return@launch
+                    }
+
                     saveRecord()
                     Toast.makeText(
                         requireContext(),
@@ -678,10 +716,10 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
 
                 }
             } catch (e: Exception) {
-                context?.let {
-                    Toast.makeText(it, "time out", Toast.LENGTH_SHORT).show()
-                    sendToFirebase(e)
-                }
+
+                downloadSuccess = false
+                sendToFirebase(e)
+
             }
 
 
@@ -698,10 +736,9 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
                         paths[media.videoUrl!!] = path!!
                     }
                 } catch (e: Exception) {
-                    context?.let {
-                        Toast.makeText(it, "time out", Toast.LENGTH_SHORT).show()
-                        sendToFirebase(e)
-                    }
+                    downloadSuccess = false
+                    sendToFirebase(e)
+
                 }
 
 
