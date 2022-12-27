@@ -20,9 +20,9 @@ object ApiClient {
     fun getClient(): UrlService {
 
         val builder: OkHttpClient.Builder = OkHttpClient.Builder()
-        builder.connectTimeout(5, TimeUnit.MINUTES)
-        builder.writeTimeout(5, TimeUnit.MINUTES)
-        builder.readTimeout(5, TimeUnit.MINUTES)
+        builder.connectTimeout(30, TimeUnit.SECONDS)
+        builder.writeTimeout(30, TimeUnit.SECONDS)
+        builder.readTimeout(30, TimeUnit.SECONDS)
 
         val client = builder.build()
         val baseUrl = BaseApplication.serverIp+":"+BaseApplication.port1
@@ -37,9 +37,9 @@ object ApiClient {
     fun getClient2(): UserService {
 
         val builder: OkHttpClient.Builder = OkHttpClient.Builder()
-        builder.connectTimeout(5, TimeUnit.MINUTES)
-        builder.writeTimeout(5, TimeUnit.MINUTES)
-        builder.readTimeout(5, TimeUnit.MINUTES)
+        builder.connectTimeout(30, TimeUnit.SECONDS)
+        builder.writeTimeout(30, TimeUnit.SECONDS)
+        builder.readTimeout(30, TimeUnit.SECONDS)
 
         val client = builder.build()
         //BaseApplication.baseUrl = Urls.BASE_URL_PY
@@ -54,9 +54,9 @@ object ApiClient {
     fun getClient3(): TagService {
 
         val builder: OkHttpClient.Builder = OkHttpClient.Builder()
-        builder.connectTimeout(5, TimeUnit.MINUTES)
-        builder.writeTimeout(5, TimeUnit.MINUTES)
-        builder.readTimeout(5, TimeUnit.MINUTES)
+        builder.connectTimeout(30, TimeUnit.SECONDS)
+        builder.writeTimeout(30, TimeUnit.SECONDS)
+        builder.readTimeout(30, TimeUnit.SECONDS)
 
         val client = builder.build()
         //BaseApplication.baseUrl = Urls.BASE_URL_PY
@@ -66,6 +66,24 @@ object ApiClient {
             .client(client)
             .addConverterFactory(GsonConverterFactory.create()).build()
             .create(TagService::class.java)
+    }
+
+
+    fun getClient4(): DownloadService {
+
+        val builder: OkHttpClient.Builder = OkHttpClient.Builder()
+        builder.connectTimeout(2, TimeUnit.MINUTES)
+        builder.writeTimeout(2, TimeUnit.MINUTES)
+        builder.readTimeout(2, TimeUnit.MINUTES)
+
+        val client = builder.build()
+        //BaseApplication.baseUrl = Urls.BASE_URL_PY
+        val baseUrl = BaseApplication.serverIp + ":" + BaseApplication.port3
+        Log.v(TAG, baseUrl)
+        return Retrofit.Builder().baseUrl(baseUrl)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create()).build()
+            .create(DownloadService::class.java)
     }
 
 

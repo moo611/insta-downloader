@@ -7,8 +7,6 @@ import retrofit2.http.*
 
 interface UrlService {
 
-    @GET
-    suspend fun downloadUrl(@Url url: String): Response<ResponseBody>
 
 
     @GET

@@ -668,7 +668,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
         if (media.mediaType == 1) {
             //image
             try {
-                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+                val responseBody = ApiClient.getClient4().downloadUrl(media.thumbnailUrl)
                 withContext(Dispatchers.IO) {
                     val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
                     val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
@@ -689,7 +689,7 @@ class ShortCodeFragment : BaseFragment<FragmentShortCodeBinding>() {
             //video
             if (media.videoUrl != null) {
                 try {
-                    val responseBody = ApiClient.getClient().downloadUrl(media.videoUrl!!)
+                    val responseBody = ApiClient.getClient4().downloadUrl(media.videoUrl!!)
                     withContext(Dispatchers.IO) {
                         val path = FileUtils.saveVideoToAlbum(
                             requireContext(),

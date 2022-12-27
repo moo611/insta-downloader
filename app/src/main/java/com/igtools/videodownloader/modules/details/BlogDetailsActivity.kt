@@ -580,7 +580,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             //image
 
             try {
-                val responseBody = ApiClient.getClient().downloadUrl(media.thumbnailUrl)
+                val responseBody = ApiClient.getClient4().downloadUrl(media.thumbnailUrl)
                 withContext(Dispatchers.IO) {
                     val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
                     val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
@@ -598,7 +598,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             //video
             media.videoUrl?.let {
                 try {
-                    val responseBody = ApiClient.getClient().downloadUrl(it)
+                    val responseBody = ApiClient.getClient4().downloadUrl(it)
                     withContext(Dispatchers.IO) {
                         val path = FileUtils.saveVideoToAlbum(
                             this@BlogDetailsActivity,
