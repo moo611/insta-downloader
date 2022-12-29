@@ -491,7 +491,9 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             for (record in records) {
 
                 val mediaModel = gson.fromJson(record.content, MediaModel::class.java)
-                medias.add(mediaModel)
+                if (mediaModel != null && mediaModel.resources != null){
+                    medias.add(mediaModel)
+                }
 
             }
             adapter.setDatas(medias)
