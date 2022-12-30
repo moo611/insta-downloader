@@ -1,6 +1,8 @@
 package com.igtools.videodownloader
 
 import android.content.ActivityNotFoundException
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -142,6 +144,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
             }
 
+
+        handleIntent(intent)
     }
 
 
@@ -154,6 +158,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     fun handleIntent(newintent: Intent?) {
+        Log.v(TAG,"handle intent")
         //这里要加延时，否则会获取不到intent或者clipboarditem
         mBinding.content.post {
             Log.v(TAG, newintent?.action + newintent?.type + "")
@@ -170,7 +175,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
                     }
                 }
+            }else{
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.primaryClip?.getItemAt(0)?.let {
+                    //fix null pointer
+//                    mBinding.etShortcode.setText(it.text)
+
+                    EventBus.getDefault().post(IntentEvent(it.text.toString()))
+
+                }
             }
+
         }
     }
 
