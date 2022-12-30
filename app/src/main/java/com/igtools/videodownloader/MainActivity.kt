@@ -45,6 +45,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     lateinit var dialog: MyDialog
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
+
     override fun getLayoutId(): Int {
         return R.layout.activity_main
     }
@@ -144,25 +145,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
             }
 
-
         handleIntent(intent)
     }
 
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Log.v(TAG, "on new intent")
-        //Toast.makeText(this,"new intent",Toast.LENGTH_SHORT).show()
+
         handleIntent(intent)
 
     }
 
     fun handleIntent(newintent: Intent?) {
-        Log.v(TAG,"handle intent")
+
         //这里要加延时，否则会获取不到intent或者clipboarditem
         mBinding.content.post {
-            Log.v(TAG, newintent?.action + newintent?.type + "")
+
             if (newintent?.action == Intent.ACTION_SEND) {
+                Log.v(TAG,"handle intent")
                 if ("text/plain" == newintent.type) {
                     newintent.getStringExtra(Intent.EXTRA_TEXT)?.let {
                         // Update UI to reflect text being shared
@@ -174,15 +174,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         }
 
                     }
-                }
-            }else{
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.primaryClip?.getItemAt(0)?.let {
-                    //fix null pointer
-//                    mBinding.etShortcode.setText(it.text)
-
-                    EventBus.getDefault().post(IntentEvent(it.text.toString()))
-
                 }
             }
 
