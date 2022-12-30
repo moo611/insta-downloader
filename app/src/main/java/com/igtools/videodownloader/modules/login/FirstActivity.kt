@@ -46,32 +46,38 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
             return
         }
 
-        progressDialog.show()
-        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-        val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 3600 * 12
-        }
-        remoteConfig.setConfigSettingsAsync(configSettings)
+//        progressDialog.show()
+//        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
+//        val configSettings = remoteConfigSettings {
+//            minimumFetchIntervalInSeconds = 3600 * 12
+//        }
+//        remoteConfig.setConfigSettingsAsync(configSettings)
+//
+//        remoteConfig.fetchAndActivate()
+//            .addOnCompleteListener(this) { task ->
+//                if (task.isSuccessful) {
+//                    progressDialog.dismiss()
+//                    val str = remoteConfig.getString("apikey2")
+//                    ShareUtils.putData("apikey", str)
+//                    BaseApplication.APIKEY = str
+//
+//                    ShareUtils.putDataBool("firstLogin", false)
+//                    BaseApplication.firstLogin = false
+//                    startActivity(Intent(this, MainActivity::class.java))
+//                    finish()
+//                }
+//            }.addOnFailureListener {
+//                //Log.e(TAG, it.message + "")
+//                sendToFirebase(it)
+//                Toast.makeText(this, getString(R.string.login_failed), Toast.LENGTH_SHORT).show()
+//                progressDialog.dismiss()
+//            }
 
-        remoteConfig.fetchAndActivate()
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    progressDialog.dismiss()
-                    val str = remoteConfig.getString("apikey2")
-                    ShareUtils.putData("apikey", str)
-                    BaseApplication.APIKEY = str
+        ShareUtils.putDataBool("firstLogin", false)
+        BaseApplication.firstLogin = false
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
 
-                    ShareUtils.putDataBool("firstLogin", false)
-                    BaseApplication.firstLogin = false
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                }
-            }.addOnFailureListener {
-                //Log.e(TAG, it.message + "")
-                sendToFirebase(it)
-                Toast.makeText(this, getString(R.string.login_failed), Toast.LENGTH_SHORT).show()
-                progressDialog.dismiss()
-            }
     }
 
     override fun initData() {

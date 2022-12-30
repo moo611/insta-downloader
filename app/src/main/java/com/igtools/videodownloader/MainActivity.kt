@@ -128,22 +128,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun initData() {
 
-        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-        val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 3600 * 12
-        }
-        remoteConfig.setConfigSettingsAsync(configSettings)
-
-        remoteConfig.fetchAndActivate()
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    val str = remoteConfig.getString("apikey2")
-                    ShareUtils.putData("apikey", str)
-                    BaseApplication.APIKEY = str
-
-                }
-
-            }
+//        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
+//        val configSettings = remoteConfigSettings {
+//            minimumFetchIntervalInSeconds = 3600 * 12
+//        }
+//        remoteConfig.setConfigSettingsAsync(configSettings)
+//
+//        remoteConfig.fetchAndActivate()
+//            .addOnCompleteListener(this) { task ->
+//                if (task.isSuccessful) {
+//                    val str = remoteConfig.getString("apikey2")
+//                    ShareUtils.putData("apikey", str)
+//                    BaseApplication.APIKEY = str
+//
+//                }
+//
+//            }
 
         handleIntent(intent)
     }

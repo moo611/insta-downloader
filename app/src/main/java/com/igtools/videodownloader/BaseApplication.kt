@@ -19,7 +19,7 @@ class BaseApplication : Application() {
         var port1 = "3000"
         var port2 = "4000"
         var port3 = "5000"
-        var APIKEY = ""
+        var APIKEY = "253e2765ab6b44c58a069af2621e5b30bc344db7f3b"
         var cookie: String? = null
 
         //ui
@@ -40,9 +40,9 @@ class BaseApplication : Application() {
 
         MobileAds.initialize(this)
 
-        ShareUtils.getData("apikey")?.let {
-            APIKEY = it
-        }
+//        ShareUtils.getData("apikey")?.let {
+//            APIKEY = it
+//        }
         ShareUtils.getData("cookie").let {
             cookie = it
         }
