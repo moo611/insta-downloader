@@ -270,7 +270,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 val username = mBinding.etUsername.text.toString()
                 val url1 = "https://www.instagram.com/$username/?__a=1&__d=dis"
                 val urlEncoded1 = URLEncoder.encode(url1,"utf-8")
-                val api1 = "http://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded1"
+                val api1 = "https://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded1"
                 val res1 = ApiClient.getClient2().getUserId(api1)
 
                 val code = res1.code()
@@ -424,7 +424,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     gson.toJson(variables)
                 }"
                 val urlEncoded = URLEncoder.encode(str, "utf-8")
-                val api = "http://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded"
+                val api = "https://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded"
 
                 //Log.v(TAG,"variables:"+variables)
                 val res = ApiClient.getClient2().getUserMediaNoCookie(api)

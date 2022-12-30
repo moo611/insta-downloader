@@ -165,7 +165,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
                 }"
 
                 val urlEncoded1 = URLEncoder.encode(str, "utf-8")
-                val api1 = "http://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded1"
+                val api1 = "https://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded1"
                 val res1 = ApiClient.getClient3().getTagNew(api1)
                 val jsonObject = res1.body()
                 val code = res1.code()
@@ -234,7 +234,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
                 }"
 
                 val urlEncoded1 = URLEncoder.encode(str, "utf-8")
-                val api1 = "http://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded1"
+                val api1 = "https://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded1"
                 val res1 = ApiClient.getClient3().getTagNew(api1)
                 val jsonObject = res1.body()
                 val code = res1.code()
