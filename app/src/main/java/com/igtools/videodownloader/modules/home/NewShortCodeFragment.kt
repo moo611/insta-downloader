@@ -182,6 +182,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
         mBinding.webview.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
+                Log.v(TAG,"time2:${System.currentTimeMillis()}")
                 view?.loadUrl("javascript:window.local_obj.showSource('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
             }
         }
@@ -252,6 +253,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 paths.clear()
                 curMediaInfo = null
                 curRecord = null
+                Log.v(TAG,"time1:${System.currentTimeMillis()}")
                 mBinding.webview.loadUrl(url)
             }
 
@@ -550,9 +552,12 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
                 .into(mBinding.picture)
         }else{
-            Glide.with(requireContext()).load(curMediaInfo?.resources?.get(0)?.thumbnailUrl)
-                .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
-                .into(mBinding.picture)
+            if(curMediaInfo?.resources?.size!! >0){
+                Glide.with(requireContext()).load(curMediaInfo?.resources?.get(0)?.thumbnailUrl)
+                    .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
+                    .into(mBinding.picture)
+            }
+
         }
 
         Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
@@ -678,10 +683,17 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 curMediaInfo = MediaModel()
                 curMediaInfo?.code = getShortCode()!!
                 val embed = doc.getElementsByClass("Embed ")[0]
-
+                Log.v(TAG,"time3:${System.currentTimeMillis()}")
                 when (embed.attr("data-media-type")) {
                     "GraphVideo" -> {
                         curMediaInfo?.mediaType = 2
+                        if(doc.getElementsByTag("video").size==0){
+                            activity?.runOnUiThread {
+                                progressDialog.dismiss()
+                                privateDialog.show()
+                            }
+                            return@Thread
+                        }
                         parseVideo(doc)
                         activity?.runOnUiThread {
                             progressDialog.dismiss()
@@ -832,6 +844,12 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             //Log.v(TAG,curMediaInfo?.resources?.size.toString())
             Log.v(TAG,curMediaInfo?.toString()+"")
             progressDialog.dismiss()
+
+            if(curMediaInfo?.resources?.size==0){
+                Toast.makeText(requireContext(),getString(R.string.failed),Toast.LENGTH_SHORT).show()
+                return@postDelayed
+            }
+
             showCurrent()
             mInterstitialAd?.show(requireActivity())
             mBinding.progressbar.visibility = View.VISIBLE
@@ -893,10 +911,15 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     }
 
     private fun getUserInfo(doc: Document) {
-
-        val a = doc.getElementsByClass("Avatar")[0]
-        val img = a.getElementsByTag("img")[0]
-        curMediaInfo?.profilePicUrl = img.attr("src")
+        if(doc.getElementsByClass("Avatar").size>0){
+            val a = doc.getElementsByClass("Avatar")[0]
+            val img = a.getElementsByTag("img")[0]
+            curMediaInfo?.profilePicUrl = img.attr("src")
+        }else if(doc.getElementsByClass("CollabAvatar").size>0){
+            val a = doc.getElementsByClass("CollabAvatar")[0]
+            val img = a.getElementsByTag("img")[0]
+            curMediaInfo?.profilePicUrl = img.attr("src")
+        }
 
         val a2 = doc.getElementsByClass("HeaderText")[0]
         val span = a2.getElementsByTag("span")[0]
@@ -929,7 +952,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
         @JavascriptInterface
         fun onReceiveImage(imageUrl: String) {
-
+            Log.v(TAG,imageUrl)
             val temp = MediaModel()
             temp.thumbnailUrl = imageUrl
             temp.mediaType = 1
