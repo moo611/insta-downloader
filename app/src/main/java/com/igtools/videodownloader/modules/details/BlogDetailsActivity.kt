@@ -561,32 +561,37 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
 
     private fun getDataFromLocal() {
-        val content = intent.extras!!.getString("content")!!
-        mediaInfo = gson.fromJson(content, MediaModel::class.java)
-        code = mediaInfo.code
-        if (mediaInfo.mediaType == 8) {
+        val content = intent.extras?.getString("content")
+        //fix content == null
+        if (content == null){
+            Toast.makeText(this,"No data",Toast.LENGTH_SHORT).show()
+        }else{
+            mediaInfo = gson.fromJson(content, MediaModel::class.java)
+            code = mediaInfo.code
+            if (mediaInfo.mediaType == 8) {
 
-            if (mediaInfo.resources.size > 0) {
-                show("album")
-                adapter.setDatas(mediaInfo.resources as List<MediaModel?>?)
+                if (mediaInfo.resources.size > 0) {
+                    show("album")
+                    adapter.setDatas(mediaInfo.resources as List<MediaModel?>?)
 
+                    mBinding.btnDownload.isEnabled = true
+                    //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
+                    mBinding.tvTitle.text = mediaInfo.captionText
+
+                }
+            } else {
+                show("picture")
+                Glide.with(this@BlogDetailsActivity).load(mediaInfo.thumbnailUrl)
+                    .into(mBinding.picture)
                 mBinding.btnDownload.isEnabled = true
                 //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
                 mBinding.tvTitle.text = mediaInfo.captionText
 
             }
-        } else {
-            show("picture")
-            Glide.with(this@BlogDetailsActivity).load(mediaInfo.thumbnailUrl)
-                .into(mBinding.picture)
-            mBinding.btnDownload.isEnabled = true
-            //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-            mBinding.tvTitle.text = mediaInfo.captionText
 
+            mBinding.username.text = mediaInfo.username
+            Glide.with(this).load(mediaInfo.profilePicUrl).circleCrop().into(mBinding.avatar)
         }
-
-        mBinding.username.text = mediaInfo.username
-        Glide.with(this).load(mediaInfo.profilePicUrl).circleCrop().into(mBinding.avatar)
 
         intent.extras?.getString("record")?.let {
             recordInfo = gson.fromJson(it, Record::class.java)

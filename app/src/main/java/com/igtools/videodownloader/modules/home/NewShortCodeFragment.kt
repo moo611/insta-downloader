@@ -1,0 +1,1000 @@
+package com.igtools.videodownloader.modules.home
+
+import android.app.ProgressDialog
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.drawable.ColorDrawable
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
+import android.util.Log
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.webkit.*
+import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
+import com.google.gson.JsonObject
+import com.igtools.videodownloader.BaseApplication
+import com.igtools.videodownloader.R
+import com.igtools.videodownloader.api.ApiClient
+import com.igtools.videodownloader.api.Urls
+import com.igtools.videodownloader.base.BaseFragment
+import com.igtools.videodownloader.databinding.FragmentNewShortCodeBinding
+import com.igtools.videodownloader.models.IntentEvent
+import com.igtools.videodownloader.models.MediaModel
+import com.igtools.videodownloader.models.Record
+import com.igtools.videodownloader.modules.details.BlogDetailsActivity
+import com.igtools.videodownloader.modules.web.WebActivity
+import com.igtools.videodownloader.room.RecordDB
+import com.igtools.videodownloader.utils.FileUtils
+import com.igtools.videodownloader.utils.KeyboardUtils
+import com.igtools.videodownloader.utils.UrlUtils
+import com.igtools.videodownloader.utils.getNullable
+import com.igtools.videodownloader.widgets.dialog.MyDialog
+import kotlinx.coroutines.*
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+
+class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
+
+    val TAG="NewShortCodeFragment"
+
+    lateinit var progressDialog: ProgressDialog
+    lateinit var privateDialog: MyDialog
+    lateinit var storyDialog: MyDialog
+    var mInterstitialAd: InterstitialAd? = null
+    var curMediaInfo: MediaModel? = null
+    var curRecord: Record? = null
+    var paths: HashMap<String, String> = HashMap()
+
+    val imageUrl = "https://www.instagram.com/p/-vSJNUDKKD/embed/captioned/"
+    val videoUrl = "https://www.instagram.com/reel/Cm6TeFHJ0xy/embed/captioned/"
+    val sideUrl = "https://www.instagram.com/p/Cm8qU92ykVU/embed/captioned/"
+
+    var downloadSuccess = true
+    private val LOGIN_REQ = 1000
+
+    override fun getLayoutId(): Int {
+        return R.layout.fragment_new_short_code
+    }
+
+    override fun initView() {
+        initWebView()
+        initDialog()
+        initAds()
+        mBinding.btnDownload.setOnClickListener {
+            autoStart()
+        }
+
+        mBinding.btnPaste.setOnClickListener {
+            handleCopy()
+        }
+
+        mBinding.container.setOnClickListener {
+            if (curMediaInfo != null && curRecord != null) {
+                startActivity(
+                    Intent(requireContext(), BlogDetailsActivity::class.java)
+                        .putExtra("content", gson.toJson(curMediaInfo))
+                        .putExtra("flag", false)
+                        .putExtra("record", gson.toJson(curRecord))
+                )
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.downloading),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+        }
+
+        mBinding.etShortcode.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+                if (mBinding.etShortcode.text.isNotEmpty()) {
+                    mBinding.imgClear.visibility = View.VISIBLE
+                } else {
+                    mBinding.imgClear.visibility = View.INVISIBLE
+                }
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+
+        })
+
+        mBinding.imgClear.setOnClickListener {
+            mBinding.etShortcode.setText("")
+        }
+
+        mBinding.adView.adListener = object : AdListener() {
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                // Code to be executed when an ad request fails.
+                Log.e(TAG, adError.message)
+            }
+
+            override fun onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+                mBinding.adcard.visibility = View.VISIBLE
+            }
+
+
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this);
+    }
+
+    fun handleCopy() {
+        mBinding.btnPaste.post {
+            val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.primaryClip?.getItemAt(0)?.let {
+                //fix null pointer
+                mBinding.etShortcode.setText(it.text)
+            }
+
+        }
+
+    }
+
+
+    override fun initData() {
+        //mBinding.webview.loadUrl(sideUrl)
+    }
+
+    private fun initWebView() {
+
+        mBinding.webview.settings.javaScriptEnabled = true
+        mBinding.webview.settings.domStorageEnabled = true
+        mBinding.webview.addJavascriptInterface(JavaScriptLocalObj(), "local_obj")
+
+        mBinding.webview.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                view?.loadUrl("javascript:window.local_obj.showSource('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
+            }
+        }
+        mBinding.webview.webChromeClient = object : WebChromeClient(){
+
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+
+                Log.e(TAG, consoleMessage?.message() + "")
+
+                return super.onConsoleMessage(consoleMessage)
+            }
+            override fun onJsAlert(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: JsResult?
+            ): Boolean {
+                return super.onJsAlert(view, url, message, result)
+            }
+
+        }
+
+    }
+
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build();
+        //inter
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/3456228078", adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(p0: InterstitialAd) {
+                    super.onAdLoaded(p0)
+                    mInterstitialAd = p0
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    super.onAdFailedToLoad(p0)
+                    mInterstitialAd = null;
+                }
+            })
+        //banner
+        mBinding.adView.loadAd(adRequest)
+
+
+    }
+
+    private fun autoStart() {
+        val paramString = mBinding.etShortcode.text.toString()
+        if(TextUtils.isEmpty(paramString)){
+            return
+        }
+        mBinding.etShortcode.clearFocus()
+        KeyboardUtils.closeKeybord(mBinding.etShortcode, context)
+        if(paramString.matches(Regex("(.*)instagram.com/p(.*)")) || paramString.matches(Regex("(.*)instagram.com/reel(.*)"))){
+            val url = handleUrl()
+            Log.v(TAG,url)
+
+            lifecycleScope.launch {
+                val record = RecordDB.getInstance().recordDao().findByUrl(paramString)
+                if (record != null) {
+                    //curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
+                    Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
+                        .show()
+
+                    return@launch
+                }
+
+                progressDialog.show()
+                mBinding.webview.loadUrl(url)
+            }
+
+        }else if (paramString.matches(Regex("(.*)instagram.com/stories/(.*)"))){
+            if (BaseApplication.cookie == null) {
+                storyDialog.show()
+            } else {
+                getStoryData()
+            }
+        }else{
+            Toast.makeText(requireContext(),getString(R.string.invalid_url),Toast.LENGTH_SHORT).show()
+        }
+
+    }
+
+    private fun handleUrl():String{
+
+        val url = mBinding.etShortcode.text.toString().split("?")[0]
+        return url+"embed/captioned/"
+    }
+
+    suspend fun getMediaDataByCookie() = withContext(Dispatchers.Main) {
+        if (!progressDialog.isShowing) {
+            progressDialog.show()
+        }
+        lifecycleScope.launch {
+            //检查是否已存在
+
+            try {
+                val map: HashMap<String, String> = HashMap()
+                map["Cookie"] = BaseApplication.cookie!!
+                map["User-Agent"] = Urls.USER_AGENT
+
+                val map2: HashMap<String, String> = HashMap()
+                val shortCode = getShortCode() ?: return@launch
+                map2["shortcode"] = shortCode
+
+                val res = ApiClient.getClient()
+                    .getMediaData(Urls.GRAPH_QL, map, Urls.QUERY_HASH, gson.toJson(map2))
+                progressDialog.dismiss()
+                val jsonObject = res.body()
+                //Log.v(TAG, jsonObject.toString())
+                if (res.code() == 200 && jsonObject != null) {
+
+                    curMediaInfo = parseMedia2(jsonObject)
+                    showCurrent()
+                    mInterstitialAd?.show(requireActivity())
+                    mBinding.progressbar.visibility = View.VISIBLE
+                    if (curMediaInfo?.mediaType == 8) {
+                        val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
+                            async {
+                                download(it)
+                            }
+                        }
+
+                        all.awaitAll()
+                    } else {
+                        download(curMediaInfo!!)
+                    }
+
+                    if (!downloadSuccess){
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.download_failed),
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        mBinding.progressbar.visibility = View.INVISIBLE
+                        return@launch
+                    }
+
+                    mBinding.progressbar.visibility = View.INVISIBLE
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.download_finish),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    saveRecord()
+
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.not_found),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+
+            } catch (e: Exception) {
+                mBinding.progressbar.visibility = View.INVISIBLE
+                Log.e(TAG, e.message + "")
+                context?.let {
+                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT)
+                        .show()
+                }
+
+                progressDialog.dismiss()
+
+            }
+        }
+
+    }
+
+    private fun parseMedia2(jsonObject: JsonObject): MediaModel {
+        val mediaModel = MediaModel()
+        val shortcode_media = jsonObject["data"].asJsonObject["shortcode_media"].asJsonObject
+        val __typename = shortcode_media["__typename"].asString
+        if (__typename == "GraphImage") {
+            mediaModel.mediaType = 1
+        } else if (__typename == "GraphVideo") {
+            mediaModel.mediaType = 2
+        } else {
+            mediaModel.mediaType = 8
+        }
+
+        mediaModel.code = shortcode_media["shortcode"].asString
+        mediaModel.pk = shortcode_media["id"].asString
+        val edge_media_to_caption = shortcode_media["edge_media_to_caption"].asJsonObject
+        val edges = edge_media_to_caption["edges"].asJsonArray
+        if (edges.size() > 0) {
+            mediaModel.captionText = edges[0].asJsonObject["node"].asJsonObject["text"].asString
+        }
+        mediaModel.videoUrl = shortcode_media.getNullable("video_url")?.asString
+        mediaModel.thumbnailUrl = shortcode_media["display_url"].asString
+        val owner = shortcode_media["owner"].asJsonObject
+        mediaModel.profilePicUrl = owner["profile_pic_url"].asString
+        mediaModel.username = owner["username"].asString
+        if (shortcode_media.has("edge_sidecar_to_children")) {
+            val edge_sidecar_to_children = shortcode_media["edge_sidecar_to_children"].asJsonObject
+            val children = edge_sidecar_to_children["edges"].asJsonArray
+            if (children.size() > 0) {
+                for (child in children) {
+                    val resource = MediaModel()
+                    resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
+                    resource.thumbnailUrl =
+                        child.asJsonObject["node"].asJsonObject["display_url"].asString
+                    resource.videoUrl =
+                        child.asJsonObject["node"].asJsonObject.getNullable("video_url")?.asString
+                    val typeName = child.asJsonObject["node"].asJsonObject["__typename"].asString
+                    if (typeName == "GraphImage") {
+                        resource.mediaType = 1
+                    } else if (typeName == "GraphVideo") {
+                        resource.mediaType = 2
+                    } else {
+                        resource.mediaType = 8
+                    }
+                    mediaModel.resources.add(resource)
+                }
+            }
+        }
+
+        return mediaModel
+
+    }
+
+    /**
+     * 获取story
+     */
+    private fun getStoryData() {
+        paths.clear()
+        curMediaInfo = null
+        curRecord = null
+        downloadSuccess = true
+        lifecycleScope.launch {
+            //检查是否已存在
+            val myUrl = mBinding.etShortcode.text.toString()
+            val record = RecordDB.getInstance().recordDao().findByUrl(myUrl)
+            if (record != null) {
+                //curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
+                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
+                    .show()
+
+                return@launch
+            }
+            progressDialog.show()
+            try {
+                val map: HashMap<String, String> = HashMap()
+                val cookie = BaseApplication.cookie
+                map["Cookie"] = cookie!!
+                map["User-Agent"] = Urls.USER_AGENT
+                val pk = getShortCode()
+                val url = Urls.PRIVATE_API + "/media/" + pk + "/info"
+                val res = ApiClient.getClient()
+                    .getStoryData(url, map)
+                val code = res.code()
+                val jsonObject = res.body()
+                progressDialog.dismiss()
+                if (code == 200 && jsonObject != null) {
+                    curMediaInfo = parseStory(jsonObject)
+                    showCurrent()
+                    mInterstitialAd?.show(requireActivity())
+                    mBinding.progressbar.visibility = View.VISIBLE
+                    download(curMediaInfo!!)
+
+                    if (!downloadSuccess){
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.download_failed),
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        mBinding.progressbar.visibility = View.INVISIBLE
+                        return@launch
+                    }
+
+                    saveRecord()
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.download_finish),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    mBinding.progressbar.visibility = View.INVISIBLE
+
+                } else {
+                    Log.e(TAG, res.errorBody()?.string() + "")
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.failed),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+
+
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                progressDialog.dismiss()
+                context?.let {
+                    Toast.makeText(
+                        it,
+                        getString(R.string.network),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            }
+        }
+
+    }
+
+    private fun parseStory(jsonObject: JsonObject): MediaModel {
+        val mediaModel = MediaModel()
+        val items = jsonObject["items"].asJsonArray
+        if (items.size() > 0) {
+            val item = items[0].asJsonObject
+            mediaModel.mediaType = item["media_type"].asInt
+            mediaModel.code = item["code"].asString
+            val user = item["user"].asJsonObject
+            mediaModel.username = user["username"].asString
+            mediaModel.profilePicUrl = user["profile_pic_url"].asString
+            val image_versions2 = item["image_versions2"].asJsonObject
+            val candidates = image_versions2["candidates"].asJsonArray
+
+            val size = candidates.size()
+            mediaModel.thumbnailUrl = candidates[size - 1].asJsonObject["url"].asString
+
+            mediaModel.pk = item["pk"].asString
+
+            if (mediaModel.mediaType == 2) {
+                val video_versions = item["video_versions"].asJsonArray
+                if (video_versions.size() > 0) {
+                    mediaModel.videoUrl = video_versions[0].asJsonObject["url"].asString
+                }
+            }
+
+            mediaModel.captionText =
+                jsonObject.getNullable("caption")?.asJsonObject?.get("text")?.asString
+
+        }
+
+        return mediaModel
+
+    }
+    private fun getShortCode(): String? {
+        val shortCode: String?
+        val url = mBinding.etShortcode.text.toString()
+        shortCode = if (!url.contains("stories")) {
+            UrlUtils.extractMedia(url)
+        } else {
+            UrlUtils.extractStory(url)
+        }
+        return shortCode
+    }
+
+
+    /**
+     * 刚搜索到先展示
+     */
+    private fun showCurrent() {
+        mBinding.container.visibility = View.VISIBLE
+        mBinding.username.text = curMediaInfo?.captionText
+        if(curMediaInfo?.mediaType != 8){
+            Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
+                .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
+                .into(mBinding.picture)
+        }else{
+            Glide.with(requireContext()).load(curMediaInfo?.resources?.get(0)?.thumbnailUrl)
+                .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
+                .into(mBinding.picture)
+        }
+
+        Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
+            .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
+            .into(mBinding.avatar)
+    }
+
+
+    suspend fun saveRecord() {
+
+        val url = mBinding.etShortcode.text.toString()
+        curRecord =
+            Record(
+                null,
+                gson.toJson(curMediaInfo),
+                System.currentTimeMillis(),
+                url,
+                null,
+                gson.toJson(paths)
+            )
+        RecordDB.getInstance().recordDao().insert(curRecord)
+
+    }
+
+    /**
+     * 下载单个图片或视频
+     */
+    private suspend fun download(media: MediaModel) {
+
+        if (media.mediaType == 1) {
+            //image
+            try {
+                val responseBody = ApiClient.getClient4().downloadUrl(media.thumbnailUrl)
+                withContext(Dispatchers.IO) {
+                    val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
+                    val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
+                    if (path != null) {
+                        paths[media.thumbnailUrl] = path
+                    }
+
+                }
+            } catch (e: Exception) {
+
+                downloadSuccess = false
+                sendToFirebase(e)
+
+            }
+
+
+        } else if (media.mediaType == 2) {
+            //video
+            if (media.videoUrl != null) {
+                try {
+                    val responseBody = ApiClient.getClient4().downloadUrl(media.videoUrl!!)
+                    withContext(Dispatchers.IO) {
+                        val path = FileUtils.saveVideoToAlbum(
+                            requireContext(),
+                            responseBody.body()!!.byteStream()
+                        )
+                        paths[media.videoUrl!!] = path!!
+                    }
+                } catch (e: Exception) {
+                    downloadSuccess = false
+                    sendToFirebase(e)
+
+                }
+
+
+            }
+
+        }
+    }
+
+
+    @Subscribe
+    fun onKeywordReceive(intentEvent: IntentEvent) {
+
+        val keyword = intentEvent.str
+        mBinding.etShortcode.setText(keyword)
+
+        if (BaseApplication.autodownload) {
+            autoStart()
+        }
+
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == LOGIN_REQ && resultCode == 200) {
+            val url = mBinding.etShortcode.text.toString()
+            if (url.contains("stories")) {
+                getStoryData()
+            } else {
+                lifecycleScope.launch {
+                    getMediaDataByCookie()
+                }
+
+            }
+
+        }
+    }
+
+    private fun sendToFirebase(e: Exception) {
+        val analytics = Firebase.analytics
+        if (e.message != null) {
+            analytics.logEvent("app_my_exception") {
+                param("my_exception", e.message!!)
+            }
+        }
+
+    }
+
+
+    private fun loadData(html: String) {
+
+        Thread {
+            //val doc: Document = Jsoup.connect(videoUrl).userAgent(Urls.USER_AGENT).get()
+            val doc = Jsoup.parse(html)
+            Log.v(TAG, doc.title())
+
+            if(doc.getElementsByClass("Embed ").size>0){
+                curMediaInfo = MediaModel()
+                curMediaInfo?.code = getShortCode()!!
+                val embed = doc.getElementsByClass("Embed ")[0]
+
+                when (embed.attr("data-media-type")) {
+                    "GraphVideo" -> {
+                        curMediaInfo?.mediaType = 2
+                        parseVideo(doc)
+                        activity?.runOnUiThread {
+                            progressDialog.dismiss()
+                            showCurrent()
+                            mInterstitialAd?.show(requireActivity())
+                            mBinding.progressbar.visibility = View.VISIBLE
+
+                            lifecycleScope.launch {
+                                download(curMediaInfo!!)
+
+                                if (!downloadSuccess){
+                                    Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.download_failed),
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                    mBinding.progressbar.visibility = View.INVISIBLE
+                                    return@launch
+                                }
+
+                                mBinding.progressbar.visibility = View.INVISIBLE
+                                saveRecord()
+                                Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.download_finish),
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+
+                        }
+
+                    }
+                    "GraphSidecar" -> {
+                        curMediaInfo?.mediaType = 8
+
+                        parseSideCar(doc)
+                    }
+                    else -> {
+                        curMediaInfo?.mediaType = 1
+                        parseImage(doc)
+                        activity?.runOnUiThread {
+                            progressDialog.dismiss()
+                            showCurrent()
+                            mInterstitialAd?.show(requireActivity())
+                            mBinding.progressbar.visibility = View.VISIBLE
+
+                            lifecycleScope.launch {
+                                download(curMediaInfo!!)
+
+                                if (!downloadSuccess){
+                                    Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.download_failed),
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                    mBinding.progressbar.visibility = View.INVISIBLE
+                                    return@launch
+                                }
+
+                                mBinding.progressbar.visibility = View.INVISIBLE
+                                saveRecord()
+                                Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.download_finish),
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+
+                        }
+
+                    }
+                }
+            }else{
+
+                activity?.runOnUiThread {
+                    progressDialog.dismiss()
+                    privateDialog.show()
+                }
+
+            }
+
+        }.start()
+
+    }
+
+    private fun parseSideCar(doc: Document) {
+        getUserInfo(doc)
+        getCaption(doc)
+        val sidecar = doc.getElementsByClass("EmbedSidecar")
+        val lis = sidecar[0].getElementsByTag("li")
+        val total = lis.size
+        mBinding.webview.post{
+
+            mBinding.webview.loadUrl("javascript:((total) => {\n" +
+                    "  let curIndex = 0;\n" +
+                    "  let i = 0;\n" +
+                    "\n" +
+                    "  while (i < total) {\n" +
+                    "\n" +
+                    "    setTimeout(() => {\n" +
+                    "\n" +
+                    "      let sidecar = document.getElementsByClassName(\"EmbedSidecar\");\n" +
+                    "      let btns = sidecar[0].getElementsByTagName(\"button\");\n" +
+                    "      if (curIndex == 0) {\n" +
+                    "        let rightbtn = btns[0];\n" +
+                    "\n" +
+                    "        rightbtn.click();\n" +
+                    "\n" +
+                    "      } else if (curIndex < total - 1) {\n" +
+                    "        let rightbtn = btns[1];\n" +
+                    "\n" +
+                    "        rightbtn.click();\n" +
+                    "      }\n" +
+                    "\n" +
+                    "\n" +
+                    "      let lis = sidecar[0].getElementsByTagName(\"li\");\n" +
+                    "      let li = lis[curIndex];\n" +
+                    "\n" +
+                    "      if (li.getElementsByTagName(\"video\").length > 0) {\n" +
+                    "\n" +
+                    "        let videoUrl = li.getElementsByTagName(\"video\")[0].src;\n" +
+                    "        let imageUrl = li.getElementsByTagName(\"video\")[0].poster;\n" +
+                    "        console.log(videoUrl);\n" +
+                    "        console.log(imageUrl);\n" +
+                    "        local_obj.onReceiveVideo(imageUrl, videoUrl);\n" +
+                    "      } else if (li.getElementsByTagName(\"img\").length > 0) {\n" +
+                    "        let imageUrl = li.getElementsByTagName(\"img\")[0].src;\n" +
+                    "        console.log(imageUrl);\n" +
+                    "        local_obj.onReceiveImage(imageUrl);\n" +
+                    "      }\n" +
+                    "\n" +
+                    "      curIndex++;\n" +
+                    "    }, i * 50);\n" +
+                    "\n" +
+                    "    i++;\n" +
+                    "  }\n" +
+                    "})($total)"
+            )
+
+        }
+
+        mBinding.webview.postDelayed({
+            Log.v(TAG,Thread.currentThread().name)
+            //Log.v(TAG,curMediaInfo?.resources?.size.toString())
+            Log.v(TAG,curMediaInfo?.toString()+"")
+            progressDialog.dismiss()
+            showCurrent()
+            mInterstitialAd?.show(requireActivity())
+            mBinding.progressbar.visibility = View.VISIBLE
+
+            lifecycleScope.launch {
+                val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
+                    async {
+                        download(it)
+                    }
+                }
+
+                all.awaitAll()
+
+                if (!downloadSuccess){
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.download_failed),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    mBinding.progressbar.visibility = View.INVISIBLE
+                    return@launch
+                }
+
+                mBinding.progressbar.visibility = View.INVISIBLE
+                saveRecord()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.download_finish),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+
+        },((total+1)*50).toLong())
+
+    }
+
+    private fun parseImage(doc: Document) {
+        getUserInfo(doc)
+        getCaption(doc)
+        val imageUrl = doc.getElementsByClass("EmbeddedMediaImage")[0].attr("src")
+        //Log.v(TAG, imageUrl)
+        curMediaInfo?.thumbnailUrl = imageUrl
+        Log.v(TAG, curMediaInfo.toString())
+    }
+
+    private fun parseVideo(doc: Document) {
+        getUserInfo(doc)
+        getCaption(doc)
+        val imageUrl = doc.getElementsByClass("EmbeddedMediaImage")[0].attr("src")
+        curMediaInfo?.thumbnailUrl = imageUrl
+
+        val video = doc.getElementsByClass("EmbedVideo")[0].getElementsByTag("video")[0]
+        curMediaInfo?.videoUrl = video.attr("src")
+        Log.v(TAG, curMediaInfo.toString())
+        progressDialog.dismiss()
+
+    }
+
+    private fun getUserInfo(doc: Document) {
+
+        val a = doc.getElementsByClass("Avatar")[0]
+        val img = a.getElementsByTag("img")[0]
+        curMediaInfo?.profilePicUrl = img.attr("src")
+
+        val a2 = doc.getElementsByClass("HeaderText")[0]
+        val span = a2.getElementsByTag("span")[0]
+        curMediaInfo?.username = span.text()
+    }
+
+
+    private fun getCaption(doc: Document) {
+        if(doc.getElementsByClass("Caption").size>0){
+            val captionDiv = doc.getElementsByClass("Caption")[0]
+            val userEle = captionDiv.child(0)
+            val commentsEle = captionDiv.child(captionDiv.childrenSize() - 1)
+            userEle.remove()
+            commentsEle.remove()
+            val content = captionDiv.text()
+            Log.v(TAG, content)
+            curMediaInfo?.captionText = content
+        }
+    }
+
+
+    inner class JavaScriptLocalObj {
+        @JavascriptInterface
+        fun showSource(html: String) {
+
+            Log.v(TAG, html)
+            loadData(html)
+
+        }
+
+        @JavascriptInterface
+        fun onReceiveImage(imageUrl: String) {
+
+            val temp = MediaModel()
+            temp.thumbnailUrl = imageUrl
+            temp.mediaType = 1
+            curMediaInfo?.resources?.add(temp)
+        }
+
+        @JavascriptInterface
+        fun onReceiveVideo(imageUrl: String, videoUrl:String) {
+            val temp = MediaModel()
+            temp.thumbnailUrl = imageUrl
+            temp.videoUrl = videoUrl
+            temp.mediaType = 2
+            curMediaInfo?.resources?.add(temp)
+        }
+    }
+
+
+    private fun initDialog() {
+
+        progressDialog = ProgressDialog(requireContext())
+        progressDialog.setMessage(getString(R.string.searching))
+        progressDialog.setCancelable(false)
+
+        storyDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
+        val storyView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
+        val title2 = storyView.findViewById<TextView>(R.id.title)
+        title2.text = getString(R.string.long_text1)
+        val tvLogin = storyView.findViewById<TextView>(R.id.tv_login)
+        val tvCancel = storyView.findViewById<TextView>(R.id.tv_cancel)
+        tvLogin.setOnClickListener {
+
+            val url = "https://www.instagram.com/accounts/login"
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
+            storyDialog.dismiss()
+        }
+        tvCancel.setOnClickListener {
+            storyDialog.dismiss()
+        }
+        storyDialog.setUpView(storyView)
+
+        privateDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
+        val privateView =
+            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
+        val title = privateView.findViewById<TextView>(R.id.title)
+        title.text = getString(R.string.long_text2)
+        val tvLogin2 = privateView.findViewById<TextView>(R.id.tv_login)
+        val tvCancel2 = privateView.findViewById<TextView>(R.id.tv_cancel)
+        tvLogin2.setOnClickListener {
+
+            val url = "https://www.instagram.com/accounts/login"
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
+            privateDialog.dismiss()
+        }
+        tvCancel2.setOnClickListener {
+            privateDialog.dismiss()
+        }
+        privateDialog.setUpView(privateView)
+
+    }
+
+}

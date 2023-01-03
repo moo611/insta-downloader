@@ -26,7 +26,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     override fun initView() {
         val fragments: ArrayList<Fragment> = ArrayList()
-        fragments.add(ShortCodeFragment())
+        fragments.add(NewShortCodeFragment())
         fragments.add(UserFragment())
 
         mAdapter = ViewPagerAdapter(childFragmentManager, fragments)
