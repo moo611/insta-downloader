@@ -249,6 +249,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 }
 
                 progressDialog.show()
+                paths.clear()
+                curMediaInfo = null
+                curRecord = null
                 mBinding.webview.loadUrl(url)
             }
 
@@ -270,7 +273,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         return url+"embed/captioned/"
     }
 
-    suspend fun getMediaDataByCookie() = withContext(Dispatchers.Main) {
+    suspend fun getMediaDataByCookie(){
         if (!progressDialog.isShowing) {
             progressDialog.show()
         }
