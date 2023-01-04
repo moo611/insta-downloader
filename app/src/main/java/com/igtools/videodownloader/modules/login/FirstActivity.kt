@@ -81,26 +81,11 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
     }
 
     override fun initData() {
-
-
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQ) {
-            for (grant in grantResults) {
-                if (grant != PackageManager.PERMISSION_GRANTED) {
-                    return
-                }
-            }
-//            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
-//            startNow()
+        if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
+            PermissionUtils.requirePermissionsReadAndWrite(this, PERMISSION_REQ)
         }
     }
+
 
     private fun sendToFirebase(e: Exception) {
         val analytics = Firebase.analytics
