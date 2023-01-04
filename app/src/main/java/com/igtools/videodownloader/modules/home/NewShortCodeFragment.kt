@@ -52,6 +52,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.net.URLEncoder
 
 class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
@@ -173,6 +174,59 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     override fun initData() {
         //mBinding.webview.loadUrl(sideUrl)
     }
+    //ui part
+    private fun initDialog() {
+
+        progressDialog = ProgressDialog(requireContext())
+        progressDialog.setMessage(getString(R.string.searching))
+        progressDialog.setCancelable(false)
+
+        storyDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
+        val storyView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
+        val title2 = storyView.findViewById<TextView>(R.id.title)
+        title2.text = getString(R.string.long_text1)
+        val tvLogin = storyView.findViewById<TextView>(R.id.tv_login)
+        val tvCancel = storyView.findViewById<TextView>(R.id.tv_cancel)
+        tvLogin.setOnClickListener {
+
+            val url = "https://www.instagram.com/accounts/login"
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
+            storyDialog.dismiss()
+        }
+        tvCancel.setOnClickListener {
+            storyDialog.dismiss()
+        }
+        storyDialog.setUpView(storyView)
+
+        privateDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
+        val privateView =
+            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
+        val title = privateView.findViewById<TextView>(R.id.title)
+        title.text = getString(R.string.long_text2)
+        val tvLogin2 = privateView.findViewById<TextView>(R.id.tv_login)
+        val tvCancel2 = privateView.findViewById<TextView>(R.id.tv_cancel)
+        tvLogin2.setOnClickListener {
+
+            val url = "https://www.instagram.com/accounts/login"
+            startActivityForResult(
+                Intent(requireContext(), WebActivity::class.java).putExtra(
+                    "url",
+                    url
+                ), LOGIN_REQ
+            )
+            privateDialog.dismiss()
+        }
+        tvCancel2.setOnClickListener {
+            privateDialog.dismiss()
+        }
+        privateDialog.setUpView(privateView)
+
+    }
 
     private fun initWebView() {
 
@@ -228,6 +282,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     }
 
+    //data part
     private fun autoStart() {
         val paramString = mBinding.etShortcode.text.toString()
         if(TextUtils.isEmpty(paramString)){
@@ -236,7 +291,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         mBinding.etShortcode.clearFocus()
         KeyboardUtils.closeKeybord(mBinding.etShortcode, context)
         if(paramString.matches(Regex("(.*)instagram.com/p(.*)")) || paramString.matches(Regex("(.*)instagram.com/reel(.*)"))){
-            val url = handleUrl()
+            val url = emBedUrl()
             Log.v(TAG,url)
 
             lifecycleScope.launch {
@@ -253,6 +308,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 paths.clear()
                 curMediaInfo = null
                 curRecord = null
+                downloadSuccess = true
                 Log.v(TAG,"time1:${System.currentTimeMillis()}")
                 mBinding.webview.loadUrl(url)
             }
@@ -269,10 +325,420 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     }
 
-    private fun handleUrl():String{
 
-        val url = mBinding.etShortcode.text.toString().split("?")[0]
-        return url+"embed/captioned/"
+    private fun loadData(html: String) {
+
+        Thread {
+            //val doc: Document = Jsoup.connect(videoUrl).userAgent(Urls.USER_AGENT).get()
+            val doc = Jsoup.parse(html)
+            Log.v(TAG, doc.title())
+
+            if(doc.getElementsByClass("Embed ").size>0){
+                curMediaInfo = MediaModel()
+                curMediaInfo?.code = getShortCode()!!
+                val embed = doc.getElementsByClass("Embed ")[0]
+                Log.v(TAG,"time3:${System.currentTimeMillis()}")
+                when (embed.attr("data-media-type")) {
+                    "GraphVideo" -> {
+                        curMediaInfo?.mediaType = 2
+                        if(doc.getElementsByTag("video").size==0){
+                            activity?.runOnUiThread {
+//                                progressDialog.dismiss()
+//                                privateDialog.show()
+                                getMediaData()
+                            }
+
+                            return@Thread
+                        }
+                        parseVideo(doc)
+                        activity?.runOnUiThread {
+                            progressDialog.dismiss()
+                            showCurrent()
+                            mInterstitialAd?.show(requireActivity())
+                            mBinding.progressbar.visibility = View.VISIBLE
+
+                            lifecycleScope.launch {
+                                download(curMediaInfo!!)
+
+                                if (!downloadSuccess){
+                                    Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.download_failed),
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                    mBinding.progressbar.visibility = View.INVISIBLE
+                                    return@launch
+                                }
+
+                                mBinding.progressbar.visibility = View.INVISIBLE
+                                saveRecord()
+                                Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.download_finish),
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+
+                        }
+
+                    }
+                    "GraphSidecar" -> {
+                        curMediaInfo?.mediaType = 8
+
+                        parseSideCar(doc)
+                    }
+                    else -> {
+                        curMediaInfo?.mediaType = 1
+                        parseImage(doc)
+                        activity?.runOnUiThread {
+                            progressDialog.dismiss()
+                            showCurrent()
+                            mInterstitialAd?.show(requireActivity())
+                            mBinding.progressbar.visibility = View.VISIBLE
+
+                            lifecycleScope.launch {
+                                download(curMediaInfo!!)
+
+                                if (!downloadSuccess){
+                                    Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.download_failed),
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                    mBinding.progressbar.visibility = View.INVISIBLE
+                                    return@launch
+                                }
+
+                                mBinding.progressbar.visibility = View.INVISIBLE
+                                saveRecord()
+                                Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.download_finish),
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+
+                        }
+
+                    }
+                }
+            }else{
+
+                activity?.runOnUiThread {
+                    progressDialog.dismiss()
+                    privateDialog.show()
+                }
+
+            }
+
+        }.start()
+
+    }
+
+    private fun parseSideCar(doc: Document) {
+        getUserInfo(doc)
+        getCaption(doc)
+        val sidecar = doc.getElementsByClass("EmbedSidecar")
+        val lis = sidecar[0].getElementsByTag("li")
+        val total = lis.size
+        mBinding.webview.post{
+
+            mBinding.webview.loadUrl("javascript:((total) => {\n" +
+                    "  let curIndex = 0;\n" +
+                    "  let i = 0;\n" +
+                    "\n" +
+                    "  while (i < total) {\n" +
+                    "\n" +
+                    "    setTimeout(() => {\n" +
+                    "\n" +
+                    "      let sidecar = document.getElementsByClassName(\"EmbedSidecar\");\n" +
+                    "      let btns = sidecar[0].getElementsByTagName(\"button\");\n" +
+                    "      if (curIndex == 0) {\n" +
+                    "        let rightbtn = btns[0];\n" +
+                    "\n" +
+                    "        rightbtn.click();\n" +
+                    "\n" +
+                    "      } else if (curIndex < total - 1) {\n" +
+                    "        let rightbtn = btns[1];\n" +
+                    "\n" +
+                    "        rightbtn.click();\n" +
+                    "      }\n" +
+                    "\n" +
+                    "\n" +
+                    "      let lis = sidecar[0].getElementsByTagName(\"li\");\n" +
+                    "      let li = lis[curIndex];\n" +
+                    "\n" +
+                    "      if (li.getElementsByTagName(\"video\").length > 0) {\n" +
+                    "\n" +
+                    "        let videoUrl = li.getElementsByTagName(\"video\")[0].src;\n" +
+                    "        let imageUrl = li.getElementsByTagName(\"video\")[0].poster;\n" +
+                    "        console.log(videoUrl);\n" +
+                    "        console.log(imageUrl);\n" +
+                    "        local_obj.onReceiveVideo(imageUrl, videoUrl);\n" +
+                    "      } else if (li.getElementsByTagName(\"img\").length > 0) {\n" +
+                    "        let imageUrl = li.getElementsByTagName(\"img\")[0].src;\n" +
+                    "        console.log(imageUrl);\n" +
+                    "        local_obj.onReceiveImage(imageUrl);\n" +
+                    "      }\n" +
+                    "\n" +
+                    "      curIndex++;\n" +
+                    "    }, i * 50);\n" +
+                    "\n" +
+                    "    i++;\n" +
+                    "  }\n" +
+                    "})($total)"
+            )
+
+        }
+
+        mBinding.webview.postDelayed({
+            Log.v(TAG,Thread.currentThread().name)
+            //Log.v(TAG,curMediaInfo?.resources?.size.toString())
+            Log.v(TAG,curMediaInfo?.toString()+"")
+            progressDialog.dismiss()
+
+            if(curMediaInfo?.resources?.size==0){
+                Toast.makeText(requireContext(),getString(R.string.failed),Toast.LENGTH_SHORT).show()
+                return@postDelayed
+            }
+
+            showCurrent()
+            mInterstitialAd?.show(requireActivity())
+            mBinding.progressbar.visibility = View.VISIBLE
+
+            lifecycleScope.launch {
+                val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
+                    async {
+                        download(it)
+                    }
+                }
+
+                all.awaitAll()
+
+                if (!downloadSuccess){
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.download_failed),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    mBinding.progressbar.visibility = View.INVISIBLE
+                    return@launch
+                }
+
+                mBinding.progressbar.visibility = View.INVISIBLE
+                saveRecord()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.download_finish),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+
+        },((total+1)*50).toLong())
+
+    }
+
+    private fun parseImage(doc: Document) {
+        getUserInfo(doc)
+        getCaption(doc)
+        val imageUrl = doc.getElementsByClass("EmbeddedMediaImage")[0].attr("src")
+        //Log.v(TAG, imageUrl)
+        curMediaInfo?.thumbnailUrl = imageUrl
+        Log.v(TAG, curMediaInfo.toString())
+    }
+
+    private fun parseVideo(doc: Document) {
+        getUserInfo(doc)
+        getCaption(doc)
+        val imageUrl = doc.getElementsByClass("EmbeddedMediaImage")[0].attr("src")
+        curMediaInfo?.thumbnailUrl = imageUrl
+
+        val video = doc.getElementsByClass("EmbedVideo")[0].getElementsByTag("video")[0]
+        curMediaInfo?.videoUrl = video.attr("src")
+        Log.v(TAG, curMediaInfo.toString())
+        progressDialog.dismiss()
+
+    }
+
+    private fun getUserInfo(doc: Document) {
+        if(doc.getElementsByClass("Avatar").size>0){
+            val a = doc.getElementsByClass("Avatar")[0]
+            val img = a.getElementsByTag("img")[0]
+            curMediaInfo?.profilePicUrl = img.attr("src")
+        }else if(doc.getElementsByClass("CollabAvatar").size>0){
+            val a = doc.getElementsByClass("CollabAvatar")[0]
+            val img = a.getElementsByTag("img")[0]
+            curMediaInfo?.profilePicUrl = img.attr("src")
+        }
+
+        val a2 = doc.getElementsByClass("HeaderText")[0]
+        val span = a2.getElementsByTag("span")[0]
+        curMediaInfo?.username = span.text()
+    }
+
+
+    private fun getCaption(doc: Document) {
+        if(doc.getElementsByClass("Caption").size>0){
+            val captionDiv = doc.getElementsByClass("Caption")[0]
+            val userEle = captionDiv.child(0)
+            val commentsEle = captionDiv.child(captionDiv.childrenSize() - 1)
+            userEle.remove()
+            commentsEle.remove()
+            val content = captionDiv.text()
+            Log.v(TAG, content)
+            curMediaInfo?.captionText = content
+        }
+    }
+
+
+    private fun getMediaData() {
+        paths.clear()
+        curMediaInfo = null
+        curRecord = null
+        downloadSuccess = true
+        lifecycleScope.launch {
+            //检查是否已存在
+            val url = mBinding.etShortcode.text.toString()
+            val record = RecordDB.getInstance().recordDao().findByUrl(url)
+
+            if (record != null) {
+
+                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
+                    .show()
+
+                return@launch
+            }
+
+            //progressDialog.show()
+
+            try {
+                val urlEncoded = handleUrl(url)
+                //val api = "https://app.scrapingbee.com/api/v1/?api_key=${BaseApplication.APIKEY}&url=$urlEncoded&render_js=false&premium_proxy=true&country_code=us"
+                val api = "https://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded"
+                val res = ApiClient.getClient().getMediaNew(api)
+
+                val jsonObject = res.body()
+                //Log.v(TAG, jsonObject.toString())
+                if (res.code() == 200 && jsonObject != null) {
+                    progressDialog.dismiss()
+                    curMediaInfo = parseMedia(jsonObject)
+                    showCurrent()
+                    mInterstitialAd?.show(requireActivity())
+                    mBinding.progressbar.visibility = View.VISIBLE
+                    if (curMediaInfo?.mediaType == 8) {
+                        val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
+                            async {
+                                download(it)
+                            }
+                        }
+
+                        all.awaitAll()
+                    } else {
+                        download(curMediaInfo!!)
+                    }
+
+                    if (!downloadSuccess){
+                        mBinding.progressbar.visibility = View.INVISIBLE
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.download_failed),
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        return@launch
+                    }
+
+                    mBinding.progressbar.visibility = View.INVISIBLE
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.download_finish),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    saveRecord()
+
+                } else {
+                    if (BaseApplication.cookie == null) {
+                        if (!requireActivity().isFinishing) {
+                            privateDialog.show()
+                        }
+                        progressDialog.dismiss()
+                    } else {
+                        getMediaDataByCookie()
+                    }
+
+                }
+
+            } catch (e: Exception) {
+                mBinding.progressbar.visibility = View.INVISIBLE
+                Log.e(TAG, e.message + "")
+                context?.let {
+                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT)
+                        .show()
+                }
+
+                progressDialog.dismiss()
+
+            }
+        }
+    }
+
+    private fun parseMedia(jsonObject: JsonObject): MediaModel {
+        val mediaModel = MediaModel()
+        val shortcode_media = jsonObject["graphql"].asJsonObject["shortcode_media"].asJsonObject
+        val __typename = shortcode_media["__typename"].asString
+        if (__typename == "GraphImage") {
+            mediaModel.mediaType = 1
+        } else if (__typename == "GraphVideo") {
+            mediaModel.mediaType = 2
+        } else {
+            mediaModel.mediaType = 8
+        }
+
+        mediaModel.code = shortcode_media["shortcode"].asString
+        mediaModel.pk = shortcode_media["id"].asString
+        val edge_media_to_caption = shortcode_media["edge_media_to_caption"].asJsonObject
+        val edges = edge_media_to_caption["edges"].asJsonArray
+        if (edges.size() > 0) {
+            mediaModel.captionText = edges[0].asJsonObject["node"].asJsonObject["text"].asString
+        }
+        mediaModel.videoUrl = shortcode_media.getNullable("video_url")?.asString
+        mediaModel.thumbnailUrl = shortcode_media["display_url"].asString
+        val owner = shortcode_media["owner"].asJsonObject
+        mediaModel.profilePicUrl = owner["profile_pic_url"].asString
+        mediaModel.username = owner["username"].asString
+        if (shortcode_media.has("edge_sidecar_to_children")) {
+            val edge_sidecar_to_children = shortcode_media["edge_sidecar_to_children"].asJsonObject
+            val children = edge_sidecar_to_children["edges"].asJsonArray
+            if (children.size() > 0) {
+                for (child in children) {
+                    val resource = MediaModel()
+                    resource.pk = child.asJsonObject["node"].asJsonObject["id"].asString
+                    resource.thumbnailUrl =
+                        child.asJsonObject["node"].asJsonObject["display_url"].asString
+                    resource.videoUrl =
+                        child.asJsonObject["node"].asJsonObject.getNullable("video_url")?.asString
+                    val typeName = child.asJsonObject["node"].asJsonObject["__typename"].asString
+                    if (typeName == "GraphImage") {
+                        resource.mediaType = 1
+                    } else if (typeName == "GraphVideo") {
+                        resource.mediaType = 2
+                    } else {
+                        resource.mediaType = 8
+                    }
+                    mediaModel.resources.add(resource)
+                }
+            }
+        }
+
+        return mediaModel
+
     }
 
     suspend fun getMediaDataByCookie(){
@@ -529,16 +995,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         return mediaModel
 
     }
-    private fun getShortCode(): String? {
-        val shortCode: String?
-        val url = mBinding.etShortcode.text.toString()
-        shortCode = if (!url.contains("stories")) {
-            UrlUtils.extractMedia(url)
-        } else {
-            UrlUtils.extractStory(url)
-        }
-        return shortCode
-    }
 
 
     /**
@@ -672,275 +1128,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     }
 
 
-    private fun loadData(html: String) {
-
-        Thread {
-            //val doc: Document = Jsoup.connect(videoUrl).userAgent(Urls.USER_AGENT).get()
-            val doc = Jsoup.parse(html)
-            Log.v(TAG, doc.title())
-
-            if(doc.getElementsByClass("Embed ").size>0){
-                curMediaInfo = MediaModel()
-                curMediaInfo?.code = getShortCode()!!
-                val embed = doc.getElementsByClass("Embed ")[0]
-                Log.v(TAG,"time3:${System.currentTimeMillis()}")
-                when (embed.attr("data-media-type")) {
-                    "GraphVideo" -> {
-                        curMediaInfo?.mediaType = 2
-                        if(doc.getElementsByTag("video").size==0){
-                            activity?.runOnUiThread {
-                                progressDialog.dismiss()
-                                privateDialog.show()
-                            }
-                            return@Thread
-                        }
-                        parseVideo(doc)
-                        activity?.runOnUiThread {
-                            progressDialog.dismiss()
-                            showCurrent()
-                            mInterstitialAd?.show(requireActivity())
-                            mBinding.progressbar.visibility = View.VISIBLE
-
-                            lifecycleScope.launch {
-                                download(curMediaInfo!!)
-
-                                if (!downloadSuccess){
-                                    Toast.makeText(
-                                        requireContext(),
-                                        getString(R.string.download_failed),
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
-                                    mBinding.progressbar.visibility = View.INVISIBLE
-                                    return@launch
-                                }
-
-                                mBinding.progressbar.visibility = View.INVISIBLE
-                                saveRecord()
-                                Toast.makeText(
-                                    requireContext(),
-                                    getString(R.string.download_finish),
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
-                            }
-
-                        }
-
-                    }
-                    "GraphSidecar" -> {
-                        curMediaInfo?.mediaType = 8
-
-                        parseSideCar(doc)
-                    }
-                    else -> {
-                        curMediaInfo?.mediaType = 1
-                        parseImage(doc)
-                        activity?.runOnUiThread {
-                            progressDialog.dismiss()
-                            showCurrent()
-                            mInterstitialAd?.show(requireActivity())
-                            mBinding.progressbar.visibility = View.VISIBLE
-
-                            lifecycleScope.launch {
-                                download(curMediaInfo!!)
-
-                                if (!downloadSuccess){
-                                    Toast.makeText(
-                                        requireContext(),
-                                        getString(R.string.download_failed),
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
-                                    mBinding.progressbar.visibility = View.INVISIBLE
-                                    return@launch
-                                }
-
-                                mBinding.progressbar.visibility = View.INVISIBLE
-                                saveRecord()
-                                Toast.makeText(
-                                    requireContext(),
-                                    getString(R.string.download_finish),
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
-                            }
-
-                        }
-
-                    }
-                }
-            }else{
-
-                activity?.runOnUiThread {
-                    progressDialog.dismiss()
-                    privateDialog.show()
-                }
-
-            }
-
-        }.start()
-
-    }
-
-    private fun parseSideCar(doc: Document) {
-        getUserInfo(doc)
-        getCaption(doc)
-        val sidecar = doc.getElementsByClass("EmbedSidecar")
-        val lis = sidecar[0].getElementsByTag("li")
-        val total = lis.size
-        mBinding.webview.post{
-
-            mBinding.webview.loadUrl("javascript:((total) => {\n" +
-                    "  let curIndex = 0;\n" +
-                    "  let i = 0;\n" +
-                    "\n" +
-                    "  while (i < total) {\n" +
-                    "\n" +
-                    "    setTimeout(() => {\n" +
-                    "\n" +
-                    "      let sidecar = document.getElementsByClassName(\"EmbedSidecar\");\n" +
-                    "      let btns = sidecar[0].getElementsByTagName(\"button\");\n" +
-                    "      if (curIndex == 0) {\n" +
-                    "        let rightbtn = btns[0];\n" +
-                    "\n" +
-                    "        rightbtn.click();\n" +
-                    "\n" +
-                    "      } else if (curIndex < total - 1) {\n" +
-                    "        let rightbtn = btns[1];\n" +
-                    "\n" +
-                    "        rightbtn.click();\n" +
-                    "      }\n" +
-                    "\n" +
-                    "\n" +
-                    "      let lis = sidecar[0].getElementsByTagName(\"li\");\n" +
-                    "      let li = lis[curIndex];\n" +
-                    "\n" +
-                    "      if (li.getElementsByTagName(\"video\").length > 0) {\n" +
-                    "\n" +
-                    "        let videoUrl = li.getElementsByTagName(\"video\")[0].src;\n" +
-                    "        let imageUrl = li.getElementsByTagName(\"video\")[0].poster;\n" +
-                    "        console.log(videoUrl);\n" +
-                    "        console.log(imageUrl);\n" +
-                    "        local_obj.onReceiveVideo(imageUrl, videoUrl);\n" +
-                    "      } else if (li.getElementsByTagName(\"img\").length > 0) {\n" +
-                    "        let imageUrl = li.getElementsByTagName(\"img\")[0].src;\n" +
-                    "        console.log(imageUrl);\n" +
-                    "        local_obj.onReceiveImage(imageUrl);\n" +
-                    "      }\n" +
-                    "\n" +
-                    "      curIndex++;\n" +
-                    "    }, i * 50);\n" +
-                    "\n" +
-                    "    i++;\n" +
-                    "  }\n" +
-                    "})($total)"
-            )
-
-        }
-
-        mBinding.webview.postDelayed({
-            Log.v(TAG,Thread.currentThread().name)
-            //Log.v(TAG,curMediaInfo?.resources?.size.toString())
-            Log.v(TAG,curMediaInfo?.toString()+"")
-            progressDialog.dismiss()
-
-            if(curMediaInfo?.resources?.size==0){
-                Toast.makeText(requireContext(),getString(R.string.failed),Toast.LENGTH_SHORT).show()
-                return@postDelayed
-            }
-
-            showCurrent()
-            mInterstitialAd?.show(requireActivity())
-            mBinding.progressbar.visibility = View.VISIBLE
-
-            lifecycleScope.launch {
-                val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
-                    async {
-                        download(it)
-                    }
-                }
-
-                all.awaitAll()
-
-                if (!downloadSuccess){
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.download_failed),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                    mBinding.progressbar.visibility = View.INVISIBLE
-                    return@launch
-                }
-
-                mBinding.progressbar.visibility = View.INVISIBLE
-                saveRecord()
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.download_finish),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-            }
-
-        },((total+1)*50).toLong())
-
-    }
-
-    private fun parseImage(doc: Document) {
-        getUserInfo(doc)
-        getCaption(doc)
-        val imageUrl = doc.getElementsByClass("EmbeddedMediaImage")[0].attr("src")
-        //Log.v(TAG, imageUrl)
-        curMediaInfo?.thumbnailUrl = imageUrl
-        Log.v(TAG, curMediaInfo.toString())
-    }
-
-    private fun parseVideo(doc: Document) {
-        getUserInfo(doc)
-        getCaption(doc)
-        val imageUrl = doc.getElementsByClass("EmbeddedMediaImage")[0].attr("src")
-        curMediaInfo?.thumbnailUrl = imageUrl
-
-        val video = doc.getElementsByClass("EmbedVideo")[0].getElementsByTag("video")[0]
-        curMediaInfo?.videoUrl = video.attr("src")
-        Log.v(TAG, curMediaInfo.toString())
-        progressDialog.dismiss()
-
-    }
-
-    private fun getUserInfo(doc: Document) {
-        if(doc.getElementsByClass("Avatar").size>0){
-            val a = doc.getElementsByClass("Avatar")[0]
-            val img = a.getElementsByTag("img")[0]
-            curMediaInfo?.profilePicUrl = img.attr("src")
-        }else if(doc.getElementsByClass("CollabAvatar").size>0){
-            val a = doc.getElementsByClass("CollabAvatar")[0]
-            val img = a.getElementsByTag("img")[0]
-            curMediaInfo?.profilePicUrl = img.attr("src")
-        }
-
-        val a2 = doc.getElementsByClass("HeaderText")[0]
-        val span = a2.getElementsByTag("span")[0]
-        curMediaInfo?.username = span.text()
-    }
-
-
-    private fun getCaption(doc: Document) {
-        if(doc.getElementsByClass("Caption").size>0){
-            val captionDiv = doc.getElementsByClass("Caption")[0]
-            val userEle = captionDiv.child(0)
-            val commentsEle = captionDiv.child(captionDiv.childrenSize() - 1)
-            userEle.remove()
-            commentsEle.remove()
-            val content = captionDiv.text()
-            Log.v(TAG, content)
-            curMediaInfo?.captionText = content
-        }
-    }
-
-
     inner class JavaScriptLocalObj {
         @JavascriptInterface
         fun showSource(html: String) {
@@ -969,58 +1156,31 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
     }
 
+    //method part
+    private fun emBedUrl():String{
 
-    private fun initDialog() {
+        val url = mBinding.etShortcode.text.toString().split("?")[0]
+        return url+"embed/captioned/"
+    }
 
-        progressDialog = ProgressDialog(requireContext())
-        progressDialog.setMessage(getString(R.string.searching))
-        progressDialog.setCancelable(false)
+    private fun handleUrl(url: String): String {
+        val urlEncoded: String
 
-        storyDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
-        val storyView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
-        val title2 = storyView.findViewById<TextView>(R.id.title)
-        title2.text = getString(R.string.long_text1)
-        val tvLogin = storyView.findViewById<TextView>(R.id.tv_login)
-        val tvCancel = storyView.findViewById<TextView>(R.id.tv_cancel)
-        tvLogin.setOnClickListener {
+        val strs = url.split("?")
+        val str = strs[0] + "?__a=1&__d=dis"
+        urlEncoded = URLEncoder.encode(str, "utf-8")
+        return urlEncoded
+    }
 
-            val url = "https://www.instagram.com/accounts/login"
-            startActivityForResult(
-                Intent(requireContext(), WebActivity::class.java).putExtra(
-                    "url",
-                    url
-                ), LOGIN_REQ
-            )
-            storyDialog.dismiss()
+    private fun getShortCode(): String? {
+        val shortCode: String?
+        val url = mBinding.etShortcode.text.toString()
+        shortCode = if (!url.contains("stories")) {
+            UrlUtils.extractMedia(url)
+        } else {
+            UrlUtils.extractStory(url)
         }
-        tvCancel.setOnClickListener {
-            storyDialog.dismiss()
-        }
-        storyDialog.setUpView(storyView)
-
-        privateDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
-        val privateView =
-            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
-        val title = privateView.findViewById<TextView>(R.id.title)
-        title.text = getString(R.string.long_text2)
-        val tvLogin2 = privateView.findViewById<TextView>(R.id.tv_login)
-        val tvCancel2 = privateView.findViewById<TextView>(R.id.tv_cancel)
-        tvLogin2.setOnClickListener {
-
-            val url = "https://www.instagram.com/accounts/login"
-            startActivityForResult(
-                Intent(requireContext(), WebActivity::class.java).putExtra(
-                    "url",
-                    url
-                ), LOGIN_REQ
-            )
-            privateDialog.dismiss()
-        }
-        tvCancel2.setOnClickListener {
-            privateDialog.dismiss()
-        }
-        privateDialog.setUpView(privateView)
-
+        return shortCode
     }
 
 }
