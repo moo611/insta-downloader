@@ -87,13 +87,4 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
     }
 
 
-    private fun sendToFirebase(e: Exception) {
-        val analytics = Firebase.analytics
-        if (e.message != null) {
-            analytics.logEvent("login_failed") {
-                param("my_exception", e.message!!)
-            }
-        }
-
-    }
 }

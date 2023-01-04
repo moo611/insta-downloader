@@ -406,6 +406,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 } else {
 
                     //如果extra里面是null，则用原来的方法尝试获取
+                    sendToFirebase2(mediatype)
                     val myUrl = mBinding.etShortcode.text.toString()
                     getMediaData(myUrl)
 
@@ -940,6 +941,14 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             analytics.logEvent("app_my_exception") {
                 param("my_exception", e.message!!)
             }
+        }
+
+    }
+
+    private fun sendToFirebase2(mediaType:String) {
+        val analytics = Firebase.analytics
+        analytics.logEvent("use_a1") {
+            param("media_type", mediaType)
         }
 
     }

@@ -1,6 +1,8 @@
 package com.igtools.videodownloader.utils
 
 import android.content.*
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.net.Uri
@@ -177,7 +179,22 @@ object FileUtils {
         }
         sendIntent.type = "image/*"
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri)
-        c.startActivity(Intent.createChooser(sendIntent, "share to"))
+
+        val chooser = Intent.createChooser(sendIntent, "share to")
+
+        val resInfoList: List<ResolveInfo> = c.packageManager
+            .queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY)
+
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+            c.grantUriPermission(
+                packageName,
+                uri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
+
+        c.startActivity(chooser)
 
     }
 
@@ -197,7 +214,22 @@ object FileUtils {
 
         sendIntent.type = "video/mp4"
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri)
-        c.startActivity(Intent.createChooser(sendIntent, "share to"))
+
+        val chooser = Intent.createChooser(sendIntent, "share to")
+
+        val resInfoList: List<ResolveInfo> = c.packageManager
+            .queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY)
+
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+            c.grantUriPermission(
+                packageName,
+                uri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
+
+        c.startActivity(chooser)
 
     }
 
