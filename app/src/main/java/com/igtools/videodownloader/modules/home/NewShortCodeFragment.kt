@@ -338,22 +338,12 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                                 }
 
                                 if (!downloadSuccess) {
-                                    Toast.makeText(
-                                        requireContext(),
-                                        getString(R.string.download_failed),
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
+                                    safeToast(R.string.download_failed)
                                     mBinding.progressbar.visibility = View.INVISIBLE
                                     return@launch
                                 }
                                 mBinding.progressbar.visibility = View.INVISIBLE
-                                Toast.makeText(
-                                    requireContext(),
-                                    getString(R.string.download_finish),
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                safeToast(R.string.download_finish)
                                 saveRecord()
                             }
 
@@ -382,22 +372,12 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         lifecycleScope.launch {
                             download(curMediaInfo!!)
                             if (!downloadSuccess) {
-                                Toast.makeText(
-                                    requireContext(),
-                                    getString(R.string.download_failed),
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                safeToast(R.string.download_failed)
                                 mBinding.progressbar.visibility = View.INVISIBLE
                                 return@launch
                             }
                             mBinding.progressbar.visibility = View.INVISIBLE
-                            Toast.makeText(
-                                requireContext(),
-                                getString(R.string.download_finish),
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
+                            safeToast(R.string.download_finish)
                             saveRecord()
                         }
 
@@ -500,22 +480,12 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
                     if (!downloadSuccess) {
                         mBinding.progressbar.visibility = View.INVISIBLE
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.download_failed),
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
+                        safeToast(R.string.download_failed)
                         return@launch
                     }
 
                     mBinding.progressbar.visibility = View.INVISIBLE
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.download_finish),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    safeToast(R.string.download_finish)
                     saveRecord()
 
                 } else {
@@ -533,10 +503,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             } catch (e: Exception) {
                 mBinding.progressbar.visibility = View.INVISIBLE
                 Log.e(TAG, e.message + "")
-                context?.let {
-                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT)
-                        .show()
-                }
+                safeToast(R.string.network)
 
                 progressDialog.dismiss()
 
@@ -585,41 +552,23 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     }
 
                     if (!downloadSuccess) {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.download_failed),
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
+                        safeToast(R.string.download_failed)
                         mBinding.progressbar.visibility = View.INVISIBLE
                         return@launch
                     }
 
                     mBinding.progressbar.visibility = View.INVISIBLE
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.download_finish),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    safeToast(R.string.download_finish)
                     saveRecord()
 
                 } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.not_found),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
+                    safeToast(R.string.not_found)
                 }
 
             } catch (e: Exception) {
                 mBinding.progressbar.visibility = View.INVISIBLE
                 Log.e(TAG, e.message + "")
-                context?.let {
-                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT)
-                        .show()
-                }
+                safeToast(R.string.network)
 
                 progressDialog.dismiss()
 
@@ -720,46 +669,25 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     download(curMediaInfo!!)
 
                     if (!downloadSuccess) {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.download_failed),
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
+                        safeToast(R.string.download_failed)
                         mBinding.progressbar.visibility = View.INVISIBLE
                         return@launch
                     }
 
                     saveRecord()
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.download_finish),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    safeToast(R.string.download_finish)
                     mBinding.progressbar.visibility = View.INVISIBLE
 
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.failed),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    safeToast(R.string.failed)
                 }
 
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 progressDialog.dismiss()
-                context?.let {
-                    Toast.makeText(
-                        it,
-                        getString(R.string.network),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                safeToast(R.string.network)
 
             }
         }
@@ -981,4 +909,11 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         return shortCode
     }
 
+
+    override fun onDetach() {
+        super.onDetach()
+
+        Log.v(TAG,"on detach")
+
+    }
 }

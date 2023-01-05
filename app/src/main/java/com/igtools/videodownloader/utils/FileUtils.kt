@@ -1,9 +1,8 @@
 package com.igtools.videodownloader.utils
 
-import android.content.*
-import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
-import android.database.Cursor
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -54,13 +53,12 @@ object FileUtils {
             contentValues.clear()
             contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
             imageUri?.let {
+                filePath = it.toString()
                 contentResolver.update(it, contentValues, null, null)
-                val uriPathHelper = URIPathHelper()
-                filePath = uriPathHelper.getPath(c, it)
-                Log.v(TAG,it.toString())
+                Log.v(TAG, it.toString())
             }
 
-            return filePath
+
         } else {
 
             val dir =
@@ -128,9 +126,9 @@ object FileUtils {
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
             }
-            val uriPathHelper = URIPathHelper()
+
             uri?.let {
-                filePath = uriPathHelper.getPath(c, it)
+                filePath = it.toString()
                 valuesVideos.clear()
                 valuesVideos.put(MediaStore.Video.Media.IS_PENDING, 0)
                 c.contentResolver.update(uri, valuesVideos, null, null)
@@ -165,70 +163,56 @@ object FileUtils {
         return filePath
     }
 
-    fun share(c: Context, file: File) {
+    fun shareImage(c: Context, path: String) {
+
+        //兼容
+        val uri: Uri = if (path.contains("content://")) {
+            Uri.parse(path)
+        } else {
+            val file = File(path)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                FileProvider.getUriForFile(
+                    c, "com.igtools.videodownloader.fileprovider",
+                    file
+                );
+            } else {
+                Uri.fromFile(file);
+            }
+
+        }
 
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
-        val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            FileProvider.getUriForFile(
-                c, "com.igtools.videodownloader.fileprovider",
-                file
-            );
-        } else {
-            Uri.fromFile(file);
-        }
         sendIntent.type = "image/*"
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri)
-
         val chooser = Intent.createChooser(sendIntent, "share to")
-
-        val resInfoList: List<ResolveInfo> = c.packageManager
-            .queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY)
-
-        for (resolveInfo in resInfoList) {
-            val packageName = resolveInfo.activityInfo.packageName
-            c.grantUriPermission(
-                packageName,
-                uri,
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-        }
-
         c.startActivity(chooser)
 
     }
 
-    fun shareVideo(c: Context, file: File) {
+    fun shareVideo(c: Context, path: String) {
+
+        //兼容
+        val uri: Uri = if (path.contains("content://")) {
+            Uri.parse(path)
+        } else {
+            val file = File(path)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                FileProvider.getUriForFile(
+                    c, "com.igtools.videodownloader.fileprovider",
+                    file
+                );
+            } else {
+                Uri.fromFile(file);
+            }
+
+        }
 
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
-
-        val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            FileProvider.getUriForFile(
-                c, "com.igtools.videodownloader.fileprovider",
-                file
-            );
-        } else {
-            Uri.fromFile(file);
-        }
-
         sendIntent.type = "video/mp4"
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri)
-
         val chooser = Intent.createChooser(sendIntent, "share to")
-
-        val resInfoList: List<ResolveInfo> = c.packageManager
-            .queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY)
-
-        for (resolveInfo in resInfoList) {
-            val packageName = resolveInfo.activityInfo.packageName
-            c.grantUriPermission(
-                packageName,
-                uri,
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-        }
-
         c.startActivity(chooser)
 
     }
@@ -242,116 +226,34 @@ object FileUtils {
         c.startActivity(Intent.createChooser(sendIntent, "share to"))
     }
 
-    fun shareAll(c: Context, paths: List<String>) {
+    fun shareAll(c: Context, paths: ArrayList<String>) {
 
-        val files = ArrayList<Uri>()
+        val uris = ArrayList<Uri>()
         for (path in paths /* List of the files you want to send */) {
-            val file = File(path)
-
-            val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                FileProvider.getUriForFile(
-                    c, "com.igtools.videodownloader.fileprovider",
-                    file
-                );
+            val uri: Uri = if (path.contains("content://")) {
+                Uri.parse(path)
             } else {
-                Uri.fromFile(file);
+                val file = File(path)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    FileProvider.getUriForFile(
+                        c, "com.igtools.videodownloader.fileprovider",
+                        file
+                    );
+                } else {
+                    Uri.fromFile(file);
+                }
+
             }
-            files.add(uri)
+            uris.add(uri)
 
         }
         val intent = Intent()
         intent.action = Intent.ACTION_SEND_MULTIPLE
         intent.putExtra(Intent.EXTRA_SUBJECT, "Here are some files.")
         intent.type = "*/*" /* This example is sharing jpeg images. */
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files)
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
         c.startActivity(Intent.createChooser(intent, "share to"))
     }
 
-
-    /**
-     * 删除文件
-     * @return
-     */
-    fun deleteImageUri(
-        contentResolver: ContentResolver,
-        imgPath: String,
-    ) {
-        val file = File(imgPath)
-        val cursor: Cursor = contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            arrayOf(MediaStore.Images.Media._ID),
-            MediaStore.MediaColumns.DISPLAY_NAME + "=?",
-            arrayOf(file.name),
-            null
-        ) ?: return
-
-        try {
-            if (cursor.moveToFirst()) {
-                val id: Long = cursor.getLong(0)
-                val contentUri: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                val uri: Uri = ContentUris.withAppendedId(contentUri, id)
-
-                contentResolver.delete(uri, null, null)
-            }
-            file.delete()
-
-        } catch (e: java.lang.Exception) {
-            Log.e(TAG, e.message + "")
-
-        } finally {
-            cursor.close()
-        }
-    }
-
-
-    fun deleteVideoUri(
-        contentResolver: ContentResolver,
-        videoPath: String,
-    ) {
-        val file = File(videoPath)
-        val cursor: Cursor = contentResolver.query(
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            arrayOf(MediaStore.Video.Media._ID),
-            MediaStore.MediaColumns.DISPLAY_NAME + "=?",
-            arrayOf(file.name),
-            null
-        ) ?: return
-        try {
-            if (cursor.moveToFirst()) {
-                val id: Long = cursor.getLong(0)
-                val contentUri: Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                val uri: Uri = ContentUris.withAppendedId(contentUri, id)
-                contentResolver.delete(uri, null, null)
-            }
-            file.delete()
-        } catch (e: java.lang.Exception) {
-            Log.e(TAG, e.message + "")
-
-        } finally {
-            cursor.close()
-        }
-    }
-
-
-//    fun getFilePathFromContentUri(
-//        selectedVideoUri: Uri,
-//        contentResolver: ContentResolver
-//    ): String {
-//        val filePath: String
-//        val filePathColumn = arrayOf<String>(MediaStore.MediaColumns.DATA)
-//        val cursor: Cursor =
-//            contentResolver.query(selectedVideoUri, filePathColumn, null, null, null)!!
-//        cursor.moveToFirst()
-//        val columnIndex: Int = cursor.getColumnIndex(filePathColumn[0])
-//        filePath = cursor.getString(columnIndex)
-//        cursor.close()
-//        return filePath
-//    }
-
-
-    interface FileDeleteListener {
-        fun onSuccess()
-        fun onFailed(intentSender: IntentSender?)
-    }
 
 }

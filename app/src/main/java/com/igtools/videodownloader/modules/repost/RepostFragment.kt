@@ -30,6 +30,7 @@ import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import com.igtools.videodownloader.widgets.dialog.MyDialog
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.InputStream
 
 
 class RepostFragment : BaseFragment<FragmentRepostBinding>() {
@@ -86,7 +87,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     fun initDialog() {
         //deleteDialog
-        deleteDialog = MyDialog(requireContext(),R.style.MyDialogTheme)
+        deleteDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
         val deleteView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_delete, null)
         val tvCancel = deleteView.findViewById<TextView>(R.id.tv_cancel)
         val tvDelete = deleteView.findViewById<TextView>(R.id.tv_delete)
@@ -357,24 +358,31 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         }
     }
 
-    fun addWallPaper(filePath: String?, status: Int) {
+    private fun addWallPaper(filePath: String?, status: Int) {
 
         sendToFirebase2()
 
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
-                val file = File(filePath)
+
+                val ios: InputStream = if(filePath.contains("content://")){
+                    val uri = Uri.parse(filePath)
+                    activity?.contentResolver?.openInputStream(uri)!!
+                }else{
+                    File(filePath).inputStream()
+                }
+                
                 val myWallpaperManager = WallpaperManager.getInstance(requireContext());
                 when (status) {
                     0 -> {
                         myWallpaperManager.setStream(
-                            file.inputStream(),
+                            ios,
                             null,
                             true,
                             WallpaperManager.FLAG_SYSTEM
                         );
                         myWallpaperManager.setStream(
-                            file.inputStream(),
+                            ios,
                             null,
                             true,
                             WallpaperManager.FLAG_LOCK
@@ -387,7 +395,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                     }
                     1 -> {
                         myWallpaperManager.setStream(
-                            file.inputStream(),
+                            ios,
                             null,
                             true,
                             WallpaperManager.FLAG_SYSTEM
@@ -400,7 +408,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                     }
                     else -> {
                         myWallpaperManager.setStream(
-                            file.inputStream(),
+                            ios,
                             null,
                             true,
                             WallpaperManager.FLAG_LOCK
@@ -425,13 +433,20 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     }
 
-    fun addWallPaperUnder24(filePath: String?) {
+    private fun addWallPaperUnder24(filePath: String?) {
         sendToFirebase2()
         if (filePath != null) {
             val intent = Intent("android.intent.action.ATTACH_DATA")
             intent.addCategory("android.intent.category.DEFAULT")
             val str = "image/*"
-            intent.setDataAndType(Uri.fromFile(File(filePath)), str)
+
+            val uri = if (filePath.contains("content://")) {
+                Uri.parse(filePath)
+            } else {
+                Uri.fromFile(File(filePath))
+            }
+            
+            intent.setDataAndType(uri, str)
             intent.putExtra("mimeType", str)
             startActivity(Intent.createChooser(intent, "Set As:"))
         } else {
@@ -453,17 +468,23 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     }
 
     fun repost(filePath: String?, isVideo: Boolean) {
-
+        sendToFirebase3()
         if (filePath != null) {
-            val file = File(filePath)
-            val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                FileProvider.getUriForFile(
-                    requireContext(), "com.igtools.videodownloader.fileprovider",
-                    file
-                );
+            val uri: Uri = if (filePath.contains("content://")) {
+                Uri.parse(filePath)
             } else {
-                Uri.fromFile(file);
+                val file = File(filePath)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    FileProvider.getUriForFile(
+                        requireContext(), "com.igtools.videodownloader.fileprovider",
+                        file
+                    );
+                } else {
+                    Uri.fromFile(file);
+                }
+
             }
+
             shareFileToInstagram(uri, isVideo)
             bottomDialog.dismiss()
         } else {
@@ -491,7 +512,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             for (record in records) {
 
                 val mediaModel = gson.fromJson(record.content, MediaModel::class.java)
-                if (mediaModel != null && mediaModel.resources != null){
+                if (mediaModel != null && mediaModel.resources != null) {
                     medias.add(mediaModel)
                 }
 
@@ -531,13 +552,13 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
                 val filePath = pathMap[media.thumbnailUrl] as? String
                 if (filePath != null) {
-                    FileUtils.share(requireContext(), File(filePath))
+                    FileUtils.shareImage(requireContext(), filePath)
                 }
 
             } else if (media.mediaType == 2) {
                 val filePath = pathMap[media.videoUrl] as? String
                 if (filePath != null) {
-                    FileUtils.shareVideo(requireContext(), File(filePath))
+                    FileUtils.shareVideo(requireContext(), filePath)
                 }
             }
         }
@@ -560,12 +581,12 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 if (resource.mediaType == 1) {
                     val filePath = pathMap[resource.thumbnailUrl] as? String
                     if (filePath != null) {
-                        deleteImage(filePath)
+                        deleteMedia(filePath)
                     }
                 } else if (resource.mediaType == 2) {
                     val filePath = pathMap[resource.videoUrl] as? String
                     if (filePath != null) {
-                        deleteVideo(filePath)
+                        deleteMedia(filePath)
                     }
                 }
 
@@ -578,7 +599,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 val pathMap = gson.fromJson(paths, HashMap::class.java)
                 val filePath = pathMap[media.thumbnailUrl] as? String
                 if (filePath != null) {
-                    deleteImage(filePath)
+                    deleteMedia(filePath)
                 }
 
             } else if (media.mediaType == 2) {
@@ -587,7 +608,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 val pathMap = gson.fromJson(paths, HashMap::class.java)
                 val filePath = pathMap[media.videoUrl] as? String
                 if (filePath != null) {
-                    deleteVideo(filePath)
+                    deleteMedia(filePath)
                 }
             }
 
@@ -596,20 +617,26 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     }
 
-    fun deleteImage(path: String) {
+    fun deleteMedia(path: String) {
 
-        FileUtils.deleteImageUri(
-            requireActivity().contentResolver,
-            path,
-        )
-    }
+        //兼容
+        val uri: Uri = if (path.contains("content://")) {
+            Uri.parse(path)
+        } else {
+            val file = File(path)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                FileProvider.getUriForFile(
+                    requireContext(), "com.igtools.videodownloader.fileprovider",
+                    file
+                );
+            } else {
+                Uri.fromFile(file);
+            }
 
-    fun deleteVideo(path: String) {
+        }
 
-        FileUtils.deleteVideoUri(
-            requireActivity().contentResolver,
-            path,
-        )
+        activity?.contentResolver?.delete(uri,null,null)
+
     }
 
 
@@ -648,6 +675,15 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 }
             }
             Log.v(TAG, "all permission granted")
+        }
+
+    }
+
+    private fun sendToFirebase3() {
+        val analytics = Firebase.analytics
+
+        analytics.logEvent("repost") {
+            param("repost", 1)
         }
 
     }

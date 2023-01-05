@@ -36,6 +36,7 @@ import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
 import java.io.File
+import java.io.InputStream
 
 class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
@@ -381,16 +382,21 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     }
 
     fun repost(filePath: String?, isVideo: Boolean) {
-
+        sendToFirebase3()
         if (filePath != null) {
-            val file = File(filePath)
-            val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                FileProvider.getUriForFile(
-                    this, "com.igtools.videodownloader.fileprovider",
-                    file
-                );
+            val uri: Uri = if (filePath.contains("content://")) {
+                Uri.parse(filePath)
             } else {
-                Uri.fromFile(file);
+                val file = File(filePath)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    FileProvider.getUriForFile(
+                        this, "com.igtools.videodownloader.fileprovider",
+                        file
+                    );
+                } else {
+                    Uri.fromFile(file);
+                }
+
             }
             shareFileToInstagram(uri, isVideo)
             //bottomDialog.dismiss()
@@ -406,23 +412,29 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
-    fun addWallPaper(filePath: String?, status: Int) {
+    private fun addWallPaper(filePath: String?, status: Int) {
 
         sendToFirebase2()
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
-                val file = File(filePath)
+                val ios: InputStream = if (filePath.contains("content://")) {
+                    val uri = Uri.parse(filePath)
+                    contentResolver.openInputStream(uri)!!
+                } else {
+                    File(filePath).inputStream()
+                }
+
                 val myWallpaperManager = WallpaperManager.getInstance(this);
                 when (status) {
                     0 -> {
                         myWallpaperManager.setStream(
-                            file.inputStream(),
+                            ios,
                             null,
                             true,
                             WallpaperManager.FLAG_SYSTEM
                         );
                         myWallpaperManager.setStream(
-                            file.inputStream(),
+                            ios,
                             null,
                             true,
                             WallpaperManager.FLAG_LOCK
@@ -435,7 +447,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                     }
                     1 -> {
                         myWallpaperManager.setStream(
-                            file.inputStream(),
+                            ios,
                             null,
                             true,
                             WallpaperManager.FLAG_SYSTEM
@@ -448,7 +460,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                     }
                     else -> {
                         myWallpaperManager.setStream(
-                            file.inputStream(),
+                            ios,
                             null,
                             true,
                             WallpaperManager.FLAG_LOCK
@@ -481,13 +493,20 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
-    fun addWallPaperUnder24(filePath: String?) {
+    private fun addWallPaperUnder24(filePath: String?) {
         sendToFirebase2()
         if (filePath != null) {
             val intent = Intent("android.intent.action.ATTACH_DATA")
             intent.addCategory("android.intent.category.DEFAULT")
             val str = "image/*"
-            intent.setDataAndType(Uri.fromFile(File(filePath)), str)
+
+            val uri = if (filePath.contains("content://")) {
+                Uri.parse(filePath)
+            } else {
+                Uri.fromFile(File(filePath))
+            }
+
+            intent.setDataAndType(uri, str)
             intent.putExtra("mimeType", str)
             startActivity(Intent.createChooser(intent, "Set As:"))
         } else {
@@ -563,9 +582,9 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     private fun getDataFromLocal() {
         val content = intent.extras?.getString("content")
         //fix content == null
-        if (content == null){
-            Toast.makeText(this,"No data",Toast.LENGTH_SHORT).show()
-        }else{
+        if (content == null) {
+            Toast.makeText(this, "No data", Toast.LENGTH_SHORT).show()
+        } else {
             mediaInfo = gson.fromJson(content, MediaModel::class.java)
             code = mediaInfo.code
             if (mediaInfo.mediaType == 8) {
@@ -686,5 +705,14 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
+
+    private fun sendToFirebase3() {
+        val analytics = Firebase.analytics
+
+        analytics.logEvent("repost") {
+            param("repost", 1)
+        }
+
+    }
 
 }
