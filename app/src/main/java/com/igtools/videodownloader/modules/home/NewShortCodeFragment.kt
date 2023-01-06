@@ -39,10 +39,7 @@ import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.modules.details.BlogDetailsActivity
 import com.igtools.videodownloader.modules.web.WebActivity
 import com.igtools.videodownloader.room.RecordDB
-import com.igtools.videodownloader.utils.FileUtils
-import com.igtools.videodownloader.utils.KeyboardUtils
-import com.igtools.videodownloader.utils.UrlUtils
-import com.igtools.videodownloader.utils.getNullable
+import com.igtools.videodownloader.utils.*
 import com.igtools.videodownloader.widgets.dialog.MyDialog
 import kotlinx.coroutines.*
 import org.greenrobot.eventbus.EventBus
@@ -390,7 +387,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 } else {
 
                     //如果extra里面是null，则用原来的方法尝试获取
-                    sendToFirebase2(mediatype)
+                    Analytics.sendEvent("use_a1","media_type",mediatype)
                     val myUrl = mBinding.etShortcode.text.toString()
                     getMediaData(myUrl)
 
@@ -825,7 +822,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             } catch (e: Exception) {
 
                 downloadSuccess = false
-                sendToFirebase(e)
+                e.message?.let {
+                    Analytics.sendException("app_my_exception",Analytics.ERROR_KEY,it)
+                }
 
             }
 
@@ -844,7 +843,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     }
                 } catch (e: Exception) {
                     downloadSuccess = false
-                    sendToFirebase(e)
+                    e.message?.let {
+                        Analytics.sendException("app_my_exception",Analytics.ERROR_KEY,it)
+                    }
 
                 }
 
@@ -882,24 +883,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             }
 
         }
-    }
-
-    private fun sendToFirebase(e: Exception) {
-        val analytics = Firebase.analytics
-        if (e.message != null) {
-            analytics.logEvent("app_my_exception") {
-                param("my_exception", e.message!!)
-            }
-        }
-
-    }
-
-    private fun sendToFirebase2(mediaType:String) {
-        val analytics = Firebase.analytics
-        analytics.logEvent("use_a1") {
-            param("media_type", mediaType)
-        }
-
     }
 
 

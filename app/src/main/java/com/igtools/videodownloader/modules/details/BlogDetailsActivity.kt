@@ -31,6 +31,7 @@ import com.igtools.videodownloader.databinding.ActivityBlogDetailsBinding
 import com.igtools.videodownloader.models.MediaModel
 import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.room.RecordDB
+import com.igtools.videodownloader.utils.Analytics
 import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import com.youth.banner.indicator.CircleIndicator
@@ -382,7 +383,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     }
 
     fun repost(filePath: String?, isVideo: Boolean) {
-        sendToFirebase3()
+        Analytics.sendEvent("repost","repost","1")
         if (filePath != null) {
             val uri: Uri = if (filePath.contains("content://")) {
                 Uri.parse(filePath)
@@ -414,7 +415,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     private fun addWallPaper(filePath: String?, status: Int) {
 
-        sendToFirebase2()
+        Analytics.sendEvent("add_wallpaper","add_wallpaper","1")
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
                 val ios: InputStream = if (filePath.contains("content://")) {
@@ -485,16 +486,8 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
-    private fun sendToFirebase2() {
-        val analytics = Firebase.analytics
-        analytics.logEvent("add_wallpaper") {
-            param("add_wallpaper", 1)
-        }
-
-    }
-
     private fun addWallPaperUnder24(filePath: String?) {
-        sendToFirebase2()
+        Analytics.sendEvent("add_wallpaper","add_wallpaper","1")
         if (filePath != null) {
             val intent = Intent("android.intent.action.ATTACH_DATA")
             intent.addCategory("android.intent.category.DEFAULT")
@@ -523,20 +516,29 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         if (uri == null) {
             return
         }
-        val feedIntent = Intent(Intent.ACTION_SEND)
-        feedIntent.type = if (isVideo) "video/*" else "image/*"
-        feedIntent.putExtra(Intent.EXTRA_STREAM, uri)
-        feedIntent.setPackage("com.instagram.android")
-        val storiesIntent = Intent("com.instagram.share.ADD_TO_STORY")
-        storiesIntent.setDataAndType(uri, if (isVideo) "mp4" else "jpg")
-        storiesIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        storiesIntent.setPackage("com.instagram.android")
-        grantUriPermission(
-            "com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
-        )
-        val chooserIntent = Intent.createChooser(feedIntent, "share to")
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(storiesIntent))
-        startActivity(chooserIntent)
+
+        try {
+            val feedIntent = Intent(Intent.ACTION_SEND)
+            feedIntent.type = if (isVideo) "video/*" else "image/*"
+            feedIntent.putExtra(Intent.EXTRA_STREAM, uri)
+            feedIntent.setPackage("com.instagram.android")
+            val storiesIntent = Intent("com.instagram.share.ADD_TO_STORY")
+            storiesIntent.setDataAndType(uri, if (isVideo) "mp4" else "jpg")
+            storiesIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            storiesIntent.setPackage("com.instagram.android")
+            grantUriPermission(
+                "com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            val chooserIntent = Intent.createChooser(feedIntent, "share to")
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(storiesIntent))
+            startActivity(chooserIntent)
+        }catch (e:Exception){
+            e.message?.let {
+                Analytics.sendException("share_exception",Analytics.ERROR_KEY,it)
+            }
+
+        }
+
     }
 
     private fun initAds() {
@@ -636,7 +638,9 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 }
             } catch (e: Exception) {
                 downloadSuccess = false
-                sendToFirebase(e)
+                e.message?.let {
+                    Analytics.sendException("app_my_exception",Analytics.ERROR_KEY,it)
+                }
             }
 
         } else if (media.mediaType == 2) {
@@ -654,7 +658,10 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                     }
                 } catch (e: Exception) {
                     downloadSuccess = false
-                    sendToFirebase(e)
+                    e.message?.let {msg->
+                        Analytics.sendException("app_my_exception",Analytics.ERROR_KEY,msg)
+                    }
+
                 }
 
             }
@@ -692,26 +699,6 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             mInterstitialAd?.show(this)
         }
         finish()
-
-    }
-
-    private fun sendToFirebase(e: Exception) {
-        val analytics = Firebase.analytics
-        if (e.message != null) {
-            analytics.logEvent("app_my_exception") {
-                param("my_exception", e.message!!)
-            }
-        }
-
-    }
-
-
-    private fun sendToFirebase3() {
-        val analytics = Firebase.analytics
-
-        analytics.logEvent("repost") {
-            param("repost", 1)
-        }
 
     }
 
