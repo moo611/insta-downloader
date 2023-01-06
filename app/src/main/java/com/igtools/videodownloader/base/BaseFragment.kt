@@ -57,4 +57,8 @@ abstract class BaseFragment<T : ViewDataBinding> : Fragment() {
         }
     }
 
+    protected fun isInvalidContext():Boolean{
+        return activity==null || requireActivity().isDestroyed || requireActivity().isFinishing
+    }
+
 }

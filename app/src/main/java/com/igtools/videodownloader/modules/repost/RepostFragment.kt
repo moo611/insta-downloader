@@ -1,15 +1,20 @@
 package com.igtools.videodownloader.modules.repost
 
+import android.app.Activity.RESULT_OK
+import android.app.RecoverableSecurityException
 import android.app.WallpaperManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,6 +39,18 @@ import java.io.InputStream
 
 
 class RepostFragment : BaseFragment<FragmentRepostBinding>() {
+
+    var deleteResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            //Toast.makeText(context, "Image deleted.", Toast.LENGTH_SHORT).show()
+            Log.v(TAG, "deleted")
+            sendToFirebase4("deleted")
+        }
+    }
+
+
     lateinit var adapter: RepostAdapter
     lateinit var bottomDialog: BottomDialog
     lateinit var selectDialog: BottomDialog
@@ -365,13 +382,13 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
 
-                val ios: InputStream = if(filePath.contains("content://")){
+                val ios: InputStream = if (filePath.contains("content://")) {
                     val uri = Uri.parse(filePath)
                     activity?.contentResolver?.openInputStream(uri)!!
-                }else{
+                } else {
                     File(filePath).inputStream()
                 }
-                
+
                 val myWallpaperManager = WallpaperManager.getInstance(requireContext());
                 when (status) {
                     0 -> {
@@ -445,7 +462,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             } else {
                 Uri.fromFile(File(filePath))
             }
-            
+
             intent.setDataAndType(uri, str)
             intent.putExtra("mimeType", str)
             startActivity(Intent.createChooser(intent, "Set As:"))
@@ -617,8 +634,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     }
 
-    fun deleteMedia(path: String) {
-
+    private fun deleteMedia(path: String) {
         //兼容
         val uri: Uri = if (path.contains("content://")) {
             Uri.parse(path)
@@ -634,8 +650,29 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             }
 
         }
+        try {
+            activity?.contentResolver?.delete(uri, null, null)
 
-        activity?.contentResolver?.delete(uri,null,null)
+        } catch (e: SecurityException) {
+            Log.e(TAG, e.message + "")
+            sendToFirebase(e.message)
+            val intentSender = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                    MediaStore.createDeleteRequest(
+                        requireActivity().contentResolver,
+                        listOf(uri)
+                    ).intentSender
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                    val recoverableSecurityException = e as? RecoverableSecurityException
+                    recoverableSecurityException?.userAction?.actionIntent?.intentSender
+                }
+                else -> null
+            }
+            intentSender?.let {
+                deleteResultLauncher.launch(IntentSenderRequest.Builder(it).build())
+            }
+        }
 
     }
 
@@ -679,6 +716,17 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     }
 
+    private fun sendToFirebase(msg: String?) {
+
+        val analytics = Firebase.analytics
+        msg?.let {
+            analytics.logEvent("delete_exception") {
+                param("error", it)
+            }
+        }
+
+    }
+
     private fun sendToFirebase3() {
         val analytics = Firebase.analytics
 
@@ -687,4 +735,13 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         }
 
     }
+
+    private fun sendToFirebase4(msg: String) {
+
+        val analytics = Firebase.analytics
+        analytics.logEvent("delete_success") {
+            param("msg", msg)
+        }
+    }
+
 }

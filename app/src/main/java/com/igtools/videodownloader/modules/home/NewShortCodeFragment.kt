@@ -319,8 +319,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         curMediaInfo = parseMedia(shortcode_media)
 
                         activity?.runOnUiThread {
+                            if (!isInvalidContext()){
+                                progressDialog.dismiss()
+                            }
 
-                            progressDialog.dismiss()
                             showCurrent()
                             mInterstitialAd?.show(requireActivity())
                             mBinding.progressbar.visibility = View.VISIBLE
@@ -364,8 +366,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     parseImage(doc)
 
                     activity?.runOnUiThread {
+                        if (!isInvalidContext()){
+                            progressDialog.dismiss()
+                        }
 
-                        progressDialog.dismiss()
                         showCurrent()
                         mInterstitialAd?.show(requireActivity())
                         mBinding.progressbar.visibility = View.VISIBLE
@@ -396,8 +400,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 //私人账户
                 Log.e(TAG, e.message + "")
                 activity?.runOnUiThread {
-                    progressDialog.dismiss()
-                    privateDialog.show()
+                    if(!isInvalidContext()){
+                        progressDialog.dismiss()
+                        privateDialog.show()
+                    }
 
                 }
             }
@@ -459,7 +465,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 val jsonObject = res.body()
                 //Log.v(TAG, jsonObject.toString())
                 if (res.code() == 200 && jsonObject != null) {
-                    progressDialog.dismiss()
+                    if (!isInvalidContext()){
+                        progressDialog.dismiss()
+                    }
+
                     val shortcode_media =
                         jsonObject["graphql"].asJsonObject["shortcode_media"].asJsonObject
                     curMediaInfo = parseMedia(shortcode_media)
@@ -490,10 +499,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
                 } else {
                     if (BaseApplication.cookie == null) {
-                        if (!requireActivity().isFinishing) {
+                        if (!isInvalidContext()) {
                             privateDialog.show()
+                            progressDialog.dismiss()
                         }
-                        progressDialog.dismiss()
                     } else {
                         getMediaDataByCookie()
                     }
@@ -504,8 +513,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 mBinding.progressbar.visibility = View.INVISIBLE
                 Log.e(TAG, e.message + "")
                 safeToast(R.string.network)
-
-                progressDialog.dismiss()
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
 
             }
         }
@@ -529,7 +539,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
                 val res = ApiClient.getClient()
                     .getMediaData(Urls.GRAPH_QL, map, Urls.QUERY_HASH, gson.toJson(map2))
-                progressDialog.dismiss()
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
+
                 val jsonObject = res.body()
                 //Log.v(TAG, jsonObject.toString())
                 if (res.code() == 200 && jsonObject != null) {
@@ -569,8 +582,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 mBinding.progressbar.visibility = View.INVISIBLE
                 Log.e(TAG, e.message + "")
                 safeToast(R.string.network)
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
 
-                progressDialog.dismiss()
 
             }
         }
@@ -660,7 +675,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     .getStoryData(url, map)
                 val code = res.code()
                 val jsonObject = res.body()
-                progressDialog.dismiss()
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
+
                 if (code == 200 && jsonObject != null) {
                     curMediaInfo = parseStory(jsonObject)
                     showCurrent()
@@ -686,7 +704,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
-                progressDialog.dismiss()
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
+
                 safeToast(R.string.network)
 
             }
