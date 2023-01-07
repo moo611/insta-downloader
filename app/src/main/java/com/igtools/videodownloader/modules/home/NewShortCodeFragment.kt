@@ -12,6 +12,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -22,9 +23,6 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.igtools.videodownloader.BaseApplication
@@ -47,6 +45,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.net.URLEncoder
+
 
 class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
@@ -140,6 +139,17 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
 
         }
+
+        //version 52 fix scrollview edittext focus bug
+        val view = mBinding.scrollview
+        view.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS)
+        view.isFocusable = true
+        view.isFocusableInTouchMode = true
+        view.setOnTouchListener { v, event ->
+            v.requestFocusFromTouch()
+            false
+        }
+
     }
 
     override fun onStart() {
