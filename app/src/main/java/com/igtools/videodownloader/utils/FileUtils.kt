@@ -1,8 +1,7 @@
 package com.igtools.videodownloader.utils
 
-import android.content.ContentValues
-import android.content.Context
-import android.content.Intent
+import android.content.*
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -253,6 +252,73 @@ object FileUtils {
         intent.type = "*/*" /* This example is sharing jpeg images. */
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
         c.startActivity(Intent.createChooser(intent, "share to"))
+    }
+
+
+
+    /**
+     * 删除文件
+     * @return
+     */
+    fun deleteImageUri(
+        contentResolver: ContentResolver,
+        imgPath: String,
+    ) {
+        val file = File(imgPath)
+        val cursor: Cursor = contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Images.Media._ID),
+            MediaStore.MediaColumns.DISPLAY_NAME + "=?",
+            arrayOf(file.name),
+            null
+        ) ?: return
+
+        try {
+            if (cursor.moveToFirst()) {
+                val id: Long = cursor.getLong(0)
+                val contentUri: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                val uri: Uri = ContentUris.withAppendedId(contentUri, id)
+                Log.v(TAG,uri.toString())
+                contentResolver.delete(uri, null, null)
+            }
+            file.delete()
+
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, e.message + "")
+
+        } finally {
+            cursor.close()
+        }
+    }
+
+
+    fun deleteVideoUri(
+        contentResolver: ContentResolver,
+        videoPath: String,
+    ) {
+        val file = File(videoPath)
+        val cursor: Cursor = contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Video.Media._ID),
+            MediaStore.MediaColumns.DISPLAY_NAME + "=?",
+            arrayOf(file.name),
+            null
+        ) ?: return
+        try {
+            if (cursor.moveToFirst()) {
+                val id: Long = cursor.getLong(0)
+                val contentUri: Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                val uri: Uri = ContentUris.withAppendedId(contentUri, id)
+                Log.v(TAG,uri.toString())
+                contentResolver.delete(uri, null, null)
+            }
+            file.delete()
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, e.message + "")
+
+        } finally {
+            cursor.close()
+        }
     }
 
 

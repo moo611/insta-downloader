@@ -48,7 +48,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             //Toast.makeText(context, "Image deleted.", Toast.LENGTH_SHORT).show()
             Log.v(TAG, "deleted")
 
-            Analytics.sendEvent("delete_success","delete_success","1")
+            Analytics.sendEvent("delete_success", "delete_success", "1")
         }
     }
 
@@ -379,7 +379,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     private fun addWallPaper(filePath: String?, status: Int) {
 
-        Analytics.sendEvent("add_wallpaper","add_wallpaper","1")
+        Analytics.sendEvent("add_wallpaper", "add_wallpaper", "1")
 
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
@@ -453,7 +453,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     }
 
     private fun addWallPaperUnder24(filePath: String?) {
-        Analytics.sendEvent("add_wallpaper","add_wallpaper","1")
+        Analytics.sendEvent("add_wallpaper", "add_wallpaper", "1")
         if (filePath != null) {
             val intent = Intent("android.intent.action.ATTACH_DATA")
             intent.addCategory("android.intent.category.DEFAULT")
@@ -480,7 +480,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
 
     fun repost(filePath: String?, isVideo: Boolean) {
-        Analytics.sendEvent("repost","repost","1")
+        Analytics.sendEvent("repost", "repost", "1")
         if (filePath != null) {
             val uri: Uri = if (filePath.contains("content://")) {
                 Uri.parse(filePath)
@@ -577,7 +577,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     }
 
-    fun deleteFile(media: MediaModel, record: Record) {
+    private fun deleteFile(media: MediaModel, record: Record) {
 
         if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())) {
             PermissionUtils.requirePermissionsReadAndWrite(requireActivity(), 1024)
@@ -593,12 +593,12 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 if (resource.mediaType == 1) {
                     val filePath = pathMap[resource.thumbnailUrl] as? String
                     if (filePath != null) {
-                        deleteMedia(filePath)
+                        deleteMedia(filePath, 1)
                     }
                 } else if (resource.mediaType == 2) {
                     val filePath = pathMap[resource.videoUrl] as? String
                     if (filePath != null) {
-                        deleteMedia(filePath)
+                        deleteMedia(filePath, 2)
                     }
                 }
 
@@ -611,7 +611,8 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 val pathMap = gson.fromJson(paths, HashMap::class.java)
                 val filePath = pathMap[media.thumbnailUrl] as? String
                 if (filePath != null) {
-                    deleteMedia(filePath)
+                    deleteMedia(filePath, 1)
+                    //FileUtils.deleteImageUri(activity?.contentResolver!!,filePath)
                 }
 
             } else if (media.mediaType == 2) {
@@ -620,7 +621,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 val pathMap = gson.fromJson(paths, HashMap::class.java)
                 val filePath = pathMap[media.videoUrl] as? String
                 if (filePath != null) {
-                    deleteMedia(filePath)
+                    deleteMedia(filePath, 2)
                 }
             }
 
@@ -629,47 +630,44 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     }
 
-    private fun deleteMedia(path: String) {
+    private fun deleteMedia(path: String, type: Int) {
         //兼容
-        val uri: Uri = if (path.contains("content://")) {
-            Uri.parse(path)
+        if (path.contains("content://")) {
+            val uri: Uri = Uri.parse(path)
+            try {
+                activity?.contentResolver?.delete(uri, null, null)
+
+            } catch (e: SecurityException) {
+                Log.e(TAG, e.message + "")
+                e.message?.let {
+                    Analytics.sendException("delete_exception", Analytics.ERROR_KEY, it)
+                }
+
+                val intentSender = when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                        MediaStore.createDeleteRequest(
+                            requireActivity().contentResolver,
+                            listOf(uri)
+                        ).intentSender
+                    }
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                        val recoverableSecurityException = e as? RecoverableSecurityException
+                        recoverableSecurityException?.userAction?.actionIntent?.intentSender
+                    }
+                    else -> null
+                }
+                intentSender?.let {
+                    deleteResultLauncher.launch(IntentSenderRequest.Builder(it).build())
+                }
+            }
+
         } else {
-            val file = File(path)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                FileProvider.getUriForFile(
-                    requireContext(), "com.igtools.videodownloader.fileprovider",
-                    file
-                );
+            if (type == 1) {
+                FileUtils.deleteImageUri(activity?.contentResolver!!, path)
             } else {
-                Uri.fromFile(file);
+                FileUtils.deleteVideoUri(activity?.contentResolver!!, path)
             }
 
-        }
-        try {
-            activity?.contentResolver?.delete(uri, null, null)
-
-        } catch (e: SecurityException) {
-            Log.e(TAG, e.message + "")
-            e.message?.let {
-                Analytics.sendException("delete_exception",Analytics.ERROR_KEY,it)
-            }
-
-            val intentSender = when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
-                    MediaStore.createDeleteRequest(
-                        requireActivity().contentResolver,
-                        listOf(uri)
-                    ).intentSender
-                }
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                    val recoverableSecurityException = e as? RecoverableSecurityException
-                    recoverableSecurityException?.userAction?.actionIntent?.intentSender
-                }
-                else -> null
-            }
-            intentSender?.let {
-                deleteResultLauncher.launch(IntentSenderRequest.Builder(it).build())
-            }
         }
 
     }
