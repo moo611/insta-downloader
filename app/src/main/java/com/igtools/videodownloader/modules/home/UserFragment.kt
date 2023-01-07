@@ -208,7 +208,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 map["Cookie"] = cookie!!
                 map["User-Agent"] = Urls.USER_AGENT
                 val res = ApiClient.getClient2()
-                    .getUserMedia(Urls.USER_INFO, map, mBinding.etUsername.text.toString())
+                    .getUserMedia(Urls.USER_INFO, map, mBinding.etUsername.text.toString().trim().lowercase())
                 val code = res.code()
                 val jsonObject = res.body()
                 if (code == 200 && jsonObject != null) {
@@ -235,7 +235,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
-                    mInterstitialAd?.show(requireActivity())
+
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
                     Toast.makeText(
@@ -263,11 +263,12 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     }
 
     fun getDataNoCookie() {
+        mInterstitialAd?.show(requireActivity())
         clearData()
         lifecycleScope.launch {
             try {
                 progressDialog.show()
-                val username = mBinding.etUsername.text.toString()
+                val username = mBinding.etUsername.text.toString().trim().lowercase()
                 val url1 = "https://www.instagram.com/$username/?__a=1&__d=dis"
                 val urlEncoded1 = URLEncoder.encode(url1,"utf-8")
                 val api1 = "https://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded1"
@@ -307,7 +308,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                         isEnd = !pageInfo["has_next_page"].asBoolean
                         cursor = pageInfo["end_cursor"].asString
                         progressDialog.dismiss()
-                        mInterstitialAd?.show(requireActivity())
+
                     }
 
                 } else {
@@ -493,7 +494,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         }
 
         mediaModel.thumbnailUrl = node["thumbnail_src"].asString
-        mediaModel.username = mBinding.etUsername.text.toString()
+        mediaModel.username = mBinding.etUsername.text.toString().trim().lowercase()
         mediaModel.profilePicUrl = profileUrl
         if (node.has("edge_sidecar_to_children")) {
             val children = node["edge_sidecar_to_children"].asJsonObject["edges"].asJsonArray

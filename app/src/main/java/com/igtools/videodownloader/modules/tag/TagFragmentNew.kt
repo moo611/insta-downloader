@@ -146,16 +146,20 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
     private fun clearData() {
         isEnd = false
         cursor = ""
-        profileUrl=""
+        profileUrl = ""
     }
 
 
     private fun refreshNoCookie() {
         clearData()
+        mInterstitialAd?.show(requireActivity())
         progressDialog.show()
         lifecycleScope.launch {
             try {
-                val tagname = mBinding.etTag.text.toString()
+                var tagname = mBinding.etTag.text.toString().trim().lowercase()
+                if (tagname.startsWith("#")) {
+                    tagname = tagname.replace("#", "")
+                }
                 val variables: HashMap<String, Any> = HashMap()
                 variables["tag_name"] = tagname
                 variables["first"] = 12
@@ -186,7 +190,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
                     val pageInfo = edge_hashtag_to_media["page_info"].asJsonObject
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
-                    mInterstitialAd?.show(requireActivity())
+
                 } else {
 
                     Toast.makeText(
@@ -217,14 +221,17 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
         if (loadingMore || isEnd) {
             return
         }
-        if (adapter.medias.size>300){
+        if (adapter.medias.size > 300) {
             return
         }
         loadingMore = true
         mBinding.progressBottom.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
-                val tagname = mBinding.etTag.text.toString()
+                var tagname = mBinding.etTag.text.toString().trim().lowercase()
+                if (tagname.startsWith("#")) {
+                    tagname = tagname.replace("#", "")
+                }
                 val variables: HashMap<String, Any> = HashMap()
                 variables["tag_name"] = tagname
                 variables["first"] = COUNT
@@ -255,7 +262,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
                     val pageInfo = edge_hashtag_to_media["page_info"].asJsonObject
                     isEnd = !pageInfo["has_next_page"].asBoolean
                     cursor = pageInfo["end_cursor"].asString
-                    //mInterstitialAd?.show(requireActivity())
+
                 } else {
 
                     Toast.makeText(
@@ -304,7 +311,11 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
         }
 
         mediaModel.thumbnailUrl = node["thumbnail_src"].asString
-        mediaModel.username = "#"+mBinding.etTag.text.toString()
+        var tagname = mBinding.etTag.text.toString().trim().lowercase()
+        if (tagname.startsWith("#")) {
+            tagname = tagname.replace("#", "")
+        }
+        mediaModel.username = "#$tagname"
         mediaModel.profilePicUrl = profileUrl
         if (node.has("edge_sidecar_to_children")) {
             val children = node["edge_sidecar_to_children"].asJsonObject["edges"].asJsonArray
