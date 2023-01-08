@@ -70,4 +70,6 @@
     <string name="delete_all_records">Xóa tất cả bản ghi?</string>
     <string name="no_recover">không thể phục hồi nếu bạn đã làm xong.</string>
     <string name="download_failed">tải xuống không thành công</string>
+
+    <string name="user_not_found">Không tìm thấy người dùng.</string>
 </resources>

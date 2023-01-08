@@ -39,6 +39,7 @@
             android:layout_height="1dp"/>
 
         <com.google.android.material.tabs.TabLayout
+            android:background="@color/white"
             app:tabIndicatorFullWidth="false"
             app:tabRippleColor="@null"
             app:tabBackground="@null"
@@ -49,6 +50,7 @@
             android:layout_height="40dp"/>
 
         <androidx.viewpager.widget.ViewPager
+            android:background="@color/white"
             android:id="@+id/viewpager"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

@@ -48,4 +48,8 @@ interface UserService {
         @Query("variables") variables: String
     ): Response<JsonObject>
 
+
+    @GET
+    suspend fun getUserWeb(@Url url:String, @HeaderMap headers: HashMap<String, String>):Response<JsonObject>
+
 }

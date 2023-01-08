@@ -70,5 +70,6 @@
     <string name="delete_all_records">Hapus semua record?</string>
     <string name="no_recover">tidak dapat dipulihkan jika Anda telah melakukannya.</string>
     <string name="download_failed">unduhan gagal</string>
+    <string name="user_not_found">Pengguna tidak ditemukan.</string>
 
 </resources>

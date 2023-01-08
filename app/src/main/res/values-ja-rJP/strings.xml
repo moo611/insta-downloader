@@ -68,4 +68,6 @@
     <string name="delete_all_records">すべてのレコードを削除しますか?</string>
     <string name="no_recover">行った場合は復元できません。</string>
     <string name="download_failed">ダウンロードに失敗しました</string>
+
+    <string name="user_not_found">ユーザーが見つかりません.</string>
 </resources>

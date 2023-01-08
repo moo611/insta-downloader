@@ -75,7 +75,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         }
 
         mBinding.btnSearch.setOnClickListener {
+
             mBinding.etUsername.clearFocus()
+            mBinding.flParent.requestFocus()
             KeyboardUtils.closeKeybord(mBinding.etUsername, context)
             if (mBinding.etUsername.text.toString().isEmpty()) {
                 Toast.makeText(
@@ -90,8 +92,8 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 param("search_by_user", 1)
             }
 
-            getDataNoCookie()
-
+            //getDataNoCookie()
+            getDataWeb()
         }
 
         mBinding.etUsername.addTextChangedListener(object : TextWatcher {
@@ -212,6 +214,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 val code = res.code()
                 val jsonObject = res.body()
                 if (code == 200 && jsonObject != null) {
+                    mInterstitialAd?.show(requireActivity())
                     val user = jsonObject["data"].asJsonObject["user"].asJsonObject
                     userId = user["id"].asString
                     if (user.has("profile_pic_url") && !user.get("profile_pic_url").isJsonNull) {
@@ -238,24 +241,19 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.failed),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    safeToast(R.string.failed)
                 }
 
-                progressDialog.dismiss()
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
-                progressDialog.dismiss()
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.network),
-                    Toast.LENGTH_SHORT
-                ).show()
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
+               safeToast(R.string.network)
             }
 
 
@@ -263,7 +261,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     }
 
     fun getDataNoCookie() {
-        mInterstitialAd?.show(requireActivity())
+
         clearData()
         lifecycleScope.launch {
             try {
@@ -293,6 +291,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
                     }else{
                         userId = user["id"].asString
+                        if(user.has("profile_pic_url") && !user["profile_pic_url"].isJsonNull){
+                            profileUrl = user["profile_pic_url"].asString
+                        }
                         val edge_owner_to_timeline_media =
                             user["edge_owner_to_timeline_media"].asJsonObject
                         val edges = edge_owner_to_timeline_media["edges"].asJsonArray
@@ -312,26 +313,94 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                     }
 
                 } else {
-                    progressDialog.dismiss()
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.failed),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    if (!isInvalidContext()){
+                        progressDialog.dismiss()
+                    }
+                   safeToast(R.string.failed)
                 }
 
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
-                progressDialog.dismiss()
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.network),
-                    Toast.LENGTH_SHORT
-                ).show()
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
+
+                safeToast(R.string.network)
             }
 
+        }
+
+    }
+
+    fun getDataWeb(){
+        clearData()
+        lifecycleScope.launch {
+            try {
+                progressDialog.show()
+                val username = mBinding.etUsername.text.toString().trim().lowercase()
+                val url = "https://www.instagram.com/api/v1/users/web_profile_info/?username=$username"
+                val headers:HashMap<String,String> = HashMap()
+                headers["user-agent"] = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36"
+                headers["x-csrftoken"] = "IQ9sfTjzBvHWYxRUwQqKOLU3eHkOISJM"
+                headers["x-ig-app-id"] = "1217981644879628"
+                val res1 = ApiClient.getClient2().getUserWeb(url,headers)
+                Log.v(TAG,res1.body().toString())
+
+                val code = res1.code()
+
+                if (code == 200 && res1.body()!=null) {
+                    val jsonObject = res1.body()!!
+
+                    val user = jsonObject["data"].asJsonObject["user"].asJsonObject
+
+                    val isPrivate = user["is_private"].asBoolean
+                    if (isPrivate){
+
+                        if (BaseApplication.cookie == null){
+                            privateDialog.show()
+                            progressDialog.dismiss()
+                        }else{
+                            getData()
+                        }
+
+                    }else{
+                        mInterstitialAd?.show(requireActivity())
+                        userId = user["id"].asString
+                        if(user.has("profile_pic_url") && !user["profile_pic_url"].isJsonNull){
+                            profileUrl = user["profile_pic_url"].asString
+                        }
+                        val edge_owner_to_timeline_media =
+                            user["edge_owner_to_timeline_media"].asJsonObject
+                        val edges = edge_owner_to_timeline_media["edges"].asJsonArray
+                        if (edges.size() > 0) {
+                            val medias: ArrayList<MediaModel> = ArrayList()
+                            for (item in edges) {
+                                val mediainfo = parse1(item.asJsonObject)
+                                medias.add(mediainfo)
+                            }
+                            adapter.refresh(medias)
+                        }
+                        val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
+                        isEnd = !pageInfo["has_next_page"].asBoolean
+                        cursor = pageInfo["end_cursor"].asString
+                        progressDialog.dismiss()
+
+                    }
+
+                } else {
+                    if (!isInvalidContext()){
+                        progressDialog.dismiss()
+                    }
+                    safeToast(R.string.failed)
+                }
+
+            }catch (e:Exception){
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
+                safeToast(R.string.network)
+            }
         }
 
     }
@@ -341,9 +410,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         if (loadingMore || isEnd) {
             return
         }
-        if (adapter.medias.size>300){
-            return
-        }
+//        if (adapter.medias.size>300){
+//            return
+//        }
         loadingMore = true
         val cookie = BaseApplication.cookie
         val map: HashMap<String, String> = HashMap()
@@ -408,9 +477,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         if (loadingMore || isEnd) {
             return
         }
-        if (adapter.medias.size>300){
-            return
-        }
+//        if (adapter.medias.size>300){
+//            return
+//        }
         loadingMore = true
 
         lifecycleScope.launch {

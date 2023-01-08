@@ -7,13 +7,15 @@
     </data>
 
     <LinearLayout
-        android:background="#f0f0f0"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context=".modules.home.UserFragment">
 
         <FrameLayout
+            android:id="@+id/fl_parent"
+            android:focusableInTouchMode="true"
+            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="20dp">

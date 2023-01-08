@@ -65,7 +65,9 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
 
 
         mBinding.btnSearch.setOnClickListener {
+
             mBinding.etTag.clearFocus()
+            mBinding.flParent.requestFocus()
             KeyboardUtils.closeKeybord(mBinding.etTag, context)
             if (mBinding.etTag.text.toString().isEmpty()) {
                 Toast.makeText(requireContext(), getString(R.string.empty_tag), Toast.LENGTH_SHORT)

@@ -141,14 +141,15 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
 
         //version 52 fix scrollview edittext focus bug
-        val view = mBinding.scrollview
-        view.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS)
-        view.isFocusable = true
-        view.isFocusableInTouchMode = true
-        view.setOnTouchListener { v, event ->
-            v.requestFocusFromTouch()
-            false
-        }
+//        val view = mBinding.scrollview
+//        view.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS)
+//        view.isFocusable = true
+//        view.isFocusableInTouchMode = true
+//        view.setOnTouchListener { v, event ->
+//            v.requestFocusFromTouch()
+//            false
+//        }
+        //the code above will cause another problem, the background color will get changed.so son't use it
 
     }
 
@@ -177,6 +178,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     override fun initData() {
         //mBinding.webview.loadUrl(sideUrl)
+        mBinding.etShortcode.clearFocus()
+        mBinding.flParent.requestFocus()
+        KeyboardUtils.hideInputForce(requireActivity())
+
     }
 
     //ui part
@@ -261,7 +266,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         if (TextUtils.isEmpty(paramString)) {
             return
         }
+
         mBinding.etShortcode.clearFocus()
+        mBinding.flParent.requestFocus()
         KeyboardUtils.closeKeybord(mBinding.etShortcode, context)
         if (paramString.matches(Regex("(.*)instagram.com/p(.*)")) || paramString.matches(Regex("(.*)instagram.com/reel(.*)"))) {
             val url = emBedUrl()

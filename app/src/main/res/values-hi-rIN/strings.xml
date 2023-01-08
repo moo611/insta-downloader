@@ -67,4 +67,5 @@
     <string name="delete_all_records">सभी रिकॉर्ड हटाएं?</string>
     <string name="no_recover"> यदि आपने किया है तो पुनर्प्राप्त नहीं किया जा सकता है।</string>
     <string name="download_failed">डाउनलोड विफल</string>
+    <string name="user_not_found">उपयोगकर्ता नहीं मिला।</string>
 </resources>
