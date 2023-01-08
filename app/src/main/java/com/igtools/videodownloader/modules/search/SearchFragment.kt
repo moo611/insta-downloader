@@ -12,24 +12,22 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.igtools.videodownloader.base.BaseFragment
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.google.gson.JsonObject
 import com.igtools.videodownloader.BaseApplication
 import com.igtools.videodownloader.R
-import com.igtools.videodownloader.modules.web.WebActivity
-import com.igtools.videodownloader.api.Urls
 import com.igtools.videodownloader.api.ApiClient
+import com.igtools.videodownloader.api.Urls
+import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.databinding.FragmentSearchBinding
-
 import com.igtools.videodownloader.models.MediaModel
+import com.igtools.videodownloader.modules.web.WebActivity
 import com.igtools.videodownloader.utils.Analytics
 import com.igtools.videodownloader.utils.KeyboardUtils
 import com.igtools.videodownloader.utils.getNullable
@@ -42,7 +40,7 @@ import java.net.URLEncoder
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     lateinit var privateDialog: MyDialog
-    val TAG = "UserFragment"
+    val TAG = "SearchFragment"
     val LOGIN_REQ = 1000
     val COUNT = 50
     lateinit var firebaseAnalytics: FirebaseAnalytics
@@ -93,9 +91,11 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
             //getDataNoCookie()
             if (isSearchUser()) {
+                adapter.isUser=true
                 Analytics.sendEvent("search_by_user","search_by_user","1")
                 getUserDataWeb()
             } else {
+                adapter.isUser=false
                 Analytics.sendEvent("search_by_tag","search_by_tag","1")
                 getTagDataWeb()
             }
@@ -128,7 +128,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         mBinding.rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!mBinding.rv.canScrollVertically(1) && dy > 0) {
+                if (isSlideToBottom(mBinding.rv) && dy > 0) {
                     //滑动到底部
                     if (isSearchUser()) {
                         if (mode == "public") {
@@ -731,6 +731,12 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
         return mediaModel
 
+    }
+
+    fun isSlideToBottom(recyclerView: RecyclerView?): Boolean {
+        if (recyclerView == null) return false
+        return (recyclerView.computeVerticalScrollExtent() + recyclerView.computeVerticalScrollOffset()
+                >= recyclerView.computeVerticalScrollRange()-50)
     }
 
 

@@ -79,7 +79,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 startActivity(
                     Intent(requireContext(), BlogDetailsActivity::class.java)
                         .putExtra("content", content)
-                        .putExtra("flag", false)
+                        .putExtra("need_download", false)
                         .putExtra("record", gson.toJson(record))
                 )
             }

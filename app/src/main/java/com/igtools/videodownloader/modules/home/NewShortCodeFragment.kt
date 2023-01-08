@@ -59,10 +59,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     var curRecord: Record? = null
     var paths: HashMap<String, String> = HashMap()
 
-    val imageUrl = "https://www.instagram.com/p/-vSJNUDKKD/embed/captioned/"
-    val videoUrl = "https://www.instagram.com/reel/Cm6TeFHJ0xy/embed/captioned/"
-    val sideUrl = "https://www.instagram.com/p/Cm8qU92ykVU/embed/captioned/"
-
     var downloadSuccess = true
     private val LOGIN_REQ = 1000
 
@@ -87,7 +83,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 startActivity(
                     Intent(requireContext(), BlogDetailsActivity::class.java)
                         .putExtra("content", gson.toJson(curMediaInfo))
-                        .putExtra("flag", false)
+                        .putExtra("need_download", false)
                         .putExtra("record", gson.toJson(curRecord))
                 )
             } else {

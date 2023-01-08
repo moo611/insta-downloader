@@ -14,12 +14,13 @@ import com.google.gson.Gson
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.modules.details.BlogDetailsActivity
 import com.igtools.videodownloader.models.MediaModel
+import com.igtools.videodownloader.modules.details.TagDetailsActivity
 
 class MediaAdapter(var c: Context) : RecyclerView.Adapter<MediaAdapter.BlogViewHolder>() {
 
     var medias: ArrayList<MediaModel> = ArrayList()
     val gson = Gson()
-
+    var isUser = true
 
     inner class BlogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var imgThumbnail: ImageView = itemView.findViewById(R.id.img_thumbnail)
@@ -52,12 +53,21 @@ class MediaAdapter(var c: Context) : RecyclerView.Adapter<MediaAdapter.BlogViewH
 
         holder.itemView.setOnClickListener {
             val mediaModel = gson.toJson(medias[position])
-            c.startActivity(
-                Intent(c, BlogDetailsActivity::class.java)
-                    .putExtra("content", mediaModel)
-                    .putExtra("flag", true)
+            if (isUser){
+                c.startActivity(
+                    Intent(c, BlogDetailsActivity::class.java)
+                        .putExtra("content", mediaModel)
+                        .putExtra("need_download", true)
+                )
+            }else{
+                c.startActivity(
+                    Intent(c, TagDetailsActivity::class.java)
+                        .putExtra("content", mediaModel)
+                        .putExtra("need_download", true)
 
-            )
+                )
+            }
+
         }
 
         val typename = medias[position].mediaType
