@@ -24,7 +24,7 @@ import com.igtools.videodownloader.api.ApiClient
 import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.databinding.FragmentTagNewBinding
 import com.igtools.videodownloader.models.MediaModel
-import com.igtools.videodownloader.modules.home.MediaAdapter
+import com.igtools.videodownloader.modules.search.MediaAdapter
 import com.igtools.videodownloader.utils.KeyboardUtils
 import com.igtools.videodownloader.utils.getNullable
 import kotlinx.coroutines.launch
@@ -78,7 +78,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
                 param("search_by_tag", 1)
             }
             //refreshNoCookie()
-            refreshWeb()
+            getTagData()
         }
 
         mBinding.etTag.addTextChangedListener(object : TextWatcher {
@@ -109,7 +109,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
                 super.onScrolled(recyclerView, dx, dy)
                 if (!mBinding.rv.canScrollVertically(1) && dy > 0) {
                     //滑动到底部
-                    loadMoreNoCookie()
+                    getTagDataMoreNoCookie()
 
                 }
 
@@ -152,71 +152,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
         profileUrl = ""
     }
 
-
-    private fun refreshNoCookie() {
-        clearData()
-
-        progressDialog.show()
-        lifecycleScope.launch {
-            try {
-                var tagname = mBinding.etTag.text.toString().trim().lowercase()
-                if (tagname.startsWith("#")) {
-                    tagname = tagname.replace("#", "")
-                }
-                val variables: HashMap<String, Any> = HashMap()
-                variables["tag_name"] = tagname
-                variables["first"] = 12
-
-                val str = Urls.GRAPH_QL + "?query_hash=${Urls.QUERY_HASH_TAG}&variables=${
-                    gson.toJson(variables)
-                }"
-
-                val urlEncoded1 = URLEncoder.encode(str, "utf-8")
-                val api1 = "https://api.scrape.do?token=${BaseApplication.APIKEY}&url=$urlEncoded1"
-                val res1 = ApiClient.getClient3().getTagNew(api1)
-                val jsonObject = res1.body()
-                val code = res1.code()
-                if (code == 200 && jsonObject != null) {
-                    mInterstitialAd?.show(requireActivity())
-                    val tag = jsonObject["data"].asJsonObject["hashtag"].asJsonObject
-                    profileUrl = tag["profile_pic_url"].asString
-                    val edge_hashtag_to_media =
-                        tag["edge_hashtag_to_media"].asJsonObject
-                    val edges = edge_hashtag_to_media["edges"].asJsonArray
-                    if (edges.size() > 0) {
-                        val medias: ArrayList<MediaModel> = ArrayList()
-                        for (item in edges) {
-                            val mediainfo = parse1(item.asJsonObject)
-                            medias.add(mediainfo)
-                        }
-                        adapter.refresh(medias)
-                    }
-                    val pageInfo = edge_hashtag_to_media["page_info"].asJsonObject
-                    isEnd = !pageInfo["has_next_page"].asBoolean
-                    cursor = pageInfo["end_cursor"].asString
-
-                } else {
-
-                    safeToast(R.string.failed)
-                }
-
-                if (!isInvalidContext()) {
-                    progressDialog.dismiss()
-                }
-            } catch (e: Exception) {
-                safeToast(R.string.network)
-                if (!isInvalidContext()) {
-                    progressDialog.dismiss()
-                }
-
-            }
-
-
-        }
-
-    }
-
-    private fun refreshWeb() {
+    private fun getTagData() {
         clearData()
         lifecycleScope.launch {
             progressDialog.show()
@@ -244,7 +180,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
                     if (edges.size() > 0) {
                         val medias: ArrayList<MediaModel> = ArrayList()
                         for (item in edges) {
-                            val mediainfo = parse1(item.asJsonObject)
+                            val mediainfo = parseTagData(item.asJsonObject)
                             medias.add(mediainfo)
                         }
                         adapter.refresh(medias)
@@ -277,7 +213,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
     }
 
 
-    private fun loadMoreNoCookie() {
+    private fun getTagDataMoreNoCookie() {
 
         if (loadingMore || isEnd) {
             return
@@ -315,7 +251,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
                     if (edges.size() > 0) {
                         val medias: ArrayList<MediaModel> = ArrayList()
                         for (item in edges) {
-                            val mediainfo = parse1(item.asJsonObject)
+                            val mediainfo = parseTagData(item.asJsonObject)
                             medias.add(mediainfo)
                         }
                         adapter.loadMore(medias)
@@ -343,7 +279,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
     }
 
 
-    private fun parse1(jsonObject: JsonObject): MediaModel {
+    private fun parseTagData(jsonObject: JsonObject): MediaModel {
         val mediaModel = MediaModel()
         val node = jsonObject["node"].asJsonObject
         mediaModel.code = node["shortcode"].asString

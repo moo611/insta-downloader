@@ -1,6 +1,5 @@
 package com.igtools.videodownloader.modules.home
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -8,6 +7,7 @@ import com.google.android.material.tabs.TabLayout
 import com.igtools.videodownloader.base.BaseFragment
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.FragmentHomeBinding
+import com.igtools.videodownloader.modules.search.SearchFragment
 
 /**
  * @Author: desong
@@ -28,7 +28,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     override fun initView() {
         val fragments: ArrayList<Fragment> = ArrayList()
         fragments.add(NewShortCodeFragment())
-        fragments.add(UserFragment())
+        fragments.add(SearchFragment())
 
         mAdapter = ViewPagerAdapter(childFragmentManager, fragments)
         mBinding.viewpager.adapter = mAdapter

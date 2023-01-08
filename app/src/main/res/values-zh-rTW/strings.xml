@@ -68,5 +68,7 @@
     <string name="delete_all_records">刪除所有記錄？</string>
     <string name="no_recover">完成後無法恢復</string>
     <string name="download_failed">下載失敗.</string>
-    <string name="user_not_found">​​未找到用戶。</string>
+    <string name="user_not_found">未找到用戶。</string>
+
+    <string name="search_user_hashtag">用戶名或標籤，例如#love</string>
 </resources>

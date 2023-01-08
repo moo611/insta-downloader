@@ -70,4 +70,5 @@
     <string name="download_failed">ダウンロードに失敗しました</string>
 
     <string name="user_not_found">ユーザーが見つかりません.</string>
+    <string name="search_user_hashtag">ユーザー名またはハッシュタグ (#love など)</string>
 </resources>

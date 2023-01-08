@@ -69,5 +69,5 @@
     <string name="download_failed">Download failed.</string>
 
     <string name="user_not_found">User not found.</string>
-
+    <string name="search_user_hashtag">username or hashtag, e.g., #love</string>
 </resources>

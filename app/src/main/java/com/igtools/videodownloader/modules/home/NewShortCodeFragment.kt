@@ -139,6 +139,12 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
 
         }
+        mBinding.imgCamera.setOnClickListener {
+
+            val launchIntent = requireActivity().packageManager.getLaunchIntentForPackage("com.instagram.android")
+            launchIntent?.let { startActivity(it) }
+        }
+
 
         //version 52 fix scrollview edittext focus bug
 //        val view = mBinding.scrollview

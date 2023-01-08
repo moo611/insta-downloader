@@ -24,7 +24,10 @@ import com.igtools.videodownloader.databinding.ActivityMainBinding
 import com.igtools.videodownloader.modules.home.HomeFragment
 import com.igtools.videodownloader.modules.setting.SettingFragment
 import com.igtools.videodownloader.models.IntentEvent
+import com.igtools.videodownloader.modules.home.NewShortCodeFragment
+import com.igtools.videodownloader.modules.home.ShortCodeFragment
 import com.igtools.videodownloader.modules.repost.RepostFragment
+import com.igtools.videodownloader.modules.search.SearchFragment
 import com.igtools.videodownloader.modules.tag.TagFragmentNew
 import com.igtools.videodownloader.utils.RegexUtils
 import com.igtools.videodownloader.utils.ShareUtils
@@ -59,13 +62,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         initDialog()
         //添加imageviews
         imageViews.add(mBinding.imgHome)
-        imageViews.add(mBinding.imgTag)
+        imageViews.add(mBinding.imgSearch)
         imageViews.add(mBinding.imgRepost)
         imageViews.add(mBinding.imgMine)
 
 
-        fragments.add(HomeFragment())
-        fragments.add(TagFragmentNew())
+        fragments.add(NewShortCodeFragment())
+        fragments.add(SearchFragment())
         fragments.add(RepostFragment())
         fragments.add(SettingFragment())
 
@@ -79,7 +82,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             lastPos = 0
 
         }
-        mBinding.llTag.setOnClickListener {
+        mBinding.llSearch.setOnClickListener {
 
             showFragment(1)
             selectPage(1)
