@@ -77,7 +77,8 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
             firebaseAnalytics.logEvent("search_by_tag") {
                 param("search_by_tag", 1)
             }
-            refreshNoCookie()
+            //refreshNoCookie()
+            refreshWeb()
         }
 
         mBinding.etTag.addTextChangedListener(object : TextWatcher {
@@ -196,15 +197,15 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
 
                 } else {
 
-                   safeToast(R.string.failed)
+                    safeToast(R.string.failed)
                 }
 
-                if (!isInvalidContext()){
+                if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
             } catch (e: Exception) {
                 safeToast(R.string.network)
-                if (!isInvalidContext()){
+                if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
 
@@ -212,6 +213,66 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
 
 
         }
+
+    }
+
+    private fun refreshWeb() {
+        clearData()
+        lifecycleScope.launch {
+            progressDialog.show()
+            try {
+                var tagname = mBinding.etTag.text.toString().trim().lowercase()
+                if (tagname.startsWith("#")) {
+                    tagname = tagname.replace("#", "")
+                }
+                val url =
+                    "https://www.instagram.com/api/v1/tags/logged_out_web_info/?tag_name=$tagname"
+                val headers: HashMap<String, String> = HashMap()
+                headers["user-agent"] =
+                    "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36"
+                headers["x-ig-app-id"] = "1217981644879628"
+                val res1 = ApiClient.getClient3().getTagWeb(url, headers)
+                val jsonObject = res1.body()
+                val code = res1.code()
+                if (code == 200 && jsonObject != null) {
+                    mInterstitialAd?.show(requireActivity())
+                    val tag = jsonObject["data"].asJsonObject["hashtag"].asJsonObject
+                    profileUrl = tag["profile_pic_url"].asString
+                    val edge_hashtag_to_media =
+                        tag["edge_hashtag_to_media"].asJsonObject
+                    val edges = edge_hashtag_to_media["edges"].asJsonArray
+                    if (edges.size() > 0) {
+                        val medias: ArrayList<MediaModel> = ArrayList()
+                        for (item in edges) {
+                            val mediainfo = parse1(item.asJsonObject)
+                            medias.add(mediainfo)
+                        }
+                        adapter.refresh(medias)
+                    }
+                    val pageInfo = edge_hashtag_to_media["page_info"].asJsonObject
+                    isEnd = !pageInfo["has_next_page"].asBoolean
+                    cursor = pageInfo["end_cursor"].asString
+
+                } else {
+
+                    safeToast(R.string.failed)
+                }
+
+                if (!isInvalidContext()) {
+                    progressDialog.dismiss()
+                }
+
+
+            } catch (e: Exception) {
+
+                safeToast(R.string.network)
+                if (!isInvalidContext()) {
+                    progressDialog.dismiss()
+                }
+            }
+
+        }
+
 
     }
 

@@ -30,4 +30,8 @@ interface TagService {
     @FormUrlEncoded
     suspend fun getMoreTagData(@Url url:String,@HeaderMap map:HashMap<String,String>,@FieldMap queries:HashMap<String,Any>): Response<JsonObject>
 
+
+    @GET
+    suspend fun getTagWeb(@Url url:String,@HeaderMap map:HashMap<String,String>): Response<JsonObject>
+
 }
