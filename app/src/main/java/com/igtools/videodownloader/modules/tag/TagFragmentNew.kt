@@ -154,7 +154,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
 
     private fun refreshNoCookie() {
         clearData()
-        mInterstitialAd?.show(requireActivity())
+
         progressDialog.show()
         lifecycleScope.launch {
             try {
@@ -176,6 +176,7 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
                 val jsonObject = res1.body()
                 val code = res1.code()
                 if (code == 200 && jsonObject != null) {
+                    mInterstitialAd?.show(requireActivity())
                     val tag = jsonObject["data"].asJsonObject["hashtag"].asJsonObject
                     profileUrl = tag["profile_pic_url"].asString
                     val edge_hashtag_to_media =
@@ -195,21 +196,18 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
 
                 } else {
 
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.failed),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                   safeToast(R.string.failed)
                 }
 
-                progressDialog.dismiss()
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
+                }
             } catch (e: Exception) {
-                context?.let {
-                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT).show()
+                safeToast(R.string.network)
+                if (!isInvalidContext()){
+                    progressDialog.dismiss()
                 }
 
-                progressDialog.dismiss()
             }
 
 
@@ -267,19 +265,12 @@ class TagFragmentNew : BaseFragment<FragmentTagNewBinding>() {
 
                 } else {
 
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.failed),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    safeToast(R.string.failed)
                 }
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
-                context?.let {
-                    Toast.makeText(it, getString(R.string.network), Toast.LENGTH_SHORT).show()
-                }
+                safeToast(R.string.network)
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
             }

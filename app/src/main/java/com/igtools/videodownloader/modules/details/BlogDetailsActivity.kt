@@ -141,48 +141,55 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         }
 
         mBinding.imgWall.setOnClickListener {
-
-            if (recordInfo == null) {
-                Toast.makeText(this, getString(R.string.download_first), Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (Build.VERSION.SDK_INT >= 24) {
-                selectDialog.show()
-            } else {
-                if (mediaInfo.mediaType == 8) {
-                    val selectIndex = mBinding.banner.currentItem
-                    if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
-                        val media = mediaInfo.resources[selectIndex]
-                        val paths = recordInfo!!.paths
-                        val pathMap = gson.fromJson(paths, HashMap::class.java)
-                        val filePath = pathMap[media.thumbnailUrl] as? String
-                        addWallPaperUnder24(filePath)
-
+            lifecycleScope.launch {
+                val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
+                if (recordInfo == null && oldRecord == null) {
+                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.download_first), Toast.LENGTH_SHORT).show()
+                    return@launch
+                }else{
+                    //从user列表重复进入的情况
+                    if(recordInfo == null){
+                        recordInfo = oldRecord
+                    }
+                    if (Build.VERSION.SDK_INT >= 24) {
+                        selectDialog.show()
                     } else {
-                        Toast.makeText(
-                            this,
-                            getString(R.string.unsupport),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        if (mediaInfo.mediaType == 8) {
+                            val selectIndex = mBinding.banner.currentItem
+                            if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
+                                val media = mediaInfo.resources[selectIndex]
+                                val paths = recordInfo!!.paths
+                                val pathMap = gson.fromJson(paths, HashMap::class.java)
+                                val filePath = pathMap[media.thumbnailUrl] as? String
+                                addWallPaperUnder24(filePath)
+
+                            } else {
+                                Toast.makeText(
+                                    this@BlogDetailsActivity,
+                                    getString(R.string.unsupport),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                            }
+                        } else {
+                            if (mediaInfo.mediaType == 1) {
+                                val paths = recordInfo!!.paths
+                                val pathMap = gson.fromJson(paths, HashMap::class.java)
+                                val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
+                                addWallPaperUnder24(filePath)
+                            } else {
+                                Toast.makeText(
+                                    this@BlogDetailsActivity,
+                                    getString(R.string.unsupport),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                            }
+                        }
 
                     }
-                } else {
-                    if (mediaInfo.mediaType == 1) {
-                        val paths = recordInfo!!.paths
-                        val pathMap = gson.fromJson(paths, HashMap::class.java)
-                        val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
-                        addWallPaperUnder24(filePath)
-                    } else {
-                        Toast.makeText(
-                            this,
-                            getString(R.string.unsupport),
-                            Toast.LENGTH_SHORT
-                        ).show()
 
-                    }
                 }
-
             }
 
         }
@@ -203,49 +210,57 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         }
 
         mBinding.imgRepost.setOnClickListener {
+            lifecycleScope.launch {
+                val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
+                if (recordInfo == null && oldRecord == null) {
 
-            if (flag && recordInfo == null) {
-
-                Toast.makeText(this, getString(R.string.download_first), Toast.LENGTH_SHORT).show()
-
-            } else {
-                //从本地获取
-                if (mediaInfo.mediaType == 8) {
-
-                    val selectIndex = mBinding.banner.currentItem
-                    Log.v(TAG, selectIndex.toString())
-                    val media = mediaInfo.resources[selectIndex]
-                    if (media.mediaType == 1) {
-                        val paths = recordInfo!!.paths
-                        val pathMap = gson.fromJson(paths, HashMap::class.java)
-                        val filePath = pathMap[media.thumbnailUrl] as? String
-
-                        repost(filePath, false)
-                    } else if (media.mediaType == 2) {
-                        val paths = recordInfo!!.paths
-                        val pathMap = gson.fromJson(paths, HashMap::class.java)
-                        val filePath = pathMap[media.videoUrl] as? String
-                        repost(filePath, true)
-                    }
+                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.download_first), Toast.LENGTH_SHORT).show()
 
                 } else {
-                    if (mediaInfo.mediaType == 1) {
+                    //从tag列表重复进入的情况
+                    if(recordInfo == null){
+                        recordInfo = oldRecord
+                    }
+                    //从本地获取
+                    if (mediaInfo.mediaType == 8) {
 
-                        val paths = recordInfo!!.paths
-                        val pathMap = gson.fromJson(paths, HashMap::class.java)
-                        val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
+                        val selectIndex = mBinding.banner.currentItem
+                        Log.v(TAG, selectIndex.toString())
+                        val media = mediaInfo.resources[selectIndex]
+                        if (media.mediaType == 1) {
+                            val paths = recordInfo!!.paths
+                            val pathMap = gson.fromJson(paths, HashMap::class.java)
+                            val filePath = pathMap[media.thumbnailUrl] as? String
 
-                        repost(filePath, false)
+                            repost(filePath, false)
+                        } else if (media.mediaType == 2) {
+                            val paths = recordInfo!!.paths
+                            val pathMap = gson.fromJson(paths, HashMap::class.java)
+                            val filePath = pathMap[media.videoUrl] as? String
+                            repost(filePath, true)
+                        }
 
-                    } else if (mediaInfo.mediaType == 2) {
+                    } else {
+                        if (mediaInfo.mediaType == 1) {
 
-                        val paths = recordInfo!!.paths
-                        val pathMap = gson.fromJson(paths, HashMap::class.java)
-                        val filePath = pathMap[mediaInfo.videoUrl] as? String
-                        repost(filePath, true)
+                            val paths = recordInfo!!.paths
+                            val pathMap = gson.fromJson(paths, HashMap::class.java)
+                            val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
+
+                            repost(filePath, false)
+
+                        } else if (mediaInfo.mediaType == 2) {
+
+                            val paths = recordInfo!!.paths
+                            val pathMap = gson.fromJson(paths, HashMap::class.java)
+                            val filePath = pathMap[mediaInfo.videoUrl] as? String
+                            repost(filePath, true)
+                        }
                     }
                 }
+
             }
+
 
         }
 
