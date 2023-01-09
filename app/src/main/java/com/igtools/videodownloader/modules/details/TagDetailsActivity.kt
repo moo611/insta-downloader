@@ -631,8 +631,10 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
                 if (mediaInfo.mediaType == 8 && mediaInfo.resources.size == 0) {
                     //tag 列表从外侧获取不到sidecar的children
-                    getDatafromServer()
-                } else {
+                    getDatafromServer(1)
+                } else if(mediaInfo.mediaType == 2 && mediaInfo.videoUrl == null){
+                    getDatafromServer(2)
+                }else {
                     updateUI()
                 }
 
@@ -648,10 +650,14 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
     }
 
-    private fun getDatafromServer() {
-
+    private fun getDatafromServer(type:Int) {
+        val sourceUrl = if(type==1){
+            "https://www.instagram.com/p/$code/embed/captioned"
+        }else{
+            "https://www.instagram.com/reel/$code/embed/captioned"
+        }
         searchDialog.show()
-        val sourceUrl = "https://www.instagram.com/p/$code/embed/captioned"
+
         Thread {
             try {
                 val doc: Document = Jsoup.connect(sourceUrl).userAgent(Urls.USER_AGENT).get()

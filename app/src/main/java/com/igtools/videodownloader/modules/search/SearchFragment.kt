@@ -61,6 +61,9 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     }
 
     override fun initView() {
+        val adRequest = AdRequest.Builder().build();
+        mBinding.adView.loadAd(adRequest)
+
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
