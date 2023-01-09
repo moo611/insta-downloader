@@ -124,4 +124,7 @@ dependencies {
     //implementation 'com.facebook.android:facebook-android-sdk:latest.release'
 
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
+
+    implementation 'com.liulishuo.okdownload:okdownload:1.0.7'
+    implementation 'com.github.jakob-grabner:Circle-Progress-View:1.4'
 }

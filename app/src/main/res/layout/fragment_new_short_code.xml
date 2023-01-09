@@ -33,10 +33,12 @@
                 android:layout_marginRight="16dp"
                 android:src="@mipmap/camera" />
         </RelativeLayout>
+
         <View
-            android:background="#e3e3e3"
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:background="#e3e3e3" />
+
         <ScrollView
             android:id="@+id/scrollview"
             android:layout_width="match_parent"
@@ -163,12 +165,32 @@
                             android:scaleType="centerCrop" />
 
 
-                        <ProgressBar
-                            android:id="@+id/progressbar"
-                            android:layout_width="60dp"
-                            android:layout_height="60dp"
+                        <at.grabner.circleprogress.CircleProgressView
+                            android:visibility="invisible"
                             android:layout_gravity="center"
-                            android:visibility="invisible" />
+                            android:id="@+id/progressbar"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            app:cpv_autoTextSize="false"
+                            app:cpv_textSize="18sp"
+                            app:cpv_barColor="@color/app_color"
+                            app:cpv_barWidth="8dp"
+                            app:cpv_rimWidth="8dp"
+                            app:cpv_rimColor="@color/gray_1"
+                            app:cpv_innerContourSize="0dp"
+                            app:cpv_maxValue="100"
+                            app:cpv_outerContourSize="0dp"
+                            app:cpv_seekMode="false"
+                            app:cpv_showUnit="true"
+                            app:cpv_textColor="@color/gray_1"
+                            app:cpv_textScale="1"
+                            app:cpv_unit="%"
+                            app:cpv_unitSize="14sp"
+                            app:cpv_unitColor="@color/gray_1"
+                            app:cpv_unitPosition="right_top"
+                            app:cpv_unitScale="1"
+                            app:cpv_value="0" />
+
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -177,7 +199,7 @@
                             android:background="#80999999"
                             android:gravity="center_vertical">
 
-                            <com.igtools.videodownloader.widgets.RoundImageView
+                            <ImageView
                                 android:id="@+id/avatar"
                                 android:layout_width="30dp"
                                 android:layout_height="30dp"

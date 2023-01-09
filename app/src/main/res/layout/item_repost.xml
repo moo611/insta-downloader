@@ -44,12 +44,12 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <com.igtools.videodownloader.widgets.RoundImageView
+            <ImageView
                 android:id="@+id/img_avatar"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginStart="12dp"
-                app:radius="15dp" />
+                />
 
             <TextView
                 android:id="@+id/tv_username"

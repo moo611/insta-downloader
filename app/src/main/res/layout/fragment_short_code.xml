@@ -147,7 +147,7 @@
                         android:background="#80999999"
                         android:gravity="center_vertical">
 
-                        <com.igtools.videodownloader.widgets.RoundImageView
+                        <ImageView
                             android:id="@+id/avatar"
                             android:layout_width="30dp"
                             android:layout_height="30dp"

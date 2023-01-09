@@ -70,4 +70,5 @@
     <string name="download_failed">Загрузка не удалась</string>
     <string name="user_not_found">Пользователь не найден.</string>
     <string name="search_user_hashtag">имя пользователя или хэштег, например, #love</string>
+    <string name="download_start">Начало загрузки</string>
 </resources>

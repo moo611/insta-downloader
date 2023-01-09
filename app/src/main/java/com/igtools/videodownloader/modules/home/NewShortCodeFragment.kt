@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
+import android.os.Environment
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -39,11 +40,23 @@ import com.igtools.videodownloader.modules.web.WebActivity
 import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.*
 import com.igtools.videodownloader.widgets.dialog.MyDialog
+import com.liulishuo.okdownload.DownloadContext
+import com.liulishuo.okdownload.DownloadContextListener
+import com.liulishuo.okdownload.DownloadTask
+import com.liulishuo.okdownload.core.breakpoint.BlockInfo
+import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
+import com.liulishuo.okdownload.core.cause.EndCause
+import com.liulishuo.okdownload.core.cause.ResumeFailedCause
+import com.liulishuo.okdownload.core.listener.DownloadListener1
+import com.liulishuo.okdownload.core.listener.DownloadListener4
+import com.liulishuo.okdownload.core.listener.assist.Listener1Assist
+import com.liulishuo.okdownload.core.listener.assist.Listener4Assist
 import kotlinx.coroutines.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.io.File
 import java.net.URLEncoder
 
 
@@ -58,10 +71,12 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     var curMediaInfo: MediaModel? = null
     var curRecord: Record? = null
     var paths: HashMap<String, String> = HashMap()
-
-    var downloadSuccess = true
+    var totalLen: Long = 0
+    var isDownloading = false
     private val LOGIN_REQ = 1000
-
+    var currentCount = 0
+    var totalCount = 0
+    val INDEX_TAG = 1
     override fun getLayoutId(): Int {
         return R.layout.fragment_new_short_code
     }
@@ -79,7 +94,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
 
         mBinding.container.setOnClickListener {
-            if (curMediaInfo != null && curRecord != null) {
+            if (!isDownloading) {
                 startActivity(
                     Intent(requireContext(), BlogDetailsActivity::class.java)
                         .putExtra("content", gson.toJson(curMediaInfo))
@@ -137,7 +152,8 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
         mBinding.imgCamera.setOnClickListener {
 
-            val launchIntent = requireActivity().packageManager.getLaunchIntentForPackage("com.instagram.android")
+            val launchIntent =
+                requireActivity().packageManager.getLaunchIntentForPackage("com.instagram.android")
             launchIntent?.let { startActivity(it) }
         }
 
@@ -308,10 +324,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     private fun loadData(sourceUrl: String) {
 
         progressDialog.show()
-        curMediaInfo = null
-        paths.clear()
-        curRecord = null
-        downloadSuccess = true
+        clearData()
 
         Thread {
             try {
@@ -335,36 +348,20 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         curMediaInfo = parseMedia(shortcode_media)
 
                         activity?.runOnUiThread {
-                            if (!isInvalidContext()){
+                            if (!isInvalidContext()) {
                                 progressDialog.dismiss()
                             }
 
                             showCurrent()
                             mInterstitialAd?.show(requireActivity())
                             mBinding.progressbar.visibility = View.VISIBLE
-                            lifecycleScope.launch {
-                                if (curMediaInfo?.mediaType == 8) {
-                                    val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
-                                        async {
-                                            download(it)
-                                        }
-                                    }
 
-                                    all.awaitAll()
-                                } else {
-                                    download(curMediaInfo!!)
-                                }
-
-                                if (!downloadSuccess) {
-                                    safeToast(R.string.download_failed)
-                                    mBinding.progressbar.visibility = View.INVISIBLE
-                                    return@launch
-                                }
-                                mBinding.progressbar.visibility = View.INVISIBLE
-                                safeToast(R.string.download_finish)
-                                saveRecord()
+                            isDownloading = true
+                            if (curMediaInfo?.mediaType == 8) {
+                                downloadMultiple(curMediaInfo!!)
+                            } else {
+                                downloadSingle(curMediaInfo!!)
                             }
-
                         }
 
                         return@Thread
@@ -382,31 +379,23 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     parseImage(doc)
 
                     activity?.runOnUiThread {
-                        if (!isInvalidContext()){
+                        if (!isInvalidContext()) {
                             progressDialog.dismiss()
                         }
 
                         showCurrent()
                         mInterstitialAd?.show(requireActivity())
                         mBinding.progressbar.visibility = View.VISIBLE
-                        lifecycleScope.launch {
-                            download(curMediaInfo!!)
-                            if (!downloadSuccess) {
-                                safeToast(R.string.download_failed)
-                                mBinding.progressbar.visibility = View.INVISIBLE
-                                return@launch
-                            }
-                            mBinding.progressbar.visibility = View.INVISIBLE
-                            safeToast(R.string.download_finish)
-                            saveRecord()
-                        }
+
+                        isDownloading = true
+                        downloadSingle(curMediaInfo!!)
 
                     }
 
                 } else {
 
                     //如果extra里面是null，则用原来的方法尝试获取
-                    Analytics.sendEvent("use_a1","media_type",mediatype)
+                    Analytics.sendEvent("use_a1", "media_type", mediatype)
                     val myUrl = mBinding.etShortcode.text.toString()
                     getMediaData(myUrl)
 
@@ -416,7 +405,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 //私人账户
                 Log.e(TAG, e.message + "")
                 activity?.runOnUiThread {
-                    if(!isInvalidContext()){
+                    if (!isInvalidContext()) {
                         progressDialog.dismiss()
                         privateDialog.show()
                     }
@@ -481,7 +470,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 val jsonObject = res.body()
                 //Log.v(TAG, jsonObject.toString())
                 if (res.code() == 200 && jsonObject != null) {
-                    if (!isInvalidContext()){
+                    if (!isInvalidContext()) {
                         progressDialog.dismiss()
                     }
 
@@ -491,28 +480,13 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
                     mBinding.progressbar.visibility = View.VISIBLE
+
+                    isDownloading = true
                     if (curMediaInfo?.mediaType == 8) {
-                        val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
-                            async {
-                                download(it)
-                            }
-                        }
-
-                        all.awaitAll()
+                        downloadMultiple(curMediaInfo!!)
                     } else {
-                        download(curMediaInfo!!)
+                        downloadSingle(curMediaInfo!!)
                     }
-
-                    if (!downloadSuccess) {
-                        mBinding.progressbar.visibility = View.INVISIBLE
-                        safeToast(R.string.download_failed)
-                        return@launch
-                    }
-
-                    mBinding.progressbar.visibility = View.INVISIBLE
-                    safeToast(R.string.download_finish)
-                    saveRecord()
-
                 } else {
                     if (BaseApplication.cookie == null) {
                         if (!isInvalidContext()) {
@@ -527,9 +501,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
             } catch (e: Exception) {
                 mBinding.progressbar.visibility = View.INVISIBLE
+                mBinding.progressbar.setValue(0f)
                 Log.e(TAG, e.message + "")
                 safeToast(R.string.network)
-                if (!isInvalidContext()){
+                if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
 
@@ -555,7 +530,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
                 val res = ApiClient.getClient()
                     .getMediaData(Urls.GRAPH_QL, map, Urls.QUERY_HASH, gson.toJson(map2))
-                if (!isInvalidContext()){
+                if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
 
@@ -568,37 +543,23 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
                     mBinding.progressbar.visibility = View.VISIBLE
+
+                    isDownloading=true
                     if (curMediaInfo?.mediaType == 8) {
-                        val all: List<Deferred<Unit>> = curMediaInfo!!.resources.map {
-                            async {
-                                download(it)
-                            }
-                        }
-
-                        all.awaitAll()
+                        downloadMultiple(curMediaInfo!!)
                     } else {
-                        download(curMediaInfo!!)
+                        downloadSingle(curMediaInfo!!)
                     }
-
-                    if (!downloadSuccess) {
-                        safeToast(R.string.download_failed)
-                        mBinding.progressbar.visibility = View.INVISIBLE
-                        return@launch
-                    }
-
-                    mBinding.progressbar.visibility = View.INVISIBLE
-                    safeToast(R.string.download_finish)
-                    saveRecord()
-
                 } else {
                     safeToast(R.string.not_found)
                 }
 
             } catch (e: Exception) {
                 mBinding.progressbar.visibility = View.INVISIBLE
+                mBinding.progressbar.setValue(0f)
                 Log.e(TAG, e.message + "")
                 safeToast(R.string.network)
-                if (!isInvalidContext()){
+                if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
 
@@ -664,10 +625,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
      * 获取story
      */
     private fun getStoryData() {
-        paths.clear()
-        curMediaInfo = null
-        curRecord = null
-        downloadSuccess = true
+        clearData()
         lifecycleScope.launch {
             //检查是否已存在
             val myUrl = mBinding.etShortcode.text.toString()
@@ -691,7 +649,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     .getStoryData(url, map)
                 val code = res.code()
                 val jsonObject = res.body()
-                if (!isInvalidContext()){
+                if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
 
@@ -700,17 +658,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     showCurrent()
                     mInterstitialAd?.show(requireActivity())
                     mBinding.progressbar.visibility = View.VISIBLE
-                    download(curMediaInfo!!)
+                    isDownloading = true
 
-                    if (!downloadSuccess) {
-                        safeToast(R.string.download_failed)
-                        mBinding.progressbar.visibility = View.INVISIBLE
-                        return@launch
-                    }
+                    downloadSingle(curMediaInfo!!)
 
-                    saveRecord()
-                    safeToast(R.string.download_finish)
-                    mBinding.progressbar.visibility = View.INVISIBLE
 
                 } else {
                     Log.e(TAG, res.errorBody()?.string() + "")
@@ -720,7 +671,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
             } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
-                if (!isInvalidContext()){
+                if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
 
@@ -728,6 +679,17 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
             }
         }
+
+    }
+
+    private fun clearData() {
+        currentCount = 0
+        totalCount = 0
+        totalLen = 0
+        paths.clear()
+        curMediaInfo = null
+        curRecord = null
+        isDownloading = false
 
     }
 
@@ -840,9 +802,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 }
             } catch (e: Exception) {
 
-                downloadSuccess = false
+                isDownloading = false
                 e.message?.let {
-                    Analytics.sendException("app_my_exception",Analytics.ERROR_KEY,it)
+                    Analytics.sendException("app_my_exception", Analytics.ERROR_KEY, it)
                 }
 
             }
@@ -861,9 +823,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         paths[media.videoUrl!!] = path!!
                     }
                 } catch (e: Exception) {
-                    downloadSuccess = false
+                    isDownloading = false
                     e.message?.let {
-                        Analytics.sendException("app_my_exception",Analytics.ERROR_KEY,it)
+                        Analytics.sendException("app_my_exception", Analytics.ERROR_KEY, it)
                     }
 
                 }
@@ -874,6 +836,244 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
     }
 
+
+    private fun downloadSingle(mediaInfo: MediaModel) {
+        val parentFile = createDirDownload()
+        val task:DownloadTask
+        if (mediaInfo.mediaType == 1) {
+            task = DownloadTask.Builder(mediaInfo.thumbnailUrl, parentFile)
+                .setConnectionCount(1)
+                // the minimal interval millisecond for callback progress
+                .setMinIntervalMillisCallbackProcess(16)
+                // ignore the same task has already completed in the past.
+                .setPassIfAlreadyCompleted(false)
+                .build()
+            task.addTag(INDEX_TAG,1)
+        } else {
+            task = DownloadTask.Builder(mediaInfo.videoUrl!!, parentFile)
+                .setConnectionCount(1)
+                // the minimal interval millisecond for callback progress
+                .setMinIntervalMillisCallbackProcess(16)
+                // ignore the same task has already completed in the past.
+                .setPassIfAlreadyCompleted(false)
+                .build()
+            task.addTag(INDEX_TAG,2)
+        }
+
+        task.enqueue(object : DownloadListener4() {
+            override fun taskStart(task: DownloadTask) {
+                Toast.makeText(requireContext(), R.string.download_start, Toast.LENGTH_SHORT).show()
+            }
+
+            override fun connectStart(
+                task: DownloadTask,
+                blockIndex: Int,
+                requestHeaderFields: MutableMap<String, MutableList<String>>
+            ) {
+
+            }
+
+            override fun connectEnd(
+                task: DownloadTask,
+                blockIndex: Int,
+                responseCode: Int,
+                responseHeaderFields: MutableMap<String, MutableList<String>>
+            ) {
+
+            }
+
+            override fun taskEnd(
+                task: DownloadTask,
+                cause: EndCause?,
+                realCause: java.lang.Exception?,
+                model: Listener4Assist.Listener4Model
+            ) {
+
+                Log.e(TAG, realCause?.message + "")
+                val tempFile = task.file
+                if (task.getTag(INDEX_TAG) == 1) {
+                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
+                    if(bitmap != null){
+                        val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
+                        if (path != null) {
+                            paths[task.url] = path
+                        }
+                        tempFile?.delete()
+                    }
+                }else{
+                    tempFile?.inputStream()?.use {
+                        val path = FileUtils.saveVideoToAlbum(requireContext(), it)
+                        if (path != null) {
+                            paths[task.url] = path
+                        }
+                    }
+                    tempFile?.delete()
+                }
+
+                lifecycleScope.launch {
+                    saveRecord()
+                }
+                isDownloading=false
+                mBinding.progressbar.visibility = View.INVISIBLE
+                mBinding.progressbar.setValue(0f)
+                Toast.makeText(requireContext(), R.string.download_finish, Toast.LENGTH_SHORT).show()
+            }
+
+
+            override fun infoReady(
+                task: DownloadTask?,
+                info: BreakpointInfo,
+                fromBreakpoint: Boolean,
+                model: Listener4Assist.Listener4Model
+            ) {
+                totalLen = info.totalLength
+            }
+
+            override fun progressBlock(
+                task: DownloadTask?,
+                blockIndex: Int,
+                currentBlockOffset: Long
+            ) {
+
+            }
+
+            override fun progress(task: DownloadTask?, currentOffset: Long) {
+                Log.v(TAG, "current thread is：" + Thread.currentThread().name)
+                val percent = (currentOffset.toFloat())*100 / totalLen
+                mBinding.progressbar.setValue(percent)
+            }
+
+            override fun blockEnd(task: DownloadTask?, blockIndex: Int, info: BlockInfo?) {
+
+            }
+
+        })
+
+    }
+
+    private fun downloadMultiple(mediaInfo: MediaModel) {
+
+        val fileDir = createDirDownload()
+
+        val builder = DownloadContext.QueueSet()
+            .setMinIntervalMillisCallbackProcess(300)
+            .commit()
+
+        for(res in mediaInfo.resources){
+            val url = if (res.mediaType == 1){
+                res.thumbnailUrl
+            }else{
+                res.videoUrl!!
+            }
+
+            val taskBuilder = DownloadTask.Builder(url, fileDir)
+                .setConnectionCount(1)
+                // the minimal interval millisecond for callback progress
+                .setMinIntervalMillisCallbackProcess(16)
+                // ignore the same task has already completed in the past.
+                .setPassIfAlreadyCompleted(false)
+
+            builder.bind(taskBuilder).addTag(INDEX_TAG,res.mediaType)
+
+        }
+
+        totalCount = mediaInfo.resources.size
+        currentCount = 0
+
+        val downloadContext = builder.setListener(object : DownloadContextListener {
+            override fun taskEnd(
+                context: DownloadContext,
+                task: DownloadTask,
+                cause: EndCause,
+                realCause: java.lang.Exception?,
+                remainCount: Int
+            ) {
+                Log.e(TAG, realCause?.message + "")
+                val tempFile = task.file
+
+                if (task.getTag(INDEX_TAG) == 1) {
+
+                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
+                    if(bitmap != null){
+                        val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
+                        if (path != null) {
+                            paths[task.url] = path
+                        }
+                        tempFile?.delete()
+                    }
+
+                } else {
+                    tempFile?.inputStream()?.use {
+                        val path = FileUtils.saveVideoToAlbum(requireContext(), it)
+                        if (path != null) {
+                            paths[task.url] = path
+                        }
+                    }
+                    tempFile?.delete()
+                }
+
+
+            }
+
+            override fun queueEnd(context: DownloadContext) {
+                lifecycleScope.launch {
+                    saveRecord()
+                }
+                isDownloading=false
+                mBinding.progressbar.visibility = View.INVISIBLE
+                mBinding.progressbar.setValue(0f)
+                Toast.makeText(requireContext(), R.string.download_finish, Toast.LENGTH_SHORT).show()
+            }
+
+        }).build()
+
+        downloadContext?.start(object : DownloadListener1() {
+            override fun taskStart(task: DownloadTask, model: Listener1Assist.Listener1Model) {
+
+            }
+
+            override fun taskEnd(
+                task: DownloadTask,
+                cause: EndCause,
+                realCause: java.lang.Exception?,
+                model: Listener1Assist.Listener1Model
+            ) {
+                Log.v(TAG, "task end---")
+                currentCount += 1
+                mBinding.progressbar.setValue(currentCount.toFloat()*100 / totalCount)
+            }
+
+            override fun retry(task: DownloadTask, cause: ResumeFailedCause) {
+
+            }
+
+            override fun connected(
+                task: DownloadTask,
+                blockCount: Int,
+                currentOffset: Long,
+                totalLength: Long
+            ) {
+
+            }
+
+            override fun progress(task: DownloadTask, currentOffset: Long, totalLength: Long) {
+
+            }
+
+        }, false)
+
+    }
+
+
+    fun createDirDownload(): File {
+
+        val fileDir = activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+        if (!fileDir.exists()) {
+            fileDir.mkdirs()
+        }
+
+        return fileDir
+    }
 
     @Subscribe
     fun onKeywordReceive(intentEvent: IntentEvent) {
@@ -936,7 +1136,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     override fun onDetach() {
         super.onDetach()
 
-        Log.v(TAG,"on detach")
+        Log.v(TAG, "on detach")
 
     }
 }

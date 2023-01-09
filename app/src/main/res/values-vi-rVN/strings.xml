@@ -73,4 +73,5 @@
 
     <string name="user_not_found">Không tìm thấy người dùng.</string>
     <string name="search_user_hashtag">tên người dùng hoặc thẻ bắt đầu bằng #, ví dụ: #love</string>
+    <string name="download_start">Bắt đầu tải xuống</string>
 </resources>

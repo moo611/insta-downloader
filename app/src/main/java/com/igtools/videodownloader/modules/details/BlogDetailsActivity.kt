@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -34,6 +35,17 @@ import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.Analytics
 import com.igtools.videodownloader.utils.FileUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
+import com.liulishuo.okdownload.DownloadContext
+import com.liulishuo.okdownload.DownloadContextListener
+import com.liulishuo.okdownload.DownloadTask
+import com.liulishuo.okdownload.core.breakpoint.BlockInfo
+import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
+import com.liulishuo.okdownload.core.cause.EndCause
+import com.liulishuo.okdownload.core.cause.ResumeFailedCause
+import com.liulishuo.okdownload.core.listener.DownloadListener1
+import com.liulishuo.okdownload.core.listener.DownloadListener4
+import com.liulishuo.okdownload.core.listener.assist.Listener1Assist
+import com.liulishuo.okdownload.core.listener.assist.Listener4Assist
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
 import java.io.File
@@ -43,7 +55,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     val TAG = "BlogDetailsActivity"
     lateinit var adapter: MultiTypeAdapter
-    lateinit var progressDialog: ProgressDialog
+
     lateinit var selectDialog: BottomDialog
     var isBack = false
     var mediaInfo = MediaModel()
@@ -52,7 +64,11 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     var mInterstitialAd: InterstitialAd? = null
     var paths: HashMap<String, String> = HashMap()
     var needDownload: Boolean = false
-    var downloadSuccess = true
+    var isDownloading = true
+    var currentCount = 0
+    var totalCount = 0
+    val INDEX_TAG = 1
+    var totalLen:Long = 0
     override fun getLayoutId(): Int {
         return R.layout.activity_blog_details
     }
@@ -67,9 +83,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             .setIndicator(CircleIndicator(this))
             .setAdapter(adapter)
             .isAutoLoop(false)
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.downloading))
-        progressDialog.setCancelable(false)
+
         intent?.extras?.getBoolean("need_download")?.let {
             needDownload = it
         }
@@ -81,11 +95,8 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         }
 
         mBinding.btnDownload.setOnClickListener {
-            isBack = false
-            mInterstitialAd?.show(this@BlogDetailsActivity)
-            downloadSuccess = true
-            lifecycleScope.launch {
 
+            lifecycleScope.launch {
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (oldRecord != null) {
                     Toast.makeText(
@@ -95,48 +106,17 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                     ).show()
                     return@launch
                 }
-                progressDialog.show()
-                if (mediaInfo.mediaType == 8) {
-                    val all: List<Deferred<Unit>> = mediaInfo.resources.map {
-                        async {
-                            downloadMedia(it)
-                        }
-                    }
+                isBack = false
+                mInterstitialAd?.show(this@BlogDetailsActivity)
+                isDownloading = true
 
-                    all.awaitAll()
-                } else {
-                    downloadMedia(mediaInfo)
+                mBinding.progressBar.visibility = View.VISIBLE
+
+                if (mediaInfo.mediaType==8){
+                    downloadMultiple(mediaInfo)
+                }else{
+                    downloadSingle(mediaInfo)
                 }
-
-                if (!downloadSuccess) {
-                    Toast.makeText(
-                        this@BlogDetailsActivity,
-                        getString(R.string.download_failed),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    progressDialog.dismiss()
-                    return@launch
-                }
-
-                //Log.v(TAG,"finish")
-                recordInfo =
-                    Record(
-                        null,
-                        Gson().toJson(mediaInfo),
-                        System.currentTimeMillis(),
-                        null,
-                        code,
-                        gson.toJson(paths)
-                    )
-                RecordDB.getInstance().recordDao().insert(recordInfo)
-
-                progressDialog.dismiss()
-
-                Toast.makeText(
-                    this@BlogDetailsActivity,
-                    getString(R.string.download_finish),
-                    Toast.LENGTH_SHORT
-                ).show()
 
             }
 
@@ -643,54 +623,259 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
+    
+    private fun downloadSingle(mediaInfo: MediaModel) {
+        val parentFile = createDirDownload()
+        val task:DownloadTask
+            if (mediaInfo.mediaType == 1) {
+            task = DownloadTask.Builder(mediaInfo.thumbnailUrl, parentFile)
+                .setConnectionCount(1)
+                // the minimal interval millisecond for callback progress
+                .setMinIntervalMillisCallbackProcess(16)
+                // ignore the same task has already completed in the past.
+                .setPassIfAlreadyCompleted(false)
+                .build()
+                task.addTag(INDEX_TAG,1)
+        } else {
+           task = DownloadTask.Builder(mediaInfo.videoUrl!!, parentFile)
+                .setConnectionCount(1)
+                // the minimal interval millisecond for callback progress
+                .setMinIntervalMillisCallbackProcess(16)
+                // ignore the same task has already completed in the past.
+                .setPassIfAlreadyCompleted(false)
+                .build()
+                task.addTag(INDEX_TAG,2)
+        }
 
-    private suspend fun downloadMedia(media: MediaModel) {
-
-        if (media.mediaType == 1) {
-            //image
-
-            try {
-                val responseBody = ApiClient.getClient4().downloadUrl(media.thumbnailUrl)
-                withContext(Dispatchers.IO) {
-                    val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
-                    val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
-                    if (path != null) {
-                        paths[media.thumbnailUrl] = path
-                    }
-
-                }
-            } catch (e: Exception) {
-                downloadSuccess = false
-                e.message?.let {
-                    Analytics.sendException("app_my_exception",Analytics.ERROR_KEY,it)
-                }
+        task.enqueue(object : DownloadListener4() {
+            override fun taskStart(task: DownloadTask) {
+                Toast.makeText(this@BlogDetailsActivity, R.string.download_start, Toast.LENGTH_SHORT).show()
             }
 
-        } else if (media.mediaType == 2) {
-            //video
-            media.videoUrl?.let {
-                try {
-                    val responseBody = ApiClient.getClient4().downloadUrl(it)
-                    withContext(Dispatchers.IO) {
-                        val path = FileUtils.saveVideoToAlbum(
-                            this@BlogDetailsActivity,
-                            responseBody.body()!!.byteStream()
-                        )
-                        paths[it] = path!!
-
-                    }
-                } catch (e: Exception) {
-                    downloadSuccess = false
-                    e.message?.let {msg->
-                        Analytics.sendException("app_my_exception",Analytics.ERROR_KEY,msg)
-                    }
-
-                }
+            override fun connectStart(
+                task: DownloadTask,
+                blockIndex: Int,
+                requestHeaderFields: MutableMap<String, MutableList<String>>
+            ) {
 
             }
+
+            override fun connectEnd(
+                task: DownloadTask,
+                blockIndex: Int,
+                responseCode: Int,
+                responseHeaderFields: MutableMap<String, MutableList<String>>
+            ) {
+
+            }
+
+            override fun taskEnd(
+                task: DownloadTask,
+                cause: EndCause?,
+                realCause: java.lang.Exception?,
+                model: Listener4Assist.Listener4Model
+            ) {
+
+                Log.e(TAG, realCause?.message + "")
+                val tempFile = task.file
+
+                if (task.getTag(INDEX_TAG) == 1) {
+                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
+                    if(bitmap != null){
+                        val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
+                        if (path != null) {
+                            paths[task.url] = path
+                        }
+                        tempFile?.delete()
+                    }
+                }else{
+                    tempFile?.inputStream()?.use {
+                        val path = FileUtils.saveVideoToAlbum(this@BlogDetailsActivity, it)
+                        if (path != null) {
+                            paths[task.url] = path
+                        }
+                    }
+                    tempFile?.delete()
+                }
+
+                lifecycleScope.launch {
+                    saveRecord()
+                }
+                isDownloading=false
+                mBinding.progressBar.visibility = View.INVISIBLE
+                mBinding.progressBar.setValue(0f)
+                Toast.makeText(this@BlogDetailsActivity, R.string.download_finish, Toast.LENGTH_SHORT).show()
+            }
+
+
+            override fun infoReady(
+                task: DownloadTask?,
+                info: BreakpointInfo,
+                fromBreakpoint: Boolean,
+                model: Listener4Assist.Listener4Model
+            ) {
+                totalLen = info.totalLength
+            }
+
+            override fun progressBlock(
+                task: DownloadTask?,
+                blockIndex: Int,
+                currentBlockOffset: Long
+            ) {
+
+            }
+
+            override fun progress(task: DownloadTask?, currentOffset: Long) {
+                Log.v(TAG, "current thread is：" + Thread.currentThread().name)
+                val percent = (currentOffset.toFloat())*100 / totalLen
+                mBinding.progressBar.setValue(percent)
+            }
+
+            override fun blockEnd(task: DownloadTask?, blockIndex: Int, info: BlockInfo?) {
+
+            }
+
+        })
+
+    }
+
+    private fun downloadMultiple(mediaInfo: MediaModel) {
+
+        val fileDir = createDirDownload()
+
+        val builder = DownloadContext.QueueSet()
+            .setMinIntervalMillisCallbackProcess(300)
+            .commit()
+
+        for(res in mediaInfo.resources){
+            val url = if (res.mediaType == 1){
+                res.thumbnailUrl
+            }else{
+                res.videoUrl!!
+            }
+
+            val taskBuilder = DownloadTask.Builder(url, fileDir)
+                .setConnectionCount(1)
+                // the minimal interval millisecond for callback progress
+                .setMinIntervalMillisCallbackProcess(16)
+                // ignore the same task has already completed in the past.
+                .setPassIfAlreadyCompleted(false)
+
+            builder.bind(taskBuilder).addTag(INDEX_TAG,res.mediaType)
 
         }
 
+        totalCount = mediaInfo.resources.size
+        currentCount = 0
+
+        val downloadContext = builder.setListener(object : DownloadContextListener {
+            override fun taskEnd(
+                context: DownloadContext,
+                task: DownloadTask,
+                cause: EndCause,
+                realCause: java.lang.Exception?,
+                remainCount: Int
+            ) {
+                Log.e(TAG, realCause?.message + "")
+                val tempFile = task.file
+
+                if (task.getTag(INDEX_TAG) == 1) {
+
+                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
+                    //bitmap may be null
+                    if (bitmap!=null){
+                        val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
+                        if (path != null) {
+                            paths[task.url] = path
+                        }
+                        tempFile?.delete()
+                    }
+
+                } else {
+                    tempFile?.inputStream()?.use {
+                        val path = FileUtils.saveVideoToAlbum(this@BlogDetailsActivity, it)
+                        if (path != null) {
+                            paths[task.url] = path
+                        }
+                    }
+                    tempFile?.delete()
+                }
+
+
+            }
+
+            override fun queueEnd(context: DownloadContext) {
+                lifecycleScope.launch {
+                    saveRecord()
+                }
+                isDownloading=false
+                mBinding.progressBar.visibility = View.INVISIBLE
+                mBinding.progressBar.setValue(0f)
+                Toast.makeText(this@BlogDetailsActivity, R.string.download_finish, Toast.LENGTH_SHORT).show()
+            }
+
+        }).build()
+
+        downloadContext?.start(object : DownloadListener1() {
+            override fun taskStart(task: DownloadTask, model: Listener1Assist.Listener1Model) {
+
+            }
+
+            override fun taskEnd(
+                task: DownloadTask,
+                cause: EndCause,
+                realCause: java.lang.Exception?,
+                model: Listener1Assist.Listener1Model
+            ) {
+                Log.v(TAG, "task end---")
+                currentCount += 1
+                mBinding.progressBar.setValue(currentCount.toFloat()*100 / totalCount)
+            }
+
+            override fun retry(task: DownloadTask, cause: ResumeFailedCause) {
+
+            }
+
+            override fun connected(
+                task: DownloadTask,
+                blockCount: Int,
+                currentOffset: Long,
+                totalLength: Long
+            ) {
+
+            }
+
+            override fun progress(task: DownloadTask, currentOffset: Long, totalLength: Long) {
+
+            }
+
+        }, false)
+
+    }
+
+    suspend fun saveRecord() {
+
+        recordInfo =
+            Record(
+                null,
+                gson.toJson(mediaInfo),
+                System.currentTimeMillis(),
+                null,
+                code,
+                gson.toJson(paths)
+            )
+        RecordDB.getInstance().recordDao().insert(recordInfo)
+
+    }
+
+    fun createDirDownload(): File {
+
+        val fileDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+        if (!fileDir.exists()) {
+            fileDir.mkdirs()
+        }
+
+        return fileDir
     }
 
     private fun show(flag: String) {

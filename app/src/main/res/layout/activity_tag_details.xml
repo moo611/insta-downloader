@@ -98,12 +98,31 @@
                 android:src="@drawable/video_play_normal"
                 android:visibility="invisible" />
 
-            <ProgressBar
-                android:id="@+id/progress_bar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <at.grabner.circleprogress.CircleProgressView
+                android:visibility="invisible"
                 android:layout_gravity="center"
-                android:visibility="invisible" />
+                android:id="@+id/progress_bar"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:cpv_autoTextSize="false"
+                app:cpv_textSize="18sp"
+                app:cpv_barColor="@color/app_color"
+                app:cpv_barWidth="8dp"
+                app:cpv_rimWidth="8dp"
+                app:cpv_rimColor="@color/gray_1"
+                app:cpv_innerContourSize="0dp"
+                app:cpv_maxValue="100"
+                app:cpv_outerContourSize="0dp"
+                app:cpv_seekMode="false"
+                app:cpv_showUnit="true"
+                app:cpv_textColor="@color/gray_1"
+                app:cpv_textScale="1"
+                app:cpv_unit="%"
+                app:cpv_unitSize="14sp"
+                app:cpv_unitColor="@color/gray_1"
+                app:cpv_unitPosition="right_top"
+                app:cpv_unitScale="1"
+                app:cpv_value="0" />
 
 
         </FrameLayout>
