@@ -65,3 +65,6 @@
 -dontwarn tv.danmaku.ijk.**
 -keep class com.google.android.exoplayer2.** {*;}
 -keep interface com.google.android.exoplayer2.**
+
+#firebase crashlytics
+-keepattributes LineNumberTable,SourceFile

@@ -288,34 +288,36 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         mBinding.etShortcode.clearFocus()
         mBinding.flParent.requestFocus()
         KeyboardUtils.closeKeybord(mBinding.etShortcode, context)
-        if (paramString.matches(Regex("(.*)instagram.com/p(.*)")) || paramString.matches(Regex("(.*)instagram.com/reel(.*)"))) {
-            val url = emBedUrl()
-            Log.v(TAG, url)
 
-            lifecycleScope.launch {
-                val record = RecordDB.getInstance().recordDao().findByUrl(paramString)
-                if (record != null) {
-                    //curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
-                    Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
-                        .show()
+        lifecycleScope.launch {
+            val record = RecordDB.getInstance().recordDao().findByUrl(paramString)
+            if (record != null) {
+                //curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
+                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
+                    .show()
 
-                    return@launch
-                }
+                return@launch
+            }
 
-                Log.v(TAG, "time1:${System.currentTimeMillis()}")
-
+            if (paramString.matches(Regex("(.*)instagram.com/p(.*)")) || paramString.matches(Regex("(.*)instagram.com/reel(.*)"))) {
+                val url = emBedUrl()
+                Log.v(TAG, url)
                 loadData(url)
+            } else if (paramString.matches(Regex("(.*)instagram.com/stories/(.*)"))) {
+                if (BaseApplication.cookie == null) {
+                    storyDialog.show()
+                } else {
+                    getStoryData()
+                }
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.invalid_url),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
             }
 
-        } else if (paramString.matches(Regex("(.*)instagram.com/stories/(.*)"))) {
-            if (BaseApplication.cookie == null) {
-                storyDialog.show()
-            } else {
-                getStoryData()
-            }
-        } else {
-            Toast.makeText(requireContext(), getString(R.string.invalid_url), Toast.LENGTH_SHORT)
-                .show()
         }
 
     }
@@ -544,7 +546,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     mInterstitialAd?.show(requireActivity())
                     mBinding.progressbar.visibility = View.VISIBLE
 
-                    isDownloading=true
+                    isDownloading = true
                     if (curMediaInfo?.mediaType == 8) {
                         downloadMultiple(curMediaInfo!!)
                     } else {
@@ -627,16 +629,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     private fun getStoryData() {
         clearData()
         lifecycleScope.launch {
-            //检查是否已存在
-            val myUrl = mBinding.etShortcode.text.toString()
-            val record = RecordDB.getInstance().recordDao().findByUrl(myUrl)
-            if (record != null) {
-                //curMediaInfo = gson.fromJson(record.content, MediaModel::class.java)
-                Toast.makeText(requireContext(), getString(R.string.exist), Toast.LENGTH_SHORT)
-                    .show()
 
-                return@launch
-            }
             progressDialog.show()
             try {
                 val map: HashMap<String, String> = HashMap()
@@ -839,7 +832,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     private fun downloadSingle(mediaInfo: MediaModel) {
         val parentFile = createDirDownload()
-        val task:DownloadTask
+        val task: DownloadTask
         if (mediaInfo.mediaType == 1) {
             task = DownloadTask.Builder(mediaInfo.thumbnailUrl, parentFile)
                 .setConnectionCount(1)
@@ -848,7 +841,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 // ignore the same task has already completed in the past.
                 .setPassIfAlreadyCompleted(false)
                 .build()
-            task.addTag(INDEX_TAG,1)
+            task.addTag(INDEX_TAG, 1)
         } else {
             task = DownloadTask.Builder(mediaInfo.videoUrl!!, parentFile)
                 .setConnectionCount(1)
@@ -857,7 +850,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 // ignore the same task has already completed in the past.
                 .setPassIfAlreadyCompleted(false)
                 .build()
-            task.addTag(INDEX_TAG,2)
+            task.addTag(INDEX_TAG, 2)
         }
 
         task.enqueue(object : DownloadListener4() {
@@ -893,16 +886,16 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 val tempFile = task.file
                 if (task.getTag(INDEX_TAG) == 1) {
                     val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
-                    if(bitmap != null){
-                        val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
+                    if (bitmap != null) {
+                        val path = FileUtils.saveImageToAlbum(BaseApplication.mContext, bitmap)
                         if (path != null) {
                             paths[task.url] = path
                         }
                         tempFile?.delete()
                     }
-                }else{
+                } else {
                     tempFile?.inputStream()?.use {
-                        val path = FileUtils.saveVideoToAlbum(requireContext(), it)
+                        val path = FileUtils.saveVideoToAlbum(BaseApplication.mContext, it)
                         if (path != null) {
                             paths[task.url] = path
                         }
@@ -913,10 +906,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 lifecycleScope.launch {
                     saveRecord()
                 }
-                isDownloading=false
+                isDownloading = false
                 mBinding.progressbar.visibility = View.INVISIBLE
                 mBinding.progressbar.setValue(0f)
-                Toast.makeText(requireContext(), R.string.download_finish, Toast.LENGTH_SHORT).show()
+                safeToast(R.string.download_finish)
             }
 
 
@@ -939,7 +932,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
             override fun progress(task: DownloadTask?, currentOffset: Long) {
                 Log.v(TAG, "current thread is：" + Thread.currentThread().name)
-                val percent = (currentOffset.toFloat())*100 / totalLen
+                val percent = (currentOffset.toFloat()) * 100 / totalLen
                 mBinding.progressbar.setValue(percent)
             }
 
@@ -959,10 +952,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             .setMinIntervalMillisCallbackProcess(300)
             .commit()
 
-        for(res in mediaInfo.resources){
-            val url = if (res.mediaType == 1){
+        for (res in mediaInfo.resources) {
+            val url = if (res.mediaType == 1) {
                 res.thumbnailUrl
-            }else{
+            } else {
                 res.videoUrl!!
             }
 
@@ -973,7 +966,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 // ignore the same task has already completed in the past.
                 .setPassIfAlreadyCompleted(false)
 
-            builder.bind(taskBuilder).addTag(INDEX_TAG,res.mediaType)
+            builder.bind(taskBuilder).addTag(INDEX_TAG, res.mediaType)
 
         }
 
@@ -994,8 +987,8 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 if (task.getTag(INDEX_TAG) == 1) {
 
                     val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
-                    if(bitmap != null){
-                        val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
+                    if (bitmap != null) {
+                        val path = FileUtils.saveImageToAlbum(BaseApplication.mContext, bitmap)
                         if (path != null) {
                             paths[task.url] = path
                         }
@@ -1004,7 +997,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
                 } else {
                     tempFile?.inputStream()?.use {
-                        val path = FileUtils.saveVideoToAlbum(requireContext(), it)
+                        val path = FileUtils.saveVideoToAlbum(BaseApplication.mContext, it)
                         if (path != null) {
                             paths[task.url] = path
                         }
@@ -1019,10 +1012,10 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 lifecycleScope.launch {
                     saveRecord()
                 }
-                isDownloading=false
+                isDownloading = false
                 mBinding.progressbar.visibility = View.INVISIBLE
                 mBinding.progressbar.setValue(0f)
-                Toast.makeText(requireContext(), R.string.download_finish, Toast.LENGTH_SHORT).show()
+                safeToast(R.string.download_finish)
             }
 
         }).build()
@@ -1040,7 +1033,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             ) {
                 Log.v(TAG, "task end---")
                 currentCount += 1
-                mBinding.progressbar.setValue(currentCount.toFloat()*100 / totalCount)
+                mBinding.progressbar.setValue(currentCount.toFloat() * 100 / totalCount)
             }
 
             override fun retry(task: DownloadTask, cause: ResumeFailedCause) {
