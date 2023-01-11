@@ -4,8 +4,10 @@ import android.app.ProgressDialog
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Environment
 import android.text.Editable
 import android.text.TextUtils
@@ -16,6 +18,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
@@ -27,6 +30,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.igtools.videodownloader.BaseApplication
+import com.igtools.videodownloader.BuildConfig
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.api.ApiClient
 import com.igtools.videodownloader.api.Urls
@@ -77,6 +81,8 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     var currentCount = 0
     var totalCount = 0
     val INDEX_TAG = 1
+    lateinit var myAlert: AlertDialog
+    private val PERMISSION_REQ = 1024
     override fun getLayoutId(): Int {
         return R.layout.fragment_new_short_code
     }
@@ -254,6 +260,22 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
         privateDialog.setUpView(privateView)
 
+        //权限dialog
+        myAlert = AlertDialog.Builder(requireContext())
+            .setMessage(getString(R.string.need_permission))
+            .setPositiveButton(
+                R.string.settings
+            ) { dialog, _ ->
+                val intent = Intent();
+                intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS";
+                intent.data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                startActivity(intent);
+                dialog.dismiss()
+            }
+            .setNegativeButton(
+                R.string.cancel
+            ) { dialog, _ -> dialog.dismiss() }
+            .create()
     }
 
 
@@ -287,7 +309,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
         //permission check first
         if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())){
-            PermissionUtils.requirePermissionsReadAndWrite(requireActivity(),1024)
+            PermissionUtils.requirePermissionsInFragment(this,PERMISSION_REQ)
             return
         }
 
@@ -1156,6 +1178,26 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         super.onDetach()
 
         Log.v(TAG, "on detach")
+
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        Log.v(TAG,"result")
+        if (requestCode == PERMISSION_REQ){
+            for (grantResult in grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    myAlert.show()
+                    return
+                }
+            }
+        }
+
 
     }
 }

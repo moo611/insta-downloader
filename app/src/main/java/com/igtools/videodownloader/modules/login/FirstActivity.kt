@@ -3,8 +3,10 @@ package com.igtools.videodownloader.modules.login
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.igtools.videodownloader.base.BaseActivity
@@ -13,6 +15,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.igtools.videodownloader.BaseApplication
+import com.igtools.videodownloader.BuildConfig
 import com.igtools.videodownloader.MainActivity
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.databinding.ActivityFirstBinding
@@ -21,8 +24,11 @@ import com.igtools.videodownloader.utils.ShareUtils
 
 class FirstActivity : BaseActivity<ActivityFirstBinding>() {
     val TAG = "FirstActivity"
-    private val PERMISSION_REQ = 1024
+
     lateinit var progressDialog: ProgressDialog
+    lateinit var myAlert:AlertDialog
+    private val PERMISSION_REQ = 1024
+
     override fun getLayoutId(): Int {
         return R.layout.activity_first
     }
@@ -37,6 +43,21 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
             startNow()
 
         }
+        myAlert = AlertDialog.Builder(this)
+            .setMessage(getString(R.string.need_permission))
+            .setPositiveButton(
+                R.string.settings
+            ) { dialog, _ ->
+                val intent = Intent();
+                intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS";
+                intent.data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                startActivity(intent);
+                dialog.dismiss()
+            }
+            .setNegativeButton(
+                R.string.cancel
+            ) { dialog, _ -> dialog.dismiss() }
+            .create()
     }
 
     private fun startNow() {
@@ -86,5 +107,24 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
         }
     }
 
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == PERMISSION_REQ){
+            for (grantResult in grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    myAlert.show()
+                    return
+                }
+            }
+        }
+
+    }
 
 }

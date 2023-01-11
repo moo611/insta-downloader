@@ -3,6 +3,7 @@ package com.igtools.videodownloader.modules.details
 import android.app.ProgressDialog
 import android.app.WallpaperManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
@@ -14,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
@@ -27,6 +29,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.igtools.videodownloader.BaseApplication
+import com.igtools.videodownloader.BuildConfig
 import com.igtools.videodownloader.R
 import com.igtools.videodownloader.api.ApiClient
 import com.igtools.videodownloader.api.Urls
@@ -78,6 +81,9 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
     var totalCount = 0
     val INDEX_TAG = 1
     var totalLen: Long = 0
+
+    lateinit var myAlert: AlertDialog
+    private val PERMISSION_REQ = 1024
     override fun getLayoutId(): Int {
         return R.layout.activity_tag_details
     }
@@ -107,7 +113,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
         mBinding.btnDownload.setOnClickListener {
             //check permission first
             if (!PermissionUtils.checkPermissionsForReadAndRight(this)){
-                PermissionUtils.requirePermissionsReadAndWrite(this,1024)
+                PermissionUtils.requirePermissionsReadAndWrite(this,PERMISSION_REQ)
                 return@setOnClickListener
             }
             if (code == null){
@@ -287,6 +293,22 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
     }
 
     private fun initDialog() {
+
+        myAlert = AlertDialog.Builder(this)
+            .setMessage(getString(R.string.need_permission))
+            .setPositiveButton(
+                R.string.settings
+            ) { dialog, _ ->
+                val intent = Intent();
+                intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS";
+                intent.data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                startActivity(intent);
+                dialog.dismiss()
+            }
+            .setNegativeButton(
+                R.string.cancel
+            ) { dialog, _ -> dialog.dismiss() }
+            .create()
 
         searchDialog = ProgressDialog(this)
         searchDialog.setMessage(getString(R.string.searching))
@@ -1263,6 +1285,25 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             mInterstitialAd?.show(this)
         }
         finish()
+
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == PERMISSION_REQ){
+            for (grantResult in grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    myAlert.show()
+                    return
+                }
+            }
+        }
 
     }
 
