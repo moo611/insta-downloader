@@ -110,7 +110,11 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 PermissionUtils.requirePermissionsReadAndWrite(this,1024)
                 return@setOnClickListener
             }
+            if (code == null){
+                return@setOnClickListener
+            }
             lifecycleScope.launch {
+
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (oldRecord != null) {
                     Toast.makeText(
@@ -138,6 +142,9 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
         }
 
         mBinding.imgWall.setOnClickListener {
+            if (code == null){
+                return@setOnClickListener
+            }
             lifecycleScope.launch {
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (recordInfo == null && oldRecord == null) {
@@ -211,6 +218,11 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
         }
 
         mBinding.imgRepost.setOnClickListener {
+
+            if (code == null){
+                return@setOnClickListener
+            }
+
             lifecycleScope.launch {
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (recordInfo == null && oldRecord == null) {
