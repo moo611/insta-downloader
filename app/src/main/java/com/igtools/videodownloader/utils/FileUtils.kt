@@ -67,6 +67,10 @@ object FileUtils {
                 subDir.mkdirs()
             }
             val file = File(subDir, System.currentTimeMillis().toString() + ".jpg")
+            //1.4.2 fix file not found bug in some device
+            if (!file.exists()){
+                file.createNewFile()
+            }
             fos = FileOutputStream(file)
             fos.use {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 70, it);
@@ -141,7 +145,10 @@ object FileUtils {
                 subDir.mkdirs()
             }
             val file = File(subDir, System.currentTimeMillis().toString() + ".mp4")
-
+            //1.4.2 fix file not found bug in some device
+            if (!file.exists()){
+                file.createNewFile()
+            }
             val fos = FileOutputStream(file)
 
             fos.use { output ->

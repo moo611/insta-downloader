@@ -285,6 +285,12 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             return
         }
 
+        //permission check first
+        if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())){
+            PermissionUtils.requirePermissionsReadAndWrite(requireActivity(),1024)
+            return
+        }
+
         mBinding.etShortcode.clearFocus()
         mBinding.flParent.requestFocus()
         KeyboardUtils.closeKeybord(mBinding.etShortcode, context)

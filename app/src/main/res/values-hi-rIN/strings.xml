@@ -71,5 +71,7 @@
 
     <string name = "search_user_hashtag">उपयोगकर्ता नाम या हैशटैग, उदाहरण के लिए, #प्यार</string>
     <string name="download_start">डाउनलोड शुरू करें</string>
+    <string name="need_permission">फ़ोटो और वीडियो डाउनलोड करने में आपकी मदद करने के लिए हमें पढ़ने और लिखने की अनुमति चाहिए</string>
+    <string name="settings">सेटिंग्स</string>
 
 </resources>

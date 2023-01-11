@@ -72,5 +72,7 @@
 
     <string name="search_user_hashtag">用戶名或標籤，例如#love</string>
     <string name="download_start">下載開始</string>
+    <string name="need_permission">我們需要讀寫權限來幫助您下載照片和視頻</string>
+    <string name="settings">設置</string>
 
 </resources>

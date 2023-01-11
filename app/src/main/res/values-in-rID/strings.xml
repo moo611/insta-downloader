@@ -73,4 +73,6 @@
     <string name="user_not_found">Pengguna tidak ditemukan.</string>
     <string name="search_user_hashtag">nama pengguna atau tagar, misalnya, #cinta</string>
     <string name="download_start">Mulai unduh</string>
+    <string name="need_permission">Kami memerlukan izin baca dan tulis untuk membantu Anda mengunduh foto dan video</string>
+    <string name="settings">Pengaturan</string>
 </resources>

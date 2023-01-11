@@ -34,6 +34,7 @@ import com.igtools.videodownloader.models.Record
 import com.igtools.videodownloader.room.RecordDB
 import com.igtools.videodownloader.utils.Analytics
 import com.igtools.videodownloader.utils.FileUtils
+import com.igtools.videodownloader.utils.PermissionUtils
 import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import com.liulishuo.okdownload.DownloadContext
 import com.liulishuo.okdownload.DownloadContextListener
@@ -95,6 +96,12 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         }
 
         mBinding.btnDownload.setOnClickListener {
+
+            //check permission first
+            if (!PermissionUtils.checkPermissionsForReadAndRight(this)){
+                PermissionUtils.requirePermissionsReadAndWrite(this,1024)
+                return@setOnClickListener
+            }
 
             lifecycleScope.launch {
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)

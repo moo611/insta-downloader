@@ -71,4 +71,6 @@
     <string name="user_not_found">Пользователь не найден.</string>
     <string name="search_user_hashtag">имя пользователя или хэштег, например, #love</string>
     <string name="download_start">Начало загрузки</string>
+    <string name="need_permission">Нам нужны права на чтение и запись, чтобы помочь вам загружать фото и видео</string>
+    <string name="settings">Настройки</string>
 </resources>

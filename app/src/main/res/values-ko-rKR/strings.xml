@@ -72,4 +72,6 @@
 
     <string name="search_user_hashtag">사용자 이름 또는 해시태그(예: #love)</string>
     <string name="download_start">다운로드 시작</string>
+    <string name="need_permission">사진과 비디오를 다운로드하려면 읽기 및 쓰기 권한이 필요합니다</string>
+    <string name="settings">설정</string>
 </resources>

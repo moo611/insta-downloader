@@ -71,4 +71,6 @@
     <string name="user_not_found">User not found.</string>
     <string name="search_user_hashtag">username or hashtag, e.g., #love</string>
     <string name="download_start">Download start</string>
+    <string name="need_permission">We need read and write permissions to help you download photos and videos</string>
+    <string name="settings">Settings</string>
 </resources>

@@ -72,4 +72,6 @@
     <string name="user_not_found">ユーザーが見つかりません.</string>
     <string name="search_user_hashtag">ユーザー名またはハッシュタグ (#love など)</string>
     <string name="download_start">ダウンロード開始</string>
+    <string name="need_permission">写真やビデオをダウンロードするには、読み取りと書き込みのアクセス許可が必要です</string>
+    <string name="settings">設定</string>
 </resources>
