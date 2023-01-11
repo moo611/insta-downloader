@@ -68,7 +68,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     var currentCount = 0
     var totalCount = 0
     val INDEX_TAG = 1
-    var totalLen:Long = 0
+    var totalLen: Long = 0
     override fun getLayoutId(): Int {
         return R.layout.activity_blog_details
     }
@@ -112,9 +112,9 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
                 mBinding.progressBar.visibility = View.VISIBLE
 
-                if (mediaInfo.mediaType==8){
+                if (mediaInfo.mediaType == 8) {
                     downloadMultiple(mediaInfo)
-                }else{
+                } else {
                     downloadSingle(mediaInfo)
                 }
 
@@ -126,11 +126,15 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             lifecycleScope.launch {
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (recordInfo == null && oldRecord == null) {
-                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.download_first), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@BlogDetailsActivity,
+                        getString(R.string.download_first),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@launch
-                }else{
+                } else {
                     //从user列表重复进入的情况
-                    if(recordInfo == null){
+                    if (recordInfo == null) {
                         recordInfo = oldRecord
                     }
                     if (Build.VERSION.SDK_INT >= 24) {
@@ -196,11 +200,15 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (recordInfo == null && oldRecord == null) {
 
-                    Toast.makeText(this@BlogDetailsActivity, getString(R.string.download_first), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@BlogDetailsActivity,
+                        getString(R.string.download_first),
+                        Toast.LENGTH_SHORT
+                    ).show()
 
                 } else {
                     //从tag列表重复进入的情况
-                    if(recordInfo == null){
+                    if (recordInfo == null) {
                         recordInfo = oldRecord
                     }
                     //从本地获取
@@ -380,7 +388,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     }
 
     fun repost(filePath: String?, isVideo: Boolean) {
-        Analytics.sendEvent("repost","repost","1")
+        Analytics.sendEvent("repost", "repost", "1")
         if (filePath != null) {
             val uri: Uri = if (filePath.contains("content://")) {
                 Uri.parse(filePath)
@@ -412,7 +420,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     private fun addWallPaper(filePath: String?, status: Int) {
 
-        Analytics.sendEvent("add_wallpaper","add_wallpaper","1")
+        Analytics.sendEvent("add_wallpaper", "add_wallpaper", "1")
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
                 val ios: InputStream = if (filePath.contains("content://")) {
@@ -484,7 +492,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     }
 
     private fun addWallPaperUnder24(filePath: String?) {
-        Analytics.sendEvent("add_wallpaper","add_wallpaper","1")
+        Analytics.sendEvent("add_wallpaper", "add_wallpaper", "1")
         if (filePath != null) {
             val intent = Intent("android.intent.action.ATTACH_DATA")
             intent.addCategory("android.intent.category.DEFAULT")
@@ -529,9 +537,9 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             val chooserIntent = Intent.createChooser(feedIntent, "share to")
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(storiesIntent))
             startActivity(chooserIntent)
-        }catch (e:Exception){
+        } catch (e: Exception) {
             e.message?.let {
-                Analytics.sendException("share_exception",Analytics.ERROR_KEY,it)
+                Analytics.sendException("share_exception", Analytics.ERROR_KEY, it)
             }
 
         }
@@ -585,7 +593,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             Toast.makeText(this, "No data", Toast.LENGTH_SHORT).show()
         } else {
             val res = gson.fromJson(content, MediaModel::class.java)
-            if(res != null){
+            if (res != null) {
                 mediaInfo = gson.fromJson(content, MediaModel::class.java)
                 code = mediaInfo.code
                 if (mediaInfo.mediaType == 8) {
@@ -611,7 +619,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
                 mBinding.username.text = mediaInfo.username
                 Glide.with(this).load(mediaInfo.profilePicUrl).circleCrop().into(mBinding.avatar)
-            }else{
+            } else {
                 Toast.makeText(this, "No data", Toast.LENGTH_SHORT).show()
             }
 
@@ -623,11 +631,11 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
-    
+
     private fun downloadSingle(mediaInfo: MediaModel) {
         val parentFile = createDirDownload()
-        val task:DownloadTask
-            if (mediaInfo.mediaType == 1) {
+        val task: DownloadTask
+        if (mediaInfo.mediaType == 1) {
             task = DownloadTask.Builder(mediaInfo.thumbnailUrl, parentFile)
                 .setConnectionCount(1)
                 // the minimal interval millisecond for callback progress
@@ -635,21 +643,25 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 // ignore the same task has already completed in the past.
                 .setPassIfAlreadyCompleted(false)
                 .build()
-                task.addTag(INDEX_TAG,1)
+            task.addTag(INDEX_TAG, 1)
         } else {
-           task = DownloadTask.Builder(mediaInfo.videoUrl!!, parentFile)
+            task = DownloadTask.Builder(mediaInfo.videoUrl!!, parentFile)
                 .setConnectionCount(1)
                 // the minimal interval millisecond for callback progress
                 .setMinIntervalMillisCallbackProcess(16)
                 // ignore the same task has already completed in the past.
                 .setPassIfAlreadyCompleted(false)
                 .build()
-                task.addTag(INDEX_TAG,2)
+            task.addTag(INDEX_TAG, 2)
         }
 
         task.enqueue(object : DownloadListener4() {
             override fun taskStart(task: DownloadTask) {
-                Toast.makeText(this@BlogDetailsActivity, R.string.download_start, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@BlogDetailsActivity,
+                    R.string.download_start,
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             override fun connectStart(
@@ -677,34 +689,54 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             ) {
 
                 Log.e(TAG, realCause?.message + "")
+                if (realCause != null) {
+
+                    Analytics.sendException(
+                        "download_fail",
+                        Analytics.ERROR_KEY,
+                        realCause.message + ""
+                    )
+                    Toast.makeText(
+                        this@BlogDetailsActivity,
+                        R.string.download_failed,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return
+                }
                 val tempFile = task.file
-
-                if (task.getTag(INDEX_TAG) == 1) {
-                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
-                    if(bitmap != null){
-                        val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
-                        if (path != null) {
-                            paths[task.url] = path
+                if (tempFile != null && tempFile.exists()) {
+                    if (task.getTag(INDEX_TAG) == 1) {
+                        val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+                        if (bitmap != null) {
+                            val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
+                            tempFile.delete()
                         }
-                        tempFile?.delete()
-                    }
-                }else{
-                    tempFile?.inputStream()?.use {
-                        val path = FileUtils.saveVideoToAlbum(this@BlogDetailsActivity, it)
-                        if (path != null) {
-                            paths[task.url] = path
+                    } else {
+                        tempFile.inputStream().use {
+                            val path = FileUtils.saveVideoToAlbum(this@BlogDetailsActivity, it)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
                         }
+                        tempFile.delete()
                     }
-                    tempFile?.delete()
-                }
 
-                lifecycleScope.launch {
-                    saveRecord()
+                    lifecycleScope.launch {
+                        saveRecord()
+                    }
+                    isDownloading = false
+                    mBinding.progressBar.visibility = View.INVISIBLE
+                    mBinding.progressBar.setValue(0f)
+                    Toast.makeText(
+                        this@BlogDetailsActivity,
+                        R.string.download_finish,
+                        Toast.LENGTH_SHORT
+                    ).show()
+
                 }
-                isDownloading=false
-                mBinding.progressBar.visibility = View.INVISIBLE
-                mBinding.progressBar.setValue(0f)
-                Toast.makeText(this@BlogDetailsActivity, R.string.download_finish, Toast.LENGTH_SHORT).show()
             }
 
 
@@ -727,7 +759,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
             override fun progress(task: DownloadTask?, currentOffset: Long) {
                 Log.v(TAG, "current thread is：" + Thread.currentThread().name)
-                val percent = (currentOffset.toFloat())*100 / totalLen
+                val percent = (currentOffset.toFloat()) * 100 / totalLen
                 mBinding.progressBar.setValue(percent)
             }
 
@@ -747,10 +779,10 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             .setMinIntervalMillisCallbackProcess(300)
             .commit()
 
-        for(res in mediaInfo.resources){
-            val url = if (res.mediaType == 1){
+        for (res in mediaInfo.resources) {
+            val url = if (res.mediaType == 1) {
                 res.thumbnailUrl
-            }else{
+            } else {
                 res.videoUrl!!
             }
 
@@ -761,7 +793,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 // ignore the same task has already completed in the past.
                 .setPassIfAlreadyCompleted(false)
 
-            builder.bind(taskBuilder).addTag(INDEX_TAG,res.mediaType)
+            builder.bind(taskBuilder).addTag(INDEX_TAG, res.mediaType)
 
         }
 
@@ -777,41 +809,58 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 remainCount: Int
             ) {
                 Log.e(TAG, realCause?.message + "")
-                val tempFile = task.file
-
-                if (task.getTag(INDEX_TAG) == 1) {
-
-                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
-                    //bitmap may be null
-                    if (bitmap!=null){
-                        val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
-                        if (path != null) {
-                            paths[task.url] = path
-                        }
-                        tempFile?.delete()
-                    }
-
-                } else {
-                    tempFile?.inputStream()?.use {
-                        val path = FileUtils.saveVideoToAlbum(this@BlogDetailsActivity, it)
-                        if (path != null) {
-                            paths[task.url] = path
-                        }
-                    }
-                    tempFile?.delete()
+                if (realCause != null){
+                    Analytics.sendException(
+                        "download_fail",
+                        Analytics.ERROR_KEY,
+                        realCause.message + ""
+                    )
+                    return
                 }
+                val tempFile = task.file
+                if (tempFile != null && tempFile.exists()){
+                    if (task.getTag(INDEX_TAG) == 1) {
 
+                        val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+                        //bitmap may be null
+                        if (bitmap != null) {
+                            val path = FileUtils.saveImageToAlbum(this@BlogDetailsActivity, bitmap)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
+                            tempFile.delete()
+                        }
+
+                    } else {
+                        tempFile.inputStream().use {
+                            val path = FileUtils.saveVideoToAlbum(this@BlogDetailsActivity, it)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
+                        }
+                        tempFile.delete()
+                    }
+                }
 
             }
 
             override fun queueEnd(context: DownloadContext) {
-                lifecycleScope.launch {
-                    saveRecord()
+                if (currentCount != totalCount){
+                    Toast.makeText(this@BlogDetailsActivity,R.string.download_failed,Toast.LENGTH_SHORT).show()
+                }else{
+                    lifecycleScope.launch {
+                        saveRecord()
+                    }
+                    isDownloading = false
+                    mBinding.progressBar.visibility = View.INVISIBLE
+                    mBinding.progressBar.setValue(0f)
+                    Toast.makeText(
+                        this@BlogDetailsActivity,
+                        R.string.download_finish,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-                isDownloading=false
-                mBinding.progressBar.visibility = View.INVISIBLE
-                mBinding.progressBar.setValue(0f)
-                Toast.makeText(this@BlogDetailsActivity, R.string.download_finish, Toast.LENGTH_SHORT).show()
+
             }
 
         }).build()
@@ -829,7 +878,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             ) {
                 Log.v(TAG, "task end---")
                 currentCount += 1
-                mBinding.progressBar.setValue(currentCount.toFloat()*100 / totalCount)
+                mBinding.progressBar.setValue(currentCount.toFloat() * 100 / totalCount)
             }
 
             override fun retry(task: DownloadTask, cause: ResumeFailedCause) {

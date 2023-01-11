@@ -72,11 +72,11 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
     var paths: HashMap<String, String> = HashMap()
     var needDownload = false
     var isDownloading = true
-    
+
     var currentCount = 0
     var totalCount = 0
     val INDEX_TAG = 1
-    var totalLen:Long = 0
+    var totalLen: Long = 0
     override fun getLayoutId(): Int {
         return R.layout.activity_tag_details
     }
@@ -92,7 +92,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             .setAdapter(adapter)
             .isAutoLoop(false)
 
-        
+
         intent?.extras?.getBoolean("need_download")?.let {
             needDownload = it
         }
@@ -122,9 +122,9 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 isDownloading = true
                 mBinding.progressBar.visibility = View.VISIBLE
 
-                if (mediaInfo.mediaType==8){
+                if (mediaInfo.mediaType == 8) {
                     downloadMultiple(mediaInfo)
-                }else{
+                } else {
                     downloadSingle(mediaInfo)
                 }
 
@@ -612,9 +612,9 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 if (mediaInfo.mediaType == 8 && mediaInfo.resources.size == 0) {
                     //tag 列表从外侧获取不到sidecar的children
                     getDatafromServer(1)
-                } else if(mediaInfo.mediaType == 2 && mediaInfo.videoUrl == null){
+                } else if (mediaInfo.mediaType == 2 && mediaInfo.videoUrl == null) {
                     getDatafromServer(2)
-                }else {
+                } else {
                     updateUI()
                 }
 
@@ -630,10 +630,10 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
     }
 
-    private fun getDatafromServer(type:Int) {
-        val sourceUrl = if(type==1){
+    private fun getDatafromServer(type: Int) {
+        val sourceUrl = if (type == 1) {
             "https://www.instagram.com/p/$code/embed/captioned"
-        }else{
+        } else {
             "https://www.instagram.com/reel/$code/embed/captioned"
         }
         searchDialog.show()
@@ -897,7 +897,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
     private fun downloadSingle(mediaInfo: MediaModel) {
         val parentFile = createDirDownload()
-        val task:DownloadTask
+        val task: DownloadTask
         if (mediaInfo.mediaType == 1) {
             task = DownloadTask.Builder(mediaInfo.thumbnailUrl, parentFile)
                 .setConnectionCount(1)
@@ -906,7 +906,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 // ignore the same task has already completed in the past.
                 .setPassIfAlreadyCompleted(false)
                 .build()
-            task.addTag(INDEX_TAG,1)
+            task.addTag(INDEX_TAG, 1)
         } else {
             task = DownloadTask.Builder(mediaInfo.videoUrl!!, parentFile)
                 .setConnectionCount(1)
@@ -915,12 +915,13 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 // ignore the same task has already completed in the past.
                 .setPassIfAlreadyCompleted(false)
                 .build()
-            task.addTag(INDEX_TAG,2)
+            task.addTag(INDEX_TAG, 2)
         }
 
         task.enqueue(object : DownloadListener4() {
             override fun taskStart(task: DownloadTask) {
-                Toast.makeText(this@TagDetailsActivity, R.string.download_start, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@TagDetailsActivity, R.string.download_start, Toast.LENGTH_SHORT)
+                    .show()
             }
 
             override fun connectStart(
@@ -948,34 +949,55 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             ) {
 
                 Log.e(TAG, realCause?.message + "")
+                if (realCause != null) {
+
+                    Analytics.sendException(
+                        "download_fail",
+                        Analytics.ERROR_KEY,
+                        realCause.message + ""
+                    )
+                    Toast.makeText(
+                        this@TagDetailsActivity,
+                        R.string.download_failed,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return
+                }
                 val tempFile = task.file
+                if (tempFile != null && tempFile.exists()) {
+                    if (task.getTag(INDEX_TAG) == 1) {
+                        val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+                        if (bitmap != null) {
+                            val path = FileUtils.saveImageToAlbum(this@TagDetailsActivity, bitmap)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
+                            tempFile.delete()
+                        }
+                    } else {
+                        tempFile.inputStream().use {
+                            val path = FileUtils.saveVideoToAlbum(this@TagDetailsActivity, it)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
+                        }
+                        tempFile.delete()
+                    }
 
-                if (task.getTag(INDEX_TAG) == 1) {
-                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
-                    if(bitmap != null){
-                        val path = FileUtils.saveImageToAlbum(this@TagDetailsActivity, bitmap)
-                        if (path != null) {
-                            paths[task.url] = path
-                        }
-                        tempFile?.delete()
+                    lifecycleScope.launch {
+                        saveRecord()
                     }
-                }else{
-                    tempFile?.inputStream()?.use {
-                        val path = FileUtils.saveVideoToAlbum(this@TagDetailsActivity, it)
-                        if (path != null) {
-                            paths[task.url] = path
-                        }
-                    }
-                    tempFile?.delete()
+                    isDownloading = false
+                    mBinding.progressBar.visibility = View.INVISIBLE
+                    mBinding.progressBar.setValue(0f)
+                    Toast.makeText(
+                        this@TagDetailsActivity,
+                        R.string.download_finish,
+                        Toast.LENGTH_SHORT
+                    ).show()
+
                 }
 
-                lifecycleScope.launch {
-                    saveRecord()
-                }
-                isDownloading=false
-                mBinding.progressBar.visibility = View.INVISIBLE
-                mBinding.progressBar.setValue(0f)
-                Toast.makeText(this@TagDetailsActivity, R.string.download_finish, Toast.LENGTH_SHORT).show()
             }
 
 
@@ -998,7 +1020,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
             override fun progress(task: DownloadTask?, currentOffset: Long) {
                 Log.v(TAG, "current thread is：" + Thread.currentThread().name)
-                val percent = (currentOffset.toFloat())*100 / totalLen
+                val percent = (currentOffset.toFloat()) * 100 / totalLen
                 mBinding.progressBar.setValue(percent)
             }
 
@@ -1018,10 +1040,10 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             .setMinIntervalMillisCallbackProcess(300)
             .commit()
 
-        for(res in mediaInfo.resources){
-            val url = if (res.mediaType == 1){
+        for (res in mediaInfo.resources) {
+            val url = if (res.mediaType == 1) {
                 res.thumbnailUrl
-            }else{
+            } else {
                 res.videoUrl!!
             }
 
@@ -1032,7 +1054,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 // ignore the same task has already completed in the past.
                 .setPassIfAlreadyCompleted(false)
 
-            builder.bind(taskBuilder).addTag(INDEX_TAG,res.mediaType)
+            builder.bind(taskBuilder).addTag(INDEX_TAG, res.mediaType)
 
         }
 
@@ -1048,40 +1070,62 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 remainCount: Int
             ) {
                 Log.e(TAG, realCause?.message + "")
+                if (realCause != null) {
+                    Analytics.sendException(
+                        "download_fail",
+                        Analytics.ERROR_KEY,
+                        realCause.message + ""
+                    )
+                    return
+                }
                 val tempFile = task.file
+                if (tempFile != null && tempFile.exists()) {
+                    if (task.getTag(INDEX_TAG) == 1) {
 
-                if (task.getTag(INDEX_TAG) == 1) {
-
-                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
-                    if(bitmap != null){
-                        val path = FileUtils.saveImageToAlbum(this@TagDetailsActivity, bitmap)
-                        if (path != null) {
-                            paths[task.url] = path
+                        val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+                        if (bitmap != null) {
+                            val path = FileUtils.saveImageToAlbum(this@TagDetailsActivity, bitmap)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
+                            tempFile.delete()
                         }
-                        tempFile?.delete()
-                    }
 
-                } else {
-                    tempFile?.inputStream()?.use {
-                        val path = FileUtils.saveVideoToAlbum(this@TagDetailsActivity, it)
-                        if (path != null) {
-                            paths[task.url] = path
+                    } else {
+                        tempFile.inputStream().use {
+                            val path = FileUtils.saveVideoToAlbum(this@TagDetailsActivity, it)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
                         }
+                        tempFile.delete()
                     }
-                    tempFile?.delete()
                 }
 
 
             }
 
             override fun queueEnd(context: DownloadContext) {
-                lifecycleScope.launch {
-                    saveRecord()
+                if (currentCount != totalCount) {
+                    Toast.makeText(
+                        this@TagDetailsActivity,
+                        R.string.download_failed,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    lifecycleScope.launch {
+                        saveRecord()
+                    }
+                    isDownloading = false
+                    mBinding.progressBar.visibility = View.INVISIBLE
+                    mBinding.progressBar.setValue(0f)
+                    Toast.makeText(
+                        this@TagDetailsActivity,
+                        R.string.download_finish,
+                        Toast.LENGTH_SHORT
+                    ).show()
+
                 }
-                isDownloading=false
-                mBinding.progressBar.visibility = View.INVISIBLE
-                mBinding.progressBar.setValue(0f)
-                Toast.makeText(this@TagDetailsActivity, R.string.download_finish, Toast.LENGTH_SHORT).show()
             }
 
         }).build()
@@ -1099,7 +1143,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             ) {
                 Log.v(TAG, "task end---")
                 currentCount += 1
-                mBinding.progressBar.setValue(currentCount.toFloat()*100 / totalCount)
+                mBinding.progressBar.setValue(currentCount.toFloat() * 100 / totalCount)
             }
 
             override fun retry(task: DownloadTask, cause: ResumeFailedCause) {
@@ -1147,7 +1191,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
         return fileDir
     }
-    
+
 
     private fun handleUrl(url: String): String {
         val str = "$url?__a=1&__d=dis"

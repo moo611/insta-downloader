@@ -883,33 +883,42 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             ) {
 
                 Log.e(TAG, realCause?.message + "")
+                if (realCause != null){
+
+                    Analytics.sendException("download_fail",Analytics.ERROR_KEY, realCause.message+"")
+                    safeToast(R.string.download_failed)
+                    return
+                }
                 val tempFile = task.file
-                if (task.getTag(INDEX_TAG) == 1) {
-                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
-                    if (bitmap != null) {
-                        val path = FileUtils.saveImageToAlbum(BaseApplication.mContext, bitmap)
-                        if (path != null) {
-                            paths[task.url] = path
+                if (tempFile != null && tempFile.exists()){
+                    if (task.getTag(INDEX_TAG) == 1) {
+                        val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+                        if (bitmap != null) {
+                            val path = FileUtils.saveImageToAlbum(BaseApplication.mContext, bitmap)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
+                            tempFile.delete()
                         }
-                        tempFile?.delete()
-                    }
-                } else {
-                    tempFile?.inputStream()?.use {
-                        val path = FileUtils.saveVideoToAlbum(BaseApplication.mContext, it)
-                        if (path != null) {
-                            paths[task.url] = path
+                    } else {
+                        tempFile.inputStream().use {
+                            val path = FileUtils.saveVideoToAlbum(BaseApplication.mContext, it)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
                         }
+                        tempFile.delete()
                     }
-                    tempFile?.delete()
+
+                    lifecycleScope.launch {
+                        saveRecord()
+                    }
+                    isDownloading = false
+                    mBinding.progressbar.visibility = View.INVISIBLE
+                    mBinding.progressbar.setValue(0f)
+                    safeToast(R.string.download_finish)
                 }
 
-                lifecycleScope.launch {
-                    saveRecord()
-                }
-                isDownloading = false
-                mBinding.progressbar.visibility = View.INVISIBLE
-                mBinding.progressbar.setValue(0f)
-                safeToast(R.string.download_finish)
             }
 
 
@@ -982,40 +991,51 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 remainCount: Int
             ) {
                 Log.e(TAG, realCause?.message + "")
-                val tempFile = task.file
 
-                if (task.getTag(INDEX_TAG) == 1) {
-
-                    val bitmap = BitmapFactory.decodeFile(tempFile?.absolutePath)
-                    if (bitmap != null) {
-                        val path = FileUtils.saveImageToAlbum(BaseApplication.mContext, bitmap)
-                        if (path != null) {
-                            paths[task.url] = path
-                        }
-                        tempFile?.delete()
-                    }
-
-                } else {
-                    tempFile?.inputStream()?.use {
-                        val path = FileUtils.saveVideoToAlbum(BaseApplication.mContext, it)
-                        if (path != null) {
-                            paths[task.url] = path
-                        }
-                    }
-                    tempFile?.delete()
+                if (realCause != null){
+                    Analytics.sendException("download_fail",Analytics.ERROR_KEY, realCause.message+"")
+                    //safeToast(R.string.download_failed)
+                    return
                 }
+                val tempFile = task.file
+                if(tempFile != null && tempFile.exists()){
+                    if (task.getTag(INDEX_TAG) == 1) {
 
+                        val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+                        if (bitmap != null) {
+                            val path = FileUtils.saveImageToAlbum(BaseApplication.mContext, bitmap)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
+                            tempFile.delete()
+                        }
+
+                    } else {
+                        tempFile.inputStream().use {
+                            val path = FileUtils.saveVideoToAlbum(BaseApplication.mContext, it)
+                            if (path != null) {
+                                paths[task.url] = path
+                            }
+                        }
+                        tempFile.delete()
+                    }
+                }
 
             }
 
             override fun queueEnd(context: DownloadContext) {
-                lifecycleScope.launch {
-                    saveRecord()
+                if (currentCount != totalCount){
+                    safeToast(R.string.download_failed)
+                }else{
+                    lifecycleScope.launch {
+                        saveRecord()
+                    }
+                    isDownloading = false
+                    mBinding.progressbar.visibility = View.INVISIBLE
+                    mBinding.progressbar.setValue(0f)
+                    safeToast(R.string.download_finish)
                 }
-                isDownloading = false
-                mBinding.progressbar.visibility = View.INVISIBLE
-                mBinding.progressbar.setValue(0f)
-                safeToast(R.string.download_finish)
+
             }
 
         }).build()
