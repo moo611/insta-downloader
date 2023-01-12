@@ -1078,12 +1078,20 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
         val builder = DownloadContext.QueueSet()
             .setMinIntervalMillisCallbackProcess(300)
             .commit()
-
+        var validCount = 0
         for (res in mediaInfo.resources) {
-            val url = if (res.mediaType == 1) {
-                res.thumbnailUrl
+            var url:String?=null
+            if (res.mediaType == 1) {
+                url = res.thumbnailUrl
             } else {
-                res.videoUrl!!
+                if (res.videoUrl != null){
+                    url = res.videoUrl!!
+                }else{
+                    Analytics.sendEvent("video_url_null","video_url_null_"+Analytics.EVENT_KEY,code!!)
+                }
+            }
+            if (url == null){
+                continue
             }
 
             val taskBuilder = DownloadTask.Builder(url, fileDir)
@@ -1094,10 +1102,10 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 .setPassIfAlreadyCompleted(false)
 
             builder.bind(taskBuilder).addTag(INDEX_TAG, res.mediaType)
-
+            validCount++
         }
 
-        totalCount = mediaInfo.resources.size
+        totalCount = validCount
         currentCount = 0
 
         val downloadContext = builder.setListener(object : DownloadContextListener {

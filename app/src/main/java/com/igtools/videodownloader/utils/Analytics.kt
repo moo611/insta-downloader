@@ -6,8 +6,8 @@ import com.google.firebase.ktx.Firebase
 
 object Analytics {
 
-    val ERROR_KEY = "my_error"
-
+    val ERROR_KEY = "error"
+    val EVENT_KEY = "event"
     fun sendException(name: String, key: String, value: String) {
 
         val analytics = Firebase.analytics
