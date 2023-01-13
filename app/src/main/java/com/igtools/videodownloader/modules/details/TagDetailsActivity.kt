@@ -112,11 +112,11 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
         mBinding.btnDownload.setOnClickListener {
             //check permission first
-            if (!PermissionUtils.checkPermissionsForReadAndRight(this)){
-                PermissionUtils.requirePermissionsReadAndWrite(this,PERMISSION_REQ)
+            if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
+                PermissionUtils.requirePermissionsReadAndWrite(this, PERMISSION_REQ)
                 return@setOnClickListener
             }
-            if (code == null){
+            if (code == null) {
                 return@setOnClickListener
             }
             lifecycleScope.launch {
@@ -148,7 +148,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
         }
 
         mBinding.imgWall.setOnClickListener {
-            if (code == null){
+            if (code == null) {
                 return@setOnClickListener
             }
             lifecycleScope.launch {
@@ -225,7 +225,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
         mBinding.imgRepost.setOnClickListener {
 
-            if (code == null){
+            if (code == null) {
                 return@setOnClickListener
             }
 
@@ -1080,17 +1080,21 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             .commit()
         var validCount = 0
         for (res in mediaInfo.resources) {
-            var url:String?=null
+            var url: String? = null
             if (res.mediaType == 1) {
                 url = res.thumbnailUrl
             } else {
-                if (res.videoUrl != null){
+                if (res.videoUrl != null) {
                     url = res.videoUrl!!
-                }else{
-                    Analytics.sendEvent("video_url_null","video_url_null_"+Analytics.EVENT_KEY,code!!)
+                } else {
+                    Analytics.sendEvent(
+                        "video_url_null",
+                        "video_url_null_" + Analytics.EVENT_KEY,
+                        code!!
+                    )
                 }
             }
-            if (url == null){
+            if (url == null) {
                 continue
             }
 
@@ -1117,6 +1121,8 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 remainCount: Int
             ) {
                 Log.e(TAG, realCause?.message + "")
+                currentCount++
+                mBinding.progressBar.setValue(currentCount.toFloat() * 100 / totalCount)
                 if (realCause != null) {
                     Analytics.sendException(
                         "download_fail",
@@ -1153,64 +1159,25 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             }
 
             override fun queueEnd(context: DownloadContext) {
-                if (currentCount != totalCount) {
-                    Toast.makeText(
-                        this@TagDetailsActivity,
-                        R.string.download_failed,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    lifecycleScope.launch {
-                        saveRecord()
-                    }
-                    isDownloading = false
-                    mBinding.progressBar.visibility = View.INVISIBLE
-                    mBinding.progressBar.setValue(0f)
-                    Toast.makeText(
-                        this@TagDetailsActivity,
-                        R.string.download_finish,
-                        Toast.LENGTH_SHORT
-                    ).show()
 
+                lifecycleScope.launch {
+                    saveRecord()
                 }
+                isDownloading = false
+                mBinding.progressBar.visibility = View.INVISIBLE
+                mBinding.progressBar.setValue(0f)
+                Toast.makeText(
+                    this@TagDetailsActivity,
+                    R.string.download_finish,
+                    Toast.LENGTH_SHORT
+                ).show()
+
+
             }
 
         }).build()
 
-        downloadContext?.start(object : DownloadListener1() {
-            override fun taskStart(task: DownloadTask, model: Listener1Assist.Listener1Model) {
-
-            }
-
-            override fun taskEnd(
-                task: DownloadTask,
-                cause: EndCause,
-                realCause: java.lang.Exception?,
-                model: Listener1Assist.Listener1Model
-            ) {
-                Log.v(TAG, "task end---")
-                currentCount += 1
-                mBinding.progressBar.setValue(currentCount.toFloat() * 100 / totalCount)
-            }
-
-            override fun retry(task: DownloadTask, cause: ResumeFailedCause) {
-
-            }
-
-            override fun connected(
-                task: DownloadTask,
-                blockCount: Int,
-                currentOffset: Long,
-                totalLength: Long
-            ) {
-
-            }
-
-            override fun progress(task: DownloadTask, currentOffset: Long, totalLength: Long) {
-
-            }
-
-        }, false)
+        downloadContext?.start(null, false)
 
     }
 
@@ -1304,7 +1271,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == PERMISSION_REQ){
+        if (requestCode == PERMISSION_REQ) {
             for (grantResult in grantResults) {
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {
                     myAlert.show()

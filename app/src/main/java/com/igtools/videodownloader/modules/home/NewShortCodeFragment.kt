@@ -308,8 +308,8 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
 
         //permission check first
-        if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())){
-            PermissionUtils.requirePermissionsInFragment(this,PERMISSION_REQ)
+        if (!PermissionUtils.checkPermissionsForReadAndRight(requireActivity())) {
+            PermissionUtils.requirePermissionsInFragment(this, PERMISSION_REQ)
             return
         }
 
@@ -911,14 +911,18 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             ) {
 
                 Log.e(TAG, realCause?.message + "")
-                if (realCause != null){
+                if (realCause != null) {
 
-                    Analytics.sendException("download_fail","download_fail_"+Analytics.ERROR_KEY, realCause.message+"")
+                    Analytics.sendException(
+                        "download_fail",
+                        "download_fail_" + Analytics.ERROR_KEY,
+                        realCause.message + ""
+                    )
                     safeToast(R.string.download_failed)
                     return
                 }
                 val tempFile = task.file
-                if (tempFile != null && tempFile.exists()){
+                if (tempFile != null && tempFile.exists()) {
                     if (task.getTag(INDEX_TAG) == 1) {
                         val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
                         if (bitmap != null) {
@@ -990,17 +994,21 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             .commit()
         var validCount = 0
         for (res in mediaInfo.resources) {
-            var url:String?=null
+            var url: String? = null
             if (res.mediaType == 1) {
                 url = res.thumbnailUrl
             } else {
-                if (res.videoUrl != null){
+                if (res.videoUrl != null) {
                     url = res.videoUrl!!
-                }else{
-                    Analytics.sendEvent("video_url_null","video_url_null_"+Analytics.EVENT_KEY,mBinding.etShortcode.text.toString())
+                } else {
+                    Analytics.sendEvent(
+                        "video_url_null",
+                        "video_url_null_" + Analytics.EVENT_KEY,
+                        mBinding.etShortcode.text.toString()
+                    )
                 }
             }
-            if (url == null){
+            if (url == null) {
                 continue
             }
 
@@ -1026,15 +1034,22 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 realCause: java.lang.Exception?,
                 remainCount: Int
             ) {
-                Log.e(TAG, realCause?.message + "")
+                Log.v(TAG,"task:$task is finished")
 
-                if (realCause != null){
-                    Analytics.sendException("download_fail","download_fail_"+Analytics.ERROR_KEY, realCause.message+"")
+                currentCount++
+                mBinding.progressbar.setValue(currentCount.toFloat() * 100 / totalCount)
+
+                if (realCause != null) {
+                    Analytics.sendException(
+                        "download_fail",
+                        "download_fail_" + Analytics.ERROR_KEY,
+                        realCause.message + ""
+                    )
                     //safeToast(R.string.download_failed)
                     return
                 }
                 val tempFile = task.file
-                if(tempFile != null && tempFile.exists()){
+                if (tempFile != null && tempFile.exists()) {
                     if (task.getTag(INDEX_TAG) == 1) {
 
                         val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
@@ -1060,56 +1075,21 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             }
 
             override fun queueEnd(context: DownloadContext) {
-                if (currentCount != totalCount){
-                    safeToast(R.string.download_failed)
-                }else{
-                    lifecycleScope.launch {
-                        saveRecord()
-                    }
-                    isDownloading = false
-                    mBinding.progressbar.visibility = View.INVISIBLE
-                    mBinding.progressbar.setValue(0f)
-                    safeToast(R.string.download_finish)
+
+                lifecycleScope.launch {
+                    saveRecord()
                 }
+                isDownloading = false
+                mBinding.progressbar.visibility = View.INVISIBLE
+                mBinding.progressbar.setValue(0f)
+                safeToast(R.string.download_finish)
+
 
             }
 
         }).build()
 
-        downloadContext?.start(object : DownloadListener1() {
-            override fun taskStart(task: DownloadTask, model: Listener1Assist.Listener1Model) {
-
-            }
-
-            override fun taskEnd(
-                task: DownloadTask,
-                cause: EndCause,
-                realCause: java.lang.Exception?,
-                model: Listener1Assist.Listener1Model
-            ) {
-                Log.v(TAG, "task end---")
-                currentCount += 1
-                mBinding.progressbar.setValue(currentCount.toFloat() * 100 / totalCount)
-            }
-
-            override fun retry(task: DownloadTask, cause: ResumeFailedCause) {
-
-            }
-
-            override fun connected(
-                task: DownloadTask,
-                blockCount: Int,
-                currentOffset: Long,
-                totalLength: Long
-            ) {
-
-            }
-
-            override fun progress(task: DownloadTask, currentOffset: Long, totalLength: Long) {
-
-            }
-
-        }, false)
+        downloadContext?.start(null, false)
 
     }
 
@@ -1196,8 +1176,8 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     ) {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        Log.v(TAG,"result")
-        if (requestCode == PERMISSION_REQ){
+        Log.v(TAG, "result")
+        if (requestCode == PERMISSION_REQ) {
             for (grantResult in grantResults) {
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {
                     myAlert.show()

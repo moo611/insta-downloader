@@ -105,8 +105,8 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         mBinding.btnDownload.setOnClickListener {
 
             //check permission first
-            if (!PermissionUtils.checkPermissionsForReadAndRight(this)){
-                PermissionUtils.requirePermissionsReadAndWrite(this,PERMISSION_REQ)
+            if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
+                PermissionUtils.requirePermissionsReadAndWrite(this, PERMISSION_REQ)
                 return@setOnClickListener
             }
 
@@ -810,17 +810,21 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             .commit()
         var validCount = 0
         for (res in mediaInfo.resources) {
-            var url:String?=null
+            var url: String? = null
             if (res.mediaType == 1) {
                 url = res.thumbnailUrl
             } else {
-                if (res.videoUrl != null){
+                if (res.videoUrl != null) {
                     url = res.videoUrl!!
-                }else{
-                    Analytics.sendEvent("video_url_null","video_url_null_"+Analytics.EVENT_KEY,code!!)
+                } else {
+                    Analytics.sendEvent(
+                        "video_url_null",
+                        "video_url_null_" + Analytics.EVENT_KEY,
+                        code!!
+                    )
                 }
             }
-            if (url == null){
+            if (url == null) {
                 continue
             }
 
@@ -847,7 +851,9 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 remainCount: Int
             ) {
                 Log.e(TAG, realCause?.message + "")
-                if (realCause != null){
+                currentCount++
+                mBinding.progressBar.setValue(currentCount.toFloat() * 100 / totalCount)
+                if (realCause != null) {
                     Analytics.sendException(
                         "download_fail",
                         Analytics.ERROR_KEY,
@@ -856,7 +862,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                     return
                 }
                 val tempFile = task.file
-                if (tempFile != null && tempFile.exists()){
+                if (tempFile != null && tempFile.exists()) {
                     if (task.getTag(INDEX_TAG) == 1) {
 
                         val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
@@ -883,60 +889,25 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             }
 
             override fun queueEnd(context: DownloadContext) {
-                if (currentCount != totalCount){
-                    Toast.makeText(this@BlogDetailsActivity,R.string.download_failed,Toast.LENGTH_SHORT).show()
-                }else{
-                    lifecycleScope.launch {
-                        saveRecord()
-                    }
-                    isDownloading = false
-                    mBinding.progressBar.visibility = View.INVISIBLE
-                    mBinding.progressBar.setValue(0f)
-                    Toast.makeText(
-                        this@BlogDetailsActivity,
-                        R.string.download_finish,
-                        Toast.LENGTH_SHORT
-                    ).show()
+
+                lifecycleScope.launch {
+                    saveRecord()
                 }
+                isDownloading = false
+                mBinding.progressBar.visibility = View.INVISIBLE
+                mBinding.progressBar.setValue(0f)
+                Toast.makeText(
+                    this@BlogDetailsActivity,
+                    R.string.download_finish,
+                    Toast.LENGTH_SHORT
+                ).show()
+
 
             }
 
         }).build()
 
-        downloadContext?.start(object : DownloadListener1() {
-            override fun taskStart(task: DownloadTask, model: Listener1Assist.Listener1Model) {
-
-            }
-
-            override fun taskEnd(
-                task: DownloadTask,
-                cause: EndCause,
-                realCause: java.lang.Exception?,
-                model: Listener1Assist.Listener1Model
-            ) {
-                Log.v(TAG, "task end---")
-                currentCount += 1
-                mBinding.progressBar.setValue(currentCount.toFloat() * 100 / totalCount)
-            }
-
-            override fun retry(task: DownloadTask, cause: ResumeFailedCause) {
-
-            }
-
-            override fun connected(
-                task: DownloadTask,
-                blockCount: Int,
-                currentOffset: Long,
-                totalLength: Long
-            ) {
-
-            }
-
-            override fun progress(task: DownloadTask, currentOffset: Long, totalLength: Long) {
-
-            }
-
-        }, false)
+        downloadContext?.start(null, false)
 
     }
 
@@ -1005,7 +976,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == PERMISSION_REQ){
+        if (requestCode == PERMISSION_REQ) {
             for (grantResult in grantResults) {
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {
                     myAlert.show()

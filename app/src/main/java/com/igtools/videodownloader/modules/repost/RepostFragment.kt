@@ -640,7 +640,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             } catch (e: SecurityException) {
                 Log.e(TAG, e.message + "")
                 e.message?.let {
-                    Analytics.sendException("delete_exception", Analytics.ERROR_KEY, it)
+                    Analytics.sendException("delete_exception", "delete_exception_"+Analytics.ERROR_KEY, it)
                 }
 
                 val intentSender = when {
