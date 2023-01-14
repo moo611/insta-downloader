@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">IgDownloader</string>
+    <string name="app_name">Insavor</string>
 
     <string name="login">लॉग इन करें</string>
     <string name="username">ईमेल</string>

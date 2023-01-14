@@ -84,11 +84,11 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             mBinding.flParent.requestFocus()
             KeyboardUtils.closeKeybord(mBinding.etSearch, context)
             if (mBinding.etSearch.text.toString().isEmpty()) {
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.empty_username),
-                    Toast.LENGTH_SHORT
-                ).show()
+//                Toast.makeText(
+//                    requireContext(),
+//                    getString(R.string.empty_username),
+//                    Toast.LENGTH_SHORT
+//                ).show()
                 return@setOnClickListener
             }
 

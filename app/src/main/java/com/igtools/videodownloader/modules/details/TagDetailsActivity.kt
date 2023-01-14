@@ -671,15 +671,16 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
     private fun getDatafromServer(type: Int) {
         val sourceUrl = if (type == 1) {
-            "https://www.instagram.com/p/$code/embed/captioned"
+            "https://www.instagram.com/p/$code/"
         } else {
-            "https://www.instagram.com/reel/$code/embed/captioned"
+            "https://www.instagram.com/reel/$code/"
         }
+        val embedUrl = sourceUrl+"embed/captioned"
         searchDialog.show()
 
         Thread {
             try {
-                val doc: Document = Jsoup.connect(sourceUrl).userAgent(Urls.USER_AGENT).get()
+                val doc: Document = Jsoup.connect(embedUrl).userAgent(Urls.USER_AGENT).get()
                 //val doc = Jsoup.parse(html)
                 Log.v(TAG, doc.title())
                 val scripts = doc.getElementsByTag("script")
@@ -725,12 +726,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                     }
 
                 } else {
-
-                    //如果extra里面是null，则用原来的方法尝试获取
-
-                    val myUrl = "https://www.instagram.com/p/$code"
-                    getMediaData(myUrl)
-
+                    getMediaData(sourceUrl)
                 }
 
             } catch (e: Exception) {
