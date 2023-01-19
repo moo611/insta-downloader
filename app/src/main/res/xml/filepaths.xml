@@ -4,4 +4,9 @@
     <external-path
         name="external_files"
         path="." />
+
+    <external-path name="external" path="." />
+    <!--表示context.getExternalFilesDirs()-->
+    <external-files-path name="name" path="." />
+
 </resources>

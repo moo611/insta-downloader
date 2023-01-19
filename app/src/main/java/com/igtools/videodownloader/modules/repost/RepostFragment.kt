@@ -497,7 +497,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
             }
 
-            shareFileToInstagram(uri, isVideo)
+            shareToInstagram(uri, isVideo)
             bottomDialog.dismiss()
         } else {
             Toast.makeText(
@@ -685,6 +685,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         storiesIntent.setDataAndType(uri, if (isVideo) "mp4" else "jpg")
         storiesIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         storiesIntent.setPackage("com.instagram.android")
+        //这个方法有些机型会在这个地方报错，所以不使用
         requireContext().grantUriPermission(
             "com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
@@ -693,6 +694,16 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         startActivity(chooserIntent)
     }
 
+    private fun shareToInstagram(uri: Uri?, isVideo: Boolean){
+        if (uri == null) {
+            return
+        }
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = if (isVideo) "video/*" else "image/*"
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        intent.setPackage("com.instagram.android")
+        startActivity(intent)
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

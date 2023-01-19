@@ -31,9 +31,7 @@ class VideoActivity : BaseActivity<ActivityVideoBinding>() {
     override fun initData() {
         url = intent.extras?.getString("url")
         thumbnailUrl = intent.extras?.getString("thumbnailUrl")
-        mBinding.player.setUp(url, true, null)
-        mBinding.player.backButton.visibility = View.GONE
-        mBinding.player.startPlayLogic()
+
         //增加封面
         val imageView = ImageView(this)
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
@@ -43,8 +41,17 @@ class VideoActivity : BaseActivity<ActivityVideoBinding>() {
                     this, R.color.gray_1
                 )
             )
-        ).thumbnail(/*sizeMultiplier=*/ 0.25f).into(imageView)
+        ).into(imageView)
         mBinding.player.thumbImageView = imageView
+
+        //player
+        if(url != null){
+            mBinding.player.setUp(url, true, null)
+            mBinding.player.startPlayLogic()
+        }
+
+        mBinding.player.backButton.visibility = View.GONE
+
     }
 
     override fun onResume() {

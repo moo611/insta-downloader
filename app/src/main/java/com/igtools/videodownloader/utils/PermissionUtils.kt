@@ -18,8 +18,10 @@ object PermissionUtils {
     fun checkPermissionsForReadAndRight(activity: Activity): Boolean {
         val read: Int
         val write: Int
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            read = activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+            return read == PackageManager.PERMISSION_GRANTED
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             read = activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
             write = activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             return read == PackageManager.PERMISSION_GRANTED &&
@@ -29,25 +31,41 @@ object PermissionUtils {
     }
 
     fun requirePermissionsReadAndWrite(activity: Activity, requestCode: Int) {
-        //如果已经多次拒绝过或选择了不再提示，fix弹窗不显示问题
 
-        ActivityCompat.requestPermissions(
-            activity, arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ),
-            requestCode
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            ActivityCompat.requestPermissions(
+                activity, arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                ),
+                requestCode
+            )
+        }else{
+            ActivityCompat.requestPermissions(
+                activity, arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ),
+                requestCode
+            )
+        }
+
     }
 
 
     fun requirePermissionsInFragment(fragment: Fragment, requestCode: Int) {
         //如果已经多次拒绝过或选择了不再提示，fix弹窗不显示问题
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            fragment.requestPermissions(arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
 
-        fragment.requestPermissions(arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ),requestCode)
+            ),requestCode)
+        }else{
+            fragment.requestPermissions(arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ),requestCode)
+        }
+
 
     }
 }

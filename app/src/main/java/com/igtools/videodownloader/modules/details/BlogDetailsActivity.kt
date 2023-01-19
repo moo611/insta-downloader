@@ -61,7 +61,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     lateinit var adapter: MultiTypeAdapter
 
     lateinit var selectDialog: BottomDialog
-    var isBack = false
+
     var mediaInfo = MediaModel()
     var recordInfo: Record? = null
     var code: String? = null
@@ -120,8 +120,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                     ).show()
                     return@launch
                 }
-                isBack = false
-                mInterstitialAd?.show(this@BlogDetailsActivity)
+
                 isDownloading = true
 
                 mBinding.progressBar.visibility = View.VISIBLE
@@ -211,7 +210,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
         mBinding.imgRepost.setOnClickListener {
             lifecycleScope.launch {
-                val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
+                val oldRecord = if(code==null) null else RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (recordInfo == null && oldRecord == null) {
 
                     Toast.makeText(
@@ -434,7 +433,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 }
 
             }
-            shareFileToInstagram(uri, isVideo)
+            shareToInstagram(uri, isVideo)
             //bottomDialog.dismiss()
         } else {
             Toast.makeText(
@@ -576,6 +575,18 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
+    private fun shareToInstagram(uri: Uri?, isVideo: Boolean){
+        if (uri == null) {
+            return
+        }
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = if (isVideo) "video/*" else "image/*"
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        intent.setPackage("com.instagram.android")
+        startActivity(intent)
+    }
+
+
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
 
@@ -598,18 +609,16 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                 // Called when ad is dismissed.
                 Log.d(TAG, "Ad dismissed fullscreen content.")
                 mInterstitialAd = null
-                if (isBack) {
-                    finish()
-                }
+                finish()
+
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 // Called when ad fails to show.
                 Log.e(TAG, "Ad failed to show fullscreen content.")
                 mInterstitialAd = null
-                if (isBack) {
-                    finish()
-                }
+                finish()
+
             }
 
         }
@@ -958,14 +967,10 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     override fun onBackPressed() {
 
-        isBack = true
-        if (mInterstitialAd == null) {
-            finish()
-        } else {
+        if(mInterstitialAd != null){
             mInterstitialAd?.show(this)
         }
-        finish()
-
+        super.onBackPressed()
     }
 
     override fun onRequestPermissionsResult(
