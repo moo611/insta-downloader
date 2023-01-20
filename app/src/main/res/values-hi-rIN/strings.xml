@@ -66,11 +66,12 @@
     <string name="add_successfully">सफलतापूर्वक जोड़ें</string>
     <string name="delete_all_records">सभी रिकॉर्ड हटाएं?</string>
     <string name="no_recover"> यदि आपने किया है तो पुनर्प्राप्त नहीं किया जा सकता है।</string>
-    <string name="download_failed">डाउनलोड विफल</string>
+
     <string name="user_not_found">उपयोगकर्ता नहीं मिला।</string>
 
     <string name = "search_user_hashtag">उपयोगकर्ता नाम या हैशटैग, उदाहरण के लिए, #प्यार</string>
     <string name="download_start">डाउनलोड शुरू करें</string>
+    <string name="download_failed">डाउनलोड विफल</string>
     <string name="need_permission">फ़ोटो और वीडियो डाउनलोड करने में आपकी मदद करने के लिए हमें पढ़ने और लिखने की अनुमति चाहिए</string>
     <string name="settings">सेटिंग्स</string>
 

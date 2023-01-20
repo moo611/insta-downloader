@@ -67,10 +67,12 @@
     <string name="add_successfully">Добавить успешно</string>
     <string name="delete_all_records">Удалить все записи?</string>
     <string name="no_recover">нельзя восстановить, если вы это сделали.</string>
-    <string name="download_failed">Загрузка не удалась</string>
+
     <string name="user_not_found">Пользователь не найден.</string>
     <string name="search_user_hashtag">имя пользователя или хэштег, например, #love</string>
+
     <string name="download_start">Начало загрузки</string>
+    <string name="download_failed">Загрузка не удалась</string>
     <string name="need_permission">Нам нужны права на чтение и запись, чтобы помочь вам загружать фото и видео</string>
     <string name="settings">Настройки</string>
 </resources>

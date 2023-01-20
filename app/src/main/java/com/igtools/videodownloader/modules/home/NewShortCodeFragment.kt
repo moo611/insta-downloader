@@ -804,60 +804,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     }
 
-    /**
-     * 下载单个图片或视频
-     */
-    private suspend fun download(media: MediaModel) {
-
-        if (media.mediaType == 1) {
-            //image
-            try {
-                val responseBody = ApiClient.getClient4().downloadUrl(media.thumbnailUrl)
-                withContext(Dispatchers.IO) {
-                    val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
-                    val path = FileUtils.saveImageToAlbum(requireContext(), bitmap)
-                    if (path != null) {
-                        paths[media.thumbnailUrl] = path
-                    }
-
-                }
-            } catch (e: Exception) {
-
-                isDownloading = false
-                e.message?.let {
-                    Analytics.sendException("app_my_exception", Analytics.ERROR_KEY, it)
-                }
-
-            }
-
-
-        } else if (media.mediaType == 2) {
-            //video
-            if (media.videoUrl != null) {
-                try {
-                    val responseBody = ApiClient.getClient4().downloadUrl(media.videoUrl!!)
-                    withContext(Dispatchers.IO) {
-                        val path = FileUtils.saveVideoToAlbum(
-                            requireContext(),
-                            responseBody.body()!!.byteStream()
-                        )
-                        paths[media.videoUrl!!] = path!!
-                    }
-                } catch (e: Exception) {
-                    isDownloading = false
-                    e.message?.let {
-                        Analytics.sendException("app_my_exception", Analytics.ERROR_KEY, it)
-                    }
-
-                }
-
-
-            }
-
-        }
-    }
-
-
     private fun downloadSingle(mediaInfo: MediaModel) {
         val parentFile = createDirDownload()
         val task: DownloadTask

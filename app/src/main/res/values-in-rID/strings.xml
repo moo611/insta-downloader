@@ -69,10 +69,12 @@
     <string name="add_successfully">Berhasil menambahkan</string>
     <string name="delete_all_records">Hapus semua record?</string>
     <string name="no_recover">tidak dapat dipulihkan jika Anda telah melakukannya.</string>
-    <string name="download_failed">unduhan gagal</string>
+
     <string name="user_not_found">Pengguna tidak ditemukan.</string>
     <string name="search_user_hashtag">nama pengguna atau tagar, misalnya, #cinta</string>
+
     <string name="download_start">Mulai unduh</string>
+    <string name="download_failed">unduhan gagal</string>
     <string name="need_permission">Kami memerlukan izin baca dan tulis untuk membantu Anda mengunduh foto dan video</string>
     <string name="settings">Pengaturan</string>
 </resources>
