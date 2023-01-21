@@ -110,7 +110,7 @@ object FileUtils {
             valuesVideos.put(MediaStore.Video.Media.IS_PENDING, 1)
 
             val collection =
-                MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
             val uri = resolver.insert(collection, valuesVideos)
 
             val pfd: ParcelFileDescriptor?
