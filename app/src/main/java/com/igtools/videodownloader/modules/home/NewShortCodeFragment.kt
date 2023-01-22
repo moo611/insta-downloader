@@ -329,8 +329,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
             if (paramString.matches(Regex("(.*)instagram.com/p(.*)")) || paramString.matches(Regex("(.*)instagram.com/reel(.*)"))) {
                 val url = emBedUrl()
-                Log.v(TAG, url)
-                loadData(url)
+                val sourceUrl = mBinding.etShortcode.text.toString()
+
+                loadData(url,sourceUrl)
             } else if (paramString.matches(Regex("(.*)instagram.com/stories/(.*)"))) {
                 if (BaseApplication.cookie == null) {
                     storyDialog.show()
@@ -351,14 +352,14 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     }
 
 
-    private fun loadData(sourceUrl: String) {
+    private fun loadData(embedUrl:String,sourceUrl: String) {
 
         progressDialog.show()
         clearData()
 
         Thread {
             try {
-                val doc: Document = Jsoup.connect(sourceUrl).userAgent(Urls.USER_AGENT).get()
+                val doc: Document = Jsoup.connect(embedUrl).userAgent(Urls.USER_AGENT).get()
                 //val doc = Jsoup.parse(html)
                 Log.v(TAG, doc.title())
                 val scripts = doc.getElementsByTag("script")
@@ -376,6 +377,24 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         val shortcode_media = jsonObject["shortcode_media"].asJsonObject
 
                         curMediaInfo = parseMedia(shortcode_media)
+
+                        //2.如果sidecar里面有视频，通过这种方式会没有videoUrl
+                        if(curMediaInfo!!.mediaType == 8){
+                            var hasVideo = false
+                            for(res in curMediaInfo!!.resources){
+                                if (res.mediaType == 2){
+                                    hasVideo = true
+                                    break
+                                }
+                            }
+                            if (hasVideo){
+                                Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
+                                val myUrl = mBinding.etShortcode.text.toString()
+                                getMediaData(myUrl)
+                                return@Thread
+                            }
+
+                        }
 
                         activity?.runOnUiThread {
                             if (!isInvalidContext()) {
@@ -398,9 +417,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     }
                 }
 
-                //2.如果extra里面是null
+                //3.如果extra里面是null
 
-                val embed = doc.getElementsByClass("Embed ")[0]
+                val embed = doc.getElementsByClass("Embed")[0]
                 val mediatype = embed.attr("data-media-type")
                 if (mediatype == "GraphImage") {
                     curMediaInfo = MediaModel()
@@ -424,10 +443,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
                 } else {
 
-                    //如果extra里面是null，则用原来的方法尝试获取
+                    //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
                     Analytics.sendEvent("use_a1", "media_type", mediatype)
-                    val myUrl = mBinding.etShortcode.text.toString()
-                    getMediaData(myUrl)
+                    getMediaData(sourceUrl)
 
                 }
 
@@ -829,7 +847,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
         task.enqueue(object : DownloadListener4() {
             override fun taskStart(task: DownloadTask) {
-                Toast.makeText(requireContext(), R.string.download_start, Toast.LENGTH_SHORT).show()
+                safeToast(R.string.download_start)
             }
 
             override fun connectStart(

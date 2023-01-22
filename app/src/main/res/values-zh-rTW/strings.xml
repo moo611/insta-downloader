@@ -76,5 +76,6 @@
     <string name="download_failed">下載失敗.</string>
     <string name="need_permission">我們需要讀寫權限來幫助您下載照片和視頻</string>
     <string name="settings">設置</string>
+    <string name="share_fail">由於系統原因共享失敗</string>
 
 </resources>

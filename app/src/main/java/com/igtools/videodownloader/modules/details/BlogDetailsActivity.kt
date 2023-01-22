@@ -53,6 +53,7 @@ import com.liulishuo.okdownload.core.listener.assist.Listener4Assist
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.coroutines.*
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.InputStream
 
 class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
@@ -452,62 +453,70 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
         Analytics.sendEvent("add_wallpaper", "add_wallpaper", "1")
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
-                val ios: InputStream = if (filePath.contains("content://")) {
-                    val uri = Uri.parse(filePath)
-                    contentResolver.openInputStream(uri)!!
-                } else {
-                    File(filePath).inputStream()
-                }
+                try {
+                    val ios: InputStream = if (filePath.contains("content://")) {
+                        val uri = Uri.parse(filePath)
+                        contentResolver.openInputStream(uri)!!
+                    } else {
+                        File(filePath).inputStream()
+                    }
 
-                val myWallpaperManager = WallpaperManager.getInstance(this);
-                when (status) {
-                    0 -> {
-                        myWallpaperManager.setStream(
-                            ios,
-                            null,
-                            true,
-                            WallpaperManager.FLAG_SYSTEM
-                        );
-                        myWallpaperManager.setStream(
-                            ios,
-                            null,
-                            true,
-                            WallpaperManager.FLAG_LOCK
-                        );
-                        Toast.makeText(
-                            this,
-                            getString(R.string.add_successfully),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    val myWallpaperManager = WallpaperManager.getInstance(this);
+                    when (status) {
+                        0 -> {
+                            myWallpaperManager.setStream(
+                                ios,
+                                null,
+                                true,
+                                WallpaperManager.FLAG_SYSTEM
+                            );
+                            myWallpaperManager.setStream(
+                                ios,
+                                null,
+                                true,
+                                WallpaperManager.FLAG_LOCK
+                            );
+                            Toast.makeText(
+                                this,
+                                getString(R.string.add_successfully),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        1 -> {
+                            myWallpaperManager.setStream(
+                                ios,
+                                null,
+                                true,
+                                WallpaperManager.FLAG_SYSTEM
+                            );
+                            Toast.makeText(
+                                this,
+                                getString(R.string.add_successfully),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        else -> {
+                            myWallpaperManager.setStream(
+                                ios,
+                                null,
+                                true,
+                                WallpaperManager.FLAG_LOCK
+                            );
+                            Toast.makeText(
+                                this,
+                                getString(R.string.add_successfully),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                    1 -> {
-                        myWallpaperManager.setStream(
-                            ios,
-                            null,
-                            true,
-                            WallpaperManager.FLAG_SYSTEM
-                        );
-                        Toast.makeText(
-                            this,
-                            getString(R.string.add_successfully),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    else -> {
-                        myWallpaperManager.setStream(
-                            ios,
-                            null,
-                            true,
-                            WallpaperManager.FLAG_LOCK
-                        );
-                        Toast.makeText(
-                            this,
-                            getString(R.string.add_successfully),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
 
+                }catch (e:FileNotFoundException){
+                    Toast.makeText(
+                        this,
+                        getString(R.string.file_not_found),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             } else {
                 Toast.makeText(
                     this,
@@ -546,44 +555,21 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
-    private fun shareFileToInstagram(uri: Uri?, isVideo: Boolean) {
-        if (uri == null) {
-            return
-        }
-
-        try {
-            val feedIntent = Intent(Intent.ACTION_SEND)
-            feedIntent.type = if (isVideo) "video/*" else "image/*"
-            feedIntent.putExtra(Intent.EXTRA_STREAM, uri)
-            feedIntent.setPackage("com.instagram.android")
-            val storiesIntent = Intent("com.instagram.share.ADD_TO_STORY")
-            storiesIntent.setDataAndType(uri, if (isVideo) "mp4" else "jpg")
-            storiesIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            storiesIntent.setPackage("com.instagram.android")
-            grantUriPermission(
-                "com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-            val chooserIntent = Intent.createChooser(feedIntent, "share to")
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(storiesIntent))
-            startActivity(chooserIntent)
-        } catch (e: Exception) {
-            e.message?.let {
-                Analytics.sendException("share_exception", Analytics.ERROR_KEY, it)
-            }
-
-        }
-
-    }
 
     private fun shareToInstagram(uri: Uri?, isVideo: Boolean){
         if (uri == null) {
             return
         }
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = if (isVideo) "video/*" else "image/*"
-        intent.putExtra(Intent.EXTRA_STREAM, uri)
-        intent.setPackage("com.instagram.android")
-        startActivity(intent)
+        try {
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = if (isVideo) "video/*" else "image/*"
+            intent.putExtra(Intent.EXTRA_STREAM, uri)
+            intent.setPackage("com.instagram.android")
+            startActivity(intent)
+        }catch (e:Exception){
+            Analytics.sendException("repost_fail",Analytics.ERROR_KEY+"_repost_fail",e.message+"")
+            Toast.makeText(this,R.string.file_not_found,Toast.LENGTH_SHORT).show()
+        }
     }
 
 

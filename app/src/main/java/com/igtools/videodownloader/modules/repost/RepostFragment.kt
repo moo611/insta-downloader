@@ -36,6 +36,7 @@ import com.igtools.videodownloader.widgets.dialog.BottomDialog
 import com.igtools.videodownloader.widgets.dialog.MyDialog
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.InputStream
 
 
@@ -383,61 +384,68 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
         if (Build.VERSION.SDK_INT >= 24) {
             if (filePath != null) {
+                try {
+                    val ios: InputStream = if (filePath.contains("content://")) {
+                        val uri = Uri.parse(filePath)
+                        activity?.contentResolver?.openInputStream(uri)!!
+                    } else {
+                        File(filePath).inputStream()
+                    }
 
-                val ios: InputStream = if (filePath.contains("content://")) {
-                    val uri = Uri.parse(filePath)
-                    activity?.contentResolver?.openInputStream(uri)!!
-                } else {
-                    File(filePath).inputStream()
-                }
-
-                val myWallpaperManager = WallpaperManager.getInstance(requireContext());
-                when (status) {
-                    0 -> {
-                        myWallpaperManager.setStream(
-                            ios,
-                            null,
-                            true,
-                            WallpaperManager.FLAG_SYSTEM
-                        );
-                        myWallpaperManager.setStream(
-                            ios,
-                            null,
-                            true,
-                            WallpaperManager.FLAG_LOCK
-                        );
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.add_successfully),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    val myWallpaperManager = WallpaperManager.getInstance(requireContext());
+                    when (status) {
+                        0 -> {
+                            myWallpaperManager.setStream(
+                                ios,
+                                null,
+                                true,
+                                WallpaperManager.FLAG_SYSTEM
+                            );
+                            myWallpaperManager.setStream(
+                                ios,
+                                null,
+                                true,
+                                WallpaperManager.FLAG_LOCK
+                            );
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.add_successfully),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        1 -> {
+                            myWallpaperManager.setStream(
+                                ios,
+                                null,
+                                true,
+                                WallpaperManager.FLAG_SYSTEM
+                            );
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.add_successfully),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        else -> {
+                            myWallpaperManager.setStream(
+                                ios,
+                                null,
+                                true,
+                                WallpaperManager.FLAG_LOCK
+                            );
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.add_successfully),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                    1 -> {
-                        myWallpaperManager.setStream(
-                            ios,
-                            null,
-                            true,
-                            WallpaperManager.FLAG_SYSTEM
-                        );
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.add_successfully),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    else -> {
-                        myWallpaperManager.setStream(
-                            ios,
-                            null,
-                            true,
-                            WallpaperManager.FLAG_LOCK
-                        );
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.add_successfully),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                }catch (e:FileNotFoundException){
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.file_not_found),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
             } else {
@@ -698,11 +706,17 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         if (uri == null) {
             return
         }
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = if (isVideo) "video/*" else "image/*"
-        intent.putExtra(Intent.EXTRA_STREAM, uri)
-        intent.setPackage("com.instagram.android")
-        startActivity(intent)
+        try {
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = if (isVideo) "video/*" else "image/*"
+            intent.putExtra(Intent.EXTRA_STREAM, uri)
+            intent.setPackage("com.instagram.android")
+            startActivity(intent)
+        }catch (e:Exception){
+            Analytics.sendException("repost_fail",Analytics.ERROR_KEY+"_repost_fail",e.message+"")
+            Toast.makeText(requireContext(),R.string.file_not_found,Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     override fun onRequestPermissionsResult(
