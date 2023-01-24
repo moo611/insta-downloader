@@ -587,7 +587,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             intent.setPackage("com.instagram.android")
             startActivity(intent)
         }catch (e:Exception){
-            Analytics.sendException("repost_fail",Analytics.ERROR_KEY+"_repost_fail",e.message+"")
+            Analytics.sendException("repost_fail","repost_fail_"+Analytics.ERROR_KEY,e.message+"")
             Toast.makeText(this,R.string.file_not_found,Toast.LENGTH_SHORT).show()
         }
 
@@ -787,55 +787,6 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
     }
 
-    private suspend fun downloadMedia(media: MediaModel) {
-
-        if (media.mediaType == 1) {
-            //image
-
-            try {
-                val responseBody = ApiClient.getClient4().downloadUrl(media.thumbnailUrl)
-                withContext(Dispatchers.IO) {
-                    val bitmap = BitmapFactory.decodeStream(responseBody.body()!!.byteStream())
-                    val path = FileUtils.saveImageToAlbum(this@TagDetailsActivity, bitmap)
-                    if (path != null) {
-                        paths[media.thumbnailUrl] = path
-                    }
-
-                }
-            } catch (e: Exception) {
-                isDownloading = false
-                e.message?.let {
-                    Analytics.sendException("app_my_exception", Analytics.ERROR_KEY, it)
-                }
-            }
-
-        } else if (media.mediaType == 2) {
-            //video
-            media.videoUrl?.let {
-                try {
-                    val responseBody = ApiClient.getClient4().downloadUrl(it)
-                    withContext(Dispatchers.IO) {
-                        val path = FileUtils.saveVideoToAlbum(
-                            this@TagDetailsActivity,
-                            responseBody.body()!!.byteStream()
-                        )
-                        paths[it] = path!!
-
-                    }
-                } catch (e: Exception) {
-                    isDownloading = false
-                    e.message?.let { msg ->
-                        Analytics.sendException("app_my_exception", Analytics.ERROR_KEY, msg)
-                    }
-
-                }
-
-            }
-
-        }
-
-    }
-
     private fun show(flag: String) {
 
         if (flag == "picture") {
@@ -1003,7 +954,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
                     Analytics.sendException(
                         "download_fail",
-                        Analytics.ERROR_KEY,
+                        "download_fail_"+Analytics.ERROR_KEY,
                         realCause.message + ""
                     )
                     Toast.makeText(
@@ -1137,7 +1088,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 if (realCause != null) {
                     Analytics.sendException(
                         "download_fail",
-                        Analytics.ERROR_KEY,
+                        "download_fail_"+Analytics.ERROR_KEY,
                         realCause.message + ""
                     )
                     return

@@ -713,7 +713,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             intent.setPackage("com.instagram.android")
             startActivity(intent)
         }catch (e:Exception){
-            Analytics.sendException("repost_fail",Analytics.ERROR_KEY+"_repost_fail",e.message+"")
+            Analytics.sendException("repost_fail","repost_fail_"+Analytics.ERROR_KEY,e.message+"")
             Toast.makeText(requireContext(),R.string.file_not_found,Toast.LENGTH_SHORT).show()
         }
 

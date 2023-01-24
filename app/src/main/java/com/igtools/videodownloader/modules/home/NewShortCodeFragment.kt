@@ -331,7 +331,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 val url = emBedUrl()
                 val sourceUrl = mBinding.etShortcode.text.toString()
 
-                loadData(url,sourceUrl)
+                loadData(url, sourceUrl)
             } else if (paramString.matches(Regex("(.*)instagram.com/stories/(.*)"))) {
                 if (BaseApplication.cookie == null) {
                     storyDialog.show()
@@ -352,7 +352,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     }
 
 
-    private fun loadData(embedUrl:String,sourceUrl: String) {
+    private fun loadData(embedUrl: String, sourceUrl: String) {
 
         progressDialog.show()
         clearData()
@@ -379,15 +379,15 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         curMediaInfo = parseMedia(shortcode_media)
 
                         //2.如果sidecar里面有视频，通过这种方式会没有videoUrl
-                        if(curMediaInfo!!.mediaType == 8){
+                        if (curMediaInfo!!.mediaType == 8) {
                             var hasVideo = false
-                            for(res in curMediaInfo!!.resources){
-                                if (res.mediaType == 2){
+                            for (res in curMediaInfo!!.resources) {
+                                if (res.mediaType == 2) {
                                     hasVideo = true
                                     break
                                 }
                             }
-                            if (hasVideo){
+                            if (hasVideo) {
                                 Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
                                 val myUrl = mBinding.etShortcode.text.toString()
                                 getMediaData(myUrl)
@@ -772,33 +772,19 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
      */
     private fun showCurrent() {
         mBinding.container.visibility = View.VISIBLE
-        mBinding.username.text = curMediaInfo?.captionText
-        if (curMediaInfo?.mediaType != 8) {
-            Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
-                .placeholder(
-                    ColorDrawable(
-                        ContextCompat.getColor(
-                            requireContext(),
-                            R.color.gray_1
-                        )
+        mBinding.username.text = curMediaInfo?.username
+        mBinding.tvCaption.text = curMediaInfo?.captionText
+        Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
+            .placeholder(
+                ColorDrawable(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.gray_1
                     )
                 )
-                .into(mBinding.picture)
-        } else {
-            if (curMediaInfo?.resources?.size!! > 0) {
-                Glide.with(requireContext()).load(curMediaInfo?.resources?.get(0)?.thumbnailUrl)
-                    .placeholder(
-                        ColorDrawable(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.gray_1
-                            )
-                        )
-                    )
-                    .into(mBinding.picture)
-            }
+            )
+            .into(mBinding.picture)
 
-        }
 
         Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
             .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
@@ -998,7 +984,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 realCause: java.lang.Exception?,
                 remainCount: Int
             ) {
-                Log.v(TAG,"task:$task is finished")
+                Log.v(TAG, "task:$task is finished")
 
                 currentCount++
                 mBinding.progressbar.setValue(currentCount.toFloat() * 100 / totalCount)
