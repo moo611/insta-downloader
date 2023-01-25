@@ -795,7 +795,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                     val embedVideo = doc.getElementsByClass("EmbedVideo")
                     if (embedVideo.size > 0) {
                         mediaInfo = MediaModel()
-                        mediaInfo.mediaType = 1
+                        mediaInfo.mediaType = 2
                         mediaInfo.code = code!!
                         val videodiv = embedVideo[0]
                         val video = videodiv.getElementsByTag("video")[0]

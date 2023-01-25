@@ -499,7 +499,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     val embedVideo = doc.getElementsByClass("EmbedVideo")
                     if (embedVideo.size > 0) {
                         curMediaInfo = MediaModel()
-                        curMediaInfo?.mediaType = 1
+                        curMediaInfo?.mediaType = 2
                         curMediaInfo?.code = getShortCode() ?: ""
                         val videodiv = embedVideo[0]
                         val video = videodiv.getElementsByTag("video")[0]
