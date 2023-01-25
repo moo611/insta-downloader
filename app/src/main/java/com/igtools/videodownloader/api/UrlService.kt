@@ -8,7 +8,6 @@ import retrofit2.http.*
 interface UrlService {
 
 
-
     @GET
     suspend fun getMedia(
         @HeaderMap headers: HashMap<String, String>,
@@ -39,6 +38,11 @@ interface UrlService {
         @Query("variables") variables: String
     ): Response<ResponseBody>
 
+
+    @GET
+    suspend fun getMediaData3(
+        @Url url: String
+    ): Response<ResponseBody>
 
     @GET
     suspend fun getStoryData(

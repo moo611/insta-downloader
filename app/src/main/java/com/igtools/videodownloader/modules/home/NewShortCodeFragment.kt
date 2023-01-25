@@ -331,7 +331,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 val url = emBedUrl()
                 val sourceUrl = mBinding.etShortcode.text.toString()
 
-                loadData(url, sourceUrl)
+                loadData2(url, sourceUrl)
             } else if (paramString.matches(Regex("(.*)instagram.com/stories/(.*)"))) {
                 if (BaseApplication.cookie == null) {
                     storyDialog.show()
@@ -440,30 +440,104 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         downloadSingle(curMediaInfo!!)
 
                     }
-
                 } else {
-
                     //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
                     Analytics.sendEvent("use_a1", "media_type", mediatype)
                     getMediaData(sourceUrl)
-
                 }
 
             } catch (e: Exception) {
                 //私人账户
                 Log.e(TAG, e.message + "")
-                activity?.runOnUiThread {
-                    if (!isInvalidContext()) {
-                        progressDialog.dismiss()
-                        privateDialog.show()
-                    }
-
-                }
+                getMediaData(sourceUrl)
             }
 
         }.start()
 
     }
+
+    private fun loadData2(embedUrl: String, sourceUrl: String) {
+
+        progressDialog.show()
+        clearData()
+
+        lifecycleScope.launch {
+
+            try {
+//                val headers = HashMap<String, String>()
+//                headers["user-agent"] = Urls.USER_AGENT
+
+                val res = ApiClient.getClient().getMediaData3(embedUrl)
+
+                val html = res.body()!!.string()
+                val doc: Document = Jsoup.parse(html)
+                //val doc = Jsoup.parse(html)
+                Log.v(TAG, doc.title())
+
+                val embed = doc.getElementsByClass("Embed")[0]
+                val mediatype = embed.attr("data-media-type")
+                if (mediatype == "GraphImage") {
+                    curMediaInfo = MediaModel()
+                    curMediaInfo?.mediaType = 1
+                    curMediaInfo?.code = getShortCode() ?: ""
+                    parseImage(doc)
+
+
+                    if (!isInvalidContext()) {
+                        progressDialog.dismiss()
+                    }
+
+                    showCurrent()
+                    mInterstitialAd?.show(requireActivity())
+                    mBinding.progressbar.visibility = View.VISIBLE
+
+                    isDownloading = true
+                    downloadSingle(curMediaInfo!!)
+
+
+                } else if (mediatype == "GraphVideo") {
+                    val embedVideo = doc.getElementsByClass("EmbedVideo")
+                    if (embedVideo.size > 0) {
+                        curMediaInfo = MediaModel()
+                        curMediaInfo?.mediaType = 1
+                        curMediaInfo?.code = getShortCode() ?: ""
+                        val videodiv = embedVideo[0]
+                        val video = videodiv.getElementsByTag("video")[0]
+                        curMediaInfo?.videoUrl = video.attr("src")
+                        parseImage(doc)
+
+                        if (!isInvalidContext()) {
+                            progressDialog.dismiss()
+                        }
+
+                        showCurrent()
+                        mInterstitialAd?.show(requireActivity())
+                        mBinding.progressbar.visibility = View.VISIBLE
+
+                        isDownloading = true
+                        downloadSingle(curMediaInfo!!)
+
+
+                    } else {
+                        //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
+                        Analytics.sendEvent("use_a1", "media_type", mediatype)
+                        getMediaData(sourceUrl)
+                    }
+                } else {
+
+                    //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
+                    Analytics.sendEvent("use_a1", "media_type", mediatype)
+                    getMediaData(sourceUrl)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                getMediaData(sourceUrl)
+            }
+
+        }
+
+    }
+
 
     private fun parseImage(doc: Document) {
         getUserInfo(doc)

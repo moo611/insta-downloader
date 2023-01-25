@@ -528,7 +528,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                             ).show()
                         }
                     }
-                }catch (e:FileNotFoundException){
+                } catch (e: FileNotFoundException) {
                     Toast.makeText(
                         this,
                         getString(R.string.file_not_found),
@@ -576,7 +576,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
     }
 
 
-    private fun shareToInstagram(uri: Uri?, isVideo: Boolean){
+    private fun shareToInstagram(uri: Uri?, isVideo: Boolean) {
         if (uri == null) {
             return
         }
@@ -586,9 +586,13 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             intent.putExtra(Intent.EXTRA_STREAM, uri)
             intent.setPackage("com.instagram.android")
             startActivity(intent)
-        }catch (e:Exception){
-            Analytics.sendException("repost_fail","repost_fail_"+Analytics.ERROR_KEY,e.message+"")
-            Toast.makeText(this,R.string.file_not_found,Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Analytics.sendException(
+                "repost_fail",
+                "repost_fail_" + Analytics.ERROR_KEY,
+                e.message + ""
+            )
+            Toast.makeText(this, R.string.file_not_found, Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -646,9 +650,9 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
                 if (mediaInfo.mediaType == 8 && mediaInfo.resources.size == 0) {
                     //tag 列表从外侧获取不到sidecar的children
-                    getDatafromServer(1)
+                    getDataFromServer2(1)
                 } else if (mediaInfo.mediaType == 2 && mediaInfo.videoUrl == null) {
-                    getDatafromServer(2)
+                    getDataFromServer2(2)
                 } else {
                     updateUI()
                 }
@@ -671,7 +675,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
         } else {
             "https://www.instagram.com/reel/$code/"
         }
-        val embedUrl = sourceUrl+"embed/captioned"
+        val embedUrl = sourceUrl + "embed/captioned"
         searchDialog.show()
 
         Thread {
@@ -695,15 +699,15 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
                         mediaInfo = parseMedia(shortcode_media)
 
-                        if(mediaInfo.mediaType == 8){
+                        if (mediaInfo.mediaType == 8) {
                             var hasVideo = false
-                            for(res in mediaInfo.resources){
-                                if (res.mediaType == 2){
+                            for (res in mediaInfo.resources) {
+                                if (res.mediaType == 2) {
                                     hasVideo = true
                                     break
                                 }
                             }
-                            if (hasVideo){
+                            if (hasVideo) {
                                 Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
 
                                 getMediaData(sourceUrl)
@@ -747,13 +751,76 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             } catch (e: Exception) {
                 //私人账户
                 Log.e(TAG, e.message + "")
-                runOnUiThread {
-                    searchDialog.dismiss()
-                    //privateDialog.show()
-                }
+                getMediaData(sourceUrl)
             }
 
         }.start()
+
+
+    }
+
+    private fun getDataFromServer2(type: Int) {
+        val sourceUrl = if (type == 1) {
+            "https://www.instagram.com/p/$code/"
+        } else {
+            "https://www.instagram.com/reel/$code/"
+        }
+        val embedUrl = sourceUrl + "embed/captioned"
+        searchDialog.show()
+
+        lifecycleScope.launch {
+            try {
+
+//                val headers = HashMap<String, String>()
+//                headers["user-agent"] = Urls.USER_AGENT
+
+                val res = ApiClient.getClient().getMediaData3(embedUrl)
+
+                val html = res.body()!!.string()
+                val doc: Document = Jsoup.parse(html)
+                //2.如果extra里面是null
+
+                val embed = doc.getElementsByClass("Embed")[0]
+                val mediatype = embed.attr("data-media-type")
+                if (mediatype == "GraphImage") {
+                    mediaInfo = MediaModel()
+                    mediaInfo.mediaType = 1
+                    mediaInfo.code = code!!
+                    parseImage(doc)
+
+                    searchDialog.dismiss()
+                    updateUI()
+
+                } else if (mediatype == "GraphVideo") {
+                    val embedVideo = doc.getElementsByClass("EmbedVideo")
+                    if (embedVideo.size > 0) {
+                        mediaInfo = MediaModel()
+                        mediaInfo.mediaType = 1
+                        mediaInfo.code = code!!
+                        val videodiv = embedVideo[0]
+                        val video = videodiv.getElementsByTag("video")[0]
+                        mediaInfo.videoUrl = video.attr("src")
+                        parseImage(doc)
+                        searchDialog.dismiss()
+                        updateUI()
+
+
+                    } else {
+                        //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
+                        Analytics.sendEvent("use_a1", "media_type", mediatype)
+                        getMediaData(sourceUrl)
+                    }
+                } else {
+                    //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
+                    Analytics.sendEvent("use_a1", "media_type", mediatype)
+                    getMediaData(sourceUrl)
+                }
+            } catch (e: Exception) {
+
+                getMediaData(sourceUrl)
+            }
+
+        }
 
 
     }
@@ -954,7 +1021,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
                     Analytics.sendException(
                         "download_fail",
-                        "download_fail_"+Analytics.ERROR_KEY,
+                        "download_fail_" + Analytics.ERROR_KEY,
                         realCause.message + ""
                     )
                     Toast.makeText(
@@ -1088,7 +1155,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 if (realCause != null) {
                     Analytics.sendException(
                         "download_fail",
-                        "download_fail_"+Analytics.ERROR_KEY,
+                        "download_fail_" + Analytics.ERROR_KEY,
                         realCause.message + ""
                     )
                     return
@@ -1215,7 +1282,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
     override fun onBackPressed() {
 
-        if(mInterstitialAd != null){
+        if (mInterstitialAd != null) {
             mInterstitialAd?.show(this)
         }
         super.onBackPressed()
