@@ -778,6 +778,49 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
                 val html = res.body()!!.string()
                 val doc: Document = Jsoup.parse(html)
+
+                val scripts = doc.getElementsByTag("script")
+                for (script in scripts) {
+
+                    if (script.data().contains("gql_data")) {
+
+                        var data = script.data()
+                        data = data.replace("\\", "");
+                        data = data.split("\"gql_data\":")[1];
+                        data = data.split("}\"}]],")[0]
+
+                        val jsonObject = JsonParser().parse(data).asJsonObject
+                        val shortcode_media = jsonObject["shortcode_media"].asJsonObject
+
+                        mediaInfo = parseMedia(shortcode_media)
+                        //caption里面有unicode,没想到好办法转
+                        getCaption(doc)
+
+                        //2.如果sidecar里面有视频，通过这种方式会没有videoUrl
+                        if (mediaInfo.mediaType == 8) {
+                            var hasVideo = false
+                            for (res1 in mediaInfo.resources) {
+                                if (res1.mediaType == 2) {
+                                    hasVideo = true
+                                    break
+                                }
+                            }
+                            if (hasVideo) {
+                                Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
+                                getMediaData(sourceUrl)
+                                return@launch
+                            }
+
+                        }
+
+                        searchDialog.dismiss()
+                        updateUI()
+
+                        return@launch
+                    }
+                }
+
+
                 //2.如果extra里面是null
 
                 val embed = doc.getElementsByClass("Embed")[0]

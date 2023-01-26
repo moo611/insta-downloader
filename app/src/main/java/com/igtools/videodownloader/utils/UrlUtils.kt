@@ -37,4 +37,12 @@ object UrlUtils {
 
     }
 
+    fun decode(encodeText: String): String {
+        fun decode1(unicode: String) = unicode.toInt(16).toChar()
+        val unicodes = encodeText.split("\\u")
+            .map { if (it.isNotBlank()) decode1(it) else null }.filterNotNull()
+        return String(unicodes.toCharArray())
+    }
+
+
 }

@@ -15,7 +15,6 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -50,10 +49,7 @@ import com.liulishuo.okdownload.DownloadTask
 import com.liulishuo.okdownload.core.breakpoint.BlockInfo
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
-import com.liulishuo.okdownload.core.cause.ResumeFailedCause
-import com.liulishuo.okdownload.core.listener.DownloadListener1
 import com.liulishuo.okdownload.core.listener.DownloadListener4
-import com.liulishuo.okdownload.core.listener.assist.Listener1Assist
 import com.liulishuo.okdownload.core.listener.assist.Listener4Assist
 import kotlinx.coroutines.*
 import org.greenrobot.eventbus.EventBus
@@ -366,14 +362,16 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 //1.如果extra里面有数据，直接提取
                 for (script in scripts) {
 
-                    if (script.data().contains("shortcode_media")) {
+                    if (script.data().contains("gql_data")) {
 
-                        val data = script.data()
-                        val strs = data.split("'extra',")
-                        val target = strs[1].substring(0, strs[1].length - 2)
-                        Log.v(TAG, target)
+                        var data = script.data()
+                        data = data.replace("\\", "");
+                        data = data.split("\"gql_data\":")[1];
+                        data = data.split("}\"}]],")[0]
 
-                        val jsonObject = JsonParser().parse(target).asJsonObject
+                        Log.v(TAG, data)
+
+                        val jsonObject = JsonParser().parse(data).asJsonObject
                         val shortcode_media = jsonObject["shortcode_media"].asJsonObject
 
                         curMediaInfo = parseMedia(shortcode_media)
@@ -417,7 +415,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     }
                 }
 
-                //3.如果extra里面是null
+                //2.如果extra里面是null
 
                 val embed = doc.getElementsByClass("Embed")[0]
                 val mediatype = embed.attr("data-media-type")
@@ -471,8 +469,60 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
                 val html = res.body()!!.string()
                 val doc: Document = Jsoup.parse(html)
-                //val doc = Jsoup.parse(html)
-                Log.v(TAG, doc.title())
+
+                val scripts = doc.getElementsByTag("script")
+                for (script in scripts) {
+
+                    if (script.data().contains("gql_data")) {
+
+                        var data = script.data()
+                        data = data.replace("\\", "");
+                        data = data.split("\"gql_data\":")[1];
+                        data = data.split("}\"}]],")[0]
+
+                        val jsonObject = JsonParser().parse(data).asJsonObject
+                        val shortcode_media = jsonObject["shortcode_media"].asJsonObject
+
+                        curMediaInfo = parseMedia(shortcode_media)
+                        //caption里面有unicode,没想到好办法转
+                        getCaption(doc)
+
+                        //2.如果sidecar里面有视频，通过这种方式会没有videoUrl
+                        if (curMediaInfo!!.mediaType == 8) {
+                            var hasVideo = false
+                            for (res1 in curMediaInfo!!.resources) {
+                                if (res1.mediaType == 2) {
+                                    hasVideo = true
+                                    break
+                                }
+                            }
+                            if (hasVideo) {
+                                Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
+                                val myUrl = mBinding.etShortcode.text.toString()
+                                getMediaData(myUrl)
+                                return@launch
+                            }
+
+                        }
+
+                        if (!isInvalidContext()) {
+                            progressDialog.dismiss()
+                        }
+
+                        showCurrent()
+                        mInterstitialAd?.show(requireActivity())
+                        mBinding.progressbar.visibility = View.VISIBLE
+
+                        isDownloading = true
+                        if (curMediaInfo?.mediaType == 8) {
+                            downloadMultiple(curMediaInfo!!)
+                        } else {
+                            downloadSingle(curMediaInfo!!)
+                        }
+
+                        return@launch
+                    }
+                }
 
                 val embed = doc.getElementsByClass("Embed")[0]
                 val mediatype = embed.attr("data-media-type")
