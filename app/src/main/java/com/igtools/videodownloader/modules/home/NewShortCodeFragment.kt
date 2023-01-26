@@ -469,11 +469,11 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
                 val html = res.body()!!.string()
                 val doc: Document = Jsoup.parse(html)
-
+                //1.先尝试从data里面获取
                 val scripts = doc.getElementsByTag("script")
                 for (script in scripts) {
 
-                    if (script.data().contains("gql_data")) {
+                    if (script.data().contains("gql_data") && script.data().contains("shortcode_media")) {
 
                         var data = script.data()
                         data = data.replace("\\", "");
@@ -523,7 +523,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         return@launch
                     }
                 }
-
+                //2.如果从数据获取不行，那么尝试从dom元素解析
                 val embed = doc.getElementsByClass("Embed")[0]
                 val mediatype = embed.attr("data-media-type")
                 if (mediatype == "GraphImage") {

@@ -782,7 +782,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 val scripts = doc.getElementsByTag("script")
                 for (script in scripts) {
 
-                    if (script.data().contains("gql_data")) {
+                    if (script.data().contains("gql_data") && script.data().contains("shortcode_media")) {
 
                         var data = script.data()
                         data = data.replace("\\", "");
