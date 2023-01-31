@@ -25,7 +25,7 @@ import com.igtools.videodownloader.utils.ShareUtils
 class FirstActivity : BaseActivity<ActivityFirstBinding>() {
     val TAG = "FirstActivity"
 
-    lateinit var progressDialog: ProgressDialog
+
     lateinit var myAlert:AlertDialog
     private val PERMISSION_REQ = 1024
 
@@ -34,9 +34,6 @@ class FirstActivity : BaseActivity<ActivityFirstBinding>() {
     }
 
     override fun initView() {
-
-        progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
 
         mBinding.btnStart.setOnClickListener {
 

@@ -1,8 +1,6 @@
 package com.igtools.videodownloader
 
 import android.content.ActivityNotFoundException
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -13,22 +11,16 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import com.igtools.videodownloader.base.BaseActivity
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+import com.igtools.videodownloader.base.BaseActivity
 import com.igtools.videodownloader.databinding.ActivityMainBinding
-import com.igtools.videodownloader.modules.home.HomeFragment
-import com.igtools.videodownloader.modules.setting.SettingFragment
 import com.igtools.videodownloader.models.IntentEvent
 import com.igtools.videodownloader.modules.home.NewShortCodeFragment
-import com.igtools.videodownloader.modules.home.ShortCodeFragment
 import com.igtools.videodownloader.modules.repost.RepostFragment
 import com.igtools.videodownloader.modules.search.SearchFragment
-import com.igtools.videodownloader.modules.tag.TagFragmentNew
+import com.igtools.videodownloader.modules.setting.SettingFragment
 import com.igtools.videodownloader.utils.RegexUtils
 import com.igtools.videodownloader.utils.ShareUtils
 import com.igtools.videodownloader.widgets.dialog.MyDialog
@@ -130,23 +122,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     override fun initData() {
-
-//        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-//        val configSettings = remoteConfigSettings {
-//            minimumFetchIntervalInSeconds = 3600 * 12
-//        }
-//        remoteConfig.setConfigSettingsAsync(configSettings)
-//
-//        remoteConfig.fetchAndActivate()
-//            .addOnCompleteListener(this) { task ->
-//                if (task.isSuccessful) {
-//                    val str = remoteConfig.getString("apikey2")
-//                    ShareUtils.putData("apikey", str)
-//                    BaseApplication.APIKEY = str
-//
-//                }
-//
-//            }
 
         handleIntent(intent)
     }

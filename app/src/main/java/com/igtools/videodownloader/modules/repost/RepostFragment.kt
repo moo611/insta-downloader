@@ -645,28 +645,30 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             try {
                 activity?.contentResolver?.delete(uri, null, null)
 
-            } catch (e: SecurityException) {
+            } catch (e: Exception) {
                 Log.e(TAG, e.message + "")
                 e.message?.let {
                     Analytics.sendException("delete_exception", "delete_exception_"+Analytics.ERROR_KEY, it)
                 }
+                if (e is SecurityException){
+                    val intentSender = when {
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                            MediaStore.createDeleteRequest(
+                                requireActivity().contentResolver,
+                                listOf(uri)
+                            ).intentSender
+                        }
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                            val recoverableSecurityException = e as? RecoverableSecurityException
+                            recoverableSecurityException?.userAction?.actionIntent?.intentSender
+                        }
+                        else -> null
+                    }
+                    intentSender?.let {
+                        deleteResultLauncher.launch(IntentSenderRequest.Builder(it).build())
+                    }
+                }
 
-                val intentSender = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
-                        MediaStore.createDeleteRequest(
-                            requireActivity().contentResolver,
-                            listOf(uri)
-                        ).intentSender
-                    }
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                        val recoverableSecurityException = e as? RecoverableSecurityException
-                        recoverableSecurityException?.userAction?.actionIntent?.intentSender
-                    }
-                    else -> null
-                }
-                intentSender?.let {
-                    deleteResultLauncher.launch(IntentSenderRequest.Builder(it).build())
-                }
             }
 
         } else {

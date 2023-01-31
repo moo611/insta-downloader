@@ -82,7 +82,7 @@ class WebActivity : BaseActivity<ActivityWebBinding>() {
                 if (cookie!=null && cookie.contains("sessionid")){
                     ShareUtils.putData("cookie",cookie)
                     BaseApplication.cookie = cookie
-                    setResult(200)
+                    setResult(RESULT_OK)
                     finish()
                 }
 

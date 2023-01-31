@@ -1,5 +1,6 @@
 package com.igtools.videodownloader.modules.search
 
+import android.app.Activity.RESULT_OK
 import android.app.ProgressDialog
 import android.content.Intent
 import android.text.Editable
@@ -94,12 +95,12 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
             //getDataNoCookie()
             if (isSearchUser()) {
-                adapter.isUser=true
-                Analytics.sendEvent("search_by_user","search_by_user","1")
+                adapter.isUser = true
+                Analytics.sendEvent("search_by_user", "search_by_user", "1")
                 getUserDataWeb()
             } else {
-                adapter.isUser=false
-                Analytics.sendEvent("search_by_tag","search_by_tag","1")
+                adapter.isUser = false
+                Analytics.sendEvent("search_by_tag", "search_by_tag", "1")
                 getTagDataWeb()
             }
 
@@ -142,7 +143,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                     } else {
                         getTagDataMoreNoCookie()
                     }
-                    
+
                 }
 
             }
@@ -154,12 +155,12 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     }
 
     private fun isSearchUser(): Boolean {
-        
+
         if (mBinding.etSearch.text.toString().contains("#")) {
-            Log.v(TAG,"is search hash tag")
+            Log.v(TAG, "is search hash tag")
             return false
         }
-        Log.v(TAG,"is search user")
+        Log.v(TAG, "is search user")
         return true
     }
 
@@ -739,19 +740,17 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     fun isSlideToBottom(recyclerView: RecyclerView?): Boolean {
         if (recyclerView == null) return false
         return (recyclerView.computeVerticalScrollExtent() + recyclerView.computeVerticalScrollOffset()
-                >= recyclerView.computeVerticalScrollRange()-50)
+                >= recyclerView.computeVerticalScrollRange() - 50)
     }
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == LOGIN_REQ) {
+        if (requestCode == LOGIN_REQ && resultCode == RESULT_OK) {
 
-            if (resultCode == 200) {
-                lifecycleScope.launch {
-                    getUserData()
-                }
+            lifecycleScope.launch {
+                getUserData()
             }
 
         }

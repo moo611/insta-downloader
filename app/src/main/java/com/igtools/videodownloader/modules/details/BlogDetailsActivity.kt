@@ -112,7 +112,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             }
 
             lifecycleScope.launch {
-                val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
+                val oldRecord = if(code==null) null else RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (oldRecord != null) {
                     Toast.makeText(
                         this@BlogDetailsActivity,
@@ -138,7 +138,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
         mBinding.imgWall.setOnClickListener {
             lifecycleScope.launch {
-                val oldRecord = RecordDB.getInstance().recordDao().findByCode(code!!)
+                val oldRecord = if(code==null) null else RecordDB.getInstance().recordDao().findByCode(code!!)
                 if (recordInfo == null && oldRecord == null) {
                     Toast.makeText(
                         this@BlogDetailsActivity,

@@ -1,5 +1,6 @@
 package com.igtools.videodownloader.modules.home
 
+import android.app.Activity.RESULT_OK
 import android.app.ProgressDialog
 import android.content.ClipboardManager
 import android.content.Context
@@ -850,8 +851,8 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         totalCount = 0
         totalLen = 0
         paths.clear()
-        curMediaInfo = null
-        curRecord = null
+        //curMediaInfo = null
+        //curRecord = null
         isDownloading = false
 
     }
@@ -1193,7 +1194,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == LOGIN_REQ && resultCode == 200) {
+        if (requestCode == LOGIN_REQ && resultCode == RESULT_OK) {
             val url = mBinding.etShortcode.text.toString()
             if (url.contains("stories")) {
                 getStoryData()
