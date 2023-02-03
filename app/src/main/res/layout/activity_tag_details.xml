@@ -123,7 +123,11 @@
                 app:cpv_unitPosition="right_top"
                 app:cpv_unitScale="1"
                 app:cpv_value="0" />
-
+            <WebView
+                android:visibility="invisible"
+                android:id="@+id/webview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
 
         </FrameLayout>
 

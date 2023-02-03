@@ -1,5 +1,6 @@
 package com.igtools.videodownloader.modules.details
 
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.app.WallpaperManager
 import android.content.Intent
@@ -13,6 +14,7 @@ import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.webkit.*
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -92,6 +94,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
     override fun initView() {
         initAds()
         initDialog()
+        initWebView()
         mBinding.btnDownload.isEnabled = false
         adapter = MultiTypeAdapter(this, mediaInfo.resources)
         mBinding.banner
@@ -309,7 +312,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             .create()
 
         searchDialog = ProgressDialog(this)
-        searchDialog.setMessage(getString(R.string.searching))
+        searchDialog.setMessage(getString(R.string.search_wait))
         searchDialog.setCancelable(false)
 
         selectDialog = BottomDialog(this, R.style.MyDialogTheme)
@@ -649,10 +652,16 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 code = mediaInfo.code
 
                 if (mediaInfo.mediaType == 8 && mediaInfo.resources.size == 0) {
+
+                    val embedUrl = "https://www.instagram.com/reel/$code/embed/captioned"
                     //tag 列表从外侧获取不到sidecar的children
-                    getDataFromServer2(1)
+                    searchDialog.show()
+                    mBinding.webview.loadUrl(embedUrl)
                 } else if (mediaInfo.mediaType == 2 && mediaInfo.videoUrl == null) {
-                    getDataFromServer2(2)
+
+                    val embedUrl = "https://www.instagram.com/reel/$code/embed/captioned"
+                    searchDialog.show()
+                    mBinding.webview.loadUrl(embedUrl)
                 } else {
                     updateUI()
                 }
@@ -669,71 +678,18 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
 
     }
 
-    private fun getDatafromServer(type: Int) {
-        val sourceUrl = if (type == 1) {
-            "https://www.instagram.com/p/$code/"
-        } else {
-            "https://www.instagram.com/reel/$code/"
-        }
-        val embedUrl = sourceUrl + "embed/captioned"
-        searchDialog.show()
-
+    private fun loadData(html: String) {
+        var curMediaType = ""
         Thread {
             try {
-                val doc: Document = Jsoup.connect(embedUrl).userAgent(Urls.USER_AGENT).get()
-                //val doc = Jsoup.parse(html)
-                Log.v(TAG, doc.title())
-                val scripts = doc.getElementsByTag("script")
-                //1.如果extra里面有数据，直接提取
-                for (script in scripts) {
-
-                    if (script.data().contains("shortcode_media")) {
-
-                        val data = script.data()
-                        val strs = data.split("'extra',")
-                        val target = strs[1].substring(0, strs[1].length - 2)
-                        Log.v(TAG, target)
-
-                        val jsonObject = JsonParser().parse(target).asJsonObject
-                        val shortcode_media = jsonObject["shortcode_media"].asJsonObject
-
-                        mediaInfo = parseMedia(shortcode_media)
-
-                        if (mediaInfo.mediaType == 8) {
-                            var hasVideo = false
-                            for (res in mediaInfo.resources) {
-                                if (res.mediaType == 2) {
-                                    hasVideo = true
-                                    break
-                                }
-                            }
-                            if (hasVideo) {
-                                Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
-
-                                getMediaData(sourceUrl)
-                                return@Thread
-                            }
-
-                        }
-
-                        runOnUiThread {
-
-                            searchDialog.dismiss()
-                            updateUI()
-
-                        }
-
-                        return@Thread
-                    }
-                }
-
-                //2.如果extra里面是null
-
+                val doc = Jsoup.parse(html)
                 val embed = doc.getElementsByClass("Embed")[0]
                 val mediatype = embed.attr("data-media-type")
+                curMediaType = mediatype
                 if (mediatype == "GraphImage") {
                     mediaInfo = MediaModel()
                     mediaInfo.mediaType = 1
+
                     mediaInfo.code = code!!
                     parseImage(doc)
 
@@ -741,98 +697,6 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                         searchDialog.dismiss()
                         updateUI()
                     }
-
-                } else {
-                    //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
-                    Analytics.sendEvent("use_a1", "media_type", mediatype)
-                    getMediaData(sourceUrl)
-                }
-
-            } catch (e: Exception) {
-                //私人账户
-                Log.e(TAG, e.message + "")
-                getMediaData(sourceUrl)
-            }
-
-        }.start()
-
-
-    }
-
-    private fun getDataFromServer2(type: Int) {
-        val sourceUrl = if (type == 1) {
-            "https://www.instagram.com/p/$code/"
-        } else {
-            "https://www.instagram.com/reel/$code/"
-        }
-        val embedUrl = sourceUrl + "embed/captioned"
-        searchDialog.show()
-
-        lifecycleScope.launch {
-            try {
-
-//                val headers = HashMap<String, String>()
-//                headers["user-agent"] = Urls.USER_AGENT
-
-                val res = ApiClient.getClient().getMediaData3(embedUrl)
-
-                val html = res.body()!!.string()
-                val doc: Document = Jsoup.parse(html)
-
-                val scripts = doc.getElementsByTag("script")
-                for (script in scripts) {
-
-                    if (script.data().contains("gql_data") && script.data().contains("shortcode_media")) {
-
-                        var data = script.data()
-                        data = data.replace("\\", "");
-                        data = data.split("\"gql_data\":")[1];
-                        data = data.split("}\"}]],")[0]
-
-                        val jsonObject = JsonParser().parse(data).asJsonObject
-                        val shortcode_media = jsonObject["shortcode_media"].asJsonObject
-
-                        mediaInfo = parseMedia(shortcode_media)
-                        //caption里面有unicode,没想到好办法转
-                        getCaption(doc)
-
-                        //2.如果sidecar里面有视频，通过这种方式会没有videoUrl
-                        if (mediaInfo.mediaType == 8) {
-                            var hasVideo = false
-                            for (res1 in mediaInfo.resources) {
-                                if (res1.mediaType == 2) {
-                                    hasVideo = true
-                                    break
-                                }
-                            }
-                            if (hasVideo) {
-                                Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
-                                getMediaData(sourceUrl)
-                                return@launch
-                            }
-
-                        }
-
-                        searchDialog.dismiss()
-                        updateUI()
-
-                        return@launch
-                    }
-                }
-
-
-                //2.如果extra里面是null
-
-                val embed = doc.getElementsByClass("Embed")[0]
-                val mediatype = embed.attr("data-media-type")
-                if (mediatype == "GraphImage") {
-                    mediaInfo = MediaModel()
-                    mediaInfo.mediaType = 1
-                    mediaInfo.code = code!!
-                    parseImage(doc)
-
-                    searchDialog.dismiss()
-                    updateUI()
 
                 } else if (mediatype == "GraphVideo") {
                     val embedVideo = doc.getElementsByClass("EmbedVideo")
@@ -844,30 +708,177 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                         val video = videodiv.getElementsByTag("video")[0]
                         mediaInfo.videoUrl = video.attr("src")
                         parseImage(doc)
-                        searchDialog.dismiss()
-                        updateUI()
 
+                        runOnUiThread {
+                            searchDialog.dismiss()
+                            updateUI()
+
+                        }
 
                     } else {
-                        //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
                         Analytics.sendEvent("use_a1", "media_type", mediatype)
+                        val sourceUrl = "https://www.instagram.com/reel/$code/"
                         getMediaData(sourceUrl)
                     }
                 } else {
-                    //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
-                    Analytics.sendEvent("use_a1", "media_type", mediatype)
+
+                    val scripts = doc.getElementsByTag("script")
+                    for (script in scripts) {
+
+                        if (script.data().contains("gql_data") && script.data()
+                                .contains("shortcode_media")
+                        ) {
+
+                            var data = script.data()
+                            data = data.replace("\\", "");
+                            data = data.split("\"gql_data\":")[1];
+                            data = data.split("}\"}]],")[0]
+
+                            val jsonObject = JsonParser().parse(data).asJsonObject
+                            val shortcode_media = jsonObject["shortcode_media"].asJsonObject
+
+                            mediaInfo = parseMedia(shortcode_media)
+                            //caption里面有unicode,没想到好办法转
+                            getCaption(doc)
+
+                            var hasVideo = false
+                            for (res1 in mediaInfo.resources) {
+                                if (res1.mediaType == 2) {
+                                    hasVideo = true
+                                    break
+                                }
+                            }
+                            if (hasVideo) {
+                                Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
+                                val myUrl = "https://www.instagram.com/p/$code"
+                                getMediaData(myUrl)
+                                return@Thread
+                            }
+
+                            runOnUiThread {
+                                searchDialog.dismiss()
+                                updateUI()
+                            }
+                            return@Thread
+                        }
+                    }
+                    Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
+                    val myUrl = "https://www.instagram.com/p/$code"
+                    getMediaData(myUrl)
+                }
+
+            } catch (e: Exception) {
+                Analytics.sendEvent("use_a1", "media_type", curMediaType)
+                if (curMediaType == "GraphSidecar") {
+
+                    val sourceUrl = "https://www.instagram.com/p/$code/"
+                    getMediaData(sourceUrl)
+                } else if (curMediaType == "GraphVideo") {
+                    val sourceUrl = "https://www.instagram.com/reel/$code/"
                     getMediaData(sourceUrl)
                 }
-            } catch (e: Exception) {
+            }
 
-                getMediaData(sourceUrl)
+        }.start()
+
+    }
+
+    private fun parseSideCar(doc: Document): Int {
+        getUserInfo(doc)
+        getCaption(doc)
+        val sidecar = doc.getElementsByClass("EmbedSidecar")
+        val lis = sidecar[0].getElementsByTag("li")
+        val total = lis.size
+        mBinding.webview.post {
+
+            mBinding.webview.loadUrl(
+                "javascript:((total) => {\n" +
+                        "  let curIndex = 0;\n" +
+                        "  let i = 0;\n" +
+                        "\n" +
+                        "  while (i < total) {\n" +
+                        "\n" +
+                        "    setTimeout(() => {\n" +
+                        "\n" +
+                        "      let sidecar = document.getElementsByClassName(\"EmbedSidecar\");\n" +
+                        "      let btns = sidecar[0].getElementsByTagName(\"button\");\n" +
+                        "      if (curIndex == 0) {\n" +
+                        "        let rightbtn = btns[0];\n" +
+                        "\n" +
+                        "        rightbtn.click();\n" +
+                        "\n" +
+                        "      } else if (curIndex < total - 1) {\n" +
+                        "        let rightbtn = btns[1];\n" +
+                        "\n" +
+                        "        rightbtn.click();\n" +
+                        "      }\n" +
+                        "\n" +
+                        "\n" +
+                        "      let lis = sidecar[0].getElementsByTagName(\"li\");\n" +
+                        "      let li = lis[curIndex];\n" +
+                        "\n" +
+                        "      if (li.getElementsByTagName(\"video\").length > 0) {\n" +
+                        "\n" +
+                        "        let videoUrl = li.getElementsByTagName(\"video\")[0].src;\n" +
+                        "        let imageUrl = li.getElementsByTagName(\"video\")[0].poster;\n" +
+                        "        console.log(videoUrl);\n" +
+                        "        console.log(imageUrl);\n" +
+                        "        local_obj.onReceiveVideo(imageUrl, videoUrl);\n" +
+                        "      } else if (li.getElementsByTagName(\"img\").length > 0) {\n" +
+                        "        let imageUrl = li.getElementsByTagName(\"img\")[0].src;\n" +
+                        "        console.log(imageUrl);\n" +
+                        "        local_obj.onReceiveImage(imageUrl);\n" +
+                        "      }\n" +
+                        "\n" +
+                        "      curIndex++;\n" +
+                        "    }, i * 50);\n" +
+                        "\n" +
+                        "    i++;\n" +
+                        "  }\n" +
+                        "})($total)"
+            )
+
+        }
+
+        return total
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun initWebView() {
+
+        mBinding.webview.settings.javaScriptEnabled = true
+        mBinding.webview.settings.domStorageEnabled = true
+        mBinding.webview.addJavascriptInterface(JavaScriptLocalObj(), "local_obj")
+
+        mBinding.webview.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                view.postDelayed({
+                    view.loadUrl("javascript:window.local_obj.showSource('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
+
+                }, 500)
+            }
+        }
+        mBinding.webview.webChromeClient = object : WebChromeClient() {
+
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+
+                Log.e(TAG, consoleMessage?.message() + "")
+
+                return super.onConsoleMessage(consoleMessage)
+            }
+
+            override fun onJsAlert(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: JsResult?
+            ): Boolean {
+                return super.onJsAlert(view, url, message, result)
             }
 
         }
 
-
     }
-
 
     private fun updateUI() {
 
@@ -1058,7 +1069,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                 realCause: java.lang.Exception?,
                 model: Listener4Assist.Listener4Model
             ) {
-
+                Log.v(TAG, task.url)
                 Log.e(TAG, realCause?.message + "")
                 if (realCause != null) {
 
@@ -1067,6 +1078,9 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
                         "download_fail_" + Analytics.ERROR_KEY,
                         realCause.message + ""
                     )
+                    isDownloading = false
+                    mBinding.progressBar.visibility = View.INVISIBLE
+                    mBinding.progressBar.setValue(0f)
                     Toast.makeText(
                         this@TagDetailsActivity,
                         R.string.download_failed,
@@ -1348,6 +1362,34 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             }
         }
 
+    }
+
+    inner class JavaScriptLocalObj {
+        @JavascriptInterface
+        fun showSource(html: String) {
+
+            Log.v(TAG, html)
+            loadData(html)
+
+        }
+
+        @JavascriptInterface
+        fun onReceiveImage(imageUrl: String) {
+
+            val temp = MediaModel()
+            temp.thumbnailUrl = imageUrl
+            temp.mediaType = 1
+            mediaInfo.resources.add(temp)
+        }
+
+        @JavascriptInterface
+        fun onReceiveVideo(imageUrl: String, videoUrl: String) {
+            val temp = MediaModel()
+            temp.thumbnailUrl = imageUrl
+            temp.videoUrl = videoUrl
+            temp.mediaType = 2
+            mediaInfo.resources.add(temp)
+        }
     }
 
 }

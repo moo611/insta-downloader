@@ -721,6 +721,9 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                         "download_fail_"+Analytics.ERROR_KEY,
                         realCause.message + ""
                     )
+                    isDownloading = false
+                    mBinding.progressBar.visibility = View.INVISIBLE
+                    mBinding.progressBar.setValue(0f)
                     Toast.makeText(
                         this@BlogDetailsActivity,
                         R.string.download_failed,

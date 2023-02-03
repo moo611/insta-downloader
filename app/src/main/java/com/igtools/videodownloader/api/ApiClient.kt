@@ -20,6 +20,8 @@ object ApiClient {
     fun getClient(): UrlService {
 
         val builder: OkHttpClient.Builder = OkHttpClient.Builder()
+        builder.followRedirects(false)
+        builder.followSslRedirects(false)
         builder.connectTimeout(30, TimeUnit.SECONDS)
         builder.writeTimeout(30, TimeUnit.SECONDS)
         builder.readTimeout(30, TimeUnit.SECONDS)

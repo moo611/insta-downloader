@@ -77,4 +77,5 @@
     <string name="need_permission">Chúng tôi cần quyền đọc và ghi để giúp bạn tải xuống ảnh và video</string>
     <string name="settings">Cài đặt</string>
     <string name="share_fail">Chia sẻ không thành công do lý do hệ thống</string>
+    <string name="search_wait">Tìm kiếm có thể mất chút thời gian, vui lòng đợi</string>
 </resources>

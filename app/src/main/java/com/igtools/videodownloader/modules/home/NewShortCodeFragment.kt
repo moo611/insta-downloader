@@ -1,5 +1,6 @@
 package com.igtools.videodownloader.modules.home
 
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.app.ProgressDialog
 import android.content.ClipboardManager
@@ -16,6 +17,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.webkit.*
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -88,6 +90,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
         initDialog()
         initAds()
+        initWebView()
         mBinding.btnDownload.setOnClickListener {
             autoStart()
         }
@@ -160,18 +163,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
             launchIntent?.let { startActivity(it) }
         }
 
-
-        //version 52 fix scrollview edittext focus bug
-//        val view = mBinding.scrollview
-//        view.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS)
-//        view.isFocusable = true
-//        view.isFocusableInTouchMode = true
-//        view.setOnTouchListener { v, event ->
-//            v.requestFocusFromTouch()
-//            false
-//        }
-        //the code above will cause another problem, the background color will get changed.so son't use it
-
     }
 
     override fun onStart() {
@@ -184,12 +175,37 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         EventBus.getDefault().unregister(this);
     }
 
-    fun handleCopy() {
-        mBinding.btnPaste.post {
-            val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clipboard.primaryClip?.getItemAt(0)?.let {
-                //fix null pointer
-                mBinding.etShortcode.setText(it.text)
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun initWebView() {
+
+        mBinding.webview.settings.javaScriptEnabled = true
+        mBinding.webview.settings.domStorageEnabled = true
+        mBinding.webview.addJavascriptInterface(JavaScriptLocalObj(), "local_obj")
+
+        mBinding.webview.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                view.postDelayed({
+                    view.loadUrl("javascript:window.local_obj.showSource('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
+
+                }, 500)
+            }
+        }
+        mBinding.webview.webChromeClient = object : WebChromeClient() {
+
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+
+                Log.e(TAG, consoleMessage?.message() + "")
+
+                return super.onConsoleMessage(consoleMessage)
+            }
+
+            override fun onJsAlert(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: JsResult?
+            ): Boolean {
+                return super.onJsAlert(view, url, message, result)
             }
 
         }
@@ -209,7 +225,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     private fun initDialog() {
 
         progressDialog = ProgressDialog(requireContext())
-        progressDialog.setMessage(getString(R.string.searching))
+        progressDialog.setMessage(getString(R.string.search_wait))
         progressDialog.setCancelable(false)
 
         storyDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
@@ -297,6 +313,18 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     }
 
+    fun handleCopy() {
+        mBinding.btnPaste.post {
+            val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.primaryClip?.getItemAt(0)?.let {
+                //fix null pointer
+                mBinding.etShortcode.setText(it.text)
+            }
+
+        }
+
+    }
+
     //data part
     private fun autoStart() {
         val paramString = mBinding.etShortcode.text.toString()
@@ -328,7 +356,11 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 val url = emBedUrl()
                 val sourceUrl = mBinding.etShortcode.text.toString()
 
-                loadData2(url, sourceUrl)
+                //loadData2(url, sourceUrl)
+
+                progressDialog.show()
+                clearData()
+                mBinding.webview.loadUrl(url)
             } else if (paramString.matches(Regex("(.*)instagram.com/stories/(.*)"))) {
                 if (BaseApplication.cookie == null) {
                     storyDialog.show()
@@ -349,75 +381,11 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     }
 
 
-    private fun loadData(embedUrl: String, sourceUrl: String) {
-
-        progressDialog.show()
-        clearData()
-
+    private fun loadData(html: String) {
+        val sourceUrl = mBinding.etShortcode.text.toString()
         Thread {
             try {
-                val doc: Document = Jsoup.connect(embedUrl).userAgent(Urls.USER_AGENT).get()
-                //val doc = Jsoup.parse(html)
-                Log.v(TAG, doc.title())
-                val scripts = doc.getElementsByTag("script")
-                //1.如果extra里面有数据，直接提取
-                for (script in scripts) {
-
-                    if (script.data().contains("gql_data")) {
-
-                        var data = script.data()
-                        data = data.replace("\\", "");
-                        data = data.split("\"gql_data\":")[1];
-                        data = data.split("}\"}]],")[0]
-
-                        Log.v(TAG, data)
-
-                        val jsonObject = JsonParser().parse(data).asJsonObject
-                        val shortcode_media = jsonObject["shortcode_media"].asJsonObject
-
-                        curMediaInfo = parseMedia(shortcode_media)
-
-                        //2.如果sidecar里面有视频，通过这种方式会没有videoUrl
-                        if (curMediaInfo!!.mediaType == 8) {
-                            var hasVideo = false
-                            for (res in curMediaInfo!!.resources) {
-                                if (res.mediaType == 2) {
-                                    hasVideo = true
-                                    break
-                                }
-                            }
-                            if (hasVideo) {
-                                Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
-                                val myUrl = mBinding.etShortcode.text.toString()
-                                getMediaData(myUrl)
-                                return@Thread
-                            }
-
-                        }
-
-                        activity?.runOnUiThread {
-                            if (!isInvalidContext()) {
-                                progressDialog.dismiss()
-                            }
-
-                            showCurrent()
-                            mInterstitialAd?.show(requireActivity())
-                            mBinding.progressbar.visibility = View.VISIBLE
-
-                            isDownloading = true
-                            if (curMediaInfo?.mediaType == 8) {
-                                downloadMultiple(curMediaInfo!!)
-                            } else {
-                                downloadSingle(curMediaInfo!!)
-                            }
-                        }
-
-                        return@Thread
-                    }
-                }
-
-                //2.如果extra里面是null
-
+                val doc = Jsoup.parse(html)
                 val embed = doc.getElementsByClass("Embed")[0]
                 val mediatype = embed.attr("data-media-type")
                 if (mediatype == "GraphImage") {
@@ -436,18 +404,97 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         mBinding.progressbar.visibility = View.VISIBLE
 
                         isDownloading = true
+                    }
+
+                    downloadSingle(curMediaInfo!!)
+
+
+                } else if (mediatype == "GraphVideo") {
+                    val embedVideo = doc.getElementsByClass("EmbedVideo")
+                    if (embedVideo.size > 0) {
+                        curMediaInfo = MediaModel()
+                        curMediaInfo?.mediaType = 2
+                        curMediaInfo?.code = getShortCode() ?: ""
+                        val videodiv = embedVideo[0]
+                        val video = videodiv.getElementsByTag("video")[0]
+                        curMediaInfo?.videoUrl = video.attr("src")
+                        parseImage(doc)
+
+                        activity?.runOnUiThread {
+                            if (!isInvalidContext()) {
+                                progressDialog.dismiss()
+                            }
+
+                            showCurrent()
+                            mInterstitialAd?.show(requireActivity())
+                            mBinding.progressbar.visibility = View.VISIBLE
+
+                            isDownloading = true
+                        }
+
                         downloadSingle(curMediaInfo!!)
 
+
+                    } else {
+                        Analytics.sendEvent("use_a1", "media_type", mediatype)
+                        getMediaData(sourceUrl)
                     }
                 } else {
-                    //如果extra里面是null，并且不是单个图片，或者是链接失效,则用原来的方法尝试获取
-                    Analytics.sendEvent("use_a1", "media_type", mediatype)
-                    getMediaData(sourceUrl)
+
+                    val scripts = doc.getElementsByTag("script")
+                    for (script in scripts) {
+
+                        if (script.data().contains("gql_data") && script.data()
+                                .contains("shortcode_media")
+                        ) {
+
+                            var data = script.data()
+                            data = data.replace("\\", "");
+                            data = data.split("\"gql_data\":")[1];
+                            data = data.split("}\"}]],")[0]
+
+                            val jsonObject = JsonParser().parse(data).asJsonObject
+                            val shortcode_media = jsonObject["shortcode_media"].asJsonObject
+
+                            curMediaInfo = parseMedia(shortcode_media)
+                            //caption里面有unicode,没想到好办法转
+                            getCaption(doc)
+
+                            var hasVideo = false
+                            for (res1 in curMediaInfo!!.resources) {
+                                if (res1.mediaType == 2) {
+                                    hasVideo = true
+                                    break
+                                }
+                            }
+                            if (hasVideo) {
+                                Analytics.sendEvent("use_a1", "media_type", "GraphSidecar")
+                                val myUrl = mBinding.etShortcode.text.toString()
+                                getMediaData(myUrl)
+                                return@Thread
+                            }
+
+                            activity?.runOnUiThread {
+                                if (!isInvalidContext()) {
+                                    progressDialog.dismiss()
+                                }
+
+                                showCurrent()
+                                mInterstitialAd?.show(requireActivity())
+                                mBinding.progressbar.visibility = View.VISIBLE
+
+                                isDownloading = true
+                            }
+
+                            downloadMultiple(curMediaInfo!!)
+                            return@Thread
+                        }
+                    }
+
                 }
 
             } catch (e: Exception) {
-                //私人账户
-                Log.e(TAG, e.message + "")
+                //Analytics.sendEvent("use_a1", "media_type", mediatype)
                 getMediaData(sourceUrl)
             }
 
@@ -474,7 +521,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 val scripts = doc.getElementsByTag("script")
                 for (script in scripts) {
 
-                    if (script.data().contains("gql_data") && script.data().contains("shortcode_media")) {
+                    if (script.data().contains("gql_data") && script.data()
+                            .contains("shortcode_media")
+                    ) {
 
                         var data = script.data()
                         data = data.replace("\\", "");
@@ -597,6 +646,66 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         //Log.v(TAG, imageUrl)
         curMediaInfo?.thumbnailUrl = imageUrl
         Log.v(TAG, curMediaInfo.toString())
+    }
+
+    private fun parseSideCar(doc: Document): Int {
+        getUserInfo(doc)
+        getCaption(doc)
+        val sidecar = doc.getElementsByClass("EmbedSidecar")
+        val lis = sidecar[0].getElementsByTag("li")
+        val total = lis.size
+        mBinding.webview.post {
+
+            mBinding.webview.loadUrl(
+                "javascript:((total) => {\n" +
+                        "  let curIndex = 0;\n" +
+                        "  let i = 0;\n" +
+                        "\n" +
+                        "  while (i < total) {\n" +
+                        "\n" +
+                        "    setTimeout(() => {\n" +
+                        "\n" +
+                        "      let sidecar = document.getElementsByClassName(\"EmbedSidecar\");\n" +
+                        "      let btns = sidecar[0].getElementsByTagName(\"button\");\n" +
+                        "      if (curIndex == 0) {\n" +
+                        "        let rightbtn = btns[0];\n" +
+                        "\n" +
+                        "        rightbtn.click();\n" +
+                        "\n" +
+                        "      } else if (curIndex < total - 1) {\n" +
+                        "        let rightbtn = btns[1];\n" +
+                        "\n" +
+                        "        rightbtn.click();\n" +
+                        "      }\n" +
+                        "\n" +
+                        "\n" +
+                        "      let lis = sidecar[0].getElementsByTagName(\"li\");\n" +
+                        "      let li = lis[curIndex];\n" +
+                        "\n" +
+                        "      if (li.getElementsByTagName(\"video\").length > 0) {\n" +
+                        "\n" +
+                        "        let videoUrl = li.getElementsByTagName(\"video\")[0].src;\n" +
+                        "        let imageUrl = li.getElementsByTagName(\"video\")[0].poster;\n" +
+                        "        console.log(videoUrl);\n" +
+                        "        console.log(imageUrl);\n" +
+                        "        local_obj.onReceiveVideo(imageUrl, videoUrl);\n" +
+                        "      } else if (li.getElementsByTagName(\"img\").length > 0) {\n" +
+                        "        let imageUrl = li.getElementsByTagName(\"img\")[0].src;\n" +
+                        "        console.log(imageUrl);\n" +
+                        "        local_obj.onReceiveImage(imageUrl);\n" +
+                        "      }\n" +
+                        "\n" +
+                        "      curIndex++;\n" +
+                        "    }, i * 50);\n" +
+                        "\n" +
+                        "    i++;\n" +
+                        "  }\n" +
+                        "})($total)"
+            )
+
+        }
+
+        return total
     }
 
     private fun getUserInfo(doc: Document) {
@@ -846,17 +955,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     }
 
-    private fun clearData() {
-        currentCount = 0
-        totalCount = 0
-        totalLen = 0
-        paths.clear()
-        //curMediaInfo = null
-        //curRecord = null
-        isDownloading = false
-
-    }
-
     private fun parseStory(jsonObject: JsonObject): MediaModel {
         val mediaModel = MediaModel()
         val items = jsonObject["items"].asJsonArray
@@ -891,29 +989,65 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     }
 
+    private fun clearData() {
+        currentCount = 0
+        totalCount = 0
+        totalLen = 0
+        paths.clear()
+        //curMediaInfo = null
+        //curRecord = null
+        isDownloading = false
+
+    }
 
     /**
      * 刚搜索到先展示
      */
     private fun showCurrent() {
-        mBinding.container.visibility = View.VISIBLE
-        mBinding.username.text = curMediaInfo?.username
-        mBinding.tvCaption.text = curMediaInfo?.captionText
-        Glide.with(requireContext()).load(curMediaInfo?.thumbnailUrl)
-            .placeholder(
-                ColorDrawable(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.gray_1
+        curMediaInfo?.let {
+
+            mBinding.container.visibility = View.VISIBLE
+            mBinding.username.text = it.username
+            mBinding.tvCaption.text = it.captionText
+            if (it.mediaType != 8) {
+                Glide.with(requireContext()).load(it.thumbnailUrl)
+                    .placeholder(
+                        ColorDrawable(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.gray_1
+                            )
+                        )
+                    )
+                    .into(mBinding.picture)
+            } else {
+                if (it.resources.size > 0) {
+                    Glide.with(requireContext()).load(it.resources[0].thumbnailUrl)
+                        .placeholder(
+                            ColorDrawable(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.gray_1
+                                )
+                            )
+                        )
+                        .into(mBinding.picture)
+                }
+
+            }
+
+            Glide.with(requireContext()).load(it.profilePicUrl).circleCrop()
+                .placeholder(
+                    ColorDrawable(
+                        ContextCompat.getColor(
+                            requireContext(),
+                            R.color.gray_1
+                        )
                     )
                 )
-            )
-            .into(mBinding.picture)
+                .into(mBinding.avatar)
+        }
 
-
-        Glide.with(requireContext()).load(curMediaInfo?.profilePicUrl).circleCrop()
-            .placeholder(ColorDrawable(ContextCompat.getColor(requireContext(), R.color.gray_1)))
-            .into(mBinding.avatar)
     }
 
 
@@ -984,10 +1118,12 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 realCause: java.lang.Exception?,
                 model: Listener4Assist.Listener4Model
             ) {
-
+                Log.v(TAG, task.url)
                 Log.e(TAG, realCause?.message + "")
                 if (realCause != null) {
-
+                    isDownloading = false
+                    mBinding.progressbar.visibility = View.INVISIBLE
+                    mBinding.progressbar.setValue(0f)
                     Analytics.sendException(
                         "download_fail",
                         "download_fail_" + Analytics.ERROR_KEY,
@@ -1208,7 +1344,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
     }
 
-
     //method part
     private fun emBedUrl(): String {
 
@@ -1262,5 +1397,33 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
 
 
+    }
+
+    inner class JavaScriptLocalObj {
+        @JavascriptInterface
+        fun showSource(html: String) {
+
+            Log.v(TAG, html)
+            loadData(html)
+
+        }
+
+        @JavascriptInterface
+        fun onReceiveImage(imageUrl: String) {
+
+            val temp = MediaModel()
+            temp.thumbnailUrl = imageUrl
+            temp.mediaType = 1
+            curMediaInfo?.resources?.add(temp)
+        }
+
+        @JavascriptInterface
+        fun onReceiveVideo(imageUrl: String, videoUrl: String) {
+            val temp = MediaModel()
+            temp.thumbnailUrl = imageUrl
+            temp.videoUrl = videoUrl
+            temp.mediaType = 2
+            curMediaInfo?.resources?.add(temp)
+        }
     }
 }

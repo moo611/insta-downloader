@@ -76,4 +76,5 @@
     <string name="need_permission">Нам нужны права на чтение и запись, чтобы помочь вам загружать фото и видео</string>
     <string name="settings">Настройки</string>
     <string name="share_fail">Отправить не удалось по системной причине</string>
+    <string name="search_wait">Поиск может занять некоторое время, подождите</string>
 </resources>

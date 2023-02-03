@@ -45,6 +45,12 @@ interface UrlService {
     ): Response<ResponseBody>
 
     @GET
+    suspend fun getMediaData4(
+        @Url url: String,
+        @HeaderMap headers: HashMap<String, String>
+    ): Response<ResponseBody>
+
+    @GET
     suspend fun getStoryData(
         @Url url: String,
         @HeaderMap headers: HashMap<String, String>

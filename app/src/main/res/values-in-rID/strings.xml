@@ -78,4 +78,6 @@
     <string name="need_permission">Kami memerlukan izin baca dan tulis untuk membantu Anda mengunduh foto dan video</string>
     <string name="settings">Pengaturan</string>
     <string name="share_fail">Pembagian gagal karena alasan sistem</string>
+    <string name="search_wait">Pencarian mungkin memakan waktu lama, harap tunggu</string>
+
 </resources>
