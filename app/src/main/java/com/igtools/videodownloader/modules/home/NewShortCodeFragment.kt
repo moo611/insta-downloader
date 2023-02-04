@@ -490,6 +490,8 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                             return@Thread
                         }
                     }
+                    Analytics.sendEvent("use_a1", "media_type", mediatype)
+                    getMediaData(sourceUrl)
 
                 }
 
