@@ -638,7 +638,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                         .into(mBinding.picture)
                     mBinding.btnDownload.isEnabled = true
                     //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                    mediaInfo.captionText = null
+
                     mBinding.tvTitle.setContent(mediaInfo.captionText)
 
                 }
