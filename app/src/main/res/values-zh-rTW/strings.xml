@@ -78,4 +78,8 @@
     <string name="settings">設置</string>
     <string name="share_fail">由於系統原因共享失敗</string>
     <string name="search_wait">搜索可能需要一些時間，請稍候</string>
+    <string name="caption">複製標題</string>
+    <string name="copied">複製到剪貼板</string>
+    <string name="tv_hide">隱藏</string>
+    <string name="tv_show">…顯示</string>
 </resources>

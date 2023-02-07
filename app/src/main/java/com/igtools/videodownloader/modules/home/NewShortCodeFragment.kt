@@ -787,7 +787,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 mBinding.progressbar.visibility = View.INVISIBLE
                 mBinding.progressbar.setValue(0f)
                 Log.e(TAG, e.message + "")
-                safeToast(R.string.network)
+                safeToast(R.string.failed)
                 if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
@@ -842,7 +842,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 mBinding.progressbar.visibility = View.INVISIBLE
                 mBinding.progressbar.setValue(0f)
                 Log.e(TAG, e.message + "")
-                safeToast(R.string.network)
+                safeToast(R.string.failed)
                 if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
@@ -950,7 +950,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     progressDialog.dismiss()
                 }
 
-                safeToast(R.string.network)
+                safeToast(R.string.failed)
 
             }
         }
@@ -1322,10 +1322,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
         val keyword = intentEvent.str
         mBinding.etShortcode.setText(keyword)
-
-        if (BaseApplication.autodownload) {
-            autoStart()
-        }
+        autoStart()
 
     }
 

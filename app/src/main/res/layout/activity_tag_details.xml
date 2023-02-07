@@ -133,13 +133,13 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical">
 
                 <ImageView
@@ -158,17 +158,31 @@
 
             </LinearLayout>
 
-            <TextView
+            <com.ctetin.expandabletextviewlibrary.ExpandableTextView
                 android:id="@+id/tv_title"
-                android:layout_width="match_parent"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:singleLine="true"
+                android:layout_margin="15dp"
+                android:lineSpacingExtra="4dp"
+                android:textSize="14sp"
                 android:textColor="@color/white"
-                android:textSize="14sp" />
+                app:ep_contract_color="#e0e0e0"
+                app:ep_contract_text="@string/tv_hide"
+                app:ep_end_color="@color/white"
+                app:ep_expand_color="#e0e0e0"
+                app:ep_expand_text="@string/tv_show"
+                app:ep_link_color="@color/white"
+                app:ep_link_res="@color/white"
+                app:ep_max_line="2"
+                app:ep_mention_color="@color/white"
+                app:ep_need_always_showright="true"
+                app:ep_need_animation="true"
+                app:ep_need_contract="true"
+                app:ep_need_convert_url="false"
+                app:ep_need_expand="true"
+                app:ep_need_link="true"
+                app:ep_need_mention="true"
+                />
         </LinearLayout>
 
     </LinearLayout>

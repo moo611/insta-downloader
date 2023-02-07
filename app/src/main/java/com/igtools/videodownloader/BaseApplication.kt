@@ -25,7 +25,7 @@ class BaseApplication : Application() {
         //ui
         var tagUpdate = true
         var userUpdate = true
-        var autodownload = true
+
         var firstLogin = true
         var showRating = true
         fun clear() {
@@ -55,9 +55,7 @@ class BaseApplication : Application() {
         ShareUtils.getDataBool("firstLogin").let {
             firstLogin = it
         }
-        ShareUtils.getDataBool("autodownload").let {
-            autodownload = it
-        }
+
         ShareUtils.getDataBool("showrating").let {
             showRating = it
         }

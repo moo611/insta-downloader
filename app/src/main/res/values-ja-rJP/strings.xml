@@ -77,4 +77,8 @@
     <string name="settings">設定</string>
     <string name="share_fail">システム上の理由により共有に失敗しました</string>
     <string name="search_wait">検索に時間がかかる場合があります。お待ちください</string>
+    <string name="caption">キャプションをコピー</string>
+    <string name="copied">クリップボードにコピー</string>
+    <string name="tv_hide">隠す</string>
+    <string name="tv_show">…番組</string>
 </resources>

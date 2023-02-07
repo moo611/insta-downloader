@@ -629,7 +629,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
                         mBinding.btnDownload.isEnabled = true
                         //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                        mBinding.tvTitle.text = mediaInfo.captionText
+                        mBinding.tvTitle.setContent(mediaInfo.captionText)
 
                     }
                 } else {
@@ -638,7 +638,8 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
                         .into(mBinding.picture)
                     mBinding.btnDownload.isEnabled = true
                     //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                    mBinding.tvTitle.text = mediaInfo.captionText
+                    mediaInfo.captionText = null
+                    mBinding.tvTitle.setContent(mediaInfo.captionText)
 
                 }
 

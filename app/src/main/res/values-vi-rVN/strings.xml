@@ -78,4 +78,8 @@
     <string name="settings">Cài đặt</string>
     <string name="share_fail">Chia sẻ không thành công do lý do hệ thống</string>
     <string name="search_wait">Tìm kiếm có thể mất chút thời gian, vui lòng đợi</string>
+    <string name="caption">Sao chép chú thích</string>
+    <string name="copied">sao chép vào clipboard</string>
+    <string name="tv_hide">ẩn</string>
+    <string name="tv_show">…hiển thị</string>
 </resources>

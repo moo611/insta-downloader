@@ -76,4 +76,8 @@
     <string name="settings">सेटिंग्स</string>
     <string name="share_fail">सिस्टम की वजह से शेयर विफल</string>
     <string name="search_wait">खोज में कुछ समय लग सकता है, कृपया प्रतीक्षा करें</string>
+    <string name="caption">कॉपी कैप्शन</string>
+    <string name="copied">क्लिपबोर्ड पर नकल</string>
+    <string name="tv_hide">छुपाएं</string>
+    <string name="tv_show">…शो</string>
 </resources>

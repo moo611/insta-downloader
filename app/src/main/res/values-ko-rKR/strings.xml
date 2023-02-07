@@ -77,4 +77,8 @@
     <string name="settings">설정</string>
     <string name="share_fail">시스템상의 이유로 공유 실패</string>
     <string name="search_wait">검색에는 다소 시간이 걸릴 수 있습니다. 잠시만 기다려 주세요</string>
+    <string name="caption">캡션 복사</string>
+    <string name="copied">클립보드에 복사됨</string>
+    <string name="tv_hide">숨기기</string>
+    <string name="tv_show">…쇼</string>
 </resources>

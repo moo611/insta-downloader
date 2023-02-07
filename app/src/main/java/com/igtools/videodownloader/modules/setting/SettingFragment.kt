@@ -61,7 +61,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
         mBinding.tvVersion.text = BuildConfig.VERSION_NAME
         mBinding.llShare.setOnClickListener {
 
-            FileUtils.share(requireContext(), "app")
+            FileUtils.share(requireContext(), "https://play.google.com/store/apps/details?id=com.igtools.videodownloader&hl=en")
 
         }
         mBinding.llLogout.setOnClickListener {
@@ -71,16 +71,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
             mBinding.llLogout.visibility = View.INVISIBLE
             Toast.makeText(requireContext(), getString(R.string.log_out), Toast.LENGTH_SHORT).show()
         }
-        val isChecked = BaseApplication.autodownload
 
-        mBinding.mySwitch.isChecked = isChecked
-        mBinding.mySwitch.setOnCheckedChangeListener { _, b ->
-            ShareUtils.putDataBool(
-                "autodownload",
-                b
-            )
-            BaseApplication.autodownload = b
-        }
 
         val builder = AlertDialog.Builder(context)
 

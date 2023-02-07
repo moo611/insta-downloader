@@ -3,6 +3,9 @@ package com.igtools.videodownloader.modules.repost
 import android.app.Activity.RESULT_OK
 import android.app.RecoverableSecurityException
 import android.app.WallpaperManager
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -141,6 +144,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         val llShare: LinearLayout = bottomView.findViewById(R.id.ll_share)
         val llDelete: LinearLayout = bottomView.findViewById(R.id.ll_delete)
         val llWall: LinearLayout = bottomView.findViewById(R.id.ll_wall)
+        val llCaption: LinearLayout = bottomView.findViewById(R.id.ll_caption)
         bottomDialog.setContent(bottomView)
 
         llRepost.setOnClickListener {
@@ -242,6 +246,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
             bottomDialog.dismiss()
         }
+
 
         selectDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
         val selectView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_select, null)
@@ -361,6 +366,15 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             }
 
             selectDialog.dismiss()
+        }
+
+        llCaption.setOnClickListener {
+            val text = medias[lastSelected].captionText
+            val clipboard = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("label",text)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(requireContext(),R.string.copied,Toast.LENGTH_SHORT).show()
+            bottomDialog.dismiss()
         }
 
     }

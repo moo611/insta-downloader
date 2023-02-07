@@ -75,4 +75,8 @@
     <string name="settings">Settings</string>
     <string name="share_fail">Share failed due to system reason</string>
     <string name="search_wait">Search may take some time, please wait</string>
+    <string name="caption">Copy Caption</string>
+    <string name="copied">copied to clipboard</string>
+    <string name="tv_hide">hide</string>
+    <string name="tv_show">…show</string>
 </resources>

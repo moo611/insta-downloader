@@ -959,7 +959,7 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             } catch (e: Exception) {
 
                 Log.e(TAG, e.message + "")
-                Toast.makeText(this@TagDetailsActivity, R.string.network, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@TagDetailsActivity, R.string.failed, Toast.LENGTH_SHORT).show()
                 searchDialog.dismiss()
             }
         }

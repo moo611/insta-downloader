@@ -28,6 +28,28 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/ll_caption"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <ImageView
+            android:layout_marginLeft="16dp"
+            android:src="@mipmap/caption"
+            android:id="@+id/img_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:layout_marginLeft="20dp"
+            android:text="@string/caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:gravity="center_vertical"
         android:id="@+id/ll_wall"
         android:layout_width="match_parent"

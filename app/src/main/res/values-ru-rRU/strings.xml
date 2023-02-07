@@ -77,4 +77,8 @@
     <string name="settings">Настройки</string>
     <string name="share_fail">Отправить не удалось по системной причине</string>
     <string name="search_wait">Поиск может занять некоторое время, подождите</string>
+    <string name="caption">Копировать заголовок</string>
+    <string name="copied">скопировано в буфер обмена</string>
+    <string name="tv_hide">скрыть</string>
+    <string name="tv_show">…шоу</string>
 </resources>

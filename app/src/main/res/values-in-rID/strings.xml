@@ -79,5 +79,9 @@
     <string name="settings">Pengaturan</string>
     <string name="share_fail">Pembagian gagal karena alasan sistem</string>
     <string name="search_wait">Pencarian mungkin memakan waktu lama, harap tunggu</string>
+    <string name="caption">Salin Teks</string>
+    <string name="copied">disalin ke papan klip</string>
+    <string name="tv_hide">sembunyikan</string>
+    <string name="tv_show">…tampilkan</string>
 
 </resources>

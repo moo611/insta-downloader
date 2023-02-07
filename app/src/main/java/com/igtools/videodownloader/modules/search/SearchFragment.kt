@@ -287,7 +287,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             if (!isInvalidContext()) {
                 progressDialog.dismiss()
             }
-            safeToast(R.string.network)
+            safeToast(R.string.failed)
         }
 
 
@@ -362,7 +362,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                 if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
-                safeToast(R.string.network)
+                safeToast(R.string.failed)
             }
         }
 
@@ -426,8 +426,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                 Log.e(TAG, e.message + "")
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(requireContext(), getString(R.string.network), Toast.LENGTH_SHORT)
-                    .show()
+                safeToast(R.string.failed)
             }
 
         }
@@ -496,8 +495,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                 Log.e(TAG, e.message + "")
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
-                Toast.makeText(requireContext(), getString(R.string.network), Toast.LENGTH_SHORT)
-                    .show()
+                safeToast(R.string.failed)
             }
 
         }
@@ -604,7 +602,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
             } catch (e: Exception) {
 
-                safeToast(R.string.network)
+                safeToast(R.string.failed)
                 if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
@@ -670,7 +668,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
             } catch (e: Exception) {
-                safeToast(R.string.network)
+                safeToast(R.string.failed)
                 loadingMore = false
                 mBinding.progressBottom.visibility = View.INVISIBLE
             }

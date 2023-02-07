@@ -44,26 +44,26 @@
                 android:textSize="16sp" />
 
             <ImageView
-                android:layout_marginRight="20dp"
                 android:id="@+id/btn_download"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
                 android:src="@mipmap/download"
                 app:tint="@color/white" />
 
             <ImageView
-                android:layout_marginRight="20dp"
                 android:id="@+id/img_wall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
                 android:src="@mipmap/wallpaper"
                 app:tint="@color/white" />
 
             <ImageView
-                android:layout_marginRight="20dp"
                 android:id="@+id/img_repost"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
                 android:src="@mipmap/refresh"
                 app:tint="@color/white" />
 
@@ -99,29 +99,29 @@
                 android:visibility="invisible" />
 
             <at.grabner.circleprogress.CircleProgressView
-                android:visibility="invisible"
-                android:layout_gravity="center"
                 android:id="@+id/progress_bar"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:visibility="invisible"
                 app:cpv_autoTextSize="false"
-                app:cpv_textSize="18sp"
                 app:cpv_barColor="@color/app_color"
                 app:cpv_barWidth="8dp"
-                app:cpv_rimWidth="8dp"
-                app:cpv_rimColor="@color/gray_1"
                 app:cpv_innerContourSize="0dp"
                 app:cpv_maxValue="100"
                 app:cpv_outerContourSize="0dp"
+                app:cpv_rimColor="@color/gray_1"
+                app:cpv_rimWidth="8dp"
                 app:cpv_seekMode="false"
                 app:cpv_showUnit="true"
                 app:cpv_textColor="@color/gray_1"
                 app:cpv_textScale="1"
+                app:cpv_textSize="18sp"
                 app:cpv_unit="%"
-                app:cpv_unitSize="14sp"
                 app:cpv_unitColor="@color/gray_1"
                 app:cpv_unitPosition="right_top"
                 app:cpv_unitScale="1"
+                app:cpv_unitSize="14sp"
                 app:cpv_value="0" />
 
 
@@ -129,13 +129,13 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical">
 
                 <ImageView
@@ -154,17 +154,31 @@
 
             </LinearLayout>
 
-            <TextView
+            <com.ctetin.expandabletextviewlibrary.ExpandableTextView
                 android:id="@+id/tv_title"
-                android:layout_width="match_parent"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:singleLine="true"
+                android:layout_margin="15dp"
+                android:lineSpacingExtra="4dp"
+                android:textSize="14sp"
                 android:textColor="@color/white"
-                android:textSize="14sp" />
+                app:ep_contract_color="#e0e0e0"
+                app:ep_contract_text="@string/tv_hide"
+                app:ep_end_color="@color/white"
+                app:ep_expand_color="#e0e0e0"
+                app:ep_expand_text="@string/tv_show"
+                app:ep_link_color="@color/white"
+                app:ep_link_res="@color/white"
+                app:ep_max_line="2"
+                app:ep_mention_color="@color/white"
+                app:ep_need_always_showright="true"
+                app:ep_need_animation="true"
+                app:ep_need_contract="true"
+                app:ep_need_convert_url="false"
+                app:ep_need_expand="true"
+                app:ep_need_link="true"
+                app:ep_need_mention="true"
+                />
         </LinearLayout>
 
     </LinearLayout>
