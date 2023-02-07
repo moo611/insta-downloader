@@ -3,6 +3,9 @@ package com.igtools.videodownloader.modules.details
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.app.WallpaperManager
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
@@ -286,6 +289,14 @@ class TagDetailsActivity : BaseActivity<ActivityTagDetailsBinding>() {
             }
 
 
+        }
+
+        mBinding.imgCaption.setOnClickListener {
+            val text = mediaInfo.captionText
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("label",text)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this,R.string.copied,Toast.LENGTH_SHORT).show()
         }
     }
 

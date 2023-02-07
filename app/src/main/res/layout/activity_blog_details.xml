@@ -47,15 +47,23 @@
                 android:id="@+id/btn_download"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
+                android:layout_marginRight="16dp"
                 android:src="@mipmap/download"
+                app:tint="@color/white" />
+
+            <ImageView
+                android:id="@+id/img_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
+                android:src="@mipmap/caption"
                 app:tint="@color/white" />
 
             <ImageView
                 android:id="@+id/img_wall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
+                android:layout_marginRight="16dp"
                 android:src="@mipmap/wallpaper"
                 app:tint="@color/white" />
 
