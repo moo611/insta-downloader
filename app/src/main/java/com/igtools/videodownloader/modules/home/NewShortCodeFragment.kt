@@ -90,7 +90,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
         initDialog()
         initAds()
-        initWebView()
+
         mBinding.btnDownload.setOnClickListener {
             autoStart()
         }
@@ -173,43 +173,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this);
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun initWebView() {
-
-        mBinding.webview.settings.javaScriptEnabled = true
-        mBinding.webview.settings.domStorageEnabled = true
-        mBinding.webview.addJavascriptInterface(JavaScriptLocalObj(), "local_obj")
-
-        mBinding.webview.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView, url: String?) {
-                view.postDelayed({
-                    view.loadUrl("javascript:window.local_obj.showSource('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
-
-                }, 500)
-            }
-        }
-        mBinding.webview.webChromeClient = object : WebChromeClient() {
-
-            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-
-                Log.e(TAG, consoleMessage?.message() + "")
-
-                return super.onConsoleMessage(consoleMessage)
-            }
-
-            override fun onJsAlert(
-                view: WebView?,
-                url: String?,
-                message: String?,
-                result: JsResult?
-            ): Boolean {
-                return super.onJsAlert(view, url, message, result)
-            }
-
-        }
-
     }
 
 
@@ -356,11 +319,9 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 val url = emBedUrl()
                 val sourceUrl = mBinding.etShortcode.text.toString()
 
-                //loadData2(url, sourceUrl)
+                loadData2(url, sourceUrl)
 
-                progressDialog.show()
-                clearData()
-                mBinding.webview.loadUrl(url)
+
             } else if (paramString.matches(Regex("(.*)instagram.com/stories/(.*)"))) {
                 if (BaseApplication.cookie == null) {
                     storyDialog.show()
@@ -528,6 +489,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     ) {
 
                         var data = script.data()
+                        data = data.replace("\\u0025","%")
                         data = data.replace("\\", "");
                         data = data.split("\"gql_data\":")[1];
                         data = data.split("}\"}]],")[0]
@@ -648,66 +610,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         //Log.v(TAG, imageUrl)
         curMediaInfo?.thumbnailUrl = imageUrl
         Log.v(TAG, curMediaInfo.toString())
-    }
-
-    private fun parseSideCar(doc: Document): Int {
-        getUserInfo(doc)
-        getCaption(doc)
-        val sidecar = doc.getElementsByClass("EmbedSidecar")
-        val lis = sidecar[0].getElementsByTag("li")
-        val total = lis.size
-        mBinding.webview.post {
-
-            mBinding.webview.loadUrl(
-                "javascript:((total) => {\n" +
-                        "  let curIndex = 0;\n" +
-                        "  let i = 0;\n" +
-                        "\n" +
-                        "  while (i < total) {\n" +
-                        "\n" +
-                        "    setTimeout(() => {\n" +
-                        "\n" +
-                        "      let sidecar = document.getElementsByClassName(\"EmbedSidecar\");\n" +
-                        "      let btns = sidecar[0].getElementsByTagName(\"button\");\n" +
-                        "      if (curIndex == 0) {\n" +
-                        "        let rightbtn = btns[0];\n" +
-                        "\n" +
-                        "        rightbtn.click();\n" +
-                        "\n" +
-                        "      } else if (curIndex < total - 1) {\n" +
-                        "        let rightbtn = btns[1];\n" +
-                        "\n" +
-                        "        rightbtn.click();\n" +
-                        "      }\n" +
-                        "\n" +
-                        "\n" +
-                        "      let lis = sidecar[0].getElementsByTagName(\"li\");\n" +
-                        "      let li = lis[curIndex];\n" +
-                        "\n" +
-                        "      if (li.getElementsByTagName(\"video\").length > 0) {\n" +
-                        "\n" +
-                        "        let videoUrl = li.getElementsByTagName(\"video\")[0].src;\n" +
-                        "        let imageUrl = li.getElementsByTagName(\"video\")[0].poster;\n" +
-                        "        console.log(videoUrl);\n" +
-                        "        console.log(imageUrl);\n" +
-                        "        local_obj.onReceiveVideo(imageUrl, videoUrl);\n" +
-                        "      } else if (li.getElementsByTagName(\"img\").length > 0) {\n" +
-                        "        let imageUrl = li.getElementsByTagName(\"img\")[0].src;\n" +
-                        "        console.log(imageUrl);\n" +
-                        "        local_obj.onReceiveImage(imageUrl);\n" +
-                        "      }\n" +
-                        "\n" +
-                        "      curIndex++;\n" +
-                        "    }, i * 50);\n" +
-                        "\n" +
-                        "    i++;\n" +
-                        "  }\n" +
-                        "})($total)"
-            )
-
-        }
-
-        return total
     }
 
     private fun getUserInfo(doc: Document) {
@@ -1398,31 +1300,5 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     }
 
-    inner class JavaScriptLocalObj {
-        @JavascriptInterface
-        fun showSource(html: String) {
 
-            Log.v(TAG, html)
-            loadData(html)
-
-        }
-
-        @JavascriptInterface
-        fun onReceiveImage(imageUrl: String) {
-
-            val temp = MediaModel()
-            temp.thumbnailUrl = imageUrl
-            temp.mediaType = 1
-            curMediaInfo?.resources?.add(temp)
-        }
-
-        @JavascriptInterface
-        fun onReceiveVideo(imageUrl: String, videoUrl: String) {
-            val temp = MediaModel()
-            temp.thumbnailUrl = imageUrl
-            temp.videoUrl = videoUrl
-            temp.mediaType = 2
-            curMediaInfo?.resources?.add(temp)
-        }
-    }
 }
