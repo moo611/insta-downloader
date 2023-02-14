@@ -54,7 +54,7 @@
             android:screenOrientation="portrait" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-8609866682652024~3028018510" />
+            android:value="ca-app-pub-8609866682652024~1999607648" />
 
         <activity
             android:name=".modules.details.VideoActivity"
@@ -85,12 +85,7 @@
                 android:resource="@xml/filepaths" />
         </provider>
 
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id" />
-        <meta-data
-            android:name="com.facebook.sdk.ClientToken"
-            android:value="@string/facebook_client_token" />
+
     </application>
 
 </manifest>

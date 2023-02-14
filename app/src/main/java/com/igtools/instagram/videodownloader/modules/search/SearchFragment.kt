@@ -199,7 +199,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
         //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/1157367794", adRequest,
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/7172043276", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)

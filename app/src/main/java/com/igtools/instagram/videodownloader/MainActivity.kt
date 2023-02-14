@@ -1,6 +1,7 @@
 package com.igtools.instagram.videodownloader
 
 import android.content.ActivityNotFoundException
+import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -8,9 +9,11 @@ import android.view.LayoutInflater
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -21,9 +24,11 @@ import com.igtools.instagram.videodownloader.modules.home.NewShortCodeFragment
 import com.igtools.instagram.videodownloader.modules.repost.RepostFragment
 import com.igtools.instagram.videodownloader.modules.search.SearchFragment
 import com.igtools.instagram.videodownloader.modules.setting.SettingFragment
+import com.igtools.instagram.videodownloader.room.RecordDB
 import com.igtools.instagram.videodownloader.utils.RegexUtils
 import com.igtools.instagram.videodownloader.utils.ShareUtils
 import com.igtools.instagram.videodownloader.widgets.dialog.MyDialog
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 
 
@@ -133,9 +138,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun initData() {
 
-        handleIntent(intent)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        handleIntent(intent)
+    }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -158,11 +167,39 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         val urls = RegexUtils.extractUrls(it)
                         if (urls.size > 0) {
 
-                            EventBus.getDefault().post(IntentEvent(urls[0]))
-                        }
+                            lifecycleScope.launch {
+                                val record = RecordDB.getInstance().recordDao().findByUrl(urls[0])
+                                if (record != null) {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        getString(R.string.exist),
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                    return@launch
+                                }
+                                EventBus.getDefault().post(IntentEvent(urls[0]))
+                            }
 
+                        }
                     }
                 }
+            } else {
+                val clipboard: ClipboardManager =
+                    this.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.primaryClip?.getItemAt(0)?.let {
+                    //fix null pointer
+                    lifecycleScope.launch {
+                        val record =
+                            RecordDB.getInstance().recordDao().findByUrl(it.text.toString())
+                        if (record != null) {
+                            return@launch
+                        }
+                        EventBus.getDefault().post(IntentEvent(it.text.toString()))
+                    }
+
+                }
+
             }
 
         }
@@ -215,13 +252,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-//        if(BaseApplication.showRating){
-//            dialog.show()
-//            BaseApplication.showRating = false
-//            ShareUtils.putDataBool("showrating",false)
-//        }else{
-//            finish()
-//        }
+        if (BaseApplication.showRating) {
+            dialog.show()
+            BaseApplication.showRating = false
+            ShareUtils.putDataBool("showrating", false)
+        } else {
+            finish()
+        }
 
     }
 }

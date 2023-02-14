@@ -95,17 +95,18 @@
                         android:layout_height="40dp"
                         android:layout_margin="20dp"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_round_stroke"
+                        android:background="@drawable/bg_round_gray"
                         android:gravity="center"
                         android:text="@string/paste"
-                        android:textColor="@color/app_color"
+                        android:textColor="@color/black"
                         android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/btn_download"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
-                        android:layout_margin="20dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginRight="20dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_round_fill"
                         android:gravity="center"
@@ -241,7 +242,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             ads:adSize="MEDIUM_RECTANGLE"
-                            ads:adUnitId="ca-app-pub-8609866682652024/6273963100" />
+                            ads:adUnitId="ca-app-pub-8609866682652024/5283697796" />
 
 
                     </LinearLayout>

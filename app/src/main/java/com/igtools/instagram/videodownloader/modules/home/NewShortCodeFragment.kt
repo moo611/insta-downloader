@@ -258,7 +258,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
         //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/3456228078", adRequest,
+        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/5458688114", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)

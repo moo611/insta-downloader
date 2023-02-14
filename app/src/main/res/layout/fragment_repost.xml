@@ -43,13 +43,13 @@
             android:layout_height="50dp">
 
             <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
-                android:layout_centerHorizontal="true"
                 android:id="@+id/adView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
                 android:layout_gravity="center_horizontal"
                 ads:adSize="BANNER"
-                ads:adUnitId="ca-app-pub-8609866682652024/1387300959" />
+                ads:adUnitId="ca-app-pub-8609866682652024/8648227733" />
 
         </RelativeLayout>
 
