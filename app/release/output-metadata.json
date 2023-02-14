@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.igtools.videodownloader",
+  "applicationId": "com.igtools.instagram.videodownloader",
   "variantName": "processReleaseResources",
   "elements": [
     {

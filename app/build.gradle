@@ -13,12 +13,12 @@ android {
     compileSdk 32
     aaptOptions { cruncherEnabled = false }
     defaultConfig {
-        applicationId "com.igtools.videodownloader"
+        applicationId "com.igtools.instagram.videodownloader"
         minSdk 21
         targetSdk 32
 
-        versionCode 76
-        versionName "1.5.4"
+        versionCode 1
+        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -38,9 +38,9 @@ android {
     signingConfigs {// 自动化打包配置
         myconfig {// 线上环境
             keyAlias 'key0'
-            keyPassword '123456'
-            storeFile file('igvideo.jks')
-            storePassword '123456'
+            keyPassword 'shanshui2018'
+            storeFile file('saveins.jks')
+            storePassword 'shanshui2018'
         }
 
 
