@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SaveIns</string>
+    <string name="my_app_name">InstSave</string>
 
     <string name="login">Login</string>
     <string name="username">Email</string>

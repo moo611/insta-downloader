@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SaveIns</string>
+    <string name="my_app_name">InstSave</string>
 
     <string name="login"> Đăng nhập </string>
     <string name="username"> Email </string>

@@ -13,7 +13,7 @@ android {
     compileSdk 32
     aaptOptions { cruncherEnabled = false }
     defaultConfig {
-        applicationId "com.igtools.instagram.videodownloader"
+        applicationId "com.igtools.insta.videodownloader"
         minSdk 21
         targetSdk 32
 
