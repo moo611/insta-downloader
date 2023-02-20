@@ -70,19 +70,10 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     val TAG = "BlogDetailsActivity"
     lateinit var adapter: MultiTypeAdapter
-
-    lateinit var selectDialog: BottomDialog
-
     var mediaInfo = MediaModel()
-    var recordInfo: Record? = null
-    var code: String? = null
+    var sourceUrl: String? = null
     var mInterstitialAd: InterstitialAd? = null
 
-    var needDownload: Boolean = false
-
-
-    lateinit var myAlert: AlertDialog
-    private val PERMISSION_REQ = 1024
 
     override fun getLayoutId(): Int {
         return R.layout.activity_blog_details
@@ -90,8 +81,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     override fun initView() {
         initAds()
-        initDialog()
-        mBinding.btnDownload.isEnabled = false
+
         adapter = MultiTypeAdapter(this, mediaInfo.resources)
         mBinding.banner
             .addBannerLifecycleObserver(this)
@@ -99,100 +89,6 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             .setAdapter(adapter)
             .isAutoLoop(false)
 
-        intent?.extras?.getBoolean("need_download")?.let {
-            needDownload = it
-        }
-
-        if (needDownload) {
-            mBinding.btnDownload.visibility = View.VISIBLE
-        } else {
-            mBinding.btnDownload.visibility = View.INVISIBLE
-        }
-
-        mBinding.btnDownload.setOnClickListener {
-
-            //check permission first
-            if (!PermissionUtils.checkPermissionsForReadAndRight(this)) {
-                PermissionUtils.requirePermissionsReadAndWrite(this, PERMISSION_REQ)
-                return@setOnClickListener
-            }
-
-            lifecycleScope.launch {
-                val oldRecord = if(code==null) null else RecordDB.getInstance().recordDao().findByCode(code!!)
-                if (oldRecord != null) {
-                    Toast.makeText(
-                        this@BlogDetailsActivity,
-                        getString(R.string.exist),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@launch
-                }
-
-                mBinding.progressBar.visibility = View.VISIBLE
-
-                startDownloadService()
-
-            }
-
-        }
-
-        mBinding.imgWall.setOnClickListener {
-            lifecycleScope.launch {
-                val oldRecord = if(code==null) null else RecordDB.getInstance().recordDao().findByCode(code!!)
-                if (recordInfo == null && oldRecord == null) {
-                    Toast.makeText(
-                        this@BlogDetailsActivity,
-                        getString(R.string.download_first),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@launch
-                } else {
-                    //从user列表重复进入的情况
-                    if (recordInfo == null) {
-                        recordInfo = oldRecord
-                    }
-                    if (Build.VERSION.SDK_INT >= 24) {
-                        selectDialog.show()
-                    } else {
-                        if (mediaInfo.mediaType == 8) {
-                            val selectIndex = mBinding.banner.currentItem
-                            if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
-                                val media = mediaInfo.resources[selectIndex]
-                                val paths = recordInfo!!.paths
-                                val pathMap = gson.fromJson(paths, HashMap::class.java)
-                                val filePath = pathMap[media.thumbnailUrl] as? String
-                                addWallPaperUnder24(filePath)
-
-                            } else {
-                                Toast.makeText(
-                                    this@BlogDetailsActivity,
-                                    getString(R.string.unsupport),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                            }
-                        } else {
-                            if (mediaInfo.mediaType == 1) {
-                                val paths = recordInfo!!.paths
-                                val pathMap = gson.fromJson(paths, HashMap::class.java)
-                                val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
-                                addWallPaperUnder24(filePath)
-                            } else {
-                                Toast.makeText(
-                                    this@BlogDetailsActivity,
-                                    getString(R.string.unsupport),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                            }
-                        }
-
-                    }
-
-                }
-            }
-
-        }
 
         mBinding.picture.setOnClickListener {
             if (mediaInfo.mediaType == 2) {
@@ -209,220 +105,116 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             onBackPressed()
         }
 
-        mBinding.imgRepost.setOnClickListener {
-            lifecycleScope.launch {
-                val oldRecord = if(code==null) null else RecordDB.getInstance().recordDao().findByCode(code!!)
-                if (recordInfo == null && oldRecord == null) {
-
-                    Toast.makeText(
-                        this@BlogDetailsActivity,
-                        getString(R.string.download_first),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                } else {
-                    //从tag列表重复进入的情况
-                    if (recordInfo == null) {
-                        recordInfo = oldRecord
-                    }
-                    //从本地获取
-                    if (mediaInfo.mediaType == 8) {
-
-                        val selectIndex = mBinding.banner.currentItem
-                        Log.v(TAG, selectIndex.toString())
-                        val media = mediaInfo.resources[selectIndex]
-                        if (media.mediaType == 1) {
-                            val paths = recordInfo!!.paths
-                            val pathMap = gson.fromJson(paths, HashMap::class.java)
-                            val filePath = pathMap[media.thumbnailUrl] as? String
-
-                            repost(filePath, false)
-                        } else if (media.mediaType == 2) {
-                            val paths = recordInfo!!.paths
-                            val pathMap = gson.fromJson(paths, HashMap::class.java)
-                            val filePath = pathMap[media.videoUrl] as? String
-                            repost(filePath, true)
-                        }
-
-                    } else {
-                        if (mediaInfo.mediaType == 1) {
-
-                            val paths = recordInfo!!.paths
-                            val pathMap = gson.fromJson(paths, HashMap::class.java)
-                            val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
-
-                            repost(filePath, false)
-
-                        } else if (mediaInfo.mediaType == 2) {
-
-                            val paths = recordInfo!!.paths
-                            val pathMap = gson.fromJson(paths, HashMap::class.java)
-                            val filePath = pathMap[mediaInfo.videoUrl] as? String
-                            repost(filePath, true)
-                        }
-                    }
-                }
-
-            }
-
-
-        }
-
-    }
-
-    private fun initDialog() {
-
-        myAlert = AlertDialog.Builder(this)
-            .setMessage(getString(R.string.need_permission))
-            .setPositiveButton(
-                R.string.settings
-            ) { dialog, _ ->
-                val intent = Intent();
-                intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS";
-                intent.data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
-                startActivity(intent);
-                dialog.dismiss()
-            }
-            .setNegativeButton(
-                R.string.cancel
-            ) { dialog, _ -> dialog.dismiss() }
-            .create()
-
-        selectDialog = BottomDialog(this, R.style.MyDialogTheme)
-        val selectView = LayoutInflater.from(this).inflate(R.layout.dialog_select, null)
-
-        val llBoth: LinearLayout = selectView.findViewById(R.id.ll_both)
-        val llLock: LinearLayout = selectView.findViewById(R.id.ll_lockscreen)
-        val llWallPaper: LinearLayout = selectView.findViewById(R.id.ll_wallpaper)
-
-        selectDialog.setContent(selectView)
-
-        llBoth.setOnClickListener {
-            if (mediaInfo.mediaType == 8) {
-                val selectIndex = mBinding.banner.currentItem
-                if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
-                    val media = mediaInfo.resources[selectIndex]
-                    val paths = recordInfo!!.paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[media.thumbnailUrl] as? String
-                    addWallPaper(filePath, 0)
-
-                } else {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-            } else {
-                if (mediaInfo.mediaType == 1) {
-                    val paths = recordInfo!!.paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
-                    addWallPaper(filePath, 0)
-                } else {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-            }
-
-            selectDialog.dismiss()
-        }
-
-        llWallPaper.setOnClickListener {
-            if (mediaInfo.mediaType == 8) {
-                val selectIndex = mBinding.banner.currentItem
-                if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
-                    val media = mediaInfo.resources[selectIndex]
-                    val paths = recordInfo!!.paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[media.thumbnailUrl] as? String
-                    addWallPaper(filePath, 1)
-
-                } else {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-            } else {
-                if (mediaInfo.mediaType == 1) {
-                    val paths = recordInfo!!.paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
-                    addWallPaper(filePath, 1)
-                } else {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-            }
-            selectDialog.dismiss()
-        }
-        llLock.setOnClickListener {
-
-            if (mediaInfo.mediaType == 8) {
-                val selectIndex = mBinding.banner.currentItem
-                if (mediaInfo.resources.size > 0 && mediaInfo.resources[selectIndex].mediaType == 1) {
-                    val media = mediaInfo.resources[selectIndex]
-                    val paths = recordInfo!!.paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[media.thumbnailUrl] as? String
-                    addWallPaper(filePath, 2)
-
-                } else {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-
-            } else {
-
-                if (mediaInfo.mediaType == 1) {
-                    val paths = recordInfo!!.paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
-                    addWallPaper(filePath, 2)
-                } else {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-
-            }
-
-            selectDialog.dismiss()
-        }
-
         mBinding.imgCaption.setOnClickListener {
             val text = mediaInfo.captionText
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("label",text)
+            val clip = ClipData.newPlainText("label", text)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(this,R.string.copied,Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
+        }
+
+        mBinding.imgRepost.setOnClickListener {
+
+            if (sourceUrl == null) {
+                Toast.makeText(
+                    this@BlogDetailsActivity,
+                    R.string.file_not_found,
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            lifecycleScope.launch {
+                val recordInfo = RecordDB.getInstance().recordDao().findByCode(sourceUrl!!)
+
+                if (recordInfo == null) {
+                    Toast.makeText(
+                        this@BlogDetailsActivity,
+                        R.string.file_not_found,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+                //从本地获取
+                if (mediaInfo.mediaType == 8) {
+
+                    val selectIndex = mBinding.banner.currentItem
+                    Log.v(TAG, selectIndex.toString())
+                    val media = mediaInfo.resources[selectIndex]
+                    if (media.mediaType == 1) {
+                        val paths = recordInfo.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[media.thumbnailUrl] as? String
+
+                        repost(filePath, false)
+                    } else if (media.mediaType == 2) {
+                        val paths = recordInfo.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[media.videoUrl] as? String
+                        repost(filePath, true)
+                    }
+
+                } else {
+                    if (mediaInfo.mediaType == 1) {
+
+                        val paths = recordInfo.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[mediaInfo.thumbnailUrl] as? String
+
+                        repost(filePath, false)
+
+                    } else if (mediaInfo.mediaType == 2) {
+
+                        val paths = recordInfo.paths
+                        val pathMap = gson.fromJson(paths, HashMap::class.java)
+                        val filePath = pathMap[mediaInfo.videoUrl] as? String
+                        repost(filePath, true)
+                    }
+                }
+
+
+            }
+
+
         }
 
     }
 
     override fun initData() {
 
-        getDataFromLocal()
+        intent.extras?.getString("content")?.let {
+            mediaInfo = gson.fromJson(it, MediaModel::class.java)
+            updateUI()
+
+        }
+        intent.extras?.getString("url")?.let {
+            sourceUrl = it
+        }
+    }
+
+    private fun updateUI(){
+        if (mediaInfo.mediaType == 8) {
+
+            if (mediaInfo.resources.size > 0) {
+                show("album")
+                adapter.setDatas(mediaInfo.resources as List<MediaModel?>?)
+
+                mBinding.tvTitle.setContent(mediaInfo.captionText)
+
+            }
+        } else {
+            show("picture")
+            Glide.with(this@BlogDetailsActivity).load(mediaInfo.thumbnailUrl)
+                .into(mBinding.picture)
+
+            mBinding.tvTitle.setContent(mediaInfo.captionText)
+
+        }
+
+        mBinding.username.text = mediaInfo.username
+        Glide.with(this).load(mediaInfo.profilePicUrl).circleCrop().into(mBinding.avatar)
+
+
     }
 
     fun repost(filePath: String?, isVideo: Boolean) {
@@ -456,115 +248,8 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     }
 
-    private fun addWallPaper(filePath: String?, status: Int) {
 
-        Analytics.sendEvent("add_wallpaper", "add_wallpaper", "1")
-        if (Build.VERSION.SDK_INT >= 24) {
-            if (filePath != null) {
-                try {
-                    val ios: InputStream = if (filePath.contains("content://")) {
-                        val uri = Uri.parse(filePath)
-                        contentResolver.openInputStream(uri)!!
-                    } else {
-                        File(filePath).inputStream()
-                    }
-
-                    val myWallpaperManager = WallpaperManager.getInstance(this);
-                    when (status) {
-                        0 -> {
-                            myWallpaperManager.setStream(
-                                ios,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_SYSTEM
-                            );
-                            myWallpaperManager.setStream(
-                                ios,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_LOCK
-                            );
-                            Toast.makeText(
-                                this,
-                                getString(R.string.add_successfully),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        1 -> {
-                            myWallpaperManager.setStream(
-                                ios,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_SYSTEM
-                            );
-                            Toast.makeText(
-                                this,
-                                getString(R.string.add_successfully),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        else -> {
-                            myWallpaperManager.setStream(
-                                ios,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_LOCK
-                            );
-                            Toast.makeText(
-                                this,
-                                getString(R.string.add_successfully),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-
-                }catch (e:FileNotFoundException){
-                    Toast.makeText(
-                        this,
-                        getString(R.string.file_not_found),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else {
-                Toast.makeText(
-                    this,
-                    getString(R.string.file_not_found),
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            }
-        }
-
-    }
-
-    private fun addWallPaperUnder24(filePath: String?) {
-        Analytics.sendEvent("add_wallpaper", "add_wallpaper", "1")
-        if (filePath != null) {
-            val intent = Intent("android.intent.action.ATTACH_DATA")
-            intent.addCategory("android.intent.category.DEFAULT")
-            val str = "image/*"
-
-            val uri = if (filePath.contains("content://")) {
-                Uri.parse(filePath)
-            } else {
-                Uri.fromFile(File(filePath))
-            }
-
-            intent.setDataAndType(uri, str)
-            intent.putExtra("mimeType", str)
-            startActivity(Intent.createChooser(intent, "Set As:"))
-        } else {
-            Toast.makeText(
-                this,
-                getString(R.string.file_not_found),
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
-    }
-
-
-    private fun shareToInstagram(uri: Uri?, isVideo: Boolean){
+    private fun shareToInstagram(uri: Uri?, isVideo: Boolean) {
         if (uri == null) {
             return
         }
@@ -574,9 +259,13 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             intent.putExtra(Intent.EXTRA_STREAM, uri)
             intent.setPackage("com.instagram.android")
             startActivity(intent)
-        }catch (e:Exception){
-            Analytics.sendException("repost_fail","repost_fail_"+Analytics.ERROR_KEY,e.message+"")
-            Toast.makeText(this,R.string.file_not_found,Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Analytics.sendException(
+                "repost_fail",
+                "repost_fail_" + Analytics.ERROR_KEY,
+                e.message + ""
+            )
+            Toast.makeText(this, R.string.file_not_found, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -619,53 +308,6 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     }
 
 
-    private fun getDataFromLocal() {
-        val content = intent.extras?.getString("content")
-        //fix content == null
-        if (content == null) {
-            Toast.makeText(this, "No data", Toast.LENGTH_SHORT).show()
-        } else {
-            val res = gson.fromJson(content, MediaModel::class.java)
-            if (res != null) {
-                mediaInfo = gson.fromJson(content, MediaModel::class.java)
-                code = mediaInfo.code
-                if (mediaInfo.mediaType == 8) {
-
-                    if (mediaInfo.resources.size > 0) {
-                        show("album")
-                        adapter.setDatas(mediaInfo.resources as List<MediaModel?>?)
-
-                        mBinding.btnDownload.isEnabled = true
-                        //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-                        mBinding.tvTitle.setContent(mediaInfo.captionText)
-
-                    }
-                } else {
-                    show("picture")
-                    Glide.with(this@BlogDetailsActivity).load(mediaInfo.thumbnailUrl)
-                        .into(mBinding.picture)
-                    mBinding.btnDownload.isEnabled = true
-                    //mBinding.btnDownload.setTextColor(resources!!.getColor(R.color.white))
-
-                    mBinding.tvTitle.setContent(mediaInfo.captionText)
-
-                }
-
-                mBinding.username.text = mediaInfo.username
-                Glide.with(this).load(mediaInfo.profilePicUrl).circleCrop().into(mBinding.avatar)
-            } else {
-                Toast.makeText(this, "No data", Toast.LENGTH_SHORT).show()
-            }
-
-        }
-
-        intent.extras?.getString("record")?.let {
-            recordInfo = gson.fromJson(it, Record::class.java)
-        }
-
-    }
-
-
 
     private fun show(flag: String) {
 
@@ -689,77 +331,11 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
     override fun onBackPressed() {
 
-        if(mInterstitialAd != null){
+        if (mInterstitialAd != null) {
             mInterstitialAd?.show(this)
         }
         super.onBackPressed()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == PERMISSION_REQ) {
-            for (grantResult in grantResults) {
-                if (grantResult != PackageManager.PERMISSION_GRANTED) {
-                    myAlert.show()
-                    return
-                }
-            }
-        }
-
-    }
-
-
-    private fun startDownloadService() {
-
-        val intent = Intent(OkDownloadProvider.context, MyService::class.java)
-        intent.putExtra("code", code)
-        intent.putExtra("data", gson.toJson(mediaInfo))
-        intent.putExtra("receiver", 2)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            OkDownloadProvider.context.startForegroundService(intent)
-        } else {
-            OkDownloadProvider.context.startService(intent)
-        }
-
-    }
-
-    @Subscribe
-    fun onDownloadSuccess(downloadSuccess: DownloadSuccess) {
-        if (downloadSuccess.receiver == 2) {
-            mBinding.progressBar.visibility = View.INVISIBLE
-            mBinding.progressBar.setValue(0f)
-        }
-    }
-
-    @Subscribe
-    fun onDownloadFail(downloadFail: DownloadFail) {
-        if (downloadFail.receiver == 2) {
-            mBinding.progressBar.visibility = View.INVISIBLE
-            mBinding.progressBar.setValue(0f)
-        }
-    }
-
-    @Subscribe
-    fun onDownloadProgress(downloadProgress: DownloadProgress) {
-        if (downloadProgress.receiver == 2) {
-            mBinding.progressBar.setValue(downloadProgress.progress)
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        EventBus.getDefault().unregister(this);
-    }
 
 }

@@ -1,24 +1,20 @@
 package com.igtools.insta.videodownloader.modules.home
 
-import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.app.ProgressDialog
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.webkit.*
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -45,27 +41,17 @@ import com.igtools.insta.videodownloader.download.DownloadSuccess
 import com.igtools.insta.videodownloader.download.MyService
 import com.igtools.insta.videodownloader.models.IntentEvent
 import com.igtools.insta.videodownloader.models.MediaModel
-import com.igtools.insta.videodownloader.models.Record
 import com.igtools.insta.videodownloader.modules.details.BlogDetailsActivity
 import com.igtools.insta.videodownloader.modules.web.WebActivity
 import com.igtools.insta.videodownloader.room.RecordDB
 import com.igtools.insta.videodownloader.utils.*
 import com.igtools.insta.videodownloader.widgets.dialog.MyDialog
-import com.liulishuo.okdownload.DownloadContext
-import com.liulishuo.okdownload.DownloadContextListener
-import com.liulishuo.okdownload.DownloadTask
 import com.liulishuo.okdownload.OkDownloadProvider
-import com.liulishuo.okdownload.core.breakpoint.BlockInfo
-import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
-import com.liulishuo.okdownload.core.cause.EndCause
-import com.liulishuo.okdownload.core.listener.DownloadListener4
-import com.liulishuo.okdownload.core.listener.assist.Listener4Assist
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import java.io.File
 import java.net.URLEncoder
 
 
@@ -821,14 +807,6 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         return shortCode
     }
 
-
-    override fun onDetach() {
-        super.onDetach()
-
-        Log.v(TAG, "on detach")
-
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -852,14 +830,14 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     private fun startDownloadService() {
 
-        val intent = Intent(OkDownloadProvider.context, MyService::class.java)
+        val intent = Intent(requireContext(), MyService::class.java)
         intent.putExtra("url", mBinding.etShortcode.text.toString())
         intent.putExtra("data", gson.toJson(curMediaInfo))
         intent.putExtra("receiver", 1)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            OkDownloadProvider.context.startForegroundService(intent)
+            requireContext().startForegroundService(intent)
         } else {
-            OkDownloadProvider.context.startService(intent)
+            requireContext().startService(intent)
         }
 
     }
