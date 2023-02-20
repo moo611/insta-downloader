@@ -2,7 +2,7 @@
 <resources>
 
     <string name="my_app_name">InstSave</string>
-
+    <string name="ok">확인</string>
     <string name="login">로그인</string>
     <string name="username">이메일</string>
     <string name="password">비밀번호</string>

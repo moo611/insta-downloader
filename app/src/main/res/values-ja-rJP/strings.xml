@@ -2,7 +2,7 @@
 <resources>
 
     <string name="my_app_name">InstSave</string>
-
+    <string name="ok">OK</string>
     <string name="login">ログイン</string>
     <string name="username">メール</string>
     <string name="password">パスワード</string>

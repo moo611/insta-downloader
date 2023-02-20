@@ -2,7 +2,7 @@
 <resources>
 
     <string name="my_app_name">InstSave</string>
-
+    <string name="ok">ОК</string>
     <string name="login">Войти</string>
     <string name="username">Электронная почта</string>
     <string name="password">Пароль</string>

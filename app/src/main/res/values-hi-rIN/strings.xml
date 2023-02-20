@@ -2,7 +2,7 @@
 <resources>
 
     <string name="my_app_name">InstSave</string>
-
+    <string name="ok">ठीक</string>
     <string name="login">लॉग इन करें</string>
     <string name="username">ईमेल</string>
     <string name="password">पासवर्ड</string>

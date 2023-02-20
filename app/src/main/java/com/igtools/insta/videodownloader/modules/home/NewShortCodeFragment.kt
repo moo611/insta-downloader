@@ -4,6 +4,7 @@ import android.app.Activity.RESULT_OK
 import android.app.ProgressDialog
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.ColorDrawable
@@ -60,8 +61,8 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     val TAG = "NewShortCodeFragment"
 
     lateinit var progressDialog: ProgressDialog
-    lateinit var privateDialog: MyDialog
-    lateinit var storyDialog: MyDialog
+    lateinit var privateDialog: AlertDialog
+    lateinit var storyDialog: AlertDialog
     var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
 
@@ -174,50 +175,65 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         progressDialog.setMessage(getString(R.string.search_wait))
         progressDialog.setCancelable(false)
 
-        storyDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
-        val storyView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
-        val title2 = storyView.findViewById<TextView>(R.id.title)
-        title2.text = getString(R.string.long_text1)
-        val tvLogin = storyView.findViewById<TextView>(R.id.tv_login)
-        val tvCancel = storyView.findViewById<TextView>(R.id.tv_cancel)
-        tvLogin.setOnClickListener {
+        //story dialog
+        val builder = AlertDialog.Builder(requireContext());
+        builder.setTitle(R.string.login);
+        builder.setMessage(R.string.long_text1);
+        builder.setIcon(R.mipmap.icon);
+        //点击对话框以外的区域是否让对话框消失
+        builder.setCancelable(true);
+        //设置正面按钮
+        builder.setPositiveButton(R.string.ok, object :DialogInterface.OnClickListener{
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+                val url = "https://www.instagram.com/accounts/login"
+                startActivityForResult(
+                    Intent(requireContext(), WebActivity::class.java).putExtra(
+                        "url",
+                        url
+                    ), LOGIN_REQ
+                )
+                storyDialog.dismiss()
+            }
 
-            val url = "https://www.instagram.com/accounts/login"
-            startActivityForResult(
-                Intent(requireContext(), WebActivity::class.java).putExtra(
-                    "url",
-                    url
-                ), LOGIN_REQ
-            )
-            storyDialog.dismiss()
-        }
-        tvCancel.setOnClickListener {
-            storyDialog.dismiss()
-        }
-        storyDialog.setUpView(storyView)
+        });
+        //设置反面按钮
+        builder.setNegativeButton(R.string.cancel, object :DialogInterface.OnClickListener{
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+                storyDialog.dismiss()
+            }
 
-        privateDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
-        val privateView =
-            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
-        val title = privateView.findViewById<TextView>(R.id.title)
-        title.text = getString(R.string.long_text2)
-        val tvLogin2 = privateView.findViewById<TextView>(R.id.tv_login)
-        val tvCancel2 = privateView.findViewById<TextView>(R.id.tv_cancel)
-        tvLogin2.setOnClickListener {
+        });
+        storyDialog = builder.create()
 
-            val url = "https://www.instagram.com/accounts/login"
-            startActivityForResult(
-                Intent(requireContext(), WebActivity::class.java).putExtra(
-                    "url",
-                    url
-                ), LOGIN_REQ
-            )
-            privateDialog.dismiss()
-        }
-        tvCancel2.setOnClickListener {
-            privateDialog.dismiss()
-        }
-        privateDialog.setUpView(privateView)
+
+        val builder2 = AlertDialog.Builder(requireContext());
+        builder2.setTitle(R.string.login);
+        builder2.setMessage(R.string.long_text2);
+        builder2.setIcon(R.mipmap.icon);
+        //点击对话框以外的区域是否让对话框消失
+        builder2.setCancelable(true);
+        //设置正面按钮
+        builder2.setPositiveButton(R.string.ok, object :DialogInterface.OnClickListener{
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+                val url = "https://www.instagram.com/accounts/login"
+                startActivityForResult(
+                    Intent(requireContext(), WebActivity::class.java).putExtra(
+                        "url",
+                        url
+                    ), LOGIN_REQ
+                )
+                privateDialog.dismiss()
+            }
+
+        });
+        //设置反面按钮
+        builder2.setNegativeButton(R.string.cancel, object :DialogInterface.OnClickListener{
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+                privateDialog.dismiss()
+            }
+
+        });
+        privateDialog = builder2.create()
 
         //权限dialog
         myAlert = AlertDialog.Builder(requireContext())

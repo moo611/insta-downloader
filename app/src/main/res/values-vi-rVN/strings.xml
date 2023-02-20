@@ -2,7 +2,7 @@
 <resources>
 
     <string name="my_app_name">InstSave</string>
-
+    <string name="ok">OK</string>
     <string name="login"> Đăng nhập </string>
     <string name="username"> Email </string>
     <string name="password"> Mật khẩu </string>

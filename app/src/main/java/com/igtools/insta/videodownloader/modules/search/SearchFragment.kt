@@ -1,14 +1,14 @@
 package com.igtools.insta.videodownloader.modules.search
 
 import android.app.Activity.RESULT_OK
+import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -32,7 +32,6 @@ import com.igtools.insta.videodownloader.modules.web.WebActivity
 import com.igtools.insta.videodownloader.utils.Analytics
 import com.igtools.insta.videodownloader.utils.KeyboardUtils
 import com.igtools.insta.videodownloader.utils.getNullable
-import com.igtools.insta.videodownloader.widgets.dialog.MyDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,7 +39,7 @@ import java.net.URLEncoder
 
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>() {
-    lateinit var privateDialog: MyDialog
+    lateinit var privateDialog: AlertDialog
     val TAG = "SearchFragment"
     val LOGIN_REQ = 1000
     val COUNT = 50
@@ -166,28 +165,34 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
     private fun initDialog() {
 
-        privateDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
-        val privateView =
-            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_remind, null)
-        val title = privateView.findViewById<TextView>(R.id.title)
-        title.text = getString(R.string.long_text2)
-        val tvLogin = privateView.findViewById<TextView>(R.id.tv_login)
-        val tvCancel = privateView.findViewById<TextView>(R.id.tv_cancel)
-        tvLogin.setOnClickListener {
+        val builder2 = AlertDialog.Builder(requireContext());
+        builder2.setTitle(R.string.login);
+        builder2.setMessage(R.string.long_text2);
+        builder2.setIcon(R.mipmap.icon);
+        //点击对话框以外的区域是否让对话框消失
+        builder2.setCancelable(true);
+        //设置正面按钮
+        builder2.setPositiveButton(R.string.ok, object : DialogInterface.OnClickListener{
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+                val url = "https://www.instagram.com/accounts/login"
+                startActivityForResult(
+                    Intent(requireContext(), WebActivity::class.java).putExtra(
+                        "url",
+                        url
+                    ), LOGIN_REQ
+                )
+                privateDialog.dismiss()
+            }
 
-            val url = "https://www.instagram.com/accounts/login"
-            startActivityForResult(
-                Intent(requireContext(), WebActivity::class.java).putExtra(
-                    "url",
-                    url
-                ), LOGIN_REQ
-            )
-            privateDialog.dismiss()
-        }
-        tvCancel.setOnClickListener {
-            privateDialog.dismiss()
-        }
-        privateDialog.setUpView(privateView)
+        });
+        //设置反面按钮
+        builder2.setNegativeButton(R.string.cancel, object : DialogInterface.OnClickListener{
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+                privateDialog.dismiss()
+            }
+
+        });
+        privateDialog = builder2.create()
     }
 
     override fun initData() {
