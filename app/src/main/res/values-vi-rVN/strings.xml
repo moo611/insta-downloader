@@ -82,4 +82,5 @@
     <string name="copied">sao chép vào clipboard</string>
     <string name="tv_hide">ẩn</string>
     <string name="tv_show">…hiển thị</string>
+    <string name="only_one">Mỗi lần chỉ có thể thực hiện một tác vụ tải xuống</string>
 </resources>

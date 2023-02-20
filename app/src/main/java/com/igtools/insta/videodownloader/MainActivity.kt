@@ -19,6 +19,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.igtools.insta.videodownloader.base.BaseActivity
 import com.igtools.insta.videodownloader.databinding.ActivityMainBinding
+import com.igtools.insta.videodownloader.download.MyService
 import com.igtools.insta.videodownloader.models.IntentEvent
 import com.igtools.insta.videodownloader.modules.home.NewShortCodeFragment
 import com.igtools.insta.videodownloader.modules.repost.RepostFragment
@@ -149,6 +150,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     fun handleIntent(newintent: Intent?) {
 
+        if (MyService.isDownloading){
+            Toast.makeText(this@MainActivity,getString(R.string.only_one),Toast.LENGTH_SHORT).show()
+            return
+        }
+
         //这里要加延时，否则会获取不到intent或者clipboarditem
         mBinding.content.post {
 
@@ -159,7 +165,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         // Update UI to reflect text being shared
 
                         val urls = RegexUtils.extractUrls(it)
-                        if (urls.size > 0) {
+                        if (urls.isNotEmpty()) {
 
                             lifecycleScope.launch {
                                 val record = RecordDB.getInstance().recordDao().findByUrl(urls[0])
@@ -172,28 +178,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                                         .show()
                                     return@launch
                                 }
+
                                 EventBus.getDefault().post(IntentEvent(urls[0]))
+
                             }
 
                         }
                     }
                 }
-            } else {
-                val clipboard: ClipboardManager =
-                    this.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.primaryClip?.getItemAt(0)?.let {
-                    //fix null pointer
-                    lifecycleScope.launch {
-                        val record =
-                            RecordDB.getInstance().recordDao().findByUrl(it.text.toString())
-                        if (record != null) {
-                            return@launch
-                        }
-                        EventBus.getDefault().post(IntentEvent(it.text.toString()))
-                    }
-
-                }
-
             }
 
         }

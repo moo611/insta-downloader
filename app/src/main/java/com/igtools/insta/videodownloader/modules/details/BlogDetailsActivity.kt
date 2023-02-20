@@ -1,70 +1,32 @@
 package com.igtools.insta.videodownloader.modules.details
 
-import android.app.ProgressDialog
-import android.app.WallpaperManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.igtools.insta.videodownloader.base.BaseActivity
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.ktx.Firebase
-import com.google.gson.Gson
-import com.igtools.insta.videodownloader.BuildConfig
 import com.igtools.insta.videodownloader.R
-import com.igtools.insta.videodownloader.api.ApiClient
+import com.igtools.insta.videodownloader.base.BaseActivity
 import com.igtools.insta.videodownloader.databinding.ActivityBlogDetailsBinding
-import com.igtools.insta.videodownloader.download.DownloadFail
-import com.igtools.insta.videodownloader.download.DownloadProgress
-import com.igtools.insta.videodownloader.download.DownloadSuccess
-import com.igtools.insta.videodownloader.download.MyService
 import com.igtools.insta.videodownloader.models.MediaModel
-import com.igtools.insta.videodownloader.models.Record
 import com.igtools.insta.videodownloader.room.RecordDB
 import com.igtools.insta.videodownloader.utils.Analytics
-import com.igtools.insta.videodownloader.utils.FileUtils
-import com.igtools.insta.videodownloader.utils.PermissionUtils
-import com.igtools.insta.videodownloader.widgets.dialog.BottomDialog
-import com.liulishuo.okdownload.DownloadContext
-import com.liulishuo.okdownload.DownloadContextListener
-import com.liulishuo.okdownload.DownloadTask
-import com.liulishuo.okdownload.OkDownloadProvider
-import com.liulishuo.okdownload.core.breakpoint.BlockInfo
-import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
-import com.liulishuo.okdownload.core.cause.EndCause
-import com.liulishuo.okdownload.core.cause.ResumeFailedCause
-import com.liulishuo.okdownload.core.listener.DownloadListener1
-import com.liulishuo.okdownload.core.listener.DownloadListener4
-import com.liulishuo.okdownload.core.listener.assist.Listener1Assist
-import com.liulishuo.okdownload.core.listener.assist.Listener4Assist
 import com.youth.banner.indicator.CircleIndicator
-import kotlinx.coroutines.*
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
+import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileNotFoundException
-import java.io.InputStream
 
 class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
 
@@ -125,7 +87,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
             }
 
             lifecycleScope.launch {
-                val recordInfo = RecordDB.getInstance().recordDao().findByCode(sourceUrl!!)
+                val recordInfo = RecordDB.getInstance().recordDao().findByUrl(sourceUrl!!)
 
                 if (recordInfo == null) {
                     Toast.makeText(

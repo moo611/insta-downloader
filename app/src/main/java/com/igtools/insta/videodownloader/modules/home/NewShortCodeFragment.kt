@@ -88,11 +88,14 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
         }
 
         mBinding.container.setOnClickListener {
-
+            if(MyService.isDownloading){
+                Toast.makeText(requireContext(),R.string.downloading,Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             startActivity(
                 Intent(requireContext(), BlogDetailsActivity::class.java)
                     .putExtra("content", gson.toJson(curMediaInfo))
-                    .putExtra("need_download", false)
+                    .putExtra("url", mBinding.etShortcode.text.toString())
 
             )
         }

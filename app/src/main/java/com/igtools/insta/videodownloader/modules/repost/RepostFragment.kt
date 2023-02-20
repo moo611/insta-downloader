@@ -22,9 +22,6 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.ads.AdRequest
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.ktx.Firebase
 import com.igtools.insta.videodownloader.R
 import com.igtools.insta.videodownloader.base.BaseFragment
 import com.igtools.insta.videodownloader.databinding.FragmentRepostBinding
@@ -59,7 +56,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
     lateinit var adapter: RepostAdapter
     lateinit var bottomDialog: BottomDialog
-    lateinit var selectDialog: BottomDialog
+
     lateinit var deleteDialog: MyDialog
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
@@ -83,8 +80,8 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
                 startActivity(
                     Intent(requireContext(), BlogDetailsActivity::class.java)
                         .putExtra("content", content)
-                        .putExtra("need_download", false)
-                        .putExtra("record", gson.toJson(record))
+                        .putExtra("url", record.url)
+
                 )
             }
 
@@ -143,7 +140,6 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
         val llRepost: LinearLayout = bottomView.findViewById(R.id.ll_repost)
         val llShare: LinearLayout = bottomView.findViewById(R.id.ll_share)
         val llDelete: LinearLayout = bottomView.findViewById(R.id.ll_delete)
-        val llWall: LinearLayout = bottomView.findViewById(R.id.ll_wall)
         val llCaption: LinearLayout = bottomView.findViewById(R.id.ll_caption)
         bottomDialog.setContent(bottomView)
 
@@ -203,170 +199,6 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
             }
         }
 
-        llWall.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= 24) {
-                selectDialog.show()
-
-            } else {
-
-                if (medias[lastSelected].mediaType == 8) {
-                    if (medias[lastSelected].resources.size > 0 && medias[lastSelected].resources[0].mediaType == 1) {
-                        val media = medias[lastSelected].resources[0]
-                        val paths = records[lastSelected].paths
-                        val pathMap = gson.fromJson(paths, HashMap::class.java)
-                        val filePath = pathMap[media.thumbnailUrl] as? String
-                        addWallPaperUnder24(filePath)
-
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.unsupport),
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                    }
-                } else {
-                    if (medias[lastSelected].mediaType == 1) {
-                        val paths = records[lastSelected].paths
-                        val pathMap = gson.fromJson(paths, HashMap::class.java)
-                        val filePath = pathMap[medias[lastSelected].thumbnailUrl] as? String
-                        addWallPaperUnder24(filePath)
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.unsupport),
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                    }
-                }
-
-
-            }
-
-            bottomDialog.dismiss()
-        }
-
-
-        selectDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
-        val selectView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_select, null)
-
-        val llBoth: LinearLayout = selectView.findViewById(R.id.ll_both)
-        val llLock: LinearLayout = selectView.findViewById(R.id.ll_lockscreen)
-        val llWallPaper: LinearLayout = selectView.findViewById(R.id.ll_wallpaper)
-
-        selectDialog.setContent(selectView)
-
-        llBoth.setOnClickListener {
-            if (medias[lastSelected].mediaType == 8) {
-                if (medias[lastSelected].resources.size > 0 && medias[lastSelected].resources[0].mediaType == 1) {
-                    val media = medias[lastSelected].resources[0]
-                    val paths = records[lastSelected].paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[media.thumbnailUrl] as? String
-                    addWallPaper(filePath, 0)
-
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-            } else {
-                if (medias[lastSelected].mediaType == 1) {
-                    val paths = records[lastSelected].paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[medias[lastSelected].thumbnailUrl] as? String
-                    addWallPaper(filePath, 0)
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-            }
-
-            selectDialog.dismiss()
-        }
-
-        llWallPaper.setOnClickListener {
-            if (medias[lastSelected].mediaType == 8) {
-                if (medias[lastSelected].resources.size > 0 && medias[lastSelected].resources[0].mediaType == 1) {
-                    val media = medias[lastSelected].resources[0]
-                    val paths = records[lastSelected].paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[media.thumbnailUrl] as? String
-                    addWallPaper(filePath, 1)
-
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-            } else {
-                if (medias[lastSelected].mediaType == 1) {
-                    val paths = records[lastSelected].paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[medias[lastSelected].thumbnailUrl] as? String
-                    addWallPaper(filePath, 1)
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-            }
-            selectDialog.dismiss()
-        }
-        llLock.setOnClickListener {
-
-            if (medias[lastSelected].mediaType == 8) {
-
-                if (medias[lastSelected].resources.size > 0 && medias[lastSelected].resources[0].mediaType == 1) {
-                    val media = medias[lastSelected].resources[0]
-                    val paths = records[lastSelected].paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[media.thumbnailUrl] as? String
-                    addWallPaper(filePath, 2)
-
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-
-            } else {
-
-                if (medias[lastSelected].mediaType == 1) {
-                    val paths = records[lastSelected].paths
-                    val pathMap = gson.fromJson(paths, HashMap::class.java)
-                    val filePath = pathMap[medias[lastSelected].thumbnailUrl] as? String
-                    addWallPaper(filePath, 2)
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.unsupport),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }
-
-            }
-
-            selectDialog.dismiss()
-        }
 
         llCaption.setOnClickListener {
             val text = medias[lastSelected].captionText
