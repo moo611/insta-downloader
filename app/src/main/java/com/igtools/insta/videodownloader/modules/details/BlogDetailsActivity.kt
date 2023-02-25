@@ -235,7 +235,7 @@ class BlogDetailsActivity : BaseActivity<ActivityBlogDetailsBinding>() {
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
 
-        InterstitialAd.load(this, "ca-app-pub-8609866682652024/8540965260", adRequest,
+        InterstitialAd.load(this, "ca-app-pub-8609866682652024/2073437875", adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(p0: InterstitialAd) {
                     super.onAdLoaded(p0)

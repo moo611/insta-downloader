@@ -54,7 +54,7 @@
             android:screenOrientation="portrait" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-8609866682652024~1999607648" />
+            android:value="ca-app-pub-8609866682652024~9038850214" />
 
         <activity
             android:name=".modules.details.VideoActivity"

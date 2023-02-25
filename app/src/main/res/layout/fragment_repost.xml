@@ -49,7 +49,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_gravity="center_horizontal"
                 ads:adSize="BANNER"
-                ads:adUnitId="ca-app-pub-8609866682652024/8648227733" />
+                ads:adUnitId="ca-app-pub-8609866682652024/8032890309" />
 
         </RelativeLayout>
 

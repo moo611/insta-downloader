@@ -63,7 +63,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
     lateinit var progressDialog: ProgressDialog
     lateinit var privateDialog: AlertDialog
     lateinit var storyDialog: AlertDialog
-    var mInterstitialAd: InterstitialAd? = null
+    //var mInterstitialAd: InterstitialAd? = null
     var curMediaInfo: MediaModel? = null
 
 
@@ -256,19 +256,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
 
     private fun initAds() {
         val adRequest = AdRequest.Builder().build();
-        //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/5458688114", adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(p0: InterstitialAd) {
-                    super.onAdLoaded(p0)
-                    mInterstitialAd = p0
-                }
 
-                override fun onAdFailedToLoad(p0: LoadAdError) {
-                    super.onAdFailedToLoad(p0)
-                    mInterstitialAd = null;
-                }
-            })
         //banner
         mBinding.adView.loadAd(adRequest)
 
@@ -398,7 +386,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         }
 
                         showCurrent()
-                        mInterstitialAd?.show(requireActivity())
+
                         mBinding.progressbar.visibility = View.VISIBLE
 
                         startDownloadService()
@@ -421,7 +409,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                     }
 
                     showCurrent()
-                    mInterstitialAd?.show(requireActivity())
+
                     mBinding.progressbar.visibility = View.VISIBLE
 
                     startDownloadService()
@@ -503,7 +491,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         jsonObject["graphql"].asJsonObject["shortcode_media"].asJsonObject
                     curMediaInfo = parseMedia(shortcode_media)
                     showCurrent()
-                    mInterstitialAd?.show(requireActivity())
+
                     mBinding.progressbar.visibility = View.VISIBLE
 
                     startDownloadService()
@@ -561,7 +549,7 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                         jsonObject["data"].asJsonObject["shortcode_media"].asJsonObject
                     curMediaInfo = parseMedia(shortcode_media)
                     showCurrent()
-                    mInterstitialAd?.show(requireActivity())
+
                     mBinding.progressbar.visibility = View.VISIBLE
 
                     startDownloadService()
@@ -662,9 +650,8 @@ class NewShortCodeFragment : BaseFragment<FragmentNewShortCodeBinding>() {
                 if (code == 200 && jsonObject != null) {
                     curMediaInfo = parseStory(jsonObject)
                     showCurrent()
-                    mInterstitialAd?.show(requireActivity())
-                    mBinding.progressbar.visibility = View.VISIBLE
 
+                    mBinding.progressbar.visibility = View.VISIBLE
 
                     startDownloadService()
 
