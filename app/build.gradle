@@ -3,19 +3,19 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'kotlin-android-extensions'
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.firebase-perf'
-    id 'com.google.firebase.crashlytics'
+//    id 'com.google.gms.google-services'
+//    id 'com.google.firebase.firebase-perf'
+//    id 'com.google.firebase.crashlytics'
 }
 apply from: "../utils.gradle"
 
 android {
-    compileSdk 32
+    compileSdk 33
     aaptOptions { cruncherEnabled = false }
     defaultConfig {
         applicationId "com.igtools.insta.videodownloader"
         minSdk 21
-        targetSdk 32
+        targetSdk 33
 
         versionCode 2
         versionName "1.0.1"
@@ -38,9 +38,9 @@ android {
     signingConfigs {// 自动化打包配置
         myconfig {// 线上环境
             keyAlias 'key0'
-            keyPassword 'shanshui2018'
+            keyPassword '123456'
             storeFile file('saveins.jks')
-            storePassword 'shanshui2018'
+            storePassword '123456'
         }
 
 
@@ -106,13 +106,13 @@ dependencies {
 
 
     //firebase
-    implementation platform('com.google.firebase:firebase-bom:30.3.1')
-    implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-perf-ktx'
-    implementation 'com.google.firebase:firebase-crashlytics-ktx'
-    implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-config-ktx'
-    implementation 'com.google.firebase:firebase-inappmessaging-display-ktx'
+//    implementation platform('com.google.firebase:firebase-bom:30.3.1')
+//    implementation 'com.google.firebase:firebase-analytics-ktx'
+//    implementation 'com.google.firebase:firebase-perf-ktx'
+//    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+//    implementation 'com.google.firebase:firebase-analytics-ktx'
+//    implementation 'com.google.firebase:firebase-config-ktx'
+//    implementation 'com.google.firebase:firebase-inappmessaging-display-ktx'
     //eventbus
     implementation("org.greenrobot:eventbus:3.3.1")
 

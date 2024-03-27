@@ -1,4 +1,3 @@
 package com.igtools.insta.videodownloader.download
 
-class DownloadSuccess(var receiver:Int = 1) {
-}
+data class DownloadSuccess(var receiver:Int = 1)

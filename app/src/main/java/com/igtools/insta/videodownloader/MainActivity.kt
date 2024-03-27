@@ -1,7 +1,6 @@
 package com.igtools.insta.videodownloader
 
 import android.content.ActivityNotFoundException
-import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -14,18 +13,15 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 import com.igtools.insta.videodownloader.base.BaseActivity
 import com.igtools.insta.videodownloader.databinding.ActivityMainBinding
 import com.igtools.insta.videodownloader.download.MyService
 import com.igtools.insta.videodownloader.models.IntentEvent
-import com.igtools.insta.videodownloader.modules.home.NewShortCodeFragment
-import com.igtools.insta.videodownloader.modules.repost.RepostFragment
-import com.igtools.insta.videodownloader.modules.search.SearchFragment
-import com.igtools.insta.videodownloader.modules.setting.SettingFragment
-import com.igtools.insta.videodownloader.room.RecordDB
+import com.igtools.insta.videodownloader.views.home.LinkFragment
+import com.igtools.insta.videodownloader.views.repost.RepostFragment
+import com.igtools.insta.videodownloader.views.search.SearchFragment
+import com.igtools.insta.videodownloader.views.setting.SettingFragment
+import com.igtools.insta.videodownloader.db.RecordDB
 import com.igtools.insta.videodownloader.utils.RegexUtils
 import com.igtools.insta.videodownloader.utils.ShareUtils
 import com.igtools.insta.videodownloader.widgets.dialog.MyDialog
@@ -44,7 +40,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     var fragments: MutableList<Fragment> = ArrayList()
     var lastPos = 0
     lateinit var dialog: MyDialog
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
+
 
 
     override fun getLayoutId(): Int {
@@ -53,20 +49,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun initView() {
 
-        firebaseAnalytics = Firebase.analytics
-
         //val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
         //mBinding.appTitle.typeface = typeface
         initDialog()
         //添加imageviews
         imageViews.add(mBinding.imgHome)
-        //imageViews.add(mBinding.imgSearch)
+        imageViews.add(mBinding.imgSearch)
         imageViews.add(mBinding.imgRepost)
         imageViews.add(mBinding.imgMine)
 
 
-        fragments.add(NewShortCodeFragment())
-        //fragments.add(SearchFragment())
+        fragments.add(LinkFragment())
+        fragments.add(SearchFragment())
         fragments.add(RepostFragment())
         fragments.add(SettingFragment())
 
@@ -80,24 +74,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             lastPos = 0
 
         }
-        mBinding.llRepost.setOnClickListener {
+        mBinding.llSearch.setOnClickListener {
 
             showFragment(1)
             selectPage(1)
             lastPos = 1
 
         }
-        mBinding.llMine.setOnClickListener {
+        mBinding.llRepost.setOnClickListener {
             showFragment(2)
             selectPage(2)
             lastPos = 2
         }
-//        mBinding.llMine.setOnClickListener {
-//            showFragment(3)
-//            selectPage(3)
-//            lastPos = 3
-//
-//        }
+        mBinding.llMine.setOnClickListener {
+            showFragment(3)
+            selectPage(3)
+            lastPos = 3
+
+        }
 
     }
 
@@ -148,20 +142,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     }
 
-    fun handleIntent(newintent: Intent?) {
+    private fun handleIntent(newIntent: Intent?) {
 
         if (MyService.isDownloading){
             Toast.makeText(this@MainActivity,getString(R.string.only_one),Toast.LENGTH_SHORT).show()
             return
         }
 
-        //这里要加延时，否则会获取不到intent或者clipboarditem
+        //这里要加延时，否则会获取不到intent或者clipboard
         mBinding.content.post {
 
-            if (newintent?.action == Intent.ACTION_SEND) {
+            if (newIntent?.action == Intent.ACTION_SEND) {
                 Log.v(TAG, "handle intent")
-                if ("text/plain" == newintent.type) {
-                    newintent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+                if ("text/plain" == newIntent.type) {
+                    newIntent.getStringExtra(Intent.EXTRA_TEXT)?.let {
                         // Update UI to reflect text being shared
 
                         val urls = RegexUtils.extractUrls(it)
@@ -237,13 +231,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
 
     override fun onBackPressed() {
-        super.onBackPressed()
+
         if (BaseApplication.showRating) {
             dialog.show()
             BaseApplication.showRating = false
-            ShareUtils.putDataBool("showrating", false)
+            ShareUtils.putDataBool("showRating", false)
         } else {
-            finish()
+            super.onBackPressed()
         }
 
     }

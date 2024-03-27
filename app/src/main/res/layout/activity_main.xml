@@ -48,23 +48,23 @@
 
             </LinearLayout>
 
-<!--            <LinearLayout-->
-<!--                android:gravity="center"-->
-<!--                android:id="@+id/ll_search"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:layout_weight="1"-->
-<!--                android:orientation="vertical">-->
+            <LinearLayout
+                android:gravity="center"
+                android:id="@+id/ll_search"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-<!--                <ImageView-->
-<!--                    android:layout_gravity="center"-->
-<!--                    android:id="@+id/img_search"-->
-<!--                    android:layout_width="28dp"-->
-<!--                    android:layout_height="28dp"-->
-<!--                    android:src="@mipmap/ic_search" />-->
+                <ImageView
+                    android:layout_gravity="center"
+                    android:id="@+id/img_search"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@mipmap/ic_search" />
 
 
-<!--            </LinearLayout>-->
+            </LinearLayout>
 
             <LinearLayout
                 android:gravity="center"

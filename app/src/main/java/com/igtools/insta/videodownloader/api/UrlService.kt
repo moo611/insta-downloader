@@ -9,19 +9,6 @@ interface UrlService {
 
 
     @GET
-    suspend fun getMedia(
-        @HeaderMap headers: HashMap<String, String>,
-        @Url url: String
-    ): Response<JsonObject>
-
-    @GET("/api/mediastory")
-    suspend fun getStory(@Query("url") code: String): Response<JsonObject>
-
-    @GET
-    suspend fun getMediaNew(@Url url: String): Response<JsonObject>
-
-
-    @GET
     suspend fun getMediaData(
         @Url url: String,
         @HeaderMap headers: HashMap<String, String>,
@@ -31,24 +18,10 @@ interface UrlService {
 
 
     @GET
-    suspend fun getMediaData2(
-        @Url url: String,
-        @HeaderMap headers: HashMap<String, String>,
-        @Query("query_hash") query_hash: String,
-        @Query("variables") variables: String
-    ): Response<ResponseBody>
-
-
-    @GET
-    suspend fun getMediaData3(
+    suspend fun getMediaData(
         @Url url: String
     ): Response<ResponseBody>
 
-    @GET
-    suspend fun getMediaData4(
-        @Url url: String,
-        @HeaderMap headers: HashMap<String, String>
-    ): Response<ResponseBody>
 
     @GET
     suspend fun getStoryData(

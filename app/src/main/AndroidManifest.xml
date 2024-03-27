@@ -26,10 +26,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IgDownloader">
         <activity
-            android:name=".modules.help.HelpActivity"
+            android:name=".views.help.HelpActivity"
             android:exported="false" />
         <activity
-            android:name=".modules.details.TagDetailsActivity"
+            android:name=".views.details.TagDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
@@ -45,11 +45,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".modules.login.FirstActivity"
+            android:name=".views.login.FirstActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".modules.web.WebActivity"
+            android:name=".views.web.WebActivity"
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
@@ -57,15 +57,15 @@
             android:value="ca-app-pub-8609866682652024~9038850214" />
 
         <activity
-            android:name=".modules.details.VideoActivity"
+            android:name=".views.details.VideoActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".modules.details.BlogDetailsActivity"
+            android:name=".views.details.DetailsActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".modules.login.SplashActivity"
+            android:name=".views.login.SplashActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>

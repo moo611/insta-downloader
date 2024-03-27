@@ -43,8 +43,7 @@
     <string name="parse_error">解析例外</string>
     <string name="recent_download">最近</string>
 
-    <string name="facebook_app_id">1129445801291076</string>
-    <string name="facebook_client_token">909dba105c7cc41b2b2f50ac66b425a6</string>
+
     <string name="repost">再投稿</string>
     <string name="delete">消去</string>
     <string name="start_right_now">今すぐ始めましょう</string>
