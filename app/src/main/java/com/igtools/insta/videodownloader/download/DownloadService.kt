@@ -33,7 +33,7 @@ import org.greenrobot.eventbus.EventBus
 import java.io.File
 
 
-class MyService : Service() {
+class DownloadService : Service() {
 
     companion object {
         var isDownloading = false
@@ -173,7 +173,7 @@ class MyService : Service() {
         task.enqueue(object : DownloadListener4() {
             // 下载开始时的处理
             override fun taskStart(task: DownloadTask) {
-                Toast.makeText(this@MyService, R.string.download_start, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@DownloadService, R.string.download_start, Toast.LENGTH_SHORT).show()
             }
 
             // 连接开始时的处理
@@ -207,7 +207,7 @@ class MyService : Service() {
                     isDownloading = false
 
                     EventBus.getDefault().post(DownloadFail())
-                    Toast.makeText(this@MyService, R.string.download_failed, Toast.LENGTH_SHORT)
+                    Toast.makeText(this@DownloadService, R.string.download_failed, Toast.LENGTH_SHORT)
                         .show()
                     stopForeground(true)
                     return
@@ -248,7 +248,7 @@ class MyService : Service() {
 
                     EventBus.getDefault().post(DownloadSuccess())
 
-                    Toast.makeText(this@MyService, R.string.download_finish, Toast.LENGTH_SHORT)
+                    Toast.makeText(this@DownloadService, R.string.download_finish, Toast.LENGTH_SHORT)
                         .show()
                     stopForeground(true)
                 }
@@ -401,7 +401,7 @@ class MyService : Service() {
                 // 发送下载成功事件
                 EventBus.getDefault().post(DownloadSuccess())
                 // 显示下载完成提示
-                Toast.makeText(this@MyService, R.string.download_finish, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@DownloadService, R.string.download_finish, Toast.LENGTH_SHORT).show()
                 // 停止前台服务
                 stopForeground(true)
 

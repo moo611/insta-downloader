@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -27,7 +26,6 @@ import com.igtools.insta.videodownloader.api.Urls
 import com.igtools.insta.videodownloader.base.BaseFragment
 import com.igtools.insta.videodownloader.databinding.FragmentLinkBinding
 import com.igtools.insta.videodownloader.db.RecordDB
-import com.igtools.insta.videodownloader.download.MyService
 import com.igtools.insta.videodownloader.models.MediaModel
 import com.igtools.insta.videodownloader.parser.LinkParser
 import com.igtools.insta.videodownloader.parser.StoryParser

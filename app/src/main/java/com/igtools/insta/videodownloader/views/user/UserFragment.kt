@@ -1,4 +1,4 @@
-package com.igtools.insta.videodownloader.views.search
+package com.igtools.insta.videodownloader.views.user
 
 import android.app.Activity.RESULT_OK
 import android.app.AlertDialog
@@ -24,7 +24,7 @@ import com.igtools.insta.videodownloader.R
 import com.igtools.insta.videodownloader.api.ApiClient
 import com.igtools.insta.videodownloader.api.Urls
 import com.igtools.insta.videodownloader.base.BaseFragment
-import com.igtools.insta.videodownloader.databinding.FragmentSearchBinding
+import com.igtools.insta.videodownloader.databinding.FragmentUserBinding
 import com.igtools.insta.videodownloader.models.MediaModel
 import com.igtools.insta.videodownloader.views.web.WebActivity
 import com.igtools.insta.videodownloader.utils.KeyboardUtils
@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class SearchFragment : BaseFragment<FragmentSearchBinding>() {
+class UserFragment : BaseFragment<FragmentUserBinding>() {
     lateinit var privateDialog: AlertDialog
     val TAG = "SearchFragment"
     val LOGIN_REQ = 1000
@@ -53,7 +53,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     var mode = "public"
 
     override fun getLayoutId(): Int {
-        return R.layout.fragment_search
+        return R.layout.fragment_user
     }
 
     override fun initView() {

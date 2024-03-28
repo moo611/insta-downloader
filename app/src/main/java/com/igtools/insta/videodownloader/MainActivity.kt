@@ -15,11 +15,11 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
 import com.igtools.insta.videodownloader.base.BaseActivity
 import com.igtools.insta.videodownloader.databinding.ActivityMainBinding
-import com.igtools.insta.videodownloader.download.MyService
+import com.igtools.insta.videodownloader.download.DownloadService
 import com.igtools.insta.videodownloader.models.IntentEvent
 import com.igtools.insta.videodownloader.views.home.LinkFragment
-import com.igtools.insta.videodownloader.views.repost.RepostFragment
-import com.igtools.insta.videodownloader.views.search.SearchFragment
+import com.igtools.insta.videodownloader.views.record.RecordFragment
+import com.igtools.insta.videodownloader.views.user.UserFragment
 import com.igtools.insta.videodownloader.views.setting.SettingFragment
 import com.igtools.insta.videodownloader.db.RecordDB
 import com.igtools.insta.videodownloader.utils.RegexUtils
@@ -60,8 +60,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
 
         fragments.add(LinkFragment())
-        fragments.add(SearchFragment())
-        fragments.add(RepostFragment())
+        fragments.add(UserFragment())
+        fragments.add(RecordFragment())
         fragments.add(SettingFragment())
 
         showFragment(lastPos)
@@ -144,7 +144,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private fun handleIntent(newIntent: Intent?) {
 
-        if (MyService.isDownloading){
+        if (DownloadService.isDownloading){
             Toast.makeText(this@MainActivity,getString(R.string.only_one),Toast.LENGTH_SHORT).show()
             return
         }

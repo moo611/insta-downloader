@@ -10,7 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
+        android:background="#000000"
         android:orientation="vertical"
         tools:context=".views.details.DetailsActivity">
 
@@ -22,7 +22,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="@color/black"
+            android:background="#000000"
             android:gravity="center_vertical">
 
             <ImageView
@@ -81,22 +81,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:visibility="invisible" />
+                android:visibility="gone" />
 
             <com.youth.banner.Banner
+                android:visibility="gone"
                 android:id="@+id/banner"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 app:banner_infinite_loop="false" />
 
-            <ImageView
-                android:id="@+id/img_play"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/video_play_normal"
-                android:visibility="invisible" />
+            <com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
+                android:visibility="gone"
+                android:id="@+id/player"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
             <at.grabner.circleprogress.CircleProgressView
                 android:id="@+id/progress_bar"

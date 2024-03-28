@@ -25,17 +25,13 @@
         android:networkSecurityConfig="@xml/network_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.IgDownloader">
-        <activity
-            android:name=".views.help.HelpActivity"
-            android:exported="false" />
-        <activity
-            android:name=".views.details.TagDetailsActivity"
-            android:exported="false" />
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait">
+            android:screenOrientation="fullSensor">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -44,30 +40,23 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".views.login.FirstActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+
         <activity
             android:name=".views.web.WebActivity"
             android:exported="false"
-            android:screenOrientation="portrait" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+            android:screenOrientation="fullSensor" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8609866682652024~9038850214" />
 
         <activity
-            android:name=".views.details.VideoActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".views.details.DetailsActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="fullSensor" />
         <activity
             android:name=".views.login.SplashActivity"
             android:exported="true"
-            android:screenOrientation="portrait">
+            android:screenOrientation="fullSensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -85,7 +74,7 @@
                 android:resource="@xml/filepaths" />
         </provider>
 
-        <service android:name=".download.MyService"/>
+        <service android:name=".download.DownloadService"/>
 
     </application>
 

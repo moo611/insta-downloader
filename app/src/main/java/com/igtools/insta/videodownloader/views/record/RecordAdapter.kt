@@ -1,8 +1,8 @@
-package com.igtools.insta.videodownloader.views.repost
+package com.igtools.insta.videodownloader.views.record
 
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
-import com.igtools.insta.videodownloader.views.repost.RepostAdapter.RepostHolder
+import com.igtools.insta.videodownloader.views.record.RecordAdapter.RepostHolder
 import android.view.ViewGroup
 import android.view.LayoutInflater
 import com.igtools.insta.videodownloader.R
@@ -19,7 +19,7 @@ import java.util.ArrayList
  * @Author: desong
  * @Date: 2022/8/4
  */
-class RepostAdapter(var c: Context) : RecyclerView.Adapter<RepostHolder>() {
+class RecordAdapter(var c: Context) : RecyclerView.Adapter<RepostHolder>() {
 
     var medias: List<MediaModel> = ArrayList()
     var onItemClickListener: OnItemClickListener? = null

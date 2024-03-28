@@ -61,15 +61,6 @@ class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel>) :
                     .placeholder(ColorDrawable(ContextCompat.getColor(context, R.color.gray_1)))
                     .into(videoHolder.imageView)
 
-                videoHolder.imageView.setOnClickListener {
-
-                    context.startActivity(
-                        Intent(context, VideoActivity::class.java)
-                            .putExtra("url", data?.videoUrl)
-                            .putExtra("thumbnailUrl", data?.thumbnailUrl)
-                    )
-
-                }
             }
 
         }

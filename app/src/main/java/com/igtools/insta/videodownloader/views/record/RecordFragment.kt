@@ -1,4 +1,4 @@
-package com.igtools.insta.videodownloader.views.repost
+package com.igtools.insta.videodownloader.views.record
 
 import android.app.Activity.RESULT_OK
 import android.app.RecoverableSecurityException
@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.ads.AdRequest
 import com.igtools.insta.videodownloader.R
 import com.igtools.insta.videodownloader.base.BaseFragment
-import com.igtools.insta.videodownloader.databinding.FragmentRepostBinding
+import com.igtools.insta.videodownloader.databinding.FragmentRecordBinding
 import com.igtools.insta.videodownloader.models.MediaModel
 import com.igtools.insta.videodownloader.db.Record
 import com.igtools.insta.videodownloader.views.details.DetailsActivity
@@ -39,7 +39,7 @@ import java.io.FileNotFoundException
 import java.io.InputStream
 
 
-class RepostFragment : BaseFragment<FragmentRepostBinding>() {
+class RecordFragment : BaseFragment<FragmentRecordBinding>() {
 
     var deleteResultLauncher = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
@@ -53,7 +53,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     }
 
 
-    lateinit var adapter: RepostAdapter
+    lateinit var adapter: RecordAdapter
     lateinit var bottomDialog: BottomDialog
 
     lateinit var deleteDialog: MyDialog
@@ -62,17 +62,17 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
     var lastSelected = -1
     val TAG = "RepostFragment"
     override fun getLayoutId(): Int {
-        return R.layout.fragment_repost
+        return R.layout.fragment_record
     }
 
     override fun initView() {
         initDialog()
         val adRequest = AdRequest.Builder().build();
         mBinding.adView.loadAd(adRequest)
-        adapter = RepostAdapter(requireContext())
+        adapter = RecordAdapter(requireContext())
         mBinding.rv.adapter = adapter
         mBinding.rv.layoutManager = LinearLayoutManager(requireContext())
-        adapter.onItemClickListener = object : RepostAdapter.OnItemClickListener {
+        adapter.onItemClickListener = object : RecordAdapter.OnItemClickListener {
             override fun onClick(position: Int) {
                 val content = records[position].content
                 val record = records[position]
@@ -86,7 +86,7 @@ class RepostFragment : BaseFragment<FragmentRepostBinding>() {
 
         }
 
-        adapter.onMenuClickListener = object : RepostAdapter.OnMenuClickListener {
+        adapter.onMenuClickListener = object : RecordAdapter.OnMenuClickListener {
             override fun onClick(position: Int) {
 
                 lastSelected = position

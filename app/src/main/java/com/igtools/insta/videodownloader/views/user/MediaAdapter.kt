@@ -1,4 +1,4 @@
-package com.igtools.insta.videodownloader.views.search
+package com.igtools.insta.videodownloader.views.user
 
 import android.content.Context
 import android.content.Intent

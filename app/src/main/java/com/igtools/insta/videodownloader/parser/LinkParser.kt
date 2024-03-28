@@ -14,7 +14,7 @@ import java.util.regex.Pattern
  * @Author:  desong
  * @Date:  2024/3/27
  */
-class LinkParser:InstaParser {
+class LinkParser : InstaParser {
     override fun parse(html: String): MediaModel {
         val soup = Jsoup.parse(html)
         val embed: Element? = soup.selectFirst(".Embed")
@@ -149,14 +149,21 @@ class LinkParser:InstaParser {
         println("username:${mediaModel.username}")
     }
 
-    private fun parseCaption(soup: Document, mediaModel: MediaModel) {
-        println("caption")
-        val captionDiv: Element? = soup.selectFirst(".Caption")
-        captionDiv?.let {
-            it.selectFirst("div")?.remove()
-            mediaModel.captionText = it.text()
+    private fun parseCaption(doc: Document, mediaModel: MediaModel) {
+        try {
+            if (doc.getElementsByClass("Caption").size > 0) {
+                val captionDiv = doc.getElementsByClass("Caption")[0]
+                val userEle = captionDiv.child(0)
+                val commentsEle = captionDiv.child(captionDiv.children().size - 1)
+                userEle.remove()
+                commentsEle.remove()
+                val content = captionDiv.text()
+                //Log.v(TAG, content)
+                mediaModel.captionText = content
+            }
+        } catch (e: Exception) {
+            println(e)
         }
-        println(mediaModel.captionText)
     }
 
     private fun parseThumbnail(soup: Document, mediaModel: MediaModel) {
@@ -168,16 +175,26 @@ class LinkParser:InstaParser {
 
     private fun parseVideo(html: String, mediaModel: MediaModel) {
         println("video")
-        val replacedHtml = html.replace("\\", "")
-        println(replacedHtml)
-        val pattern =
-            "\"video_url\":\"https://.*?\\.mp4?.*?\","
-        val matcher = Pattern.compile(pattern).matcher(replacedHtml)
-        if (matcher.find()) {
-            var str1 = replacedHtml.substring(matcher.start(), matcher.end())
-            str1 = str1.split(",")[0].replace("\"video_url\":\"", "").replace("\"", "")
-            mediaModel.videoUrl = str1
+        //先尝试从dom元素中找video，如果没有，再从数据解析。因为实测中发现，直接从数据解析，拿到的videoUrl有可能是过期的
+        val soup = Jsoup.parse(html)
+        val videos = soup.getElementsByTag("video")
+        if (videos != null && videos.size > 0) {
+            val video = videos[0]
+            mediaModel.videoUrl = video.attr("src")
+        } else {
+            val replacedHtml = html.replace("\\", "")
+            println(replacedHtml)
+            val pattern =
+                "\"video_url\":\"https://.*?\\.mp4?.*?\","
+            val matcher = Pattern.compile(pattern).matcher(replacedHtml)
+            if (matcher.find()) {
+                var str1 = replacedHtml.substring(matcher.start(), matcher.end())
+                str1 = str1.split(",")[0].replace("\"video_url\":\"", "").replace("\"", "")
+                mediaModel.videoUrl = str1
+            }
         }
+
+
         println(mediaModel.videoUrl)
     }
 
