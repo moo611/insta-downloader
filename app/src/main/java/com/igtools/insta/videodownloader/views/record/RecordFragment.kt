@@ -21,7 +21,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.gms.ads.AdRequest
 import com.igtools.insta.videodownloader.R
 import com.igtools.insta.videodownloader.base.BaseFragment
 import com.igtools.insta.videodownloader.databinding.FragmentRecordBinding
@@ -67,8 +66,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>() {
 
     override fun initView() {
         initDialog()
-        val adRequest = AdRequest.Builder().build();
-        mBinding.adView.loadAd(adRequest)
+
         adapter = RecordAdapter(requireContext())
         mBinding.rv.adapter = adapter
         mBinding.rv.layoutManager = LinearLayoutManager(requireContext())

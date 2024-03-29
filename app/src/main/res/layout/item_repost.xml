@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_margin="5dp"
-                android:src="@mipmap/collections_white"
+                android:src="@mipmap/ic_paste_white"
                 android:visibility="gone" />
 
             <ImageView
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_margin="5dp"
-                android:src="@mipmap/player"
+                android:src="@mipmap/ic_player"
                 android:visibility="gone" />
 
         </FrameLayout>
@@ -97,6 +97,6 @@
         android:layout_gravity="end"
         android:layout_marginTop="10dp"
         android:layout_marginRight="10dp"
-        android:src="@mipmap/menu" />
+        android:src="@mipmap/ic_menu" />
 
 </FrameLayout>

@@ -81,4 +81,5 @@
     <string name="tv_hide">隱藏</string>
     <string name="tv_show">…顯示</string>
     <string name="only_one">一次只能執行一個下載任務</string>
+    <string name="features">Features</string>
 </resources>

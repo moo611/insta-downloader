@@ -81,4 +81,5 @@
     <string name="tv_hide">숨기기</string>
     <string name="tv_show">…쇼</string>
     <string name="only_one">한 번에 하나의 다운로드 작업만 수행할 수 있습니다</string>
+    <string name="features">Features</string>
 </resources>

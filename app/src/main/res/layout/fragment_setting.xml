@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
-                android:src="@mipmap/share" />
+                android:src="@mipmap/ic_share" />
 
             <TextView
                 android:textColor="@color/black"
@@ -68,7 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
-                android:src="@mipmap/email" />
+                android:src="@mipmap/ic_email" />
 
             <TextView
                 android:textColor="@color/black"
@@ -92,7 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
-                android:src="@mipmap/mood" />
+                android:src="@mipmap/ic_mood" />
 
             <TextView
                 android:textColor="@color/black"
@@ -129,7 +129,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
-                android:src="@mipmap/logout" />
+                android:src="@mipmap/ic_logout" />
 
             <TextView
                 android:textColor="@color/black"

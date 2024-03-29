@@ -56,13 +56,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         imageViews.add(mBinding.imgHome)
         imageViews.add(mBinding.imgSearch)
         imageViews.add(mBinding.imgRepost)
-        imageViews.add(mBinding.imgMine)
 
 
         fragments.add(LinkFragment())
         fragments.add(UserFragment())
         fragments.add(RecordFragment())
-        fragments.add(SettingFragment())
+
 
         showFragment(lastPos)
         selectPage(0)
@@ -86,12 +85,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             selectPage(2)
             lastPos = 2
         }
-        mBinding.llMine.setOnClickListener {
-            showFragment(3)
-            selectPage(3)
-            lastPos = 3
 
-        }
 
     }
 

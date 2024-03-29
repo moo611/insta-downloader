@@ -15,12 +15,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.igtools.insta.videodownloader.R
 import com.igtools.insta.videodownloader.base.BaseActivity
 import com.igtools.insta.videodownloader.databinding.ActivityDetailsBinding
@@ -44,15 +38,12 @@ class DetailsActivity : BaseActivity<ActivityDetailsBinding>() {
     lateinit var adapter: MultiTypeAdapter
     var mediaInfo = MediaModel()
     var sourceUrl: String? = null
-    var mInterstitialAd: InterstitialAd? = null
-
 
     override fun getLayoutId(): Int {
         return R.layout.activity_details
     }
 
     override fun initView() {
-        initAds()
 
         mBinding.imgBack.setOnClickListener {
             onBackPressed()
@@ -274,43 +265,6 @@ class DetailsActivity : BaseActivity<ActivityDetailsBinding>() {
     }
 
 
-    private fun initAds() {
-        val adRequest = AdRequest.Builder().build();
-
-        InterstitialAd.load(this, "ca-app-pub-8609866682652024/2073437875", adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(p0: InterstitialAd) {
-                    super.onAdLoaded(p0)
-                    mInterstitialAd = p0
-                }
-
-                override fun onAdFailedToLoad(p0: LoadAdError) {
-                    super.onAdFailedToLoad(p0)
-                    mInterstitialAd = null;
-                }
-            })
-
-        mInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
-
-            override fun onAdDismissedFullScreenContent() {
-                // Called when ad is dismissed.
-                Log.d(TAG, "Ad dismissed fullscreen content.")
-                mInterstitialAd = null
-                finish()
-
-            }
-
-            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                // Called when ad fails to show.
-                Log.e(TAG, "Ad failed to show fullscreen content.")
-                mInterstitialAd = null
-                finish()
-
-            }
-
-        }
-    }
-
 
     /**
      * 初始化基础信息，包括标题、用户名和头像。
@@ -393,13 +347,6 @@ class DetailsActivity : BaseActivity<ActivityDetailsBinding>() {
 
     }
 
-    override fun onBackPressed() {
-
-        if (mInterstitialAd != null) {
-            mInterstitialAd?.show(this)
-        }
-        super.onBackPressed()
-    }
 
     /**
      * 处理下载成功的事件。

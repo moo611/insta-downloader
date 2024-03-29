@@ -15,9 +15,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.LoadAdError
 import com.igtools.insta.videodownloader.BaseApplication
 import com.igtools.insta.videodownloader.BuildConfig
 import com.igtools.insta.videodownloader.R
@@ -61,7 +58,6 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
     override fun initView() {
 
         initDialog()
-        initAds()
 
         mBinding.btnDownload.setOnClickListener {
 
@@ -100,20 +96,7 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
             mBinding.etLink.setText("")
         }
 
-        mBinding.adView.adListener = object : AdListener() {
 
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                // Code to be executed when an ad request fails.
-                Log.e(TAG, adError.message)
-            }
-
-            override fun onAdLoaded() {
-                // Code to be executed when an ad finishes loading.
-                mBinding.adcard.visibility = View.VISIBLE
-            }
-
-
-        }
         mBinding.imgCamera.setOnClickListener {
 
             val launchIntent =
@@ -209,15 +192,6 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
             .create()
     }
 
-
-    private fun initAds() {
-        val adRequest = AdRequest.Builder().build();
-
-        //banner
-        mBinding.adView.loadAd(adRequest)
-
-
-    }
 
     private fun handleCopy() {
         mBinding.btnPaste.post {

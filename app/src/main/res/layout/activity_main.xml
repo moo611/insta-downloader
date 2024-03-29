@@ -43,7 +43,7 @@
                     android:id="@+id/img_home"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@mipmap/outline_home" />
+                    android:src="@mipmap/ic_home" />
 
 
             </LinearLayout>
@@ -61,7 +61,7 @@
                     android:id="@+id/img_search"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@mipmap/ic_search" />
+                    android:src="@mipmap/ic_user" />
 
 
             </LinearLayout>
@@ -77,28 +77,28 @@
                 <ImageView
                     android:layout_gravity="center"
                     android:id="@+id/img_repost"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/tab_repost" />
-
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/ll_mine"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/img_mine"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@mipmap/account" />
+                    android:src="@mipmap/ic_history" />
+
 
             </LinearLayout>
+
+<!--            <LinearLayout-->
+<!--                android:id="@+id/ll_mine"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:layout_weight="1"-->
+<!--                android:gravity="center"-->
+<!--                android:orientation="vertical">-->
+
+<!--                <ImageView-->
+<!--                    android:id="@+id/img_mine"-->
+<!--                    android:layout_width="28dp"-->
+<!--                    android:layout_height="28dp"-->
+<!--                    android:src="@mipmap/account" />-->
+
+<!--            </LinearLayout>-->
 
         </LinearLayout>
 

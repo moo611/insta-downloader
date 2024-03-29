@@ -117,7 +117,7 @@ dependencies {
     implementation("org.greenrobot:eventbus:3.3.1")
 
     //admob
-    implementation 'com.google.android.gms:play-services-ads:21.1.0'
+//    implementation 'com.google.android.gms:play-services-ads:21.1.0'
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
     implementation 'org.jsoup:jsoup:1.13.1'
@@ -125,5 +125,5 @@ dependencies {
 
     implementation 'com.liulishuo.okdownload:okdownload:1.0.7'
     implementation 'com.github.jakob-grabner:Circle-Progress-View:1.4'
-    implementation 'com.github.MZCretin:ExpandableTextView:v1.6.1-x'
+
 }

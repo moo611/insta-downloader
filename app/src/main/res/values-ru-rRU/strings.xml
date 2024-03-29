@@ -80,4 +80,5 @@
     <string name="tv_hide">скрыть</string>
     <string name="tv_show">…шоу</string>
     <string name="only_one">Единовременно может выполняться только одна задача загрузки</string>
+    <string name="features">Features</string>
 </resources>

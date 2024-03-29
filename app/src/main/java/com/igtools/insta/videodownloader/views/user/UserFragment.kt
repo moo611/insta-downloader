@@ -13,10 +13,6 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
 import com.google.gson.JsonObject
 import com.igtools.insta.videodownloader.BaseApplication
@@ -49,7 +45,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     var loadingMore = false
     var isEnd = false
     var userId = ""
-    var mInterstitialAd: InterstitialAd? = null
+
     var mode = "public"
 
     override fun getLayoutId(): Int {
@@ -57,8 +53,6 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     }
 
     override fun initView() {
-        val adRequest = AdRequest.Builder().build();
-        mBinding.adView.loadAd(adRequest)
 
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage(getString(R.string.searching))
@@ -181,26 +175,6 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
     override fun initData() {
 
-        initAds()
-    }
-
-
-    private fun initAds() {
-        val adRequest = AdRequest.Builder().build();
-        //inter
-        InterstitialAd.load(requireContext(), "ca-app-pub-8609866682652024/7172043276", adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(p0: InterstitialAd) {
-                    super.onAdLoaded(p0)
-                    mInterstitialAd = p0
-                }
-
-                override fun onAdFailedToLoad(p0: LoadAdError) {
-                    super.onAdFailedToLoad(p0)
-                    mInterstitialAd = null;
-                }
-            })
-
     }
 
 
@@ -237,7 +211,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             val code = res.code()
             val jsonObject = res.body()
             if (code == 200 && jsonObject != null) {
-                mInterstitialAd?.show(requireActivity())
+
                 val user = jsonObject["data"].asJsonObject["user"].asJsonObject
                 userId = user["id"].asString
                 if (user.has("profile_pic_url") && !user.get("profile_pic_url").isJsonNull) {
@@ -317,7 +291,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                         }
 
                     } else {
-                        mInterstitialAd?.show(requireActivity())
+
                         userId = user["id"].asString
                         if (user.has("profile_pic_url") && !user["profile_pic_url"].isJsonNull) {
                             profileUrl = user["profile_pic_url"].asString
