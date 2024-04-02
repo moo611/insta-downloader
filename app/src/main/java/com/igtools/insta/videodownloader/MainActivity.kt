@@ -3,28 +3,20 @@ package com.igtools.insta.videodownloader
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.lifecycleScope
 import com.igtools.insta.videodownloader.base.BaseActivity
 import com.igtools.insta.videodownloader.databinding.ActivityMainBinding
-import com.igtools.insta.videodownloader.db.RecordDB
-import com.igtools.insta.videodownloader.download.DownloadService
-import com.igtools.insta.videodownloader.utils.RegexUtils
 import com.igtools.insta.videodownloader.utils.ShareUtils
 import com.igtools.insta.videodownloader.views.home.LinkFragment
 import com.igtools.insta.videodownloader.views.record.RecordFragment
 import com.igtools.insta.videodownloader.views.user.UserFragment
 import com.igtools.insta.videodownloader.widgets.dialog.MyDialog
-import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 
 
 /**
