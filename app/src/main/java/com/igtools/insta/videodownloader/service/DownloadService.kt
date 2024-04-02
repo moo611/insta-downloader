@@ -1,4 +1,4 @@
-package com.igtools.insta.videodownloader.download
+package com.igtools.insta.videodownloader.service
 
 import android.app.*
 import android.content.Context

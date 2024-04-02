@@ -74,7 +74,7 @@
                 android:resource="@xml/filepaths" />
         </provider>
 
-        <service android:name=".download.DownloadService"/>
+        <service android:name=".service.DownloadService"/>
 
     </application>
 

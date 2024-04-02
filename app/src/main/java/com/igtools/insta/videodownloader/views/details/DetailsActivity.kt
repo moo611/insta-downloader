@@ -21,10 +21,10 @@ import com.igtools.insta.videodownloader.databinding.ActivityDetailsBinding
 
 import com.igtools.insta.videodownloader.models.MediaModel
 import com.igtools.insta.videodownloader.db.RecordDB
-import com.igtools.insta.videodownloader.download.DownloadFail
-import com.igtools.insta.videodownloader.download.DownloadProgress
-import com.igtools.insta.videodownloader.download.DownloadSuccess
-import com.igtools.insta.videodownloader.download.DownloadService
+import com.igtools.insta.videodownloader.service.DownloadFail
+import com.igtools.insta.videodownloader.service.DownloadProgress
+import com.igtools.insta.videodownloader.service.DownloadSuccess
+import com.igtools.insta.videodownloader.service.DownloadService
 import com.youth.banner.indicator.CircleIndicator
 import kotlinx.android.synthetic.main.activity_details.*
 import kotlinx.coroutines.launch
