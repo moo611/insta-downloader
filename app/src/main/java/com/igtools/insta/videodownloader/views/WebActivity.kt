@@ -1,4 +1,4 @@
-package com.igtools.insta.videodownloader.views.web
+package com.igtools.insta.videodownloader.views
 
 import android.annotation.SuppressLint
 import android.os.Build

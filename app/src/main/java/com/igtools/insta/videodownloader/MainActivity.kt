@@ -17,7 +17,6 @@ import com.igtools.insta.videodownloader.base.BaseActivity
 import com.igtools.insta.videodownloader.databinding.ActivityMainBinding
 import com.igtools.insta.videodownloader.db.RecordDB
 import com.igtools.insta.videodownloader.download.DownloadService
-import com.igtools.insta.videodownloader.models.IntentEvent
 import com.igtools.insta.videodownloader.utils.RegexUtils
 import com.igtools.insta.videodownloader.utils.ShareUtils
 import com.igtools.insta.videodownloader.views.home.LinkFragment
@@ -47,19 +46,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun initView() {
 
-        //val typeface = Typeface.createFromAsset(assets, "fonts/DancingScript-Bold.ttf")
-        //mBinding.appTitle.typeface = typeface
         initDialog()
-        //添加imageviews
         imageViews.add(mBinding.imgHome)
         imageViews.add(mBinding.imgSearch)
         imageViews.add(mBinding.imgRepost)
-
-
         fragments.add(LinkFragment())
         fragments.add(UserFragment())
         fragments.add(RecordFragment())
-
 
         showFragment(lastPos)
         selectPage(0)
@@ -124,63 +117,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     override fun initData() {
-        handleIntent(intent)
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
-        handleIntent(intent)
 
     }
-
-    private fun handleIntent(newIntent: Intent?) {
-
-        if (DownloadService.isDownloading) {
-            Toast.makeText(this@MainActivity, getString(R.string.only_one), Toast.LENGTH_SHORT)
-                .show()
-            return
-        }
-
-        //这里要加延时，否则会获取不到intent或者clipboard
-        mBinding.content.post {
-
-            if (newIntent?.action == Intent.ACTION_SEND) {
-                Log.v(TAG, "handle intent")
-                if ("text/plain" == newIntent.type) {
-                    newIntent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-                        // Update UI to reflect text being shared
-
-                        val urls = RegexUtils.extractUrls(it)
-                        if (urls.isNotEmpty()) {
-
-                            lifecycleScope.launch {
-                                val record = RecordDB.getInstance().recordDao().findByUrl(urls[0])
-                                if (record != null) {
-                                    Toast.makeText(
-                                        this@MainActivity,
-                                        getString(R.string.exist),
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
-                                    return@launch
-                                }
-
-                                EventBus.getDefault().post(IntentEvent(urls[0]))
-
-                            }
-
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-
 
     /**
-     * 切换fragment性能优化,使每个fragment只实例化一次
+     * 根据页码显示相应的Fragment。
+     * @param page 页码，用于指定要显示的Fragment。
      */
     private fun showFragment(page: Int) {
         supportFragmentManager.executePendingTransactions()
@@ -196,7 +138,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         ft.commitAllowingStateLoss()
     }
 
-    // 当fragment已被实例化，相当于发生过切换，就隐藏起来
+    /**
+     * 隐藏所有已添加的Fragment。
+     * @param ft Fragment事务，用于执行隐藏操作。
+     */
     private fun hideFragments(ft: FragmentTransaction) {
         for (fm in fragments) {
             if (fm.isAdded) {
@@ -205,7 +150,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
     }
 
-    //点击底部导航栏的图标文字变化
+    /**
+     * 根据指定位置选中页面，通过改变ImageView的颜色来表示选中状态。
+     * @param pos 位置，用于指定要选中的页面。
+     */
     private fun selectPage(pos: Int) {
 
         for (i in imageViews.indices) {

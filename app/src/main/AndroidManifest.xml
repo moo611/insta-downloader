@@ -42,7 +42,7 @@
         </activity>
 
         <activity
-            android:name=".views.web.WebActivity"
+            android:name=".views.WebActivity"
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
@@ -54,7 +54,7 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".views.login.SplashActivity"
+            android:name=".views.SplashActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>

@@ -1,7 +1,6 @@
 package com.igtools.insta.videodownloader.views.details
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +16,7 @@ import com.youth.banner.util.BannerUtils
 /**
  * 自定义布局,多个不同UI切换
  */
-class MultiTypeAdapter(private val context: Context, mDatas: List<MediaModel>) :
+class DetailsAdapter(private val context: Context, mDatas: List<MediaModel>) :
     BannerAdapter<MediaModel, RecyclerView.ViewHolder>(mDatas) {
     var TAG = "MultiTypeAdapter"
     override fun onCreateHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {

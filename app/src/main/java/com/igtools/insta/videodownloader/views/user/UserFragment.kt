@@ -5,8 +5,6 @@ import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.content.Intent
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.SearchView
@@ -24,12 +22,9 @@ import com.igtools.insta.videodownloader.base.BaseFragment
 import com.igtools.insta.videodownloader.databinding.FragmentUserBinding
 import com.igtools.insta.videodownloader.models.MediaModel
 import com.igtools.insta.videodownloader.models.UserModel
-import com.igtools.insta.videodownloader.views.web.WebActivity
-import com.igtools.insta.videodownloader.utils.KeyboardUtils
+import com.igtools.insta.videodownloader.views.WebActivity
 import com.igtools.insta.videodownloader.utils.getNullable
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class UserFragment : BaseFragment<FragmentUserBinding>() {
@@ -39,7 +34,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     val COUNT = 50
 
     lateinit var layoutManager: GridLayoutManager
-    lateinit var adapter: MediaAdapter
+    lateinit var adapter: UserAdapter
     lateinit var progressDialog: ProgressDialog
 
     var cursor = ""
@@ -58,7 +53,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         progressDialog.setMessage(getString(R.string.searching))
         progressDialog.setCancelable(false)
         initDialog()
-        adapter = MediaAdapter(requireContext())
+        adapter = UserAdapter(requireContext())
         layoutManager = GridLayoutManager(context, 3)
         mBinding.rv.adapter = adapter
         mBinding.rv.layoutManager = layoutManager

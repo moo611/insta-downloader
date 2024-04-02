@@ -3,7 +3,6 @@ package com.igtools.insta.videodownloader.views.user
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
-import android.media.Image
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +18,7 @@ import com.igtools.insta.videodownloader.models.MediaModel
 import com.igtools.insta.videodownloader.models.UserModel
 
 
-class MediaAdapter(var c: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class UserAdapter(var c: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var medias: ArrayList<MediaModel> = ArrayList()
     var userInfo: UserModel? = null

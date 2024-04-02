@@ -13,7 +13,7 @@ object RegexUtils {
     fun extractUrls(text: String): List<String> {
         val containedUrls: MutableList<String> = ArrayList()
         val urlRegex =
-            "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)"
+            "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?+-=\\\\.&]*)"
         val pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE)
         val urlMatcher = pattern.matcher(text)
         while (urlMatcher.find()) {

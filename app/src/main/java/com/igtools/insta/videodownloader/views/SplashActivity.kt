@@ -1,8 +1,7 @@
-package com.igtools.insta.videodownloader.views.login
+package com.igtools.insta.videodownloader.views
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import com.igtools.insta.videodownloader.BaseApplication
 import com.igtools.insta.videodownloader.MainActivity
 import com.igtools.insta.videodownloader.R
 import com.igtools.insta.videodownloader.base.BaseActivity

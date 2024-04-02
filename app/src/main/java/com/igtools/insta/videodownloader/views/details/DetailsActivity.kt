@@ -35,7 +35,7 @@ import java.io.File
 class DetailsActivity : BaseActivity<ActivityDetailsBinding>() {
 
     val TAG = "BlogDetailsActivity"
-    lateinit var adapter: MultiTypeAdapter
+    lateinit var adapter: DetailsAdapter
     var mediaInfo = MediaModel()
     var sourceUrl: String? = null
 
@@ -285,7 +285,7 @@ class DetailsActivity : BaseActivity<ActivityDetailsBinding>() {
         mBinding.banner.visibility = View.VISIBLE // 设置轮播图可见
 
         // 创建并设置适配器
-        adapter = MultiTypeAdapter(this, mediaInfo.resources)
+        adapter = DetailsAdapter(this, mediaInfo.resources)
         mBinding.banner
             .addBannerLifecycleObserver(this)
             .setIndicator(CircleIndicator(this)) // 设置指示器

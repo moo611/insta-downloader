@@ -79,7 +79,7 @@
                                 android:layout_height="20dp"
                                 android:layout_gravity="end|center_vertical"
                                 android:layout_marginEnd="30dp"
-                                android:src="@drawable/close"
+                                android:src="@drawable/ic_close"
                                 android:visibility="invisible"
                                 app:tint="@color/black" />
                         </FrameLayout>

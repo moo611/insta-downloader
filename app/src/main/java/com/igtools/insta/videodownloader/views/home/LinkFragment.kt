@@ -35,7 +35,7 @@ import com.igtools.insta.videodownloader.parser.LinkParser
 import com.igtools.insta.videodownloader.parser.StoryParser
 import com.igtools.insta.videodownloader.utils.*
 import com.igtools.insta.videodownloader.views.details.DetailsActivity
-import com.igtools.insta.videodownloader.views.web.WebActivity
+import com.igtools.insta.videodownloader.views.WebActivity
 import kotlinx.coroutines.launch
 
 

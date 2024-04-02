@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".views.web.WebActivity">
+        tools:context=".views.WebActivity">
 
         <View
             android:layout_width="match_parent"
