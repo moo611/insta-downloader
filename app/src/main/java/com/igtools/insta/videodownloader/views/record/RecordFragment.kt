@@ -18,6 +18,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -55,7 +56,6 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>() {
     lateinit var adapter: RecordAdapter
     lateinit var bottomDialog: BottomDialog
 
-    lateinit var deleteDialog: MyDialog
     var records: ArrayList<Record> = ArrayList()
     var medias: ArrayList<MediaModel> = ArrayList()
     var lastSelected = -1
@@ -97,38 +97,37 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>() {
         }
 
         mBinding.imgDelete.setOnClickListener {
-            deleteDialog.show()
+
+            val alertDialogBuilder = AlertDialog.Builder(requireContext());
+            alertDialogBuilder.setTitle(requireContext().getString(R.string.delete_all_records))
+            .setMessage(requireContext().getString(R.string.no_recover))
+                .setPositiveButton(requireContext().getString(R.string.ok)
+                ) { dialog, _ ->
+
+                    for (media in medias) {
+                        val index = medias.indexOf(media)
+                        deleteFile(media, records[index])
+                    }
+
+                    lifecycleScope.launch {
+                        RecordDB.getInstance().recordDao().deleteAll()
+                        medias.clear()
+                        records.clear()
+                        adapter.setDatas(medias)
+                    }
+                    dialog.dismiss()
+                }
+                .setNegativeButton(requireContext().getString(R.string.cancel)) { dialog, _ ->
+
+                    dialog.dismiss()
+                }
+            val alertDialog = alertDialogBuilder.create();
+            alertDialog.show()
         }
 
     }
 
-    fun initDialog() {
-        //deleteDialog
-        deleteDialog = MyDialog(requireContext(), R.style.MyDialogTheme)
-        val deleteView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_delete, null)
-        val tvCancel = deleteView.findViewById<TextView>(R.id.tv_cancel)
-        val tvDelete = deleteView.findViewById<TextView>(R.id.tv_delete)
-        deleteDialog.setUpView(deleteView)
-        tvCancel.setOnClickListener {
-            deleteDialog.dismiss()
-        }
-        tvDelete.setOnClickListener {
-
-            for (media in medias) {
-                val index = medias.indexOf(media)
-                deleteFile(media, records[index])
-            }
-
-            lifecycleScope.launch {
-                RecordDB.getInstance().recordDao().deleteAll()
-                medias.clear()
-                records.clear()
-                adapter.setDatas(medias)
-            }
-
-            deleteDialog.dismiss()
-        }
-
+    private fun initDialog() {
 
         //bottomDialog
         bottomDialog = BottomDialog(requireContext(), R.style.MyDialogTheme)
@@ -221,112 +220,6 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>() {
         }
     }
 
-    private fun addWallPaper(filePath: String?, status: Int) {
-
-        if (Build.VERSION.SDK_INT >= 24) {
-            if (filePath != null) {
-                try {
-                    val ios: InputStream = if (filePath.contains("content://")) {
-                        val uri = Uri.parse(filePath)
-                        activity?.contentResolver?.openInputStream(uri)!!
-                    } else {
-                        File(filePath).inputStream()
-                    }
-
-                    val myWallpaperManager = WallpaperManager.getInstance(requireContext());
-                    when (status) {
-                        0 -> {
-                            myWallpaperManager.setStream(
-                                ios,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_SYSTEM
-                            );
-                            myWallpaperManager.setStream(
-                                ios,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_LOCK
-                            );
-                            Toast.makeText(
-                                requireContext(),
-                                getString(R.string.add_successfully),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        1 -> {
-                            myWallpaperManager.setStream(
-                                ios,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_SYSTEM
-                            );
-                            Toast.makeText(
-                                requireContext(),
-                                getString(R.string.add_successfully),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        else -> {
-                            myWallpaperManager.setStream(
-                                ios,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_LOCK
-                            );
-                            Toast.makeText(
-                                requireContext(),
-                                getString(R.string.add_successfully),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                }catch (e:FileNotFoundException){
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.file_not_found),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-            } else {
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.file_not_found),
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            }
-        }
-
-    }
-
-    private fun addWallPaperUnder24(filePath: String?) {
-
-        if (filePath != null) {
-            val intent = Intent("android.intent.action.ATTACH_DATA")
-            intent.addCategory("android.intent.category.DEFAULT")
-            val str = "image/*"
-
-            val uri = if (filePath.contains("content://")) {
-                Uri.parse(filePath)
-            } else {
-                Uri.fromFile(File(filePath))
-            }
-
-            intent.setDataAndType(uri, str)
-            intent.putExtra("mimeType", str)
-            startActivity(Intent.createChooser(intent, "Set As:"))
-        } else {
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.file_not_found),
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
-    }
-
 
     fun repost(filePath: String?, isVideo: Boolean) {
 
@@ -361,7 +254,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>() {
     }
 
 
-    fun getDatas() {
+    private fun getDatas() {
 
         records.clear()
         medias.clear()
@@ -373,7 +266,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>() {
             for (record in records) {
 
                 val mediaModel = gson.fromJson(record.content, MediaModel::class.java)
-                if (mediaModel != null && mediaModel.resources != null) {
+                if (mediaModel?.resources != null) {
                     medias.add(mediaModel)
                 }
 
@@ -384,7 +277,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>() {
 
     }
 
-    fun shareFile() {
+    private fun shareFile() {
 
         bottomDialog.dismiss()
 

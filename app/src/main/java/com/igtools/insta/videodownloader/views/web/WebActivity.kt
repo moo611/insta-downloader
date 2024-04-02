@@ -36,14 +36,14 @@ class WebActivity : BaseActivity<ActivityWebBinding>() {
 
         }
     }
-    @SuppressLint("JavascriptInterface")
+    @SuppressLint("JavascriptInterface", "SetJavaScriptEnabled")
     private fun webViewSetting() {
 
-        mBinding.webview.addJavascriptInterface(this, "webview")
+        mBinding.webview.addJavascriptInterface(this, "web-view")
         val settings = mBinding.webview.settings
         settings.javaScriptEnabled = true
-        settings.setDomStorageEnabled(true)
-        settings.setAllowFileAccess(true)
+        settings.domStorageEnabled = true
+        settings.allowFileAccess = true
 
         settings.userAgentString = Urls.USER_AGENT
 //        if (ShareUtils.getData("user-agent")==null){
@@ -76,7 +76,7 @@ class WebActivity : BaseActivity<ActivityWebBinding>() {
 
                 Log.v(TAG,cookie+"")
                 if (cookie!=null && cookie.contains("sessionid")){
-                    ShareUtils.putData("cookie",cookie)
+                    ShareUtils.putDataString("cookie",cookie)
                     BaseApplication.cookie = cookie
                     setResult(RESULT_OK)
                     finish()

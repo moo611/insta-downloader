@@ -13,8 +13,6 @@ class BaseApplication : Application() {
         lateinit var mContext: Context
 
         var cookie: String? = null
-
-        var firstLogin = true
         var showRating = true
 
     }
@@ -25,15 +23,11 @@ class BaseApplication : Application() {
         mContext = applicationContext
 
 
-        ShareUtils.getData("cookie").let {
+        ShareUtils.getDataString("cookie")?.let {
             cookie = it
         }
 
-        ShareUtils.getDataBool("firstLogin").let {
-            firstLogin = it
-        }
-
-        ShareUtils.getDataBool("showrating").let {
+        ShareUtils.getDataBool("show_rating").let {
             showRating = it
         }
     }

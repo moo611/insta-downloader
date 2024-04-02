@@ -7,242 +7,244 @@
 
     </data>
 
-    <LinearLayout
+    <androidx.drawerlayout.widget.DrawerLayout
+        tools:openDrawer="start"
+        android:id="@+id/drawer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/my_app_name"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
+           <androidx.appcompat.widget.Toolbar
+               app:navigationIcon="@mipmap/ic_menu"
+               android:id="@+id/toolbar"
+               android:layout_width="match_parent"
+               android:layout_height="50dp"/>
 
-            <ImageView
-                android:id="@+id/img_camera"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="16dp"
-                android:src="@mipmap/ic_menu" />
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#e3e3e3" />
-
-        <ScrollView
-            android:id="@+id/scrollview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:paddingBottom="100dp"
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                tools:context=".views.home.ShortCodeFragment">
+                android:layout_height="1dp"
+                android:background="#e3e3e3" />
+
+            <ScrollView
+                android:id="@+id/scrollview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_view_fill"
                     android:orientation="vertical"
-                    android:paddingTop="20dp"
-                    android:paddingBottom="20dp">
-
-                    <FrameLayout
-                        android:id="@+id/fl_parent"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="20dp"
-                        android:focusable="true"
-                        android:focusableInTouchMode="true">
-
-                        <EditText
-                            android:id="@+id/et_link"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:layout_marginLeft="20dp"
-                            android:layout_marginRight="20dp"
-                            android:background="@drawable/bg_edit_fill"
-                            android:gravity="center_vertical|start"
-                            android:hint="@string/search_hint"
-                            android:maxLines="1"
-                            android:paddingLeft="12dp"
-                            android:paddingRight="40dp"
-                            android:singleLine="true"
-                            android:textColor="@color/white"
-                            android:textSize="14sp" />
-
-                        <ImageView
-                            android:id="@+id/img_clear"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_gravity="end|center_vertical"
-                            android:layout_marginEnd="30dp"
-                            android:src="@drawable/close"
-                            android:visibility="invisible"
-                            app:tint="@color/black" />
-                    </FrameLayout>
+                    android:paddingBottom="100dp"
+                    tools:context=".views.home.ShortCodeFragment">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:background="@drawable/bg_view_fill"
+                        android:orientation="vertical"
+                        android:paddingTop="20dp"
+                        android:paddingBottom="20dp">
 
-                        <TextView
-                            android:id="@+id/btn_paste"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_margin="20dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_button_fill"
-                            android:gravity="center"
-                            android:text="@string/paste"
-                            android:textColor="@color/white"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/btn_download"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
+                        <FrameLayout
+                            android:id="@+id/fl_parent"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
                             android:layout_marginTop="20dp"
-                            android:layout_marginRight="20dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_button_fill"
-                            android:gravity="center"
-                            android:text="@string/search"
-                            android:textColor="@color/white"
-                            android:textSize="14sp" />
+                            android:focusable="true"
+                            android:focusableInTouchMode="true">
+
+                            <EditText
+                                android:id="@+id/et_link"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_marginLeft="20dp"
+                                android:layout_marginRight="20dp"
+                                android:background="@drawable/bg_edit_fill"
+                                android:gravity="center_vertical|start"
+                                android:hint="@string/search_hint"
+                                android:maxLines="1"
+                                android:paddingLeft="12dp"
+                                android:paddingRight="40dp"
+                                android:singleLine="true"
+                                android:textColor="@color/white"
+                                android:textSize="14sp" />
+
+                            <ImageView
+                                android:id="@+id/img_clear"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="end|center_vertical"
+                                android:layout_marginEnd="30dp"
+                                android:src="@drawable/close"
+                                android:visibility="invisible"
+                                app:tint="@color/black" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/btn_paste"
+                                android:layout_width="0dp"
+                                android:layout_height="40dp"
+                                android:layout_margin="20dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_button_fill"
+                                android:gravity="center"
+                                android:text="@string/paste"
+                                android:textColor="@color/white"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/btn_download"
+                                android:layout_width="0dp"
+                                android:layout_height="40dp"
+                                android:layout_marginTop="20dp"
+                                android:layout_marginRight="20dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_button_fill"
+                                android:gravity="center"
+                                android:text="@string/search"
+                                android:textColor="@color/white"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="@string/features"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="Fast and Reliable:Our reliable service ensures you get your videos without interruptions."
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="High-Quality Downloads:Download Instagram videos in the highest available quality."
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="User-Friendly Interface:No technical expertise required—just a few simple clicks."
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="No Registration Required:No need to create an account or log in."
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="Unlimited Downloads:Download as many Instagram videos as you want, with no restrictions."
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="Guide"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="Go to the Instagram video that you want to download."
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="Copy the URL of the video."
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="Paste the URL into the search bar on this website."
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="Click the `Search` button."
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:text="Download in the details page"
+                        android:textSize="14sp" />
+
                 </LinearLayout>
 
+            </ScrollView>
 
-                <TextView
-                    android:textStyle="bold"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="@string/features"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="Fast and Reliable:Our reliable service ensures you get your videos without interruptions."
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="High-Quality Downloads:Download Instagram videos in the highest available quality."
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="User-Friendly Interface:No technical expertise required—just a few simple clicks."
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="No Registration Required:No need to create an account or log in."
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="Unlimited Downloads:Download as many Instagram videos as you want, with no restrictions."
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:textStyle="bold"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="Guide"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="Go to the Instagram video that you want to download."
-                    android:textSize="14sp" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="Copy the URL of the video."
-                    android:textSize="14sp" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="Paste the URL into the search bar on this website."
-                    android:textSize="14sp" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="Click the `Search` button."
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="Download in the details page"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
-
-        </ScrollView>
-
-    </LinearLayout>
+        </LinearLayout>
 
 
+        <com.google.android.material.navigation.NavigationView
+            app:headerLayout="@layout/nav_header"
+            android:layout_gravity="start"
+            android:id="@+id/view_nav"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:menu="@menu/nav_menu" />
+
+    </androidx.drawerlayout.widget.DrawerLayout>
 </layout>

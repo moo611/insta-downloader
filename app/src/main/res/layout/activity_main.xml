@@ -61,7 +61,7 @@
                     android:id="@+id/img_search"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@mipmap/ic_user" />
+                    android:src="@mipmap/ic_search" />
 
 
             </LinearLayout>

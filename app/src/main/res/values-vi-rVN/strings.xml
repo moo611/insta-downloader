@@ -82,4 +82,9 @@
     <string name="tv_show">…hiển thị</string>
     <string name="only_one">Mỗi lần chỉ có thể thực hiện một tác vụ tải xuống</string>
     <string name="features">Features</string>
+    <string name="post">post</string>
+    <string name="following">following</string>
+    <string name="followers">followers</string>
+    <string name="open">open</string>
+    <string name="close">close</string>
 </resources>

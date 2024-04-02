@@ -13,71 +13,18 @@
         android:orientation="vertical"
         tools:context=".views.user.UserFragment">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="Search"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
-
-
-        </RelativeLayout>
+       <SearchView
+           android:id="@+id/searchView"
+           android:queryHint="@string/search"
+           android:background="@drawable/bg_edit_fill"
+           android:layout_margin="10dp"
+           android:layout_width="match_parent"
+           android:layout_height="50dp"/>
         <View
             android:background="#e3e3e3"
             android:layout_width="match_parent"
             android:layout_height="1dp"/>
 
-
-        <FrameLayout
-            android:id="@+id/fl_parent"
-            android:focusableInTouchMode="true"
-            android:focusable="true"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="10dp">
-
-            <EditText
-                android:id="@+id/et_search"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:background="@drawable/bg_edit_stroke"
-                android:gravity="center_vertical|start"
-                android:hint="@string/search_user_hashtag"
-                android:maxLines="1"
-                android:paddingLeft="12dp"
-                android:paddingRight="40dp"
-                android:singleLine="true"
-                android:textColor="@color/black"
-                android:textSize="14sp" />
-
-            <ImageView
-                android:id="@+id/img_clear"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="end|center_vertical"
-                android:layout_marginEnd="30dp"
-                android:src="@drawable/close"
-                android:visibility="invisible" />
-        </FrameLayout>
-
-
-        <TextView
-            android:background="@drawable/bg_button_fill"
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:id="@+id/btn_search"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_margin="20dp"
-            android:text="@string/search"
-            android:textSize="14sp" />
 
         <FrameLayout
             android:layout_width="match_parent"

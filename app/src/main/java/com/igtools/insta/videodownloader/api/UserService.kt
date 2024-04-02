@@ -6,24 +6,13 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface UserService {
-
-
-    @GET("/api/v2/usermedias")
-    suspend fun getUserMedias(
-        @Query("username") username: String,
-        @Query("end_cursor") end_cursor: String,
-        @Query("user_id") user_id: String
-    ): Response<JsonObject>
-
-
-    @GET("/api/v2/usermedias/more")
-    suspend fun getUserMediasMore(
-        @Query("username") username: String,
-        @Query("end_cursor") end_cursor: String,
-        @Query("user_id") user_id: String
-    ): Response<JsonObject>
-
-
+    /**
+     * 获取用户媒体信息。
+     * @param url 请求的完整URL。
+     * @param headers 请求头部的键值对。
+     * @param username 查询的用户名。
+     * @return 返回一个包含用户媒体信息的JsonObject的响应体。
+     */
     @GET
     suspend fun getUserMedia(
         @Url url: String,
@@ -31,15 +20,14 @@ interface UserService {
         @Query("username") username: String
     ): Response<JsonObject>
 
-
-    @GET
-    suspend fun getUserMediaNoCookie(
-        @Url url: String
-    ): Response<JsonObject>
-
-    @GET
-    suspend fun getUserId(@Url url: String):Response<JsonObject>
-
+    /**
+     * 获取更多用户媒体信息。
+     * @param url 请求的完整URL。
+     * @param headers 请求头部的键值对。
+     * @param query_hash 用于查询的哈希值。
+     * @param variables 查询变量的JSON字符串。
+     * @return 返回一个包含更多用户媒体信息的JsonObject的响应体。
+     */
     @GET
     suspend fun getUserMediaMore(
         @Url url: String,
@@ -48,8 +36,12 @@ interface UserService {
         @Query("variables") variables: String
     ): Response<JsonObject>
 
-
+    /**
+     * 获取用户网页信息。
+     * @param url 请求的完整URL。
+     * @param headers 请求头部的键值对。
+     * @return 返回一个包含用户网页信息的JsonObject的响应体。
+     */
     @GET
     suspend fun getUserWeb(@Url url:String, @HeaderMap headers: HashMap<String, String>):Response<JsonObject>
-
 }

@@ -7,13 +7,20 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
+import android.webkit.CookieManager
+import android.webkit.CookieSyncManager
 import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.igtools.insta.videodownloader.BaseApplication
 import com.igtools.insta.videodownloader.BuildConfig
@@ -26,9 +33,7 @@ import com.igtools.insta.videodownloader.db.RecordDB
 import com.igtools.insta.videodownloader.models.MediaModel
 import com.igtools.insta.videodownloader.parser.LinkParser
 import com.igtools.insta.videodownloader.parser.StoryParser
-import com.igtools.insta.videodownloader.utils.KeyboardUtils
-import com.igtools.insta.videodownloader.utils.PermissionUtils
-import com.igtools.insta.videodownloader.utils.UrlUtils
+import com.igtools.insta.videodownloader.utils.*
 import com.igtools.insta.videodownloader.views.details.DetailsActivity
 import com.igtools.insta.videodownloader.views.web.WebActivity
 import kotlinx.coroutines.launch
@@ -41,10 +46,11 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
     lateinit var progressDialog: ProgressDialog
     lateinit var privateDialog: AlertDialog
     lateinit var storyDialog: AlertDialog
+    lateinit var alertDialog: android.app.AlertDialog
 
     //var mInterstitialAd: InterstitialAd? = null
-    var curMediaInfo: MediaModel? = null
-
+    private var curMediaInfo: MediaModel? = null
+    lateinit var toggle: ActionBarDrawerToggle
     private val linkParser = LinkParser()
     private val storyParser = StoryParser()
     private val LOGIN_REQ = 1000
@@ -58,6 +64,46 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
     override fun initView() {
 
         initDialog()
+
+        (activity as AppCompatActivity).setSupportActionBar(mBinding.toolbar)
+
+        toggle =
+            ActionBarDrawerToggle(
+                requireActivity(),
+                mBinding.drawer,
+                mBinding.toolbar,
+                R.string.open,
+                R.string.close
+            )
+        mBinding.drawer.addDrawerListener(toggle)
+        toggle.syncState()
+
+        mBinding.viewNav.setNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.menu_share -> {
+                    FileUtils.share(
+                        requireContext(),
+                        "https://play.google.com/store/apps/details?id=com.igtools.insta.videodownloader&hl=en"
+                    )
+                }
+                R.id.menu_feedback -> {
+                    alertDialog.show()
+                }
+                R.id.menu_logout -> {
+                    ShareUtils.getEdit().remove("cookie").apply()
+                    BaseApplication.cookie = null
+                    clearCookies(requireContext())
+                    requireActivity().invalidateOptionsMenu()
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.log_out),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                else -> {}
+            }
+            true
+        }
 
         mBinding.btnDownload.setOnClickListener {
 
@@ -96,14 +142,6 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
             mBinding.etLink.setText("")
         }
 
-
-        mBinding.imgCamera.setOnClickListener {
-
-            val launchIntent =
-                requireActivity().packageManager.getLaunchIntentForPackage("com.instagram.android")
-            launchIntent?.let { startActivity(it) }
-        }
-
     }
 
 
@@ -114,6 +152,21 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
         KeyboardUtils.hideInputForce(requireActivity())
 
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        requireActivity().invalidateOptionsMenu()
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+
+        val menuLogout = menu.findItem(R.id.menu_logout)
+        menuLogout.isVisible = BaseApplication.cookie != null
+    }
+
 
     //ui part
     private fun initDialog() {
@@ -190,6 +243,15 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
                 R.string.cancel
             ) { dialog, _ -> dialog.dismiss() }
             .create()
+
+
+        val builder3 = android.app.AlertDialog.Builder(context)
+
+        builder3.setMessage(getString(R.string.feedbackstr))
+        builder3.setPositiveButton(
+            "OK"
+        ) { dialog, which -> dialog?.dismiss() }
+        alertDialog = builder3.create()
     }
 
 
@@ -224,7 +286,7 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
 
         mBinding.etLink.clearFocus()
         mBinding.flParent.requestFocus()
-        KeyboardUtils.closeKeybord(mBinding.etLink, context)
+        KeyboardUtils.closeKeyboard(mBinding.etLink, requireContext())
 
         lifecycleScope.launch {
             val record = RecordDB.getInstance().recordDao().findByUrl(paramString)
@@ -471,6 +533,21 @@ class LinkFragment : BaseFragment<FragmentLinkBinding>() {
 
     }
 
+    @SuppressWarnings("deprecation")
+    fun clearCookies(context: Context?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            CookieManager.getInstance().removeAllCookies(null)
+            CookieManager.getInstance().flush()
+        } else if (context != null) {
+            val cookieSyncManager = CookieSyncManager.createInstance(context)
+            cookieSyncManager.startSync()
+            val cookieManager: CookieManager = CookieManager.getInstance()
+            cookieManager.removeAllCookie()
+            cookieManager.removeSessionCookie()
+            cookieSyncManager.stopSync()
+            cookieSyncManager.sync()
+        }
+    }
 
 
 }

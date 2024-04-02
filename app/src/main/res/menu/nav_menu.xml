@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <item android:title="@string/share" android:icon="@mipmap/ic_share" android:id="@+id/menu_share"/>
+    <item android:title="@string/feedback" android:icon="@mipmap/ic_email" android:id="@+id/menu_feedback"/>
+    <item android:title="@string/app_version" android:icon="@mipmap/ic_update" android:id="@+id/menu_version"/>
+    <item android:title="@string/log_out" android:icon="@mipmap/ic_logout" android:id="@+id/menu_logout" android:visible="false"/>
+</menu>

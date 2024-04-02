@@ -12,7 +12,7 @@ object ShareUtils {
         return sp.edit()
     }
 
-    fun getData(key:String):String?{
+    fun getDataString(key:String):String?{
 
         return sp.getString(key,null)
     }
@@ -21,7 +21,7 @@ object ShareUtils {
         return sp.getBoolean(key,true)
     }
 
-    fun putData(key: String,value:String){
+    fun putDataString(key: String,value:String){
         sp.edit().putString(key, value).apply()
     }
 

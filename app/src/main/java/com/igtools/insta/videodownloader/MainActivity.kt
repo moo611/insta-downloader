@@ -15,15 +15,14 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
 import com.igtools.insta.videodownloader.base.BaseActivity
 import com.igtools.insta.videodownloader.databinding.ActivityMainBinding
+import com.igtools.insta.videodownloader.db.RecordDB
 import com.igtools.insta.videodownloader.download.DownloadService
 import com.igtools.insta.videodownloader.models.IntentEvent
+import com.igtools.insta.videodownloader.utils.RegexUtils
+import com.igtools.insta.videodownloader.utils.ShareUtils
 import com.igtools.insta.videodownloader.views.home.LinkFragment
 import com.igtools.insta.videodownloader.views.record.RecordFragment
 import com.igtools.insta.videodownloader.views.user.UserFragment
-import com.igtools.insta.videodownloader.views.setting.SettingFragment
-import com.igtools.insta.videodownloader.db.RecordDB
-import com.igtools.insta.videodownloader.utils.RegexUtils
-import com.igtools.insta.videodownloader.utils.ShareUtils
 import com.igtools.insta.videodownloader.widgets.dialog.MyDialog
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
@@ -40,7 +39,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     var fragments: MutableList<Fragment> = ArrayList()
     var lastPos = 0
     lateinit var dialog: MyDialog
-
 
 
     override fun getLayoutId(): Int {
@@ -89,13 +87,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     }
 
-    fun initDialog() {
+    private fun initDialog() {
 
         dialog = MyDialog(this)
         val v = LayoutInflater.from(this).inflate(R.layout.view_rating, null)
 
         val rating = v.findViewById<RatingBar>(R.id.rating_bar)
-        rating.setOnRatingBarChangeListener { ratingBar, rating, fromUser ->
+        rating.setOnRatingBarChangeListener { _, _, _ ->
             //go google play
 
         }
@@ -138,8 +136,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private fun handleIntent(newIntent: Intent?) {
 
-        if (DownloadService.isDownloading){
-            Toast.makeText(this@MainActivity,getString(R.string.only_one),Toast.LENGTH_SHORT).show()
+        if (DownloadService.isDownloading) {
+            Toast.makeText(this@MainActivity, getString(R.string.only_one), Toast.LENGTH_SHORT)
+                .show()
             return
         }
 

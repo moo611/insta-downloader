@@ -9,6 +9,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -22,6 +23,7 @@ import com.igtools.insta.videodownloader.api.Urls
 import com.igtools.insta.videodownloader.base.BaseFragment
 import com.igtools.insta.videodownloader.databinding.FragmentUserBinding
 import com.igtools.insta.videodownloader.models.MediaModel
+import com.igtools.insta.videodownloader.models.UserModel
 import com.igtools.insta.videodownloader.views.web.WebActivity
 import com.igtools.insta.videodownloader.utils.KeyboardUtils
 import com.igtools.insta.videodownloader.utils.getNullable
@@ -40,13 +42,11 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     lateinit var adapter: MediaAdapter
     lateinit var progressDialog: ProgressDialog
 
-    var profileUrl = ""
     var cursor = ""
     var loadingMore = false
     var isEnd = false
     var userId = ""
-
-    var mode = "public"
+    var userInfo: UserModel? = null
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_user
@@ -64,52 +64,25 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         mBinding.rv.layoutManager = layoutManager
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
-                return 1
-            }
-        }
 
-        mBinding.btnSearch.setOnClickListener {
-
-            mBinding.etSearch.clearFocus()
-            mBinding.flParent.requestFocus()
-            KeyboardUtils.closeKeybord(mBinding.etSearch, context)
-            if (mBinding.etSearch.text.toString().isEmpty()) {
-//                Toast.makeText(
-//                    requireContext(),
-//                    getString(R.string.empty_username),
-//                    Toast.LENGTH_SHORT
-//                ).show()
-                return@setOnClickListener
-            }
-
-            //getDataNoCookie()
-            if (isSearchUser()) {
-                adapter.isUser = true
-
-                getUserDataWeb()
-            }
-
-        }
-
-        mBinding.etSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-
-                if (mBinding.etSearch.text.isNotEmpty()) {
-
-                    mBinding.imgClear.visibility = View.VISIBLE
+                return if (position == 0) {
+                    layoutManager.spanCount
                 } else {
-
-                    mBinding.imgClear.visibility = View.INVISIBLE
+                    1
                 }
+            }
+        }
 
+
+
+        mBinding.searchView.setOnQueryTextListener(object :SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(p0: String?): Boolean {
+                getUserData()
+                return true
             }
 
-            override fun afterTextChanged(s: Editable?) {
-                //TODO("Not yet implemented")
+            override fun onQueryTextChange(p0: String?): Boolean {
+                return false
             }
 
         })
@@ -126,20 +99,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             }
         })
 
-        mBinding.imgClear.setOnClickListener {
-            mBinding.etSearch.setText("")
-        }
+
     }
 
-    private fun isSearchUser(): Boolean {
-
-        if (mBinding.etSearch.text.toString().contains("#")) {
-            Log.v(TAG, "is search hash tag")
-            return false
-        }
-        Log.v(TAG, "is search user")
-        return true
-    }
 
     private fun initDialog() {
 
@@ -182,18 +144,106 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         userId = ""
         cursor = ""
         isEnd = false
-        profileUrl = ""
-        mode = "public"
+        userInfo = null
+
     }
 
-    private fun clearTagData() {
-        isEnd = false
-        cursor = ""
-        profileUrl = ""
+    /**
+     * 获取用户数据的方法。此方法首先清除旧的用户数据，然后通过异步任务从Instagram API获取用户的公开信息（如果用户不私有）或私有信息（如果用户已登录并授权）。
+     * 使用了Coroutine和LifecycleScope来管理异步任务，并在UI线程上更新进度对话框和数据。
+     */
+    private fun getUserData() {
+        clearUserData()
+        lifecycleScope.launch {
+            try {
+                progressDialog.show()
+                val username = mBinding.searchView.query.toString().trim().lowercase()
+                val url =
+                    "https://www.instagram.com/api/v1/users/web_profile_info/?username=$username"
+                val headers: HashMap<String, String> = HashMap()
+                headers["user-agent"] =
+                    "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36"
+                headers["x-csrftoken"] = "IQ9sfTjzBvHWYxRUwQqKOLU3eHkOISJM"
+                headers["x-ig-app-id"] = "1217981644879628"
+                val res1 = ApiClient.getClient2().getUserWeb(url, headers)
+                Log.v(TAG, res1.body().toString())
+
+                val code = res1.code()
+
+                if (code == 200 && res1.body() != null) {
+                    val jsonObject = res1.body()!!
+
+                    val user = jsonObject["data"].asJsonObject["user"].asJsonObject
+
+                    val isPrivate = user["is_private"].asBoolean
+                    if (isPrivate) {
+
+                        if (BaseApplication.cookie == null) {
+                            privateDialog.show()
+                            progressDialog.dismiss()
+                        } else {
+                            getUserDataByCookie()
+                        }
+
+                    } else {
+
+                        userId = user["id"].asString
+
+                        val edge_owner_to_timeline_media =
+                            user["edge_owner_to_timeline_media"].asJsonObject
+                        val username = user["username"].asString
+                        val avatar = user["profile_pic_url"].asString
+                        val post = edge_owner_to_timeline_media["count"].asInt
+                        val followers = user["edge_followed_by"].asJsonObject["count"].asInt
+                        val following = user["edge_follow"].asJsonObject["count"].asInt
+                        userInfo = UserModel(username, avatar, post, followers, following)
+
+
+                        val edges = edge_owner_to_timeline_media["edges"].asJsonArray
+                        if (edges.size() > 0) {
+                            val medias: ArrayList<MediaModel> = ArrayList()
+                            for (item in edges) {
+                                val mediainfo = parseUserData(item.asJsonObject)
+                                medias.add(mediainfo)
+                            }
+
+                            adapter.refresh(medias, userInfo!!)
+                        }
+                        val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
+                        isEnd = !pageInfo["has_next_page"].asBoolean
+                        cursor = pageInfo["end_cursor"].asString
+                        progressDialog.dismiss()
+
+                    }
+
+                } else {
+                    if (!isInvalidContext()) {
+                        progressDialog.dismiss()
+                    }
+                    safeToast(R.string.failed)
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, e.message + "")
+                if (!isInvalidContext()) {
+                    progressDialog.dismiss()
+                }
+                safeToast(R.string.failed)
+            }
+        }
+
     }
 
-    suspend fun getUserData() = withContext(Dispatchers.Main) {
-        mode = "private"
+    /**
+     * 使用cookie获取用户数据的异步函数。
+     * 该函数首先检查进度对话框是否正在显示，如果没有则显示它。
+     * 然后基于提供的cookie构建请求头，向指定API发送请求以获取用户信息和媒体内容。
+     * 如果请求成功，会解析响应数据，更新用户ID和头像URL（如果存在），
+     * 并刷新媒体列表。如果请求失败，会显示错误信息。
+     * 在任何情况下，如果上下文未失效，都会尝试关闭进度对话框。
+     */
+    private suspend fun getUserDataByCookie() {
+
         if (!progressDialog.isShowing) {
             progressDialog.show()
         }
@@ -204,9 +254,9 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
             map["User-Agent"] = Urls.USER_AGENT
             val res = ApiClient.getClient2()
                 .getUserMedia(
-                    Urls.PRIVATE_API+"/users/web_profile_info",
+                    Urls.PRIVATE_API + "/users/web_profile_info",
                     map,
-                    mBinding.etSearch.text.toString().trim().lowercase()
+                    mBinding.searchView.query.toString().trim().lowercase()
                 )
             val code = res.code()
             val jsonObject = res.body()
@@ -214,13 +264,18 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
                 val user = jsonObject["data"].asJsonObject["user"].asJsonObject
                 userId = user["id"].asString
-                if (user.has("profile_pic_url") && !user.get("profile_pic_url").isJsonNull) {
-                    profileUrl = user["profile_pic_url"].asString
-                }
 
                 Log.v(TAG, "user_id:" + userId)
                 val edge_owner_to_timeline_media =
                     user["edge_owner_to_timeline_media"].asJsonObject
+
+                val username = user["username"].asString
+                val avatar = user["profile_pic_url"].asString
+                val post = edge_owner_to_timeline_media["count"].asInt
+                val followers = user["edge_followed_by"].asJsonObject["count"].asInt
+                val following = user["edge_follow"].asJsonObject["count"].asInt
+                userInfo = UserModel(username, avatar, post, followers, following)
+
                 val edges = edge_owner_to_timeline_media["edges"].asJsonArray
                 if (edges.size() > 0) {
                     val medias: ArrayList<MediaModel> = ArrayList()
@@ -228,7 +283,10 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                         val mediainfo = parseUserData(item.asJsonObject)
                         medias.add(mediainfo)
                     }
-                    adapter.refresh(medias)
+
+
+
+                    adapter.refresh(medias, userInfo!!)
 
 
                 }
@@ -256,89 +314,20 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
     }
 
-
-    private fun getUserDataWeb() {
-        clearUserData()
-        lifecycleScope.launch {
-            try {
-                progressDialog.show()
-                val username = mBinding.etSearch.text.toString().trim().lowercase()
-                val url =
-                    "https://www.instagram.com/api/v1/users/web_profile_info/?username=$username"
-                val headers: HashMap<String, String> = HashMap()
-                headers["user-agent"] =
-                    "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36"
-                headers["x-csrftoken"] = "IQ9sfTjzBvHWYxRUwQqKOLU3eHkOISJM"
-                headers["x-ig-app-id"] = "1217981644879628"
-                val res1 = ApiClient.getClient2().getUserWeb(url, headers)
-                Log.v(TAG, res1.body().toString())
-
-                val code = res1.code()
-
-                if (code == 200 && res1.body() != null) {
-                    val jsonObject = res1.body()!!
-
-                    val user = jsonObject["data"].asJsonObject["user"].asJsonObject
-
-                    val isPrivate = user["is_private"].asBoolean
-                    if (isPrivate) {
-
-                        if (BaseApplication.cookie == null) {
-                            privateDialog.show()
-                            progressDialog.dismiss()
-                        } else {
-                            getUserData()
-                        }
-
-                    } else {
-
-                        userId = user["id"].asString
-                        if (user.has("profile_pic_url") && !user["profile_pic_url"].isJsonNull) {
-                            profileUrl = user["profile_pic_url"].asString
-                        }
-                        val edge_owner_to_timeline_media =
-                            user["edge_owner_to_timeline_media"].asJsonObject
-                        val edges = edge_owner_to_timeline_media["edges"].asJsonArray
-                        if (edges.size() > 0) {
-                            val medias: ArrayList<MediaModel> = ArrayList()
-                            for (item in edges) {
-                                val mediainfo = parseUserData(item.asJsonObject)
-                                medias.add(mediainfo)
-                            }
-                            adapter.refresh(medias)
-                        }
-                        val pageInfo = edge_owner_to_timeline_media["page_info"].asJsonObject
-                        isEnd = !pageInfo["has_next_page"].asBoolean
-                        cursor = pageInfo["end_cursor"].asString
-                        progressDialog.dismiss()
-
-                    }
-
-                } else {
-                    if (!isInvalidContext()) {
-                        progressDialog.dismiss()
-                    }
-                    safeToast(R.string.failed)
-                }
-
-            } catch (e: Exception) {
-                if (!isInvalidContext()) {
-                    progressDialog.dismiss()
-                }
-                safeToast(R.string.failed)
-            }
-        }
-
-    }
-
+    /**
+     * 加载更多用户数据的函数。
+     * 这个函数用于在当前已有数据基础上，通过网络请求获取更多用户媒体信息，并更新到UI上。
+     * 该函数会检查是否已经在加载中或者数据已经加载完毕，以避免不必要的请求。
+     *
+     * 参数无。
+     * 返回值无。
+     */
     private fun getUserDataMore() {
 
-        if (loadingMore || isEnd) {
+        if (loadingMore || isEnd || BaseApplication.cookie == null) {
             return
         }
-//        if (adapter.medias.size>300){
-//            return
-//        }
+
         loadingMore = true
         val cookie = BaseApplication.cookie
         val map: HashMap<String, String> = HashMap()
@@ -353,7 +342,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 variables["after"] = cursor
                 //Log.v(TAG,"variables:"+variables)
                 val res = ApiClient.getClient2().getUserMediaMore(
-                    Urls.PUBLIC_API+"/graphql/query",
+                    Urls.PUBLIC_API + "/graphql/query",
                     map,
                     Urls.QUERY_HASH_USER,
                     gson.toJson(variables)
@@ -396,6 +385,12 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
     }
 
+    /**
+     * 解析用户数据的函数。
+     *
+     * @param jsonObject 包含媒体模型数据的JsonObject对象。
+     * @return 返回一个填充了媒体模型数据的MediaModel实例。
+     */
     private fun parseUserData(jsonObject: JsonObject): MediaModel {
         val mediaModel = MediaModel()
         val node = jsonObject["node"].asJsonObject
@@ -418,8 +413,8 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         }
 
         mediaModel.thumbnailUrl = node["thumbnail_src"].asString
-        mediaModel.username = mBinding.etSearch.text.toString().trim().lowercase()
-        mediaModel.profilePicUrl = profileUrl
+        mediaModel.username = mBinding.searchView.query.toString().trim().lowercase()
+        mediaModel.profilePicUrl = userInfo!!.avatar
         if (node.has("edge_sidecar_to_children")) {
             val children = node["edge_sidecar_to_children"].asJsonObject["edges"].asJsonArray
             if (children.size() > 0) {
@@ -461,7 +456,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
         if (requestCode == LOGIN_REQ && resultCode == RESULT_OK) {
 
             lifecycleScope.launch {
-                getUserData()
+                getUserDataByCookie()
             }
 
         }
