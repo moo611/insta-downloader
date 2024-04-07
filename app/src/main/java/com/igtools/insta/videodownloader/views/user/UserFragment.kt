@@ -42,7 +42,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
     var isEnd = false
     var userId = ""
     var userInfo: UserModel? = null
-
+    var retries = 0
     override fun getLayoutId(): Int {
         return R.layout.fragment_user
     }
@@ -70,7 +70,7 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
 
 
 
-        mBinding.searchView.setOnQueryTextListener(object :SearchView.OnQueryTextListener{
+        mBinding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String?): Boolean {
                 getUserData()
                 return true
@@ -148,13 +148,17 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
      * 使用了Coroutine和LifecycleScope来管理异步任务，并在UI线程上更新进度对话框和数据。
      */
     private fun getUserData() {
+        if (retries > 1) {
+            retries = 0
+            return
+        }
         clearUserData()
         lifecycleScope.launch {
             try {
                 progressDialog.show()
-                val username = mBinding.searchView.query.toString().trim().lowercase()
+                val query = mBinding.searchView.query.toString().trim().lowercase()
                 val url =
-                    "https://www.instagram.com/api/v1/users/web_profile_info/?username=$username"
+                    "https://www.instagram.com/api/v1/users/web_profile_info/?username=$query"
                 val headers: HashMap<String, String> = HashMap()
                 headers["user-agent"] =
                     "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36"
@@ -219,7 +223,14 @@ class UserFragment : BaseFragment<FragmentUserBinding>() {
                 }
 
             } catch (e: Exception) {
+
                 Log.e(TAG, e.message + "")
+
+                if (retries == 0) {
+                    retries++
+                    getUserData()
+                }
+
                 if (!isInvalidContext()) {
                     progressDialog.dismiss()
                 }
